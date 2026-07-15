@@ -1,55 +1,85 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
 import 'result.dart';
 
-typedef CommandAction0<T> = Future<Result<T>> Function();
-typedef CommandAction1<T, A> = Future<Result<T>> Function(A);
+export 'result.dart';
 
-abstract class Command<T> extends ChangeNotifier {
+typedef CommandAction0<Output extends Object> = Future<Result<Output>> Function();
+
+typedef CommandAction1<Output extends Object, Input> = Future<Result<Output>> Function(Input);
+
+enum CommandState {
+  idle,
+  running,
+  success,
+  failure,
+}
+
+abstract class Command<Output extends Object> extends ChangeNotifier {
   Command();
 
-  bool _running = false;
-  bool get running => _running;
+  CommandState _state = CommandState.idle;
+  Result<Output>? _result;
 
-  Result<T>? _result;
-  Result<T>? get result => _result;
+  int _executionId = 0;
 
-  bool get error => _result is Error<T>;
+  CommandState get state => _state;
 
-  void clearResult() {
-    _result = null;
-    notifyListeners();
-  }
+  bool get isIdle => _state == CommandState.idle;
+  bool get isRunning => _state == CommandState.running;
+  bool get isSuccess => _state == CommandState.success;
+  bool get isFailure => _state == CommandState.failure;
 
-  Future<void> _execute(Future<Result<T>> Function() action) async {
-    if (_running) return;
+  Result<Output>? get result => _result;
 
-    _running = true;
-    _result = null;
+  Output? get value => _result?.value;
+  Exception? get error => _result?.error;
+
+  Future<void> _execute(
+    AsyncResult<Output> Function() action,
+  ) async {
+    final currentExecution = ++_executionId;
+
+    _state = CommandState.running;
     notifyListeners();
 
     try {
-      _result = await action();
+      final result = await action();
+
+      if (currentExecution != _executionId) return;
+
+      _result = result;
+      _state = result.isSuccess ? CommandState.success : CommandState.failure;
+    } catch (err) {
+      // CORE fallback (infra-agnostic)
+      _result = Result.failure(
+        err is Exception ? err : Exception(err.toString()),
+      );
+      _state = CommandState.failure;
     } finally {
-      _running = false;
       notifyListeners();
     }
   }
 }
 
-class Command0<T> extends Command<T> {
-  Command0(this.action);
-  final CommandAction0<T> action;
+class Command0<Output extends Object> extends Command<Output> {
+  final CommandAction0<Output> _action;
+
+  Command0(this._action);
 
   Future<void> execute() async {
-    await _execute(() => action());
+    if (isRunning) return;
+    await _execute(_action);
   }
 }
 
-class Command1<T, A> extends Command<T> {
-  Command1(this.action);
-  final CommandAction1<T, A> action;
+class Command1<Output extends Object, Input> extends Command<Output> {
+  final CommandAction1<Output, Input> _action;
 
-  Future<void> execute(A argument) async {
-    await _execute(() => action(argument));
+  Command1(this._action);
+
+  Future<void> execute(Input param) async {
+    if (isRunning) return;
+    await _execute(() => _action(param));
   }
 }
