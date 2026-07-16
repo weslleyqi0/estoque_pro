@@ -1,3 +1,4 @@
+import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -16,6 +17,8 @@ class BiometricPage extends StatefulWidget {
 }
 
 class _BiometricPageState extends State<BiometricPage> {
+  BiometricViewModel get viewModel => widget.viewModel;
+
   final ValueNotifier<bool> _isAvailable = ValueNotifier<bool>(true);
 
   @override
@@ -31,15 +34,15 @@ class _BiometricPageState extends State<BiometricPage> {
   }
 
   Future<void> _checkAvailability() async {
-    final available = await widget.viewModel.isAvailable();
+    final available = await viewModel.isAvailable();
     _isAvailable.value = available;
 
     if (!available) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.viewModel.setBiometricAuthenticated(true);
+        viewModel.setBiometricAuthenticated(true);
       });
     } else {
-      widget.viewModel.authenticateCommand.execute();
+      viewModel.authenticateCommand.execute();
     }
   }
 
@@ -58,31 +61,32 @@ class _BiometricPageState extends State<BiometricPage> {
                   Icon(
                     Symbols.fingerprint,
                     size: 100,
+                    color: context.colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
-                  Gap(24),
-                  GestureDetector(
-                    onTap: () => widget.viewModel.authenticateCommand.execute(),
-                    child: Text(
-                      'Use sua digital para\ndesbloquear o app',
-                      textAlign: TextAlign.center,
-                    ),
+                  Gap(AppSpacing.space24),
+                  Text(
+                    'Use sua digital para\ndesbloquear o app',
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.titleLarge,
                   ),
                 ],
               ),
             ),
-            ListenableBuilder(
-              listenable: widget.viewModel.authenticateCommand,
-              builder: (context, _) {
-                return GestureDetector(
-                  onTap: () => widget.viewModel.authenticateCommand.execute(),
-                  child: Text(
-                    widget.viewModel.authenticateCommand.isRunning.toString(),
-                    style: TextStyle(color: Colors.red),
-                  ),
-                );
-              },
+            AppButton(
+              onPressed: () => viewModel.authenticateCommand.execute(),
+              label: 'Usar digital',
+              icon: Symbols.fingerprint,
+              isFullWidth: true,
             ),
+            Gap(AppSpacing.space8),
+            AppButton.text(
+              onPressed: () {},
+              label: 'USAR SENHA',
+              icon: Symbols.keyboard,
+              isFullWidth: true,
+            ),
+            Gap(AppSpacing.space24),
           ],
         ),
       ),
