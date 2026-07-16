@@ -1,0 +1,80 @@
+import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockBiometricService extends Mock implements BiometricService {}
+
+void main() {
+  late MockBiometricService mockBiometricService;
+  late BiometricViewModel viewModel;
+
+  setUp(() async {
+    mockBiometricService = MockBiometricService();
+    // We register the dependency manually for tests.
+    // Ensure getIt is clean before registering.
+    await getIt.reset();
+    getIt.registerLazySingleton<BiometricService>(() => mockBiometricService);
+
+    viewModel = BiometricViewModel();
+  });
+
+  group('BiometricViewModel Tests', () {
+    test('isAvailable returns correct state from service', () async {
+
+      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => true);
+      expect(await viewModel.isAvailable(), isTrue);
+
+      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => false);
+      expect(await viewModel.isAvailable(), isFalse);
+    });
+
+    test('authenticateCommand success updates isBiometricAuthenticated to true', () async {
+
+      when(() => mockBiometricService.authenticateWithBiometrics()).thenAnswer((_) async => true);
+
+      await viewModel.authenticateCommand.execute();
+
+      expect(viewModel.isBiometricAuthenticated, isTrue);
+      expect(viewModel.authenticateCommand.isSuccess, isTrue);
+      expect(viewModel.authenticateCommand.value, isTrue);
+    });
+
+    test('authenticateCommand failure keeps isBiometricAuthenticated as false', () async {
+
+      when(() => mockBiometricService.authenticateWithBiometrics()).thenAnswer((_) async => false);
+
+      await viewModel.authenticateCommand.execute();
+
+      expect(viewModel.isBiometricAuthenticated, isFalse);
+      expect(viewModel.authenticateCommand.isSuccess, isTrue);
+      expect(viewModel.authenticateCommand.value, isFalse);
+    });
+
+    test('authenticateCommand error sets command to failure state', () async {
+      final exception = Exception('biometric failed');
+
+      when(() => mockBiometricService.authenticateWithBiometrics()).thenThrow(exception);
+
+      await viewModel.authenticateCommand.execute();
+
+      expect(viewModel.isBiometricAuthenticated, isFalse);
+      expect(viewModel.authenticateCommand.isFailure, isTrue);
+      expect(viewModel.authenticateCommand.error, equals(exception));
+    });
+
+    test('setBiometricAuthenticated updates authenticated status and notifies listeners', () {
+      var listenerCalled = false;
+
+      viewModel.addListener(() {
+        listenerCalled = true;
+      });
+
+      viewModel.setBiometricAuthenticated(true);
+
+      expect(viewModel.isBiometricAuthenticated, isTrue);
+      expect(listenerCalled, isTrue);
+    });
+  });
+}
