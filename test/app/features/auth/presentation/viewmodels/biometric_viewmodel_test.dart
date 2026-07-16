@@ -1,12 +1,15 @@
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockBiometricService extends Mock implements BiometricService {}
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   late MockBiometricService mockBiometricService;
   late BiometricViewModel viewModel;
 
@@ -75,6 +78,48 @@ void main() {
 
       expect(viewModel.isBiometricAuthenticated, isTrue);
       expect(listenerCalled, isTrue);
+    });
+
+    test('app lifecycle transition to paused sets backgroundTimestamp if authenticated', () {
+      viewModel.setBiometricAuthenticated(true);
+      expect(viewModel.backgroundTimestamp, isNull);
+
+      viewModel.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(viewModel.backgroundTimestamp, isNotNull);
+    });
+
+    test('app lifecycle transition to paused does not set backgroundTimestamp if not authenticated', () {
+      viewModel.setBiometricAuthenticated(false);
+      expect(viewModel.backgroundTimestamp, isNull);
+
+      viewModel.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(viewModel.backgroundTimestamp, isNull);
+    });
+
+    test('app lifecycle transition to resumed locks app if 2 minutes or more passed in background', () {
+      viewModel.setBiometricAuthenticated(true);
+      
+      // Simulate app paused 2 minutes ago
+      viewModel.backgroundTimestamp = DateTime.now().subtract(const Duration(minutes: 2));
+
+      viewModel.didChangeAppLifecycleState(AppLifecycleState.resumed);
+
+      expect(viewModel.isBiometricAuthenticated, isFalse);
+      expect(viewModel.backgroundTimestamp, isNull);
+    });
+
+    test('app lifecycle transition to resumed keeps app unlocked if less than 2 minutes passed in background', () {
+      viewModel.setBiometricAuthenticated(true);
+      
+      // Simulate app paused 1 minute and 59 seconds ago
+      viewModel.backgroundTimestamp = DateTime.now().subtract(const Duration(minutes: 1, seconds: 59));
+
+      viewModel.didChangeAppLifecycleState(AppLifecycleState.resumed);
+
+      expect(viewModel.isBiometricAuthenticated, isTrue);
+      expect(viewModel.backgroundTimestamp, isNull);
     });
   });
 }

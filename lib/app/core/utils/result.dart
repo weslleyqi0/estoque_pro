@@ -10,7 +10,13 @@ sealed class Result<T extends Object> {
   factory Result.failure(Object error) {
     return Failure<T>(error is Exception ? error : Exception(error.toString()));
   }
-
+  static Future<Result<T>> guard<T extends Object>(Future<T> Function() computation) async {
+    try {
+      return Result.success(await computation());
+    } catch (e) {
+      return Result.failure(e);
+    }
+  }
   /// value returns null if this is a Failure, otherwise the value. This allows
   /// access to the value without folding when the caller only cares about
   /// the success case, such as for caching the last successful
