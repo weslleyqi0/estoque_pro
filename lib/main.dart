@@ -1,3 +1,4 @@
+import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_router.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +16,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Estoque Pro',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.dark,
+      darkTheme: AppTheme.light,
       themeMode: ThemeMode.system,
       routerConfig: AppRouter.router,
     );
