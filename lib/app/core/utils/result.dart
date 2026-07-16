@@ -7,7 +7,9 @@ sealed class Result<T extends Object> {
   bool get isFailure => this is Failure<T>;
 
   const factory Result.success(T value) = Success<T>;
-  const factory Result.failure(Exception error) = Failure<T>;
+  factory Result.failure(Object error) {
+    return Failure<T>(error is Exception ? error : Exception(error.toString()));
+  }
 
   /// value returns null if this is a Failure, otherwise the value. This allows
   /// access to the value without folding when the caller only cares about

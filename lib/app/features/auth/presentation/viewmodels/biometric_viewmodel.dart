@@ -17,8 +17,8 @@ class BiometricViewModel extends ChangeNotifier {
         final authenticated = await _biometricService.authenticateWithBiometrics();
         setBiometricAuthenticated(authenticated);
         return Result.success(authenticated);
-      } catch (e) {
-        return Result.failure(Exception(e.toString()));
+      } catch (error) {
+        return Result.failure(error);
       }
     });
   }

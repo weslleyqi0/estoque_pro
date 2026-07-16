@@ -51,10 +51,7 @@ abstract class Command<Output extends Object> extends ChangeNotifier {
       _result = result;
       _state = result.isSuccess ? CommandState.success : CommandState.failure;
     } catch (err) {
-      // CORE fallback (infra-agnostic)
-      _result = Result.failure(
-        err is Exception ? err : Exception(err.toString()),
-      );
+      _result = Result.failure(err);
       _state = CommandState.failure;
     } finally {
       notifyListeners();
