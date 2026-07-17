@@ -19,31 +19,17 @@ class BiometricPage extends StatefulWidget {
 class _BiometricPageState extends State<BiometricPage> {
   BiometricViewModel get viewModel => widget.viewModel;
 
-  final ValueNotifier<bool> _isAvailable = ValueNotifier<bool>(true);
-
   @override
   void initState() {
     super.initState();
-    _checkAvailability();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewModel.checkAvailability();
+    });
   }
 
   @override
   void dispose() {
-    _isAvailable.dispose();
     super.dispose();
-  }
-
-  Future<void> _checkAvailability() async {
-    final available = await viewModel.isAvailable();
-    _isAvailable.value = available;
-
-    if (!available) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        viewModel.setBiometricAuthenticated(true);
-      });
-    } else {
-      viewModel.authenticateCommand.execute();
-    }
   }
 
   @override

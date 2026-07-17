@@ -121,5 +121,24 @@ void main() {
       expect(viewModel.isBiometricAuthenticated, isTrue);
       expect(viewModel.backgroundTimestamp, isNull);
     });
+
+    test('checkAvailability when biometric is unavailable sets isBiometricAuthenticated to true', () async {
+      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => false);
+
+      await viewModel.checkAvailability();
+
+      expect(viewModel.isBiometricAuthenticated, isTrue);
+      verifyNever(() => mockBiometricService.authenticateWithBiometrics());
+    });
+
+    test('checkAvailability when biometric is available triggers authenticateWithBiometrics', () async {
+      when(() => mockBiometricService.isBiometricAvailable()).thenAnswer((_) async => true);
+      when(() => mockBiometricService.authenticateWithBiometrics()).thenAnswer((_) async => true);
+
+      await viewModel.checkAvailability();
+
+      expect(viewModel.isBiometricAuthenticated, isTrue);
+      verify(() => mockBiometricService.authenticateWithBiometrics()).called(1);
+    });
   });
 }

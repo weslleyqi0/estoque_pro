@@ -21,11 +21,13 @@ class BiometricViewModel extends ChangeNotifier with WidgetsBindingObserver {
 
   BiometricViewModel() {
     WidgetsBinding.instance.addObserver(this);
-    authenticateCommand = Command0(() => Result.guard(() async {
-      final authenticated = await _biometricService.authenticateWithBiometrics();
-      setBiometricAuthenticated(authenticated);
-      return authenticated;
-    }));
+    authenticateCommand = Command0(
+      () => Result.guard(() async {
+        final authenticated = await _biometricService.authenticateWithBiometrics();
+        setBiometricAuthenticated(authenticated);
+        return authenticated;
+      }),
+    );
   }
 
   @override
@@ -46,6 +48,15 @@ class BiometricViewModel extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<bool> isAvailable() => _biometricService.isBiometricAvailable();
+
+  Future<void> checkAvailability() async {
+    final available = await isAvailable();
+    if (!available) {
+      setBiometricAuthenticated(true);
+    } else {
+      await authenticateCommand.execute();
+    }
+  }
 
   void setBiometricAuthenticated(bool value) {
     if (_isBiometricAuthenticated != value) {
