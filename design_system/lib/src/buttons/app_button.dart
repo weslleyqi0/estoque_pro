@@ -101,8 +101,7 @@ class AppButton extends StatelessWidget {
         child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(
-            variant == AppButtonVariant.primary ||
-                    variant == AppButtonVariant.secondary
+            variant == AppButtonVariant.primary || variant == AppButtonVariant.secondary
                 ? Colors.white
                 : Theme.of(context).colorScheme.primary,
           ),
@@ -135,18 +134,18 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = context.colorScheme;
 
     Widget button = switch (variant) {
       AppButtonVariant.primary => ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: context.colorScheme.primary,
-          foregroundColor: context.colorScheme.onPrimary,
-          disabledBackgroundColor: context.colorScheme.onSurface.withValues(
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          disabledBackgroundColor: colorScheme.onSurface.withValues(
             alpha: 0.2,
           ),
-          disabledForegroundColor: context.colorScheme.onSurface.withValues(
+          disabledForegroundColor: colorScheme.onSurface.withValues(
             alpha: 0.4,
           ),
           minimumSize: const Size(0, AppSpacing.buttonHeightLg),
@@ -163,12 +162,12 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.secondary => ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: context.colorScheme.secondary,
-          foregroundColor: context.colorScheme.onSecondary,
-          disabledBackgroundColor: context.colorScheme.onSurface.withValues(
+          backgroundColor: colorScheme.secondary,
+          foregroundColor: colorScheme.onSecondary,
+          disabledBackgroundColor: colorScheme.onSurface.withValues(
             alpha: 0.2,
           ),
-          disabledForegroundColor: context.colorScheme.onSurface.withValues(
+          disabledForegroundColor: colorScheme.onSurface.withValues(
             alpha: 0.4,
           ),
           minimumSize: const Size(0, AppSpacing.buttonHeightLg),
@@ -183,16 +182,14 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.outlined => OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: context.colorScheme.primary,
-          disabledForegroundColor: context.colorScheme.onSurface.withValues(
+          foregroundColor: colorScheme.primary,
+          disabledForegroundColor: colorScheme.onSurface.withValues(
             alpha: 0.4,
           ),
           minimumSize: const Size(0, AppSpacing.buttonHeightLg),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space20),
           side: BorderSide(
-            color: isLoading || onPressed == null
-                ? context.colorScheme.onSurface.withValues(alpha: 0.2)
-                : context.colorScheme.primary,
+            color: isLoading || onPressed == null ? colorScheme.onSurface.withValues(alpha: 0.2) : colorScheme.primary,
           ),
           shape: const RoundedRectangleBorder(
             borderRadius: AppSpacing.borderRadius12,
@@ -203,8 +200,8 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.text => TextButton(
         onPressed: isLoading ? null : onPressed,
         style: TextButton.styleFrom(
-          foregroundColor: context.colorScheme.primary,
-          disabledForegroundColor: context.colorScheme.onSurface.withValues(
+          foregroundColor: colorScheme.primary,
+          disabledForegroundColor: colorScheme.onSurface.withValues(
             alpha: 0.38,
           ),
           minimumSize: const Size(0, AppSpacing.buttonHeightLg),
