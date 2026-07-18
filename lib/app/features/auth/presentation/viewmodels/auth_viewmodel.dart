@@ -24,9 +24,17 @@ class AuthViewModel extends ChangeNotifier {
         );
         return const Success(true);
       } on FirebaseAuthException catch (e) {
-        return Failure(Exception(e.message ?? 'Ocorreu um erro desconhecido'));
+        final message = switch (e.code) {
+          'user-not-found' || 'wrong-password' || 'invalid-credential' => 'E-mail ou senha incorretos.',
+          'invalid-email' => 'O formato do e-mail é inválido.',
+          'user-disabled' => 'Esta conta de usuário foi desativada.',
+          'too-many-requests' => 'Muitas tentativas bloqueadas. Tente novamente mais tarde.',
+          'network-request-failed' => 'Falha na conexão de rede. Verifique sua conexão com a internet.',
+          _ => e.message ?? 'Ocorreu um erro ao realizar o login.',
+        };
+        return Failure(Exception(message));
       } catch (e) {
-        return Failure(Exception(e.toString()));
+        return Failure(Exception('Erro inesperado!'));
       }
     });
 
