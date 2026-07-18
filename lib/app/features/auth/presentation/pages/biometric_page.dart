@@ -67,7 +67,7 @@ class _BiometricPageState extends State<BiometricPage> {
             ),
             Gap(AppSpacing.space8),
             AppButton.text(
-              onPressed: () {},
+              onPressed: () => viewModel.usePassword(),
               label: 'USAR SENHA',
               icon: Symbols.keyboard,
               isFullWidth: true,

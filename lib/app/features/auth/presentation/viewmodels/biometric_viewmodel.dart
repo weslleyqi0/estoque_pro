@@ -1,13 +1,12 @@
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:flutter/widgets.dart';
 
 class BiometricViewModel extends ChangeNotifier with WidgetsBindingObserver {
-  final BiometricService _biometricService = getIt<BiometricService>();
-
-  bool _isBiometricAuthenticated = false;
-  bool get isBiometricAuthenticated => _isBiometricAuthenticated;
+  final _biometricService = getIt<BiometricService>();
+  final _authViewModel = getIt<AuthViewModel>();
 
   DateTime? _backgroundTimestamp;
 
@@ -24,7 +23,7 @@ class BiometricViewModel extends ChangeNotifier with WidgetsBindingObserver {
     authenticateCommand = Command0(
       () => Result.guard(() async {
         final authenticated = await _biometricService.authenticateWithBiometrics();
-        setBiometricAuthenticated(authenticated);
+        _authViewModel.setBiometricAuthenticated(authenticated);
         return authenticated;
       }),
     );
@@ -33,14 +32,14 @@ class BiometricViewModel extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      if (_isBiometricAuthenticated) {
+      if (_authViewModel.isBiometricAuthenticated) {
         _backgroundTimestamp ??= DateTime.now();
       }
     } else if (state == AppLifecycleState.resumed) {
       if (_backgroundTimestamp != null) {
         final difference = DateTime.now().difference(_backgroundTimestamp!);
         if (difference.inMinutes >= 2) {
-          setBiometricAuthenticated(false);
+          _authViewModel.setBiometricAuthenticated(false);
         }
         _backgroundTimestamp = null;
       }
@@ -52,17 +51,14 @@ class BiometricViewModel extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> checkAvailability() async {
     final available = await isAvailable();
     if (!available) {
-      setBiometricAuthenticated(true);
+      _authViewModel.setBiometricAuthenticated(true);
     } else {
       await authenticateCommand.execute();
     }
   }
 
-  void setBiometricAuthenticated(bool value) {
-    if (_isBiometricAuthenticated != value) {
-      _isBiometricAuthenticated = value;
-      notifyListeners();
-    }
+  Future<void> usePassword() async {
+    await _authViewModel.logoutCommand.execute();
   }
 
   @override
