@@ -60,11 +60,11 @@ class _LoginPageState extends State<LoginPage> {
               listenable: viewModel.loginCommand,
               builder: (context, _) {
                 return AppButton(
-                  //onPressed: () => viewModel.loginCommand.execute,
                   onPressed: () {
-                    viewModel.loginCommand.execute(
-                      (_emailController.text, _passwordController.text),
-                    );
+                    viewModel.loginCommand.execute((
+                      email: _emailController.text,
+                      password: _passwordController.text,
+                    ));
                   },
                   isLoading: viewModel.loginCommand.isRunning,
                   isFullWidth: true,

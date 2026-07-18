@@ -1,30 +1,27 @@
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
-import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
+import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 class AuthViewModel extends ChangeNotifier {
-  final _authService = getIt<AuthService>();
+  final _authRepository = getIt<AuthRepository>();
 
-  User? _currentUser = getIt<AuthService>().currentUser;
-  User? get currentUser => _currentUser;
+  User? get currentUser => _authRepository.currentUser;
+  bool get isBiometricAuthenticated => _authRepository.isBiometricAuthenticated;
 
-  bool _isBiometricAuthenticated = false;
-  bool get isBiometricAuthenticated => _isBiometricAuthenticated;
-
-  late final Command1<bool, (String, String)> loginCommand;
+  late final Command1<bool, ({String email, String password})> loginCommand;
   late final Command0<bool> logoutCommand;
 
   AuthViewModel() {
+    _authRepository.addListener(notifyListeners);
+
     loginCommand = Command1((credentials) async {
       try {
-        await _authService.signInWithEmailAndPassword(
-          email: credentials.$1,
-          password: credentials.$2,
+        await _authRepository.signIn(
+          credentials.email,
+          credentials.password,
         );
-        _isBiometricAuthenticated = true;
-        notifyListeners();
         return const Success(true);
       } on FirebaseAuthException catch (e) {
         return Failure(Exception(e.message ?? 'Ocorreu um erro desconhecido'));
@@ -35,30 +32,21 @@ class AuthViewModel extends ChangeNotifier {
 
     logoutCommand = Command0(() async {
       try {
-        await _authService.signOut();
-        _isBiometricAuthenticated = false;
-        notifyListeners();
+        await _authRepository.signOut();
         return const Success(true);
       } catch (e) {
         return Failure(Exception(e.toString()));
       }
     });
-
-    _authService.authStateChanges.listen((user) {
-      _currentUser = user;
-      if (user == null) {
-        _isBiometricAuthenticated = false;
-      }
-      notifyListeners();
-    });
-
-    if (_currentUser != null) {
-      _isBiometricAuthenticated = false;
-    }
   }
 
   void setBiometricAuthenticated(bool value) {
-    _isBiometricAuthenticated = value;
-    notifyListeners();
+    _authRepository.setBiometricAuthenticated(value);
+  }
+
+  @override
+  void dispose() {
+    _authRepository.removeListener(notifyListeners);
+    super.dispose();
   }
 }
