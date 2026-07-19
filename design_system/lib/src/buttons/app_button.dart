@@ -109,10 +109,11 @@ class AppButton extends StatelessWidget {
       );
     }
 
-    final content = child ?? Text(label!, style: AppTypography.titleMedium);
+    final labelText =
+        child ?? Text(label!, style: AppTypography.titleMedium, overflow: TextOverflow.clip, softWrap: false);
 
     if (icon == null && suffixIcon == null) {
-      return content;
+      return labelText;
     }
 
     return Row(
@@ -123,7 +124,7 @@ class AppButton extends StatelessWidget {
           Icon(icon, size: AppSpacing.icon24),
           const SizedBox(width: AppSpacing.space8),
         ],
-        content,
+        Flexible(child: labelText),
         if (suffixIcon != null) ...[
           const SizedBox(width: AppSpacing.space8),
           Icon(suffixIcon, size: AppSpacing.icon24),
@@ -150,7 +151,7 @@ class AppButton extends StatelessWidget {
           ),
           minimumSize: const Size(0, AppSpacing.buttonHeightLg),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.buttonHeightLg,
+            horizontal: AppSpacing.space16,
           ),
           shape: const RoundedRectangleBorder(
             borderRadius: AppSpacing.borderRadius12,
