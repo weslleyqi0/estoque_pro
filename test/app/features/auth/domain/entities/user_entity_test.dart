@@ -1,7 +1,7 @@
 import 'package:estoque_pro/app/features/authorization/domain/entities/app_permission.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../fakes/fake_users.dart';
+import '../../../../../fakes/fake_users.dart';
 
 void main() {
   group(
@@ -22,7 +22,7 @@ void main() {
       });
 
       test('should admin role has all permissions and is active by default', () {
-        const user = fakeAdminUser;
+        final user = fakeAdminUser;
 
         expect(user.hasPermission(AppPermission.changeSalePrice), isTrue);
         expect(user.hasPermission(AppPermission.deleteProducts), isTrue);
@@ -44,6 +44,8 @@ void main() {
         expect(user.hasPermission(AppPermission.manageCategories), isTrue);
         expect(user.hasPermission(AppPermission.manageStock), isTrue);
         expect(user.hasPermission(AppPermission.manageSuppliers), isTrue);
+        expect(user.hasPermission(AppPermission.manageUsers), isFalse);
+        expect(user.hasPermission(AppPermission.viewReports), isFalse);
       });
 
       test('Inactive user has no permissions, even if role is admin or owner', () {

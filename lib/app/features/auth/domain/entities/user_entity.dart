@@ -7,7 +7,7 @@ class UserEntity {
   final String email;
   final AppRole role;
   final bool isActive;
-  final List<AppPermission> permissions;
+  final Set<AppPermission> permissions;
 
   const UserEntity({
     required this.uid,

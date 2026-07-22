@@ -1,6 +1,6 @@
+import 'package:estoque_pro/app/features/auth/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/authorization/domain/entities/app_permission.dart';
 import 'package:estoque_pro/app/features/authorization/domain/entities/app_role.dart';
-import 'package:estoque_pro/app/features/authorization/user_entity.dart';
 
 const fakeOwnerUser = UserEntity(
   uid: 'owner_123',
@@ -8,16 +8,16 @@ const fakeOwnerUser = UserEntity(
   email: 'owner@test.com',
   role: AppRole.owner,
   isActive: true,
-  permissions: [],
+  permissions: {},
 );
 
-const fakeAdminUser = UserEntity(
+final fakeAdminUser = UserEntity(
   uid: 'admin_123',
   name: 'Admin',
   email: 'admin@test.com',
   role: AppRole.admin,
   isActive: true,
-  permissions: AppPermission.values,
+  permissions: AppPermission.values.toSet(),
 );
 
 const fakeSellerUser = UserEntity(
@@ -26,14 +26,14 @@ const fakeSellerUser = UserEntity(
   email: 'seller@test.com',
   role: AppRole.seller,
   isActive: true,
-  permissions: [
+  permissions: {
     AppPermission.changeSalePrice,
     AppPermission.editProducts,
     AppPermission.editSales,
     AppPermission.manageCategories,
     AppPermission.manageStock,
     AppPermission.manageSuppliers,
-  ],
+  },
 );
 
 const fakeInactiveOwnerUser = UserEntity(
@@ -42,7 +42,7 @@ const fakeInactiveOwnerUser = UserEntity(
   email: 'owner@test.com',
   role: AppRole.owner,
   isActive: false,
-  permissions: [],
+  permissions: {},
 );
 
 const fakeInactiveAdminUser = UserEntity(
@@ -51,7 +51,7 @@ const fakeInactiveAdminUser = UserEntity(
   email: 'admin@test.com',
   role: AppRole.admin,
   isActive: false,
-  permissions: [],
+  permissions: {},
 );
 
 const fakeInactiveSellerUser = UserEntity(
@@ -60,12 +60,12 @@ const fakeInactiveSellerUser = UserEntity(
   email: 'seller@test.com',
   role: AppRole.seller,
   isActive: false,
-  permissions: [
+  permissions: {
     AppPermission.changeSalePrice,
     AppPermission.editProducts,
     AppPermission.editSales,
     AppPermission.manageCategories,
     AppPermission.manageStock,
     AppPermission.manageSuppliers,
-  ],
+  },
 );
