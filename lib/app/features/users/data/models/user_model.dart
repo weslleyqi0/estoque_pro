@@ -1,6 +1,6 @@
-import 'package:estoque_pro/app/features/auth/domain/entities/user_entity.dart';
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_permission.dart';
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_role.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 
 class UserModel extends UserEntity {
   const UserModel({
@@ -26,16 +26,16 @@ class UserModel extends UserEntity {
   factory UserModel.fromMap(String uid, Map<dynamic, dynamic> map) {
     final name = map['name'] as String? ?? '';
     final roleStr = map['role'] as String? ?? '';
-    final role = AppRole.fromValue(roleStr) ?? AppRole.seller;
+    final role = UserRole.fromValue(roleStr) ?? UserRole.seller;
     final email = map['email'] as String? ?? '';
     final isActive = map['isActive'] as bool? ?? true;
 
-    final permissionsList = <AppPermission>[];
+    final permissionsList = <UserPermission>[];
     final permsMap = map['permissions'];
     if (permsMap is Map) {
       permsMap.forEach((key, value) {
         if (value == true) {
-          final perm = AppPermission.fromValue(key.toString());
+          final perm = UserPermission.fromValue(key.toString());
           if (perm != null) {
             permissionsList.add(perm);
           }

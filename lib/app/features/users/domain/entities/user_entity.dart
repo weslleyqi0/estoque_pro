@@ -1,13 +1,13 @@
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_permission.dart';
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_role.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 
 class UserEntity {
   final String uid;
   final String name;
   final String email;
-  final AppRole role;
+  final UserRole role;
   final bool isActive;
-  final Set<AppPermission> permissions;
+  final Set<UserPermission> permissions;
 
   const UserEntity({
     required this.uid,
@@ -18,9 +18,9 @@ class UserEntity {
     required this.permissions,
   });
 
-  bool hasPermission(AppPermission permission) {
+  bool hasPermission(UserPermission permission) {
     if (!isActive) return false;
-    if (role == AppRole.owner) return true;
+    if (role == UserRole.owner) return true;
     return permissions.contains(permission);
   }
 }

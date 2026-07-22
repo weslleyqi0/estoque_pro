@@ -1,7 +1,7 @@
-import 'package:estoque_pro/app/features/auth/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 
 /// Repository responsible for CRUD operations and realtime updates of [UserEntity].
-abstract class UserRepository {
+abstract class UsersRepository {
   /// Fetches a [UserEntity] by its [uid].
   ///
   /// Returns `null` if the user is not found.

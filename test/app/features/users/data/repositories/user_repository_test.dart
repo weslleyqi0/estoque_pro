@@ -1,8 +1,8 @@
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
-import 'package:estoque_pro/app/features/auth/domain/entities/user_entity.dart';
-import 'package:estoque_pro/app/features/authorization/data/repositories/user_repository_impl.dart';
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_permission.dart';
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_role.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/features/users/data/repositories/users_repository_impl.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -20,7 +20,7 @@ void main() {
   late MockDatabaseReference mockUserUidRef;
   late MockDataSnapshot mockUserSnapshot;
   late MockDataSnapshot mockUsersSnapshot;
-  late UserRepositoryImpl repository;
+  late UsersRepositoryImpl repository;
 
   setUp(() {
     mockDb = MockFirebaseDatabase();
@@ -37,7 +37,7 @@ void main() {
     when(() => mockUsersRef.child(any())).thenReturn(mockUserUidRef);
     when(() => mockUserUidRef.onValue).thenAnswer((_) => const Stream<DatabaseEvent>.empty());
 
-    repository = UserRepositoryImpl(
+    repository = UsersRepositoryImpl(
       FirebaseDatabaseService<UserEntity>(mockUsersRef),
     );
   });
@@ -60,9 +60,9 @@ void main() {
       expect(user!.uid, 'uid_123');
       expect(user.name, 'Test User');
       expect(user.email, 'test@example.com');
-      expect(user.role, AppRole.admin);
+      expect(user.role, UserRole.admin);
       expect(user.isActive, isTrue);
-      expect(user.hasPermission(AppPermission.manageUsers), isTrue);
+      expect(user.hasPermission(UserPermission.manageUsers), isTrue);
     });
 
     test('getUser returns null when user does not exist in DB', () async {
@@ -81,7 +81,7 @@ void main() {
         uid: 'uid_123',
         name: 'Saved User',
         email: 'saved@example.com',
-        role: AppRole.seller,
+        role: UserRole.seller,
         isActive: true,
         permissions: {},
       );

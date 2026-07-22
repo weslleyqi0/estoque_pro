@@ -1,4 +1,4 @@
-enum AppPermission {
+enum UserPermission {
   changeSalePrice(
     'change_sale_price',
     'Alterar Preço na Venda',
@@ -49,9 +49,9 @@ enum AppPermission {
   final String title;
   final String description;
 
-  const AppPermission(this.value, this.title, this.description);
+  const UserPermission(this.value, this.title, this.description);
 
-  static AppPermission? fromValue(String value) {
+  static UserPermission? fromValue(String value) {
     for (final perm in values) {
       if (perm.value == value) return perm;
     }

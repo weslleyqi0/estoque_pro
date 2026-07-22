@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
-import 'package:estoque_pro/app/features/auth/domain/entities/user_entity.dart';
-import 'package:estoque_pro/app/features/authorization/data/models/user_model.dart';
-import 'package:estoque_pro/app/features/authorization/domain/repositories/user_repository.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/features/users/data/models/user_model.dart';
+import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
 
-class UserRepositoryImpl implements UserRepository {
+class UsersRepositoryImpl implements UsersRepository {
   final FirebaseDatabaseService<UserEntity> _usersDatabase;
 
-  UserRepositoryImpl(
+  UsersRepositoryImpl(
     this._usersDatabase,
   );
 

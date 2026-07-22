@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:estoque_pro/app/features/auth/domain/entities/user_entity.dart';
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_permission.dart';
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_role.dart';
-import 'package:estoque_pro/app/features/authorization/domain/repositories/user_repository.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
+import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 class AuthorizationService extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth;
-  final UserRepository _userRepository;
+  final UsersRepository _userRepository;
 
   AuthorizationService(
     this._firebaseAuth,
@@ -77,9 +77,9 @@ class AuthorizationService extends ChangeNotifier {
           uid: uid,
           name: 'Dono',
           email: email,
-          role: AppRole.owner,
+          role: UserRole.owner,
           isActive: true,
-          permissions: AppPermission.values.toSet(),
+          permissions: UserPermission.values.toSet(),
         );
 
         try {
@@ -93,7 +93,7 @@ class AuthorizationService extends ChangeNotifier {
             uid: uid,
             name: email.split('@').first,
             email: email,
-            role: AppRole.seller,
+            role: UserRole.seller,
             isActive: true,
             permissions: const {},
           );
@@ -105,7 +105,7 @@ class AuthorizationService extends ChangeNotifier {
         uid: uid,
         name: email.split('@').first,
         email: email,
-        role: AppRole.seller,
+        role: UserRole.seller,
         isActive: true,
         permissions: const {},
       );
@@ -115,11 +115,11 @@ class AuthorizationService extends ChangeNotifier {
     }
   }
 
-  bool hasPermission(AppPermission permission) {
+  bool hasPermission(UserPermission permission) {
     return _currentUser?.hasPermission(permission) ?? false;
   }
 
-  bool hasRole(AppRole role) {
+  bool hasRole(UserRole role) {
     return _currentUser?.role == role;
   }
 

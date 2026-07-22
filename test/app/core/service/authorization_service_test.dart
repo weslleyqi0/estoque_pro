@@ -1,21 +1,21 @@
 import 'dart:async';
 
-import 'package:estoque_pro/app/features/auth/domain/entities/user_entity.dart';
-import 'package:estoque_pro/app/features/authorization/data/service/authorization_service.dart';
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_permission.dart';
-import 'package:estoque_pro/app/features/authorization/domain/entities/app_role.dart';
-import 'package:estoque_pro/app/features/authorization/domain/repositories/user_repository.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/core/services/authorization_service.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
+import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import '../../../../../fakes/fake_users.dart';
+import '../../../fakes/fake_users.dart';
 
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 
 class MockUser extends Mock implements User {}
 
-class MockUserRepository extends Mock implements UserRepository {}
+class MockUserRepository extends Mock implements UsersRepository {}
 
 class FakeUserEntity extends Fake implements UserEntity {}
 
@@ -55,10 +55,10 @@ void main() {
       await service.loadUserProfile('owner_uid', 'owner@test.com');
 
       expect(service.currentUser, isNotNull);
-      expect(service.currentUser!.role, AppRole.owner);
+      expect(service.currentUser!.role, UserRole.owner);
       expect(service.currentUser!.isActive, isTrue);
 
-      for (final permission in AppPermission.values) {
+      for (final permission in UserPermission.values) {
         expect(service.hasPermission(permission), isTrue, reason: 'Owner should have permission $permission');
       }
     });
@@ -84,15 +84,15 @@ void main() {
       expect(service.currentUser!.uid, 'new_owner_uid');
       expect(service.currentUser!.name, 'Dono');
       expect(service.currentUser!.email, 'dono@empresa.com');
-      expect(service.currentUser!.role, AppRole.owner);
+      expect(service.currentUser!.role, UserRole.owner);
       expect(service.currentUser!.isActive, isTrue);
-      expect(service.currentUser!.permissions, AppPermission.values);
+      expect(service.currentUser!.permissions, UserPermission.values);
 
       verify(
         () => mockUserRepository.saveUser(
           any(
             that: isA<UserEntity>()
-                .having((u) => u.role, 'role', AppRole.owner)
+                .having((u) => u.role, 'role', UserRole.owner)
                 .having((u) => u.isActive, 'isActive', isTrue),
           ),
         ),
@@ -109,7 +109,7 @@ void main() {
       expect(service.currentUser!.uid, 'new_seller_uid');
       expect(service.currentUser!.name, 'vendedor');
       expect(service.currentUser!.email, 'vendedor@empresa.com');
-      expect(service.currentUser!.role, AppRole.seller);
+      expect(service.currentUser!.role, UserRole.seller);
       expect(service.currentUser!.isActive, isTrue);
       expect(service.currentUser!.permissions, isEmpty);
     });
@@ -120,7 +120,7 @@ void main() {
       await service.loadUserProfile('error_uid', 'user@empresa.com');
 
       expect(service.currentUser, isNotNull);
-      expect(service.currentUser!.role, AppRole.seller);
+      expect(service.currentUser!.role, UserRole.seller);
       expect(service.currentUser!.isActive, isTrue);
       expect(service.isLoading, isFalse);
     });
@@ -164,16 +164,16 @@ void main() {
         uid: 'seller_123',
         name: 'Seller Atualizado',
         email: 'seller@test.com',
-        role: AppRole.admin,
+        role: UserRole.admin,
         isActive: true,
-        permissions: AppPermission.values.toSet(),
+        permissions: UserPermission.values.toSet(),
       );
 
       listenUserController.add(updatedUser);
       await pumpEventQueue();
 
       expect(service.currentUser, equals(updatedUser));
-      expect(service.hasRole(AppRole.admin), isTrue);
+      expect(service.hasRole(UserRole.admin), isTrue);
     });
 
     test('should return true for hasRole when role matches current user', () async {
@@ -181,15 +181,15 @@ void main() {
 
       await service.loadUserProfile('owner_123', 'owner@test.com');
 
-      expect(service.hasRole(AppRole.owner), isTrue);
-      expect(service.hasRole(AppRole.seller), isFalse);
-      expect(service.hasRole(AppRole.admin), isFalse);
+      expect(service.hasRole(UserRole.owner), isTrue);
+      expect(service.hasRole(UserRole.seller), isFalse);
+      expect(service.hasRole(UserRole.admin), isFalse);
     });
 
     test('should return false for hasPermission when no user is logged in', () {
       expect(service.currentUser, isNull);
-      expect(service.hasPermission(AppPermission.editProducts), isFalse);
-      expect(service.hasPermission(AppPermission.manageUsers), isFalse);
+      expect(service.hasPermission(UserPermission.editProducts), isFalse);
+      expect(service.hasPermission(UserPermission.manageUsers), isFalse);
     });
   });
 }
