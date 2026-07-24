@@ -32,7 +32,7 @@ class _UsersPageState extends State<UsersPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Gerenciar Usuários'),
+        title: const Text('Gerenciar Usuários'),
       ),
       body: ListenableBuilder(
         listenable: widget.viewModel,
@@ -47,14 +47,14 @@ class _UsersPageState extends State<UsersPage> {
             return Center(child: Text(vm.error.toString()));
           }
 
-          return ListView.builder(
-            itemCount: vm.users.length,
-            itemBuilder: (BuildContext context, int index) {
-              final user = vm.users[index];
+          return ValueListenableBuilder(
+            valueListenable: widget.viewModel.expandedUserId,
+            builder: (context, expandedId, child) {
+              return ListView.builder(
+                itemCount: vm.users.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final user = vm.users[index];
 
-              return ValueListenableBuilder(
-                valueListenable: widget.viewModel.expandedUserId,
-                builder: (context, expandedId, _) {
                   return CardUser(
                     viewModel: vm,
                     user: user,
