@@ -55,6 +55,7 @@ class AppSpacing {
   static const double icon16 = 16.0;
   static const double icon20 = 20.0;
   static const double icon24 = 24.0;
+  static const double icon28 = 28.0;
   static const double icon32 = 32.0;
   static const double icon40 = 40.0;
   static const double icon48 = 48.0;

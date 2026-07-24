@@ -63,14 +63,14 @@ class AppTypography {
   static const TextStyle titleLarge = TextStyle(
     fontFamily: fontFamily,
     fontSize: 22,
-    fontWeight: medium,
+    fontWeight: semiBold,
     height: 1.27,
   );
 
   static const TextStyle titleMedium = TextStyle(
     fontFamily: fontFamily,
     fontSize: 18,
-    fontWeight: medium,
+    fontWeight: semiBold,
     height: 1.5,
     letterSpacing: 0.15,
   );
@@ -78,7 +78,7 @@ class AppTypography {
   static const TextStyle titleSmall = TextStyle(
     fontFamily: fontFamily,
     fontSize: 16,
-    fontWeight: medium,
+    fontWeight: semiBold,
     height: 1.43,
     letterSpacing: 0.1,
   );

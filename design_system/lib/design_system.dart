@@ -16,6 +16,12 @@ export 'src/buttons/app_button.dart';
 // Input exports
 export 'src/inputs/app_textfield.dart';
 
+// Swicths exports
+export 'src/switches/app_switch_title.dart';
+
+// Tag exports
+export 'src/tags/app_tag.dart';
+
 // Dialog exports
 export 'src/dialogs/app_bottom_sheet.dart';
 

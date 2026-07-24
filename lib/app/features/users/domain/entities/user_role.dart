@@ -1,10 +1,15 @@
 enum UserRole {
-  owner('owner'),
-  admin('admin'),
-  seller('seller');
+  owner('owner', 'Dono'),
+  admin('admin', 'Admin'),
+  seller('seller', 'Vendedor');
 
   final String value;
-  const UserRole(this.value);
+  final String title;
+
+  const UserRole(
+    this.value,
+    this.title,
+  );
 
   static UserRole? fromValue(String value) {
     for (final role in values) {
