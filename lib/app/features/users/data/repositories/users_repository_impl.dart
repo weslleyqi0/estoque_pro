@@ -17,7 +17,7 @@ class UsersRepositoryImpl implements UsersRepository {
     final snapshotValue = await _usersDatabase.getChildOnce(uid).timeout(const Duration(seconds: 4));
 
     if (snapshotValue != null) {
-      return UserModel.fromMap(uid, snapshotValue);
+      return UserModel.fromMap(uid, snapshotValue).toEntity();
     }
     return null;
   }
@@ -26,7 +26,7 @@ class UsersRepositoryImpl implements UsersRepository {
   Stream<UserEntity?> listenUser(String uid) {
     return _usersDatabase.listenChild(uid).map((data) {
       if (data != null) {
-        return UserModel.fromMap(uid, data);
+        return UserModel.fromMap(uid, data).toEntity();
       }
       return null;
     });
@@ -50,7 +50,7 @@ class UsersRepositoryImpl implements UsersRepository {
       final usersList = <UserEntity>[];
       data.forEach((key, value) {
         if (value is Map) {
-          usersList.add(UserModel.fromMap(key.toString(), value));
+          usersList.add(UserModel.fromMap(key.toString(), value).toEntity());
         }
       });
       return usersList;
@@ -65,7 +65,7 @@ class UsersRepositoryImpl implements UsersRepository {
       if (data != null) {
         data.forEach((key, value) {
           if (value is Map) {
-            usersList.add(UserModel.fromMap(key.toString(), value));
+            usersList.add(UserModel.fromMap(key.toString(), value).toEntity());
           }
         });
       }
