@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/utils/command.dart';
+import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
@@ -11,6 +12,7 @@ enum UsersLoadState { loading, success, failure }
 
 class UsersViewModel extends ChangeNotifier {
   final UsersRepository _usersRepository;
+  final AuthorizationService _authorizationService;
 
   StreamSubscription<Result<List<UserEntity>>>? _usersSubscription;
   late final Command1<bool, UserEntity> updateUserProfileCommand;
@@ -27,8 +29,11 @@ class UsersViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
+  UserEntity? get currentUser => _authorizationService.currentUser;
+
   UsersViewModel(
     this._usersRepository,
+    this._authorizationService,
   ) {
     updateUserProfileCommand = Command1(_updateUser);
   }

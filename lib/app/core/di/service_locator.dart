@@ -57,6 +57,7 @@ void setupServiceLocator() {
   getIt.registerFactory<UsersViewModel>(
     () => UsersViewModel(
       getIt<UsersRepository>(),
+      getIt<AuthorizationService>(),
     ),
   );
 }

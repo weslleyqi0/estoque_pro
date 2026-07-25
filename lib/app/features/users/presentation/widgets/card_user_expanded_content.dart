@@ -4,6 +4,7 @@ import 'package:estoque_pro/app/features/users/domain/entities/user_permission.d
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/widgets/card_user_info.dart';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -11,6 +12,8 @@ import 'package:material_symbols_icons/symbols.dart';
 class CardUserExpandedContent extends StatelessWidget {
   final UsersViewModel viewModel;
   final UserEntity user;
+  final UserRole currentUserRole;
+  final String currentUserId;
   final IconData? icon;
   final Color? color;
 
@@ -18,6 +21,8 @@ class CardUserExpandedContent extends StatelessWidget {
     super.key,
     required this.viewModel,
     required this.user,
+    required this.currentUserRole,
+    required this.currentUserId,
     this.icon,
     this.color,
   });
@@ -43,50 +48,55 @@ class CardUserExpandedContent extends StatelessWidget {
           Column(
             crossAxisAlignment: .start,
             children: [
-              AppSwitchTitle(
-                title: 'Status da Conta',
-                subtitle: 'Ativar ou desativar acesso do usuário',
-                titleStyle: context.textTheme.titleLarge,
-                value: user.isActive,
-                onChanged: (value) => viewModel.toggleUserActive(user, value),
-              ),
-              Gap(AppSpacing.space24),
-              Column(
-                crossAxisAlignment: .start,
-                children: [
-                  Text(
-                    'Função',
-                    style: context.textTheme.titleLarge,
-                  ),
-                  Gap(AppSpacing.space8),
-                  Row(
-                    mainAxisAlignment: .spaceBetween,
-                    children: [
-                      Flexible(
-                        child: AppButton(
-                          onPressed: () => viewModel.updateUserRole(user, UserRole.seller),
-                          icon: Symbols.shopping_bag_rounded,
-                          variant: user.role == UserRole.admin ? AppButtonVariant.outlined : AppButtonVariant.primary,
-                          label: 'Vendedor',
-                          isFullWidth: true,
+              if (user.uid != currentUserId) ...[
+                AppSwitchTitle(
+                  title: 'Status da Conta',
+                  subtitle: 'Ativar ou desativar acesso do usuário',
+                  titleStyle: context.textTheme.titleLarge,
+                  value: user.isActive,
+                  onChanged: (value) => viewModel.toggleUserActive(user, value),
+                ),
+
+                Gap(AppSpacing.space24),
+                Column(
+                  crossAxisAlignment: .start,
+                  children: [
+                    Text(
+                      'Função',
+                      style: context.textTheme.titleLarge,
+                    ),
+                    Gap(AppSpacing.space8),
+                    Row(
+                      mainAxisAlignment: .spaceBetween,
+                      children: [
+                        Flexible(
+                          child: AppButton(
+                            onPressed: () => viewModel.updateUserRole(user, UserRole.seller),
+                            icon: Symbols.shopping_bag_rounded,
+                            variant: user.role == UserRole.admin ? AppButtonVariant.outlined : AppButtonVariant.primary,
+                            label: 'Vendedor',
+                            isFullWidth: true,
+                          ),
                         ),
-                      ),
-                      Gap(AppSpacing.space8),
-                      Flexible(
-                        child: AppButton(
-                          onPressed: () => viewModel.updateUserRole(user, UserRole.admin),
-                          icon: Symbols.shield_person,
-                          variant: user.role == UserRole.seller ? AppButtonVariant.outlined : AppButtonVariant.primary,
-                          label: 'Administrador',
-                          isFullWidth: true,
+                        Gap(AppSpacing.space8),
+                        Flexible(
+                          child: AppButton(
+                            onPressed: () => viewModel.updateUserRole(user, UserRole.admin),
+                            icon: Symbols.shield_person,
+                            variant: user.role == UserRole.seller
+                                ? AppButtonVariant.outlined
+                                : AppButtonVariant.primary,
+                            label: 'Administrador',
+                            isFullWidth: true,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              if (user.role == UserRole.admin) ...[
+                      ],
+                    ),
+                  ],
+                ),
                 Gap(AppSpacing.space16),
+              ],
+              if (user.role == UserRole.admin) ...[
                 CardUserInfo(
                   user: user,
                   title: 'Administrador',

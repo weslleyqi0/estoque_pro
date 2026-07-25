@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/widgets/card_user.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,10 @@ class _UsersPageState extends State<UsersPage> {
             return Center(child: Text(vm.error.toString()));
           }
 
+          final currentUser = vm.currentUser;
+          final currentUserRole = currentUser?.role ?? UserRole.seller;
+          final currentUserId = currentUser?.uid ?? '';
+
           return ValueListenableBuilder(
             valueListenable: widget.viewModel.expandedUserId,
             builder: (context, expandedId, child) {
@@ -58,6 +63,8 @@ class _UsersPageState extends State<UsersPage> {
                   return CardUser(
                     viewModel: vm,
                     user: user,
+                    currentUserRole: currentUserRole,
+                    currentUserId: currentUserId,
                     isExpanded: expandedId == user.uid,
                     onExpanded: () => widget.viewModel.toggleExpanded(user.uid),
                   );

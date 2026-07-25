@@ -1,5 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/presentation/extensions/user_role_ui_extension.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/widgets/card_user_expanded_content.dart';
@@ -9,6 +10,8 @@ import 'package:flutter/material.dart';
 class CardUser extends StatelessWidget {
   final UsersViewModel viewModel;
   final UserEntity user;
+  final UserRole currentUserRole;
+  final String currentUserId;
   final bool isExpanded;
   final void Function()? onExpanded;
 
@@ -16,6 +19,8 @@ class CardUser extends StatelessWidget {
     super.key,
     required this.viewModel,
     required this.user,
+    required this.currentUserRole,
+    required this.currentUserId,
     this.isExpanded = false,
     this.onExpanded,
   });
@@ -49,6 +54,8 @@ class CardUser extends StatelessWidget {
               CardUserExpandedContent(
                 viewModel: viewModel,
                 user: user,
+                currentUserRole: currentUserRole,
+                currentUserId: currentUserId,
                 icon: roleIcon,
                 color: roleColor,
               ),
