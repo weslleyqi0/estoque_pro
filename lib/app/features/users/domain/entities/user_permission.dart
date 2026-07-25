@@ -34,11 +34,7 @@ enum UserPermission {
     'Gerenciar Fornecedores',
     'Permitir adicionar, editar e remover fornecedores',
   ),
-  manageUsers(
-    'manage_users',
-    'Gerenciar Usuários',
-    'Permitir adicionar e editar outros usuários',
-  ),
+
   viewReports(
     'view_reports',
     'Ver Relatórios',

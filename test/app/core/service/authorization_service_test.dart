@@ -189,7 +189,6 @@ void main() {
     test('should return false for hasPermission when no user is logged in', () {
       expect(service.currentUser, isNull);
       expect(service.hasPermission(UserPermission.editProducts), isFalse);
-      expect(service.hasPermission(UserPermission.manageUsers), isFalse);
     });
   });
 }

@@ -1,7 +1,6 @@
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
-import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/data/repositories/users_repository_impl.dart';
-import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,7 +61,6 @@ void main() {
       expect(user.email, 'test@example.com');
       expect(user.role, UserRole.admin);
       expect(user.isActive, isTrue);
-      expect(user.hasPermission(UserPermission.manageUsers), isTrue);
     });
 
     test('getUser returns null when user does not exist in DB', () async {

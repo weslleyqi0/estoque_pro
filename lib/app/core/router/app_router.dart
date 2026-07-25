@@ -1,10 +1,14 @@
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
+import 'package:estoque_pro/app/core/router/route_guard.dart';
 import 'package:estoque_pro/app/features/auth/presentation/pages/biometric_page.dart';
+import 'package:estoque_pro/app/features/auth/presentation/pages/inactive_page.dart';
 import 'package:estoque_pro/app/features/auth/presentation/pages/login_page.dart';
+import 'package:estoque_pro/app/features/auth/presentation/pages/unauthorized_page.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/home_page.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/presentation/pages/users_page.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -13,20 +17,32 @@ import 'package:go_router/go_router.dart';
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+  static final _routeGuard = RouteGuard(
+    routePermissions: {},
+  );
+
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.home,
     refreshListenable: getIt<AuthViewModel>(),
     redirect: (context, state) {
       final authViewModel = getIt<AuthViewModel>();
-      final user = authViewModel.currentUser;
+
+      final isAuthenticated = authViewModel.isAuthenticated;
       final isBiometricAuth = authViewModel.isBiometricAuthenticated;
+      final currentUser = authViewModel.currentUser;
 
-      final isLoginPage = state.uri.toString() == AppRoutes.login;
-      final isBiometricPage = state.uri.toString() == AppRoutes.biometric;
+      final path = state.uri.path;
+      final isLoginPage = path == AppRoutes.login;
+      final isBiometricPage = path == AppRoutes.biometric;
+      final isInactivePage = path == AppRoutes.inactive;
 
-      if (user == null) {
+      if (!isAuthenticated) {
         return isLoginPage ? null : AppRoutes.login;
+      }
+
+      if (currentUser != null && !currentUser.isActive) {
+        return isInactivePage ? null : AppRoutes.inactive;
       }
 
       if (!isBiometricAuth) {
@@ -37,7 +53,15 @@ class AppRouter {
         return AppRoutes.home;
       }
 
-      return null;
+      if (isLoginPage || isBiometricPage || (isInactivePage && currentUser?.isActive == true)) {
+        return AppRoutes.home;
+      }
+
+      if (path.startsWith(AppRoutes.users) && currentUser?.role == UserRole.seller) {
+        return AppRoutes.unauthorized;
+      }
+
+      return _routeGuard.redirect(context, state, currentUser);
     },
     routes: [
       GoRoute(
@@ -55,6 +79,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.users,
         builder: (context, state) => UsersPage(viewModel: getIt<UsersViewModel>()),
+      ),
+      GoRoute(
+        path: AppRoutes.inactive,
+        builder: (context, state) => InactivePage(viewModel: getIt<AuthViewModel>()),
+      ),
+      GoRoute(
+        path: AppRoutes.unauthorized,
+        builder: (context, state) => const UnauthorizedPage(),
       ),
     ],
   );

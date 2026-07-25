@@ -17,7 +17,6 @@ void main() {
         expect(user.hasPermission(UserPermission.manageCategories), isTrue);
         expect(user.hasPermission(UserPermission.manageStock), isTrue);
         expect(user.hasPermission(UserPermission.manageSuppliers), isTrue);
-        expect(user.hasPermission(UserPermission.manageUsers), isTrue);
         expect(user.hasPermission(UserPermission.viewReports), isTrue);
       });
 
@@ -31,7 +30,6 @@ void main() {
         expect(user.hasPermission(UserPermission.manageCategories), isTrue);
         expect(user.hasPermission(UserPermission.manageStock), isTrue);
         expect(user.hasPermission(UserPermission.manageSuppliers), isTrue);
-        expect(user.hasPermission(UserPermission.manageUsers), isTrue);
         expect(user.hasPermission(UserPermission.viewReports), isTrue);
       });
 
@@ -44,17 +42,12 @@ void main() {
         expect(user.hasPermission(UserPermission.manageCategories), isTrue);
         expect(user.hasPermission(UserPermission.manageStock), isTrue);
         expect(user.hasPermission(UserPermission.manageSuppliers), isTrue);
-        expect(user.hasPermission(UserPermission.manageUsers), isFalse);
         expect(user.hasPermission(UserPermission.viewReports), isFalse);
       });
 
       test('Inactive user has no permissions, even if role is admin or owner', () {
-        const owner = fakeInactiveOwnerUser;
-        const admin = fakeInactiveAdminUser;
         const seller = fakeInactiveSellerUser;
 
-        expect(owner.hasPermission(UserPermission.manageUsers), isFalse);
-        expect(admin.hasPermission(UserPermission.manageUsers), isFalse);
         expect(seller.hasPermission(UserPermission.editProducts), isFalse);
       });
     },

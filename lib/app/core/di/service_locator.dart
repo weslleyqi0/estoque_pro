@@ -52,7 +52,12 @@ void setupServiceLocator() {
   );
 
   // ViewModels
-  getIt.registerLazySingleton<AuthViewModel>(() => AuthViewModel());
+  getIt.registerLazySingleton<AuthViewModel>(
+    () => AuthViewModel(
+      getIt<AuthRepository>(),
+      getIt<AuthorizationService>(),
+    ),
+  );
   getIt.registerLazySingleton<BiometricViewModel>(() => BiometricViewModel());
   getIt.registerFactory<UsersViewModel>(
     () => UsersViewModel(

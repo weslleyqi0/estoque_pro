@@ -22,6 +22,7 @@ class AuthorizationService extends ChangeNotifier {
   bool _isLoading = false;
 
   UserEntity? get currentUser => _currentUser;
+  bool get isAuthenticated => _firebaseAuth.currentUser != null;
 
   StreamSubscription<UserEntity?>? _userSubscription;
 
