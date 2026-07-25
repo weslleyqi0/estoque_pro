@@ -45,6 +45,7 @@ class CardUser extends StatelessWidget {
           children: [
             CardUserHeader(
               user: user,
+              currentUserId: currentUserId,
               icon: roleIcon,
               color: roleColor,
               isExpanded: isExpanded,

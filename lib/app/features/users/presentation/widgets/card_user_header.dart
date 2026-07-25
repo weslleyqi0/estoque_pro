@@ -6,6 +6,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 class CardUserHeader extends StatelessWidget {
   final UserEntity user;
+  final String currentUserId;
   final Color? color;
   final IconData? icon;
   final bool isExpanded;
@@ -14,6 +15,7 @@ class CardUserHeader extends StatelessWidget {
   const CardUserHeader({
     super.key,
     required this.user,
+    required this.currentUserId,
     this.color,
     this.icon,
     this.onExpanded,
@@ -71,6 +73,14 @@ class CardUserHeader extends StatelessWidget {
                         icon: user.isActive ? Symbols.check_circle_rounded : Symbols.block_rounded,
                         color: activeColor,
                       ),
+                      if (user.uid == currentUserId) ...[
+                        Gap(AppSpacing.space8),
+                        AppTag(
+                          title: 'Você',
+                          icon: Symbols.person,
+                          color: color,
+                        ),
+                      ],
                     ],
                   ),
                 ],
