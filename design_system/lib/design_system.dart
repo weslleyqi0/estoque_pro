@@ -2,6 +2,7 @@
 ///
 /// A comprehensive design system with theme tokens and reusable components
 /// that work across web and mobile platforms.
+library;
 
 // Theme exports
 export 'src/theme/app_colors.dart';
