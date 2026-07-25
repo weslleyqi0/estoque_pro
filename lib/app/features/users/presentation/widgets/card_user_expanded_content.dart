@@ -69,26 +69,17 @@ class CardUserExpandedContent extends StatelessWidget {
                     Row(
                       mainAxisAlignment: .spaceBetween,
                       children: [
-                        Flexible(
-                          child: AppButton(
-                            onPressed: () => viewModel.updateUserRole(user, UserRole.seller),
-                            icon: Symbols.shopping_bag_rounded,
-                            variant: user.role == UserRole.admin ? AppButtonVariant.outlined : AppButtonVariant.primary,
-                            label: 'Vendedor',
-                            isFullWidth: true,
-                          ),
+                        AppButton(
+                          onPressed: () => viewModel.updateUserRole(user, UserRole.seller),
+                          icon: Symbols.shopping_bag_rounded,
+                          variant: user.role == UserRole.admin ? AppButtonVariant.outlined : AppButtonVariant.primary,
+                          label: 'Vendedor',
                         ),
-                        Gap(AppSpacing.space8),
-                        Flexible(
-                          child: AppButton(
-                            onPressed: () => viewModel.updateUserRole(user, UserRole.admin),
-                            icon: Symbols.shield_person,
-                            variant: user.role == UserRole.seller
-                                ? AppButtonVariant.outlined
-                                : AppButtonVariant.primary,
-                            label: 'Administrador',
-                            isFullWidth: true,
-                          ),
+                        AppButton(
+                          onPressed: () => viewModel.updateUserRole(user, UserRole.admin),
+                          icon: Symbols.shield_person,
+                          variant: user.role == UserRole.seller ? AppButtonVariant.outlined : AppButtonVariant.primary,
+                          label: 'Administrador',
                         ),
                       ],
                     ),
