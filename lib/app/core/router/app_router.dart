@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/pages/biometric_page.dart';
 import 'package:estoque_pro/app/features/auth/presentation/pages/login_page.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
@@ -14,45 +15,45 @@ class AppRouter {
 
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: AppRoutes.home,
     refreshListenable: getIt<AuthViewModel>(),
     redirect: (context, state) {
       final authViewModel = getIt<AuthViewModel>();
       final user = authViewModel.currentUser;
       final isBiometricAuth = authViewModel.isBiometricAuthenticated;
 
-      final isLoginPage = state.uri.toString() == '/login';
-      final isBiometricPage = state.uri.toString() == '/biometric';
+      final isLoginPage = state.uri.toString() == AppRoutes.login;
+      final isBiometricPage = state.uri.toString() == AppRoutes.biometric;
 
       if (user == null) {
-        return isLoginPage ? null : '/login';
+        return isLoginPage ? null : AppRoutes.login;
       }
 
       if (!isBiometricAuth) {
-        return isBiometricPage ? null : '/biometric';
+        return isBiometricPage ? null : AppRoutes.biometric;
       }
 
       if (isLoginPage || isBiometricPage) {
-        return '/home';
+        return AppRoutes.home;
       }
 
       return null;
     },
     routes: [
       GoRoute(
-        path: '/login',
+        path: AppRoutes.login,
         builder: (context, state) => LoginPage(viewModel: getIt<AuthViewModel>()),
       ),
       GoRoute(
-        path: '/biometric',
+        path: AppRoutes.biometric,
         builder: (context, state) => BiometricPage(viewModel: getIt<BiometricViewModel>()),
       ),
       GoRoute(
-        path: '/home',
+        path: AppRoutes.home,
         builder: (context, state) => const HomePage(),
       ),
       GoRoute(
-        path: '/users',
+        path: AppRoutes.users,
         builder: (context, state) => UsersPage(viewModel: getIt<UsersViewModel>()),
       ),
     ],

@@ -1,5 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ class HomePage extends StatelessWidget {
       ),
       body: Center(
         child: AppButton(
-          onPressed: () => context.push('/users'),
+          onPressed: () => context.push(AppRoutes.users),
           label: 'Gerenciar Usuários',
         ),
       ),
