@@ -12,7 +12,7 @@ enum UsersLoadState { loading, success, failure }
 class UsersViewModel extends ChangeNotifier {
   final UsersRepository _usersRepository;
 
-  StreamSubscription<List<UserEntity>>? _usersSubscription;
+  StreamSubscription<Result<List<UserEntity>>>? _usersSubscription;
   late final Command1<bool, UserEntity> updateUserProfileCommand;
   bool _hasSortedInitially = false;
 
@@ -50,20 +50,24 @@ class UsersViewModel extends ChangeNotifier {
 
     _usersSubscription?.cancel();
     _usersSubscription = _usersRepository.listenAllUsers().listen(
-      (usersList) {
-        if (!_hasSortedInitially) {
-          _users = _sortUsers(usersList);
-          _hasSortedInitially = true;
-        } else {
-          _users = _updateUsersPreservingOrder(usersList);
-        }
-        _state = UsersLoadState.success;
-        notifyListeners();
-      },
-      onError: (e) {
-        _error = e;
-        _state = UsersLoadState.failure;
-        notifyListeners();
+      (result) {
+        result.fold(
+          onSuccess: (usersList) {
+            if (!_hasSortedInitially) {
+              _users = _sortUsers(usersList);
+              _hasSortedInitially = true;
+            } else {
+              _users = _updateUsersPreservingOrder(usersList);
+            }
+            _state = UsersLoadState.success;
+            notifyListeners();
+          },
+          onFailure: (error) {
+            _error = error;
+            _state = UsersLoadState.failure;
+            notifyListeners();
+          },
+        );
       },
     );
   }

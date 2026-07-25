@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/data/models/user_model.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
@@ -59,17 +60,26 @@ class UsersRepositoryImpl implements UsersRepository {
   }
 
   @override
-  Stream<List<UserEntity>> listenAllUsers() {
-    return _usersDatabase.listen().map((data) {
-      final usersList = <UserEntity>[];
-      if (data != null) {
-        data.forEach((key, value) {
-          if (value is Map) {
-            usersList.add(UserModel.fromMap(key.toString(), value).toEntity());
+  Stream<Result<List<UserEntity>>> listenAllUsers() {
+    return _usersDatabase
+        .listen()
+        .map<Result<List<UserEntity>>>((data) {
+          try {
+            final usersList = <UserEntity>[];
+            if (data != null) {
+              data.forEach((key, value) {
+                if (value is Map) {
+                  usersList.add(UserModel.fromMap(key.toString(), value).toEntity());
+                }
+              });
+            }
+            return Result.success(usersList);
+          } catch (e) {
+            return Result.failure(e);
           }
+        })
+        .handleError((error) {
+          return Result.failure(error);
         });
-      }
-      return usersList;
-    });
   }
 }

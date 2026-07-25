@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 
 /// Repository responsible for CRUD operations and realtime updates of [UserEntity].
@@ -20,5 +21,5 @@ abstract class UsersRepository {
   Future<List<UserEntity>> getAllUsers();
 
   /// Listens to realtime changes across all registered users.
-  Stream<List<UserEntity>> listenAllUsers();
+  Stream<Result<List<UserEntity>>> listenAllUsers();
 }
