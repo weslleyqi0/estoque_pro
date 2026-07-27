@@ -1,14 +1,4 @@
 enum UserPermission {
-  changeSalePrice(
-    'change_sale_price',
-    'Alterar Preço na Venda',
-    'Permitir mudar o preço dos produtos durante a venda',
-  ),
-  deleteProducts(
-    'delete_products',
-    'Excluir Produtos',
-    'Permitir remover produtos do sistema',
-  ),
   editProducts(
     'edit_products',
     'Editar Produtos',
@@ -24,21 +14,41 @@ enum UserPermission {
     'Gerenciar Categorias',
     'Permitir adicionar, editar e remover categorias de produtos',
   ),
-  manageStock(
-    'manage_stock',
-    'Gerenciar Estoque',
-    'Permitir ajustar quantidades de estoque',
-  ),
   manageSuppliers(
     'manage_suppliers',
     'Gerenciar Fornecedores',
     'Permitir adicionar, editar e remover fornecedores',
   ),
-
+  managerCustomer(
+    'manage_customer',
+    'Gerenciar Clientes',
+    'Permitir adicionar, editar e remover clientes',
+  ),
   viewReports(
     'view_reports',
     'Ver Relatórios',
     'Permitir acessar relatórios e estatísticas',
+  ),
+  deliveries(
+    'deliveries',
+    'Entregas',
+    'Gerenciar entregas',
+  ),
+
+  changeSalePrice(
+    'change_sale_price',
+    'Alterar Preço na Venda',
+    'Permitir mudar o preço dos produtos durante a venda',
+  ),
+  deleteProducts(
+    'delete_products',
+    'Excluir Produtos',
+    'Permitir remover produtos do sistema',
+  ),
+  manageStock(
+    'manage_stock',
+    'Gerenciar Estoque',
+    'Permitir ajustar quantidades de estoque',
   );
 
   final String value;

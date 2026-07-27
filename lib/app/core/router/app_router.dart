@@ -7,7 +7,7 @@ import 'package:estoque_pro/app/features/auth/presentation/pages/login_page.dart
 import 'package:estoque_pro/app/features/auth/presentation/pages/unauthorized_page.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
-import 'package:estoque_pro/app/features/home/presentation/home_page.dart';
+import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/presentation/pages/users_page.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';

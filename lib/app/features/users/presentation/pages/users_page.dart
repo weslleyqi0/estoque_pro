@@ -1,3 +1,4 @@
+import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/widgets/card_user.dart';
@@ -57,6 +58,7 @@ class _UsersPageState extends State<UsersPage> {
             builder: (context, expandedId, child) {
               return ListView.builder(
                 itemCount: vm.users.length,
+                padding: const .only(bottom: AppSpacing.space32),
                 itemBuilder: (BuildContext context, int index) {
                   final user = vm.users[index];
 
