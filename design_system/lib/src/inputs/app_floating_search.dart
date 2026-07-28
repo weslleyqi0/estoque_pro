@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 /// Design System Floating Search Sliver
-class AppFloatingSearch extends StatelessWidget {
+class AppFloatingSearch extends StatefulWidget {
   final String hint;
   final ValueChanged<String>? onChanged;
 
@@ -12,6 +12,39 @@ class AppFloatingSearch extends StatelessWidget {
     this.hint = 'Pesquisar...',
     this.onChanged,
   });
+
+  @override
+  State<AppFloatingSearch> createState() => _AppFloatingSearchState();
+}
+
+class _AppFloatingSearchState extends State<AppFloatingSearch> {
+  final _controller = TextEditingController();
+  bool _hasText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onTextChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    final hasText = _controller.text.isNotEmpty;
+    if (_hasText != hasText) {
+      setState(() => _hasText = hasText);
+    }
+  }
+
+  void _clearSearch() {
+    _controller.clear();
+    widget.onChanged?.call('');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +56,14 @@ class AppFloatingSearch extends StatelessWidget {
       backgroundColor: AppColors.transparent,
       scrolledUnderElevation: 0,
       title: AppTextfield(
-        hint: hint,
+        controller: _controller,
+        hint: widget.hint,
         prefixIcon: Symbols.search_rounded,
+        suffixIcon: _hasText ? Symbols.close_rounded : null,
+        onSuffixIconPressed: _hasText ? _clearSearch : null,
         filled: true,
         filledColor: context.colorScheme.surface,
-        onChanged: onChanged,
+        onChanged: widget.onChanged,
       ),
     );
   }
