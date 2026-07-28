@@ -11,6 +11,11 @@ import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart'
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
+import 'package:estoque_pro/app/features/categories/data/repositories/categories_repository_impl.dart';
+import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
+import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
+import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_form_viewmodel.dart';
+import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/data/repositories/users_repository_impl.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
@@ -37,6 +42,7 @@ void setupServiceLocator() {
   // Services / Data Sources
   registerDatabaseService<UserEntity>('users');
   registerDatabaseService<SupplierEntity>('suppliers');
+  registerDatabaseService<CategoryEntity>('categories');
 
   // Services
   getIt.registerLazySingleton<AuthService>(() => AuthService());
@@ -60,6 +66,12 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<SuppliersRepository>(
     () => SuppliersRepositoryImpl(
       getIt<FirebaseDatabaseService<SupplierEntity>>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<CategoriesRepository>(
+    () => CategoriesRepositoryImpl(
+      getIt<FirebaseDatabaseService<CategoryEntity>>(),
     ),
   );
 
