@@ -13,6 +13,7 @@ export 'src/theme/context_theme_extension.dart';
 
 // Button exports
 export 'src/buttons/app_button.dart';
+export 'src/buttons/app_floating_action_button.dart';
 
 // Input exports
 export 'src/inputs/app_dropdown.dart';
