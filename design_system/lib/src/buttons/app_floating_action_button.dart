@@ -10,6 +10,7 @@ class AppFloatingActionButton extends StatelessWidget {
   final Color? iconColor;
   final double iconSize;
   final double elevation;
+  final EdgeInsetsGeometry padding;
 
   const AppFloatingActionButton({
     super.key,
@@ -20,6 +21,7 @@ class AppFloatingActionButton extends StatelessWidget {
     this.iconColor,
     this.iconSize = AppSpacing.icon48,
     this.elevation = 12,
+    this.padding = const EdgeInsets.all(AppSpacing.space16),
   });
 
   @override
@@ -36,7 +38,7 @@ class AppFloatingActionButton extends StatelessWidget {
           onTap: onPressed,
           borderRadius: AppSpacing.borderRadius24,
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.space20),
+            padding: padding,
             child: Icon(
               icon,
               color: iconColor ?? AppColors.white,
