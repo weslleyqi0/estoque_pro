@@ -9,6 +9,7 @@ class AppTextfield extends StatefulWidget {
   final String? hint;
   final bool required;
   final bool filled;
+  final Color? filledColor;
   final String? helperText;
   final String? errorText;
   final TextEditingController? controller;
@@ -39,6 +40,7 @@ class AppTextfield extends StatefulWidget {
     this.hint,
     this.required = false,
     this.filled = false,
+    this.filledColor,
     this.helperText,
     this.errorText,
     this.controller,
@@ -170,7 +172,7 @@ class _AppTextfieldState extends State<AppTextfield> {
           style: context.textTheme.bodyLarge,
           decoration: InputDecoration(
             filled: widget.filled,
-            fillColor: context.colorScheme.onPrimaryContainer.withValues(alpha: 0.1),
+            fillColor: widget.filledColor ?? context.colorScheme.onPrimaryContainer.withValues(alpha: 0.1),
             hintText: widget.hint,
             helperText: widget.helperText,
             errorText: widget.errorText,

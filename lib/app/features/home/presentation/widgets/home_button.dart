@@ -27,7 +27,7 @@ class HomeButton extends StatelessWidget {
       elevation: 0.5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.space24),
-        side: BorderSide(color: context.colorScheme.outline, width: 0.5),
+        side: BorderSide(color: context.colorScheme.outline, width: 0.2),
       ),
 
       child: InkWell(

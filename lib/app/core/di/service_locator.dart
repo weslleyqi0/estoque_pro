@@ -2,6 +2,11 @@ import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
+import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
+import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
+import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
+import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_form_viewmodel.dart';
+import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
@@ -31,6 +36,7 @@ void setupServiceLocator() {
 
   // Services / Data Sources
   registerDatabaseService<UserEntity>('users');
+  registerDatabaseService<SupplierEntity>('suppliers');
 
   // Services
   getIt.registerLazySingleton<AuthService>(() => AuthService());
@@ -51,6 +57,12 @@ void setupServiceLocator() {
     () => UsersRepositoryImpl(getIt<FirebaseDatabaseService<UserEntity>>()),
   );
 
+  getIt.registerLazySingleton<SuppliersRepository>(
+    () => SuppliersRepositoryImpl(
+      getIt<FirebaseDatabaseService<SupplierEntity>>(),
+    ),
+  );
+
   // ViewModels
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(
@@ -64,5 +76,12 @@ void setupServiceLocator() {
       getIt<UsersRepository>(),
       getIt<AuthorizationService>(),
     ),
+  );
+
+  getIt.registerFactory<SuppliersViewModel>(
+    () => SuppliersViewModel(getIt<SuppliersRepository>()),
+  );
+  getIt.registerFactory<SuppliersFormViewmodel>(
+    () => SuppliersFormViewmodel(getIt<SuppliersRepository>()),
   );
 }

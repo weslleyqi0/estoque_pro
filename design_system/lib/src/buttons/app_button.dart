@@ -236,7 +236,7 @@ class AppIconButton extends StatelessWidget {
     super.key,
     required this.icon,
     required this.onPressed,
-    this.size = AppIconButtonSize.medium,
+    this.size = AppIconButtonSize.large,
     this.iconColor,
     this.backgroundColor,
     this.tooltip,
