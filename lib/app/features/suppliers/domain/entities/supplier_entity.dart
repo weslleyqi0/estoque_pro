@@ -5,8 +5,6 @@ class SupplierEntity extends Equatable {
   final String name;
   final String? cnpj;
   final String? phone;
-  final String? email;
-  final String? address;
   final bool isActive;
 
   const SupplierEntity({
@@ -14,8 +12,6 @@ class SupplierEntity extends Equatable {
     required this.name,
     this.cnpj,
     this.phone,
-    this.email,
-    this.address,
     this.isActive = true,
   });
 
@@ -33,12 +29,10 @@ class SupplierEntity extends Equatable {
       name: name ?? this.name,
       cnpj: cnpj ?? this.cnpj,
       phone: phone ?? this.phone,
-      email: email ?? this.email,
-      address: address ?? this.address,
       isActive: isActive ?? this.isActive,
     );
   }
 
   @override
-  List<Object?> get props => [id, name, cnpj, phone, email, address, isActive];
+  List<Object?> get props => [id, name, cnpj, phone, isActive];
 }

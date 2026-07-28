@@ -6,4 +6,7 @@ class AppRoutes {
 
   static const inactive = '/inactive';
   static const unauthorized = '/unauthorized';
+
+  static const suppliers = '/suppliers';
+  static const supplierForm = '/suppliers/:id';
 }

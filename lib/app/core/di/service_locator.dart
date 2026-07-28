@@ -5,6 +5,7 @@ import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dar
 import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
+import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
@@ -79,5 +80,8 @@ void setupServiceLocator() {
 
   getIt.registerFactory<SuppliersViewModel>(
     () => SuppliersViewModel(getIt<SuppliersRepository>()),
+  );
+  getIt.registerFactory<SuppliersFormViewmodel>(
+    () => SuppliersFormViewmodel(getIt<SuppliersRepository>()),
   );
 }

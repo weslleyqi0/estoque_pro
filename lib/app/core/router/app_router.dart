@@ -8,6 +8,9 @@ import 'package:estoque_pro/app/features/auth/presentation/pages/unauthorized_pa
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
+import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
+import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_form_page.dart';
+import 'package:estoque_pro/app/features/suppliers/presentation/pages/suppliers_page.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/presentation/pages/users_page.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
@@ -79,6 +82,17 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.users,
         builder: (context, state) => UsersPage(viewModel: getIt<UsersViewModel>()),
+      ),
+      GoRoute(
+        path: AppRoutes.suppliers,
+        builder: (context, state) => SuppliersPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.supplierForm,
+        builder: (context, state) {
+          final supplier = state.extra as SupplierEntity?;
+          return SupplierFormPage(supplier: supplier);
+        },
       ),
       GoRoute(
         path: AppRoutes.inactive,

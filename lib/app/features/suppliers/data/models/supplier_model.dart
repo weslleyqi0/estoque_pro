@@ -5,8 +5,6 @@ class SupplierModel {
   final String name;
   final String? cnpj;
   final String? phone;
-  final String? email;
-  final String? address;
   final bool isActive;
 
   const SupplierModel({
@@ -14,8 +12,6 @@ class SupplierModel {
     required this.name,
     this.cnpj,
     this.phone,
-    this.email,
-    this.address,
     this.isActive = true,
   });
 
@@ -25,8 +21,6 @@ class SupplierModel {
       name: map['name'] as String? ?? '',
       cnpj: map['cnpj'] as String?,
       phone: map['phone'] as String?,
-      email: map['email'] as String?,
-      address: map['address'] as String?,
       isActive: map['isActive'] as bool? ?? true,
     );
   }
@@ -36,8 +30,6 @@ class SupplierModel {
       'name': name,
       'cnpj': cnpj,
       'phone': phone,
-      'email': email,
-      'address': address,
       'isActive': isActive,
     };
   }
@@ -48,8 +40,6 @@ class SupplierModel {
       name: name,
       cnpj: cnpj,
       phone: phone,
-      email: email,
-      address: address,
       isActive: isActive,
     );
   }
@@ -60,8 +50,6 @@ class SupplierModel {
       name: entity.name,
       cnpj: entity.cnpj,
       phone: entity.phone,
-      email: entity.email,
-      address: entity.address,
       isActive: entity.isActive,
     );
   }

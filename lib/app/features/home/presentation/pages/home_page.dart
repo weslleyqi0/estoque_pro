@@ -116,7 +116,7 @@ class HomePage extends StatelessWidget {
                       subTitle: 'Gerenciar paceiros',
                       color: Colors.cyan,
                       icon: Symbols.local_shipping_rounded,
-                      onPressed: () {},
+                      onPressed: () => context.push(AppRoutes.suppliers),
                     ),
                     HomeButton(
                       title: 'Clientes',
