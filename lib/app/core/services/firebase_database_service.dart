@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 
 class FirebaseDatabaseService<T> {
   final DatabaseReference _ref;
@@ -7,30 +9,61 @@ class FirebaseDatabaseService<T> {
 
   DatabaseReference get ref => _ref;
 
+  Future<T> _handleError<T>(Future<T> Function() action) async {
+    try {
+      return await action();
+    } on FirebaseException catch (e) {
+      debugPrint('FirebaseException [${e.code}]: ${e.message}');
+      switch (e.code) {
+        case 'permission-denied':
+          throw Exception('Você não tem permissão para realizar esta operação.');
+        case 'disconnected':
+          throw Exception('Sem conexão com a internet. Tente novamente mais tarde.');
+        case 'network-error':
+          throw Exception('Erro de rede. Verifique sua conexão.');
+        case 'unavailable':
+          throw Exception('O serviço de banco de dados está indisponível.');
+        case 'write-canceled':
+          throw Exception('A operação foi cancelada pelo servidor.');
+        default:
+          throw Exception('Ocorreu um erro inesperado: ${e.message}');
+      }
+    } catch (e) {
+      debugPrint('Unknown Exception: $e');
+      throw Exception('Ocorreu um erro: $e');
+    }
+  }
+
   /// Add an item generating an automatic key (push)
   Future<void> addOrUpdate(Map<String, dynamic> data) async {
-    final newRef = _ref.push();
+    return _handleError(() async {
+      final newRef = _ref.push();
 
-    final dataWithId = {
-      ...data,
-      'id': newRef.key,
-      'createdAt': DateTime.now().toIso8601String(),
-    };
+      final dataWithId = {
+        ...data,
+        'id': newRef.key,
+        'createdAt': DateTime.now().toIso8601String(),
+      };
 
-    await newRef.set(dataWithId);
+      await newRef.set(dataWithId);
+    });
   }
 
   /// Adds/updates on a specific key
   Future<void> update(String key, Map<String, dynamic> data) async {
-    await _ref.child(key).set({
-      ...data,
-      "updatedAt": DateTime.now().toIso8601String(),
+    return _handleError(() async {
+      await _ref.child(key).update({
+        ...data,
+        "updatedAt": DateTime.now().toIso8601String(),
+      });
     });
   }
 
   /// Remove an item by ID
   Future<void> delete(String key) async {
-    await _ref.child(key).remove();
+    return _handleError(() async {
+      await _ref.child(key).remove();
+    });
   }
 
   /// Listen to changes in real time
@@ -57,19 +90,23 @@ class FirebaseDatabaseService<T> {
 
   /// Fetch data only once
   Future<Map<String, dynamic>?> getOnce() async {
-    final snapshot = await _ref.get();
-    if (snapshot.exists && snapshot.value is Map) {
-      return Map<String, dynamic>.from(snapshot.value as Map);
-    }
-    return null;
+    return _handleError(() async {
+      final snapshot = await _ref.get();
+      if (snapshot.exists && snapshot.value is Map) {
+        return Map<String, dynamic>.from(snapshot.value as Map);
+      }
+      return null;
+    });
   }
 
   /// Fetch child data only once
   Future<Map<String, dynamic>?> getChildOnce(String key) async {
-    final snapshot = await _ref.child(key).get();
-    if (snapshot.exists && snapshot.value is Map) {
-      return Map<String, dynamic>.from(snapshot.value as Map);
-    }
-    return null;
+    return _handleError(() async {
+      final snapshot = await _ref.child(key).get();
+      if (snapshot.exists && snapshot.value is Map) {
+        return Map<String, dynamic>.from(snapshot.value as Map);
+      }
+      return null;
+    });
   }
 }
