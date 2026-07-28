@@ -15,6 +15,8 @@ export 'src/theme/context_theme_extension.dart';
 export 'src/buttons/app_button.dart';
 
 // Input exports
+export 'src/inputs/app_dropdown.dart';
+export 'src/inputs/app_floating_search.dart';
 export 'src/inputs/app_textfield.dart';
 
 // Swicths exports
@@ -27,5 +29,4 @@ export 'src/tags/app_tag.dart';
 export 'src/dialogs/app_bottom_sheet.dart';
 
 // Component exports
-export 'src/inputs/app_dropdown.dart';
 export 'src/empty/app_empty_list.dart';

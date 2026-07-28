@@ -17,6 +17,42 @@ class SuppliersViewModel extends ChangeNotifier {
   List<SupplierEntity> _suppliers = [];
   List<SupplierEntity> get suppliers => _suppliers;
 
+  String _searchQuery = '';
+  String get searchQuery => _searchQuery;
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  List<SupplierEntity> get filteredSuppliers {
+    if (_searchQuery.trim().isEmpty) return _suppliers;
+    
+    final query = _searchQuery.toLowerCase().trim();
+    final queryDigits = query.replaceAll(RegExp(r'\D'), '');
+    final isSearchingNumbers = queryDigits.isNotEmpty;
+
+    return _suppliers.where((supplier) {
+      final nameMatches = supplier.name.toLowerCase().contains(query);
+      
+      var cnpjMatches = false;
+      var phoneMatches = false;
+      
+      if (isSearchingNumbers) {
+        final cnpjDigits = supplier.cnpj?.replaceAll(RegExp(r'\D'), '') ?? '';
+        final phoneDigits = supplier.phone?.replaceAll(RegExp(r'\D'), '') ?? '';
+        
+        cnpjMatches = cnpjDigits.contains(queryDigits);
+        phoneMatches = phoneDigits.contains(queryDigits);
+      } else {
+        cnpjMatches = supplier.cnpj?.toLowerCase().contains(query) ?? false;
+        phoneMatches = supplier.phone?.toLowerCase().contains(query) ?? false;
+      }
+      
+      return nameMatches || cnpjMatches || phoneMatches;
+    }).toList();
+  }
+
   Object? _error;
   Object? get error => _error;
 

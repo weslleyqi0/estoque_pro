@@ -52,38 +52,56 @@ class _SuppliersPageState extends State<SuppliersPage> {
       body: ListenableBuilder(
         listenable: _viewModel,
         builder: (context, _) {
-          if (_viewModel.state == SuppliersLoadState.loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (_viewModel.state == SuppliersLoadState.failure) {
-            return Center(child: Text(_viewModel.error.toString()));
-          }
-
-          if (_viewModel.suppliers.isEmpty) {
-            return AppEmptyList(
-              message: 'Nenhum fornecedor cadastrado!\nClique no botão abaixo para cadastrar um novo fornecedor.',
-              icon: Symbols.local_shipping_rounded,
-              iconColor: Colors.cyan,
-              iconSize: AppSpacing.icon48,
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.only(
-              left: AppSpacing.space16,
-              right: AppSpacing.space16,
-              bottom: AppSpacing.space32,
-            ),
-            itemCount: _viewModel.suppliers.length,
-
-            itemBuilder: (context, index) {
-              final supplier = _viewModel.suppliers[index];
-
-              return SuppliersItem(
-                supplier: supplier,
-              );
-            },
+          return CustomScrollView(
+            slivers: [
+              AppFloatingSearch(
+                hint: 'Pesquisar fornecedor...',
+                onChanged: _viewModel.setSearchQuery,
+              ),
+              if (_viewModel.state == SuppliersLoadState.loading)
+                const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_viewModel.state == SuppliersLoadState.failure)
+                SliverFillRemaining(
+                  child: Center(child: Text(_viewModel.error.toString())),
+                )
+              else if (_viewModel.suppliers.isEmpty)
+                SliverFillRemaining(
+                  child: AppEmptyList(
+                    message: 'Nenhum fornecedor cadastrado!\nClique no botão abaixo para cadastrar um novo fornecedor.',
+                    icon: Symbols.local_shipping_rounded,
+                    iconColor: Colors.cyan,
+                    iconSize: AppSpacing.icon48,
+                  ),
+                )
+              else if (_viewModel.filteredSuppliers.isEmpty)
+                const SliverFillRemaining(
+                  child: AppEmptyList(
+                    message: 'Nenhum fornecedor encontrado para essa pesquisa.',
+                    icon: Symbols.search_off_rounded,
+                    iconColor: Colors.grey,
+                    iconSize: AppSpacing.icon48,
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.only(
+                    left: AppSpacing.space16,
+                    right: AppSpacing.space16,
+                    bottom: AppSpacing.space32,
+                  ),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final supplier = _viewModel.filteredSuppliers[index];
+                        return SuppliersItem(supplier: supplier);
+                      },
+                      childCount: _viewModel.filteredSuppliers.length,
+                    ),
+                  ),
+                ),
+            ],
           );
         },
       ),
