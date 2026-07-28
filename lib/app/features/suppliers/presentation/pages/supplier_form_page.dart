@@ -90,11 +90,13 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
         actions: [
           AppIconButton(
             icon: Symbols.save_rounded,
+            tooltip: 'Salvar',
             onPressed: () => _save(),
           ),
           if (_currentSupplier != null)
             AppIconButton(
               icon: Symbols.delete,
+              tooltip: 'Excluir',
               onPressed: () => _delete(),
             ),
           const Gap(AppSpacing.space4),
