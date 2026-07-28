@@ -63,23 +63,32 @@ class SuppliersRepositoryImpl implements SuppliersRepository {
   @override
   Future<void> save(SupplierEntity supplier) async {
     final model = SupplierModel.fromEntity(supplier);
-    _firebaseDb.addOrUpdate(model.toMap()).catchError((e) {
-      debugPrint('---> Suppliers: Erro ao salvar no Firebase em background: $e');
-    });
+    try {
+      await _firebaseDb.addOrUpdate(model.toMap());
+    } catch (e) {
+      debugPrint('---> Suppliers: Erro ao salvar no Firebase: $e');
+      rethrow;
+    }
   }
 
   @override
   Future<void> update(SupplierEntity supplier) async {
     final model = SupplierModel.fromEntity(supplier);
-    _firebaseDb.update(supplier.id, model.toMap()).catchError((e) {
-      debugPrint('---> Suppliers: Erro ao salvar no Firebase em background: $e');
-    });
+    try {
+      await _firebaseDb.update(supplier.id, model.toMap());
+    } catch (e) {
+      debugPrint('---> Suppliers: Erro ao atualizar no Firebase: $e');
+      rethrow;
+    }
   }
 
   @override
   Future<void> delete(String id) async {
-    _firebaseDb.delete(id).catchError((e) {
-      debugPrint('---> Suppliers: Erro ao deletar no Firebase em background: $e');
-    });
+    try {
+      await _firebaseDb.delete(id);
+    } catch (e) {
+      debugPrint('---> Suppliers: Erro ao deletar no Firebase: $e');
+      rethrow;
+    }
   }
 }
