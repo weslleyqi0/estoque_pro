@@ -39,14 +39,10 @@ class _SuppliersPageState extends State<SuppliersPage> {
         title: const Text('Fornecedores'),
       ),
 
-      floatingActionButton: FloatingActionButton.large(
+      floatingActionButton: AppFloatingActionButton(
+        tooltip: 'Adicionar novo fornecedor',
+        icon: Symbols.add_rounded,
         onPressed: () => context.push(AppRoutes.supplierForm),
-        child: const Icon(
-          Symbols.add_rounded,
-          color: AppColors.white,
-          size: AppSpacing.icon48,
-          weight: 600,
-        ),
       ),
 
       body: ListenableBuilder(
