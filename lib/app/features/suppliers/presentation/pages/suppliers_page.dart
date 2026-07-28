@@ -53,6 +53,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
         listenable: _viewModel,
         builder: (context, _) {
           return CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               AppFloatingSearch(
                 hint: 'Pesquisar fornecedor...',
