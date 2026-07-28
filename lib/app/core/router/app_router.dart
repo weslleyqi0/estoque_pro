@@ -7,6 +7,9 @@ import 'package:estoque_pro/app/features/auth/presentation/pages/login_page.dart
 import 'package:estoque_pro/app/features/auth/presentation/pages/unauthorized_page.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
+import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
+import 'package:estoque_pro/app/features/categories/presentation/pages/categories_page.dart';
+import 'package:estoque_pro/app/features/categories/presentation/pages/category_form_page.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_form_page.dart';
@@ -92,6 +95,17 @@ class AppRouter {
         builder: (context, state) {
           final supplier = state.extra as SupplierEntity?;
           return SupplierFormPage(supplier: supplier);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.categories,
+        builder: (context, state) => const CategoriesPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.categoryForm,
+        builder: (context, state) {
+          final category = state.extra as CategoryEntity?;
+          return CategoryFormPage(category: category);
         },
       ),
       GoRoute(

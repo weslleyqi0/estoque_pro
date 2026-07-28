@@ -96,4 +96,11 @@ void setupServiceLocator() {
   getIt.registerFactory<SuppliersFormViewmodel>(
     () => SuppliersFormViewmodel(getIt<SuppliersRepository>()),
   );
+
+  getIt.registerFactory<CategoriesViewModel>(
+    () => CategoriesViewModel(getIt<CategoriesRepository>()),
+  );
+  getIt.registerFactory<CategoriesFormViewmodel>(
+    () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
+  );
 }
