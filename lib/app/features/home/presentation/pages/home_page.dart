@@ -109,7 +109,7 @@ class HomePage extends StatelessWidget {
                       subTitle: 'Organizar produtos',
                       color: Colors.deepPurple,
                       icon: Symbols.stacks_rounded,
-                      onPressed: () {},
+                      onPressed: () => context.push(AppRoutes.categories),
                     ),
                     HomeButton(
                       title: 'Fornecedores',

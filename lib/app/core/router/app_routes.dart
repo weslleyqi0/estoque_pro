@@ -9,4 +9,7 @@ class AppRoutes {
 
   static const suppliers = '/suppliers';
   static const supplierForm = '/suppliers/:id';
+
+  static const categories = '/categories';
+  static const categoryForm = '/categories/:id';
 }

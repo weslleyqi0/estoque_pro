@@ -18,6 +18,7 @@ export 'src/buttons/app_floating_action_button.dart';
 // Input exports
 export 'src/inputs/app_dropdown.dart';
 export 'src/inputs/app_floating_search.dart';
+export 'src/inputs/app_icon_picker.dart';
 export 'src/inputs/app_textfield.dart';
 
 // Swicths exports
