@@ -11,6 +11,7 @@ class AppTheme {
   static ThemeData get light => ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
+    scaffoldBackgroundColor: AppColors.backgroundLight,
 
     // Color Scheme
     colorScheme: const ColorScheme.light(
@@ -89,8 +90,9 @@ class AppTheme {
     // App Bar Theme
     appBarTheme: AppBarTheme(
       elevation: 0,
-      centerTitle: false,
-      backgroundColor: AppColors.surfaceLight,
+      centerTitle: true,
+      surfaceTintColor: AppColors.transparent,
+      backgroundColor: AppColors.backgroundLight,
       foregroundColor: AppColors.textPrimaryLight,
       titleTextStyle: AppTypography.titleLarge.copyWith(
         color: AppColors.textPrimaryLight,
@@ -242,7 +244,7 @@ class AppTheme {
     // App Bar Theme
     appBarTheme: AppBarTheme(
       elevation: 0,
-      centerTitle: false,
+      centerTitle: true,
       backgroundColor: AppColors.surfaceDark,
       foregroundColor: AppColors.textPrimaryDark,
       titleTextStyle: AppTypography.titleLarge.copyWith(

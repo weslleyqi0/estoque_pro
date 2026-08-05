@@ -70,7 +70,7 @@ class AppSpacing {
   static const double appBarHeight = 56.0;
   static const double bottomNavHeight = 56.0;
 
-  static const double cardElevation = 2.0;
+  static const double cardElevation = 0.01;
   static const double darkCardElevation = 8.0;
   static const double dialogElevation = 24.0;
 
