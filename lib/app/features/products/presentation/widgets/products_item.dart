@@ -29,7 +29,7 @@ class ProductsItem extends StatelessWidget {
     } else if (rawProgress < 0.75) {
       statusColor = AppColors.success;
     } else {
-      statusColor = AppColors.primary;
+      statusColor = AppColors.info;
     }
 
     final textColor = !product.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
@@ -44,133 +44,152 @@ class ProductsItem extends StatelessWidget {
       ),
       elevation: 0,
       child: InkWell(
-        borderRadius: BorderRadius.circular(AppSpacing.space16),
+        borderRadius: BorderRadius.circular(AppSpacing.radius16),
         overlayColor: WidgetStateProperty.all(statusColor.withValues(alpha: 0.1)),
         onTap: () {
           context.push(AppRoutes.productForm, extra: product);
         },
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.space12),
-          child: Row(
+          padding: const .all(AppSpacing.space8),
+          child: Column(
             children: [
-              Container(
-                height: 110,
-                width: 110,
-                decoration: BoxDecoration(
-                  color: context.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppSpacing.space16),
-                ),
-                clipBehavior: Clip.hardEdge,
-                child: product.imgUrl.isNotEmpty
-                    ? Image.network(
-                        product.imgUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Icon(
-                          Symbols.package_2_rounded,
-                          size: AppSpacing.icon64,
-                          weight: 300,
-                          color: context.colorScheme.onSurface.withValues(alpha: 0.5),
-                        ),
-                      )
-                    : Icon(
-                        Symbols.package_2_rounded,
-                        size: AppSpacing.icon64,
-                        weight: 300,
-                        color: context.colorScheme.onSurface.withValues(alpha: 0.5),
-                      ),
-              ),
-              const Gap(AppSpacing.space16),
-              Expanded(
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                product.name,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.titleLarge?.copyWith(color: textColor),
-                              ),
-                              Text(
-                                product.categories.isEmpty
-                                    ? 'Sem categoria'
-                                    : product.categories.map((category) => category.name).join(', '),
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.bodySmall?.copyWith(
-                                  color: textColor,
-                                  height: 0.9,
-                                ),
-                              ),
-                              Row(
-                                crossAxisAlignment: .center,
-                                children: [
-                                  Text(
-                                    'R\$ ',
-                                    style: context.textTheme.bodyLarge?.copyWith(
-                                      color: textColor?.withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                  Text(
-                                    CurrencyInputFormatter.formatDouble(product.price),
-                                    style: context.textTheme.headlineMedium?.copyWith(
-                                      color: textColor?.withValues(alpha: 0.5),
-                                      fontWeight: FontWeight.w900,
-                                      height: 0.9,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+              Row(
+                crossAxisAlignment: .start,
+                children: [
+                  Container(
+                    height: 80,
+                    width: 80,
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.surfaceContainerHighest,
+                      borderRadius: AppSpacing.borderRadius16,
                     ),
-                    Column(
+                    foregroundDecoration: BoxDecoration(
+                      borderRadius: AppSpacing.borderRadius16,
+                      border: Border.all(
+                        color: context.colorScheme.outline,
+                        width: 0.5,
+                      ),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: product.imgUrl.isNotEmpty
+                        ? Image.network(
+                            product.imgUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Symbols.package_2_rounded,
+                              size: AppSpacing.icon64,
+                              weight: 300,
+                              color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+                            ),
+                          )
+                        : Icon(
+                            Symbols.package_2_rounded,
+                            size: AppSpacing.icon64,
+                            weight: 300,
+                            color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                  ),
+                  const Gap(AppSpacing.space16),
+                  Expanded(
+                    child: Column(
                       children: [
                         Row(
-                          mainAxisAlignment: .spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Text(
-                                  'Estoque: ${product.stock}',
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    color: rawProgress < 0.50 ? statusColor : null,
-                                    fontWeight: rawProgress < 0.50 ? FontWeight.bold : null,
-                                  ),
+                            Expanded(
+                              child: SizedBox(
+                                height: 80,
+                                child: Column(
+                                  mainAxisAlignment: .spaceBetween,
+                                  crossAxisAlignment: .start,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: .start,
+                                      children: [
+                                        Text(
+                                          product.name,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: context.textTheme.titleMedium?.copyWith(color: textColor),
+                                        ),
+                                        Text(
+                                          product.categories.isEmpty
+                                              ? 'Sem categoria'
+                                              : product.categories.map((category) => category.name).join(', '),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: context.textTheme.labelMedium?.copyWith(
+                                            color: textColor,
+                                            height: 0.9,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      crossAxisAlignment: .center,
+                                      children: [
+                                        Text(
+                                          'R\$ ',
+                                          style: context.textTheme.bodyLarge?.copyWith(
+                                            color: textColor?.withValues(alpha: 0.3),
+                                          ),
+                                        ),
+                                        Text(
+                                          CurrencyInputFormatter.formatDouble(product.price),
+                                          style: context.textTheme.headlineLarge?.copyWith(
+                                            color: textColor?.withValues(alpha: 0.5),
+                                            fontWeight: FontWeight.w900,
+                                            height: 0.9,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                if (rawProgress < 0.50) ...[
-                                  const Gap(AppSpacing.space4),
-                                  Icon(
-                                    rawProgress < 0.25 ? Symbols.cancel_rounded : Symbols.info_rounded,
-                                    size: AppSpacing.icon16,
-                                    color: statusColor,
-                                    weight: 900,
-                                  ),
-                                ],
-                              ],
-                            ),
-                            Text(
-                              'Min: ${product.minStock}',
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                color: rawProgress < 0.50 ? statusColor : null,
-                                fontWeight: rawProgress < 0.50 ? FontWeight.bold : null,
                               ),
                             ),
                           ],
                         ),
-                        LinearProgressIndicator(
-                          value: progressValue,
-                          borderRadius: AppSpacing.borderRadius4,
-                          backgroundColor: statusColor.withValues(alpha: 0.2),
-                          color: statusColor,
-                          minHeight: 8,
+                      ],
+                    ),
+                  ),
+                  if (rawProgress < 0.50) ...[
+                    Icon(
+                      product.stock <= 0 ? Symbols.cancel_rounded : Symbols.info_rounded,
+                      size: AppSpacing.icon24,
+                      color: statusColor,
+                      weight: 900,
+                    ),
+                  ],
+                ],
+              ),
+              const Gap(AppSpacing.space4),
+              Padding(
+                padding: const .symmetric(horizontal: AppSpacing.space4),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: .spaceBetween,
+                      children: [
+                        Text(
+                          'Estoque: ${product.stock}',
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: rawProgress < 0.50 ? statusColor : null,
+                            fontWeight: rawProgress < 0.50 ? FontWeight.bold : null,
+                          ),
+                        ),
+                        Text(
+                          'Min: ${product.minStock}',
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: rawProgress < 0.50 ? statusColor : null,
+                            fontWeight: rawProgress < 0.50 ? FontWeight.bold : null,
+                          ),
                         ),
                       ],
+                    ),
+                    LinearProgressIndicator(
+                      value: progressValue,
+                      borderRadius: AppSpacing.borderRadius4,
+                      backgroundColor: statusColor.withValues(alpha: 0.2),
+                      color: statusColor,
+                      minHeight: 8,
                     ),
                   ],
                 ),

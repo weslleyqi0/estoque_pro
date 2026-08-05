@@ -50,8 +50,8 @@ class ProductsListSliver extends StatelessWidget {
 
     return SliverPadding(
       padding: const EdgeInsets.only(
-        left: AppSpacing.space16,
-        right: AppSpacing.space16,
+        left: AppSpacing.space8,
+        right: AppSpacing.space8,
         bottom: AppSpacing.space32,
       ),
       sliver: SliverList(
