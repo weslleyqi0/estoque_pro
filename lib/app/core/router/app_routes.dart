@@ -14,4 +14,5 @@ class AppRoutes {
   static const categoryForm = '/categories/:id';
 
   static const products = '/products';
+  static const productForm = '/products/:id';
 }

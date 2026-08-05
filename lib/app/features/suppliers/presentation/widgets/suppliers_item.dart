@@ -8,10 +8,14 @@ import 'package:material_symbols_icons/symbols.dart';
 
 class SuppliersItem extends StatelessWidget {
   final SupplierEntity supplier;
+  final VoidCallback? onTap;
+  final bool showProductsTag;
 
   const SuppliersItem({
     super.key,
     required this.supplier,
+    this.onTap,
+    this.showProductsTag = true,
   });
 
   @override
@@ -20,9 +24,8 @@ class SuppliersItem extends StatelessWidget {
     return Padding(
       padding: const .symmetric(vertical: AppSpacing.space4),
       child: InkWell(
-        onTap: () => context.push(AppRoutes.supplierForm, extra: supplier),
+        onTap: onTap ?? () => context.push(AppRoutes.supplierForm, extra: supplier),
         borderRadius: AppSpacing.borderRadius12,
-        //overlayColor: WidgetStateProperty.all(color.withValues(alpha: 0.1)),
         child: Container(
           padding: const .all(AppSpacing.space12),
           decoration: BoxDecoration(
@@ -104,11 +107,12 @@ class SuppliersItem extends StatelessWidget {
                             ),
                           ],
                         ),
-                        AppTag(
-                          title: '5 produtos',
-                          icon: Symbols.package_2_rounded,
-                          color: context.colorScheme.primary,
-                        ),
+                        if (showProductsTag)
+                          AppTag(
+                            title: '5 produtos',
+                            icon: Symbols.package_2_rounded,
+                            color: context.colorScheme.primary,
+                          ),
                       ],
                     ),
                   ],

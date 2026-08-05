@@ -4,14 +4,14 @@ import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_enti
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
 import 'package:flutter/foundation.dart';
 
-enum SuppliersLoadState { indle, loading, success, failure }
+enum SuppliersLoadState { idle, loading, success, failure }
 
 class SuppliersViewModel extends ChangeNotifier {
   final SuppliersRepository _repository;
 
   StreamSubscription<List<SupplierEntity>>? _subscription;
 
-  SuppliersLoadState _state = SuppliersLoadState.indle;
+  SuppliersLoadState _state = SuppliersLoadState.idle;
   SuppliersLoadState get state => _state;
 
   List<SupplierEntity> _suppliers = [];
@@ -27,28 +27,28 @@ class SuppliersViewModel extends ChangeNotifier {
 
   List<SupplierEntity> get filteredSuppliers {
     if (_searchQuery.trim().isEmpty) return _suppliers;
-    
+
     final query = _searchQuery.toLowerCase().trim();
     final queryDigits = query.replaceAll(RegExp(r'\D'), '');
     final isSearchingNumbers = queryDigits.isNotEmpty;
 
     return _suppliers.where((supplier) {
       final nameMatches = supplier.name.toLowerCase().contains(query);
-      
+
       var cnpjMatches = false;
       var phoneMatches = false;
-      
+
       if (isSearchingNumbers) {
         final cnpjDigits = supplier.cnpj?.replaceAll(RegExp(r'\D'), '') ?? '';
         final phoneDigits = supplier.phone?.replaceAll(RegExp(r'\D'), '') ?? '';
-        
+
         cnpjMatches = cnpjDigits.contains(queryDigits);
         phoneMatches = phoneDigits.contains(queryDigits);
       } else {
         cnpjMatches = supplier.cnpj?.toLowerCase().contains(query) ?? false;
         phoneMatches = supplier.phone?.toLowerCase().contains(query) ?? false;
       }
-      
+
       return nameMatches || cnpjMatches || phoneMatches;
     }).toList();
   }
