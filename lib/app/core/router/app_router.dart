@@ -11,6 +11,7 @@ import 'package:estoque_pro/app/features/categories/domain/entities/category_ent
 import 'package:estoque_pro/app/features/categories/presentation/pages/categories_page.dart';
 import 'package:estoque_pro/app/features/categories/presentation/pages/category_form_page.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
+import 'package:estoque_pro/app/features/products/presentation/pages/products_page.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_form_page.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/suppliers_page.dart';
@@ -107,6 +108,10 @@ class AppRouter {
           final category = state.extra as CategoryEntity?;
           return CategoryFormPage(category: category);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.products,
+        builder: (context, state) => const ProductsPage(),
       ),
       GoRoute(
         path: AppRoutes.inactive,

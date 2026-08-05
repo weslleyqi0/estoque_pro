@@ -94,7 +94,7 @@ class HomePage extends StatelessWidget {
                       subTitle: 'Gerenciar Catalogo',
                       color: AppColors.primary,
                       icon: Symbols.lists_rounded,
-                      onPressed: () {},
+                      onPressed: () => context.push(AppRoutes.products),
                     ),
                     HomeButton(
                       title: 'Vendas',
