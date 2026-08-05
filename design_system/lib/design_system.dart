@@ -29,6 +29,7 @@ export 'src/tags/app_tag.dart';
 
 // Dialog exports
 export 'src/dialogs/app_bottom_sheet.dart';
+export 'src/dialogs/app_dialog.dart';
 
 // Component exports
 export 'src/empty/app_empty_list.dart';

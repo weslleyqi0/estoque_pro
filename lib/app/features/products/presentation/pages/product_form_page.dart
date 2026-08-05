@@ -108,9 +108,22 @@ class _ProductFormPageState extends State<ProductFormPage> {
   }
 
   Future<void> _delete() async {
-    final success = await _viewModel.deleteCurrentProduct();
-    if (success && mounted) {
-      context.pop();
+    final confirm = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Excluir Produto',
+      content: 'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.',
+      confirmLabel: 'Excluir',
+      isDestructive: true,
+    );
+
+    if (confirm == true) {
+      final success = await _viewModel.deleteCurrentProduct();
+      if (success && mounted) {
+        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Produto excluído com sucesso!')),
+        );
+      }
     }
   }
 
