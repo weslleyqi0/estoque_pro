@@ -35,7 +35,6 @@ class _SuppliersPageState extends State<SuppliersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: const Text('Fornecedores'),
       ),
 
@@ -84,8 +83,8 @@ class _SuppliersPageState extends State<SuppliersPage> {
               else
                 SliverPadding(
                   padding: const EdgeInsets.only(
-                    left: AppSpacing.space16,
-                    right: AppSpacing.space16,
+                    left: AppSpacing.space8,
+                    right: AppSpacing.space8,
                     bottom: AppSpacing.space32,
                   ),
                   sliver: SliverList(
