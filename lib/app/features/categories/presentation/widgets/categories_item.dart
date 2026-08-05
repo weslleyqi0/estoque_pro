@@ -20,21 +20,12 @@ class CategoriesItem extends StatelessWidget {
     final categoryColor = category.color != null ? Color(category.color!) : context.colorScheme.primary;
     final iconColor = categoryColor;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.space4),
+    return Card(
       child: InkWell(
         onTap: () => context.push(AppRoutes.categoryForm, extra: category),
         borderRadius: AppSpacing.borderRadius12,
-        child: Container(
+        child: Padding(
           padding: const .all(AppSpacing.space12),
-          decoration: BoxDecoration(
-            borderRadius: AppSpacing.borderRadius12,
-            color: context.colorScheme.outline.withValues(alpha: 0.4),
-            border: Border.all(
-              color: context.colorScheme.outline,
-              width: 1,
-            ),
-          ),
           child: Row(
             children: [
               Container(

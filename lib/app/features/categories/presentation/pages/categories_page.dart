@@ -35,7 +35,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: const Text('Categorias'),
       ),
 
@@ -85,8 +84,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
               else
                 SliverPadding(
                   padding: const EdgeInsets.only(
-                    left: AppSpacing.space16,
-                    right: AppSpacing.space16,
+                    left: AppSpacing.space8,
+                    right: AppSpacing.space8,
                     bottom: AppSpacing.space32,
                   ),
                   sliver: SliverList(
