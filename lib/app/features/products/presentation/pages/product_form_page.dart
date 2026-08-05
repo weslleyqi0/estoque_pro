@@ -167,7 +167,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   child: url.isNotEmpty
                       ? Image.network(
                           url,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) => const Center(
                             child: Icon(Symbols.broken_image_rounded, size: 48),
                           ),

@@ -59,6 +59,8 @@ class AppSpacing {
   static const double icon32 = 32.0;
   static const double icon40 = 40.0;
   static const double icon48 = 48.0;
+  static const double icon56 = 56.0;
+  static const double icon64 = 64.0;
 
   // Common Dimensions
   static const double buttonHeightLg = 60.0;
