@@ -14,6 +14,7 @@ import 'package:estoque_pro/app/features/categories/presentation/viewmodels/cate
 import 'package:estoque_pro/app/features/products/data/repositories/products_repository_impl.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
@@ -112,5 +113,9 @@ void setupServiceLocator() {
   );
   getIt.registerFactory<CategoriesFormViewmodel>(
     () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
+  );
+
+  getIt.registerFactory<ProductsFormViewModel>(
+    () => ProductsFormViewModel(getIt<ProductsRepository>()),
   );
 }
