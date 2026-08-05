@@ -28,11 +28,13 @@ class AppTextfield extends StatefulWidget {
   final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
   final IconData? prefixIcon;
+  final VoidCallback? onPrefixIconPressed;
   final IconData? suffixIcon;
   final VoidCallback? onSuffixIconPressed;
   final bool showPasswordToggle;
   final bool showCharacterCounter;
   final FocusNode? focusNode;
+  final TextAlign textAlign;
 
   const AppTextfield({
     super.key,
@@ -59,11 +61,13 @@ class AppTextfield extends StatefulWidget {
     this.textInputAction,
     this.inputFormatters,
     this.prefixIcon,
+    this.onPrefixIconPressed,
     this.suffixIcon,
     this.onSuffixIconPressed,
     this.showPasswordToggle = false,
     this.showCharacterCounter = false,
     this.focusNode,
+    this.textAlign = TextAlign.start,
   });
 
   @override
@@ -108,11 +112,17 @@ class _AppTextfieldState extends State<AppTextfield> {
   Widget build(BuildContext context) {
     Widget? prefixIconWidget;
     if (widget.prefixIcon != null) {
-      prefixIconWidget = Icon(
-        widget.prefixIcon,
-        size: AppSpacing.icon20,
-        color: _isFocused ? context.colorScheme.primary : context.colorScheme.onSurface.withValues(alpha: 0.6),
-      );
+      prefixIconWidget = widget.onPrefixIconPressed != null
+          ? IconButton(
+              icon: Icon(widget.prefixIcon, size: AppSpacing.icon20),
+              onPressed: widget.onPrefixIconPressed,
+              color: _isFocused ? context.colorScheme.primary : context.colorScheme.onSurface.withValues(alpha: 0.6),
+            )
+          : Icon(
+              widget.prefixIcon,
+              size: AppSpacing.icon20,
+              color: _isFocused ? context.colorScheme.primary : context.colorScheme.onSurface.withValues(alpha: 0.6),
+            );
     }
 
     Widget? suffixIconWidget;
@@ -161,6 +171,7 @@ class _AppTextfieldState extends State<AppTextfield> {
           onFieldSubmitted: widget.onSubmitted,
           validator: widget.validator,
           obscureText: _obscureText,
+          textAlign: widget.textAlign,
           enabled: widget.enabled,
           readOnly: widget.readOnly,
           maxLines: widget.obscureText ? 1 : widget.maxLines,
