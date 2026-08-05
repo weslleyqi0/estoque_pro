@@ -37,6 +37,17 @@ class ProductsListSliver extends StatelessWidget {
       );
     }
 
+    if (viewModel.filteredProducts.isEmpty) {
+      return const SliverFillRemaining(
+        child: AppEmptyList(
+          message: 'Nenhum produto encontrado para essa pesquisa.',
+          icon: Symbols.search_off_rounded,
+          iconColor: Colors.grey,
+          iconSize: AppSpacing.icon48,
+        ),
+      );
+    }
+
     return SliverPadding(
       padding: const EdgeInsets.only(
         left: AppSpacing.space16,
@@ -46,10 +57,10 @@ class ProductsListSliver extends StatelessWidget {
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            final product = viewModel.products[index];
+            final product = viewModel.filteredProducts[index];
             return ProductsItem(product: product);
           },
-          childCount: viewModel.products.length,
+          childCount: viewModel.filteredProducts.length,
         ),
       ),
     );

@@ -17,6 +17,26 @@ class ProductsViewModel extends ChangeNotifier {
   List<ProductEntity> _products = [];
   List<ProductEntity> get products => _products;
 
+  String _searchQuery = '';
+  String get searchQuery => _searchQuery;
+
+  bool get hasLowStock => _products.any((p) => p.stock < p.minStock && p.isActive);
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  List<ProductEntity> get filteredProducts {
+    if (_searchQuery.trim().isEmpty) return _products;
+
+    final query = _searchQuery.toLowerCase().trim();
+
+    return _products.where((product) {
+      return product.name.toLowerCase().contains(query);
+    }).toList();
+  }
+
   Object? _error;
   Object? get error => _error;
 

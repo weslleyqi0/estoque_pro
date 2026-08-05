@@ -42,6 +42,11 @@ class _ProductsPageState extends State<ProductsPage> {
           return CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
+              if (_viewModel.products.isNotEmpty)
+                AppFloatingSearch(
+                  hint: 'Pesquisar produto...',
+                  onChanged: _viewModel.setSearchQuery,
+                ),
               ProductsListSliver(viewModel: _viewModel),
             ],
           );
