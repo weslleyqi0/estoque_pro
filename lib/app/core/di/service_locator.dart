@@ -1,8 +1,13 @@
-import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
+import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
+import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
+import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
+import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_form_viewmodel.dart';
+import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_viewmodel.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
@@ -15,13 +20,9 @@ import 'package:estoque_pro/app/features/products/data/repositories/products_rep
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
-import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
-import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
-import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
-import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_form_viewmodel.dart';
-import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_viewmodel.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/data/repositories/users_repository_impl.dart';
-import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -115,6 +116,9 @@ void setupServiceLocator() {
     () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
   );
 
+  getIt.registerLazySingleton<ProductsViewModel>(
+    () => ProductsViewModel(getIt<ProductsRepository>()),
+  );
   getIt.registerFactory<ProductsFormViewModel>(
     () => ProductsFormViewModel(getIt<ProductsRepository>()),
   );
