@@ -35,19 +35,11 @@ class ProductsItem extends StatelessWidget {
     final textColor = !product.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
 
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.space16),
-        side: BorderSide(
-          color: rawProgress < 0.50 ? statusColor : context.colorScheme.outline,
-          width: 0.8,
-        ),
-      ),
-      elevation: 0,
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radius16),
         overlayColor: WidgetStateProperty.all(statusColor.withValues(alpha: 0.1)),
         onTap: () {
-          context.push(AppRoutes.productForm, extra: product);
+          context.push(AppRoutes.productDetails, extra: product);
         },
         child: Padding(
           padding: const .all(AppSpacing.space8),
@@ -60,7 +52,7 @@ class ProductsItem extends StatelessWidget {
                     height: 80,
                     width: 80,
                     decoration: BoxDecoration(
-                      color: context.colorScheme.surfaceContainerHighest,
+                      color: context.colorScheme.onSurface.withValues(alpha: 0.05),
                       borderRadius: AppSpacing.borderRadius16,
                     ),
                     foregroundDecoration: BoxDecoration(
