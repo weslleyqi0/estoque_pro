@@ -120,7 +120,7 @@ void setupServiceLocator() {
     () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
   );
 
-  getIt.registerLazySingleton<ProductsViewModel>(
+  getIt.registerFactory<ProductsViewModel>(
     () => ProductsViewModel(getIt<ProductsRepository>()),
   );
   getIt.registerFactory<ProductsFormViewModel>(

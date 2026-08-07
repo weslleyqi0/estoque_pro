@@ -188,7 +188,7 @@ class ProductsItem extends StatelessWidget {
                     LinearProgressIndicator(
                       value: progressValue,
                       borderRadius: AppSpacing.borderRadius4,
-                      backgroundColor: context.colorScheme.outline,
+                      backgroundColor: context.colorScheme.outline.withValues(alpha: 0.5),
                       color: statusColor,
                       minHeight: 10,
                     ),
