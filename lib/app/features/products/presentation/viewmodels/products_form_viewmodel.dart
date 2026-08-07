@@ -72,7 +72,9 @@ class ProductsFormViewModel extends ChangeNotifier {
     required String barcode,
     required double price,
     required int minStock,
+    int initialStock = 0,
   }) async {
+    final finalStock = isEditing ? _stock : initialStock;
     final product = ProductEntity(
       id: _currentProduct?.id ?? '',
       name: name.trim(),
@@ -82,9 +84,9 @@ class ProductsFormViewModel extends ChangeNotifier {
       categories: _selectedCategories,
       supplier: _selectedSupplier,
       price: price,
-      stock: _stock,
+      stock: finalStock,
       minStock: minStock,
-      isActive: _stock == 0 ? false : _isActive,
+      isActive: finalStock == 0 ? false : (isEditing ? _isActive : true),
       history: _history,
       updatedAt: DateTime.now(),
     );

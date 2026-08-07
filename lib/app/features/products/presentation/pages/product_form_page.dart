@@ -37,6 +37,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
   final _barcodeController = TextEditingController();
   final _priceController = TextEditingController();
   final _minStockController = TextEditingController();
+  final _initialStockController = TextEditingController(text: '0');
 
   @override
   void initState() {
@@ -84,6 +85,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     _barcodeController.dispose();
     _priceController.dispose();
     _minStockController.dispose();
+    _initialStockController.dispose();
     super.dispose();
   }
 
@@ -100,6 +102,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
       barcode: _barcodeController.text,
       price: price,
       minStock: minStock,
+      initialStock: _initialStockController.text.toIntOr(),
     );
 
     if (success && mounted) {
@@ -215,24 +218,55 @@ class _ProductFormPageState extends State<ProductFormPage> {
             ),
             const Gap(AppSpacing.space16),
 
+            Expanded(
+              child: AppTextfield(
+                label: 'Preço (R\$)',
+                hint: '0,00',
+                required: true,
+                textAlign: TextAlign.center,
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [CurrencyInputFormatter()],
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) return 'Obrigatório';
+                  if (value.toDoubleOr() <= 0) return 'Inválido';
+                  return null;
+                },
+              ),
+            ),
+            const Gap(AppSpacing.space16),
+
             Row(
               children: [
-                Expanded(
-                  child: AppTextfield(
-                    label: 'Preço (R\$)',
-                    hint: '0,00',
-                    required: true,
-                    textAlign: TextAlign.center,
-                    controller: _priceController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [CurrencyInputFormatter()],
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Obrigatório';
-                      if (value.toDoubleOr() <= 0) return 'Inválido';
-                      return null;
-                    },
+                if (!_viewModel.isEditing) ...[
+                  Expanded(
+                    child: AppTextfield(
+                      label: 'Estoque Inicial',
+                      hint: '0',
+                      required: true,
+                      textAlign: TextAlign.center,
+                      controller: _initialStockController,
+                      keyboardType: TextInputType.number,
+                      prefixIcon: Symbols.remove,
+                      onPrefixIconPressed: () {
+                        int val = _initialStockController.text.toIntOr();
+                        if (val > 0) {
+                          _initialStockController.text = (val - 1).toString();
+                        }
+                      },
+                      suffixIcon: Symbols.add,
+                      onSuffixIconPressed: () {
+                        int val = _initialStockController.text.toIntOr();
+                        _initialStockController.text = (val + 1).toString();
+                      },
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) return 'Obrigatório';
+                        if (int.tryParse(value) == null) return 'Inválido';
+                        return null;
+                      },
+                    ),
                   ),
-                ),
+                ],
                 const Gap(AppSpacing.space16),
                 Expanded(
                   child: AppTextfield(
