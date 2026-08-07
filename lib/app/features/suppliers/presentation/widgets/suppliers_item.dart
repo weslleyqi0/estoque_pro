@@ -22,9 +22,14 @@ class SuppliersItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = !supplier.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
     return Card(
+      color: context.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppSpacing.borderRadius16,
+        side: BorderSide(color: context.colorScheme.outlineVariant),
+      ),
       child: InkWell(
         onTap: onTap ?? () => context.push(AppRoutes.supplierForm, extra: supplier),
-        borderRadius: AppSpacing.borderRadius12,
+        borderRadius: AppSpacing.borderRadius16,
         child: Padding(
           padding: const .all(AppSpacing.space12),
           child: Row(
