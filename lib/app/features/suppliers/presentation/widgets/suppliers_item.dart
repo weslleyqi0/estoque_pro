@@ -1,5 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
+import 'package:estoque_pro/app/core/utils/cnpj_input_formatter.dart';
+import 'package:estoque_pro/app/core/utils/phone_input_formatter.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -80,7 +82,7 @@ class SuppliersItem extends StatelessWidget {
                         ),
                         const Gap(AppSpacing.space4),
                         Text(
-                          supplier.cnpj ?? '',
+                          supplier.cnpj == null || supplier.cnpj!.isEmpty ? 'Não informado' : CnpjInputFormatter.formatString(supplier.cnpj!),
                           style: context.textTheme.labelLarge?.copyWith(color: color),
                         ),
                       ],
@@ -98,7 +100,7 @@ class SuppliersItem extends StatelessWidget {
                             ),
                             const Gap(AppSpacing.space4),
                             Text(
-                              supplier.phone ?? '',
+                              supplier.phone == null || supplier.phone!.isEmpty ? 'Não informado' : PhoneInputFormatter.formatString(supplier.phone!),
                               style: context.textTheme.labelLarge?.copyWith(color: color),
                             ),
                           ],
