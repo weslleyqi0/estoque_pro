@@ -1,18 +1,21 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
-import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
-import 'package:estoque_pro/app/features/products/presentation/widgets/info_row.dart';
+import 'package:estoque_pro/app/features/products/presentation/widgets/product_header_card.dart';
+import 'package:estoque_pro/app/features/products/presentation/widgets/product_history_card.dart';
+import 'package:estoque_pro/app/features/products/presentation/widgets/product_info_card.dart';
+import 'package:estoque_pro/app/features/products/presentation/widgets/product_status_card.dart';
+import 'package:estoque_pro/app/features/products/presentation/widgets/product_stock_status_card.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/stock_adjustment_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:intl/intl.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
@@ -60,9 +63,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       ProductHistoryEntity(
         action: action,
         quantity: quantity,
+        oldStock: product.stock,
+        newStock: newStock,
         date: DateTime.now(),
         note: note,
         userName: currentUser?.name,
+        isNew: true,
       ),
       ...product.history,
     ];
@@ -140,323 +146,33 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           body: ListView(
             padding: const .all(AppSpacing.space16),
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 130,
-                    width: 130,
-                    decoration: BoxDecoration(
-                      color: context.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppSpacing.space16),
-                    ),
-                    foregroundDecoration: BoxDecoration(
-                      borderRadius: AppSpacing.borderRadius16,
-                      border: Border.all(color: context.colorScheme.outline, width: 1),
-                    ),
-                    clipBehavior: Clip.hardEdge,
-                    child: product.imgUrl.isNotEmpty
-                        ? Image.network(
-                            product.imgUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => const Center(
-                              child: Icon(Symbols.broken_image_rounded, size: 48),
-                            ),
-                          )
-                        : const Center(
-                            child: Icon(Symbols.image_rounded, size: 48),
-                          ),
-                  ),
-                  const Gap(AppSpacing.space12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 130,
-                      child: Column(
-                        mainAxisAlignment: .spaceBetween,
-                        crossAxisAlignment: .start,
-                        children: [
-                          Text(
-                            product.name,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 3,
-                            style: context.textTheme.titleLarge?.copyWith(),
-                          ),
-                          Text(
-                            'R\$ ${product.price.toStringAsFixed(2)}',
-                            style: context.textTheme.displaySmall?.copyWith(
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+              ProductHeaderCard(product: product),
+
+              ProductStatusCard(
+                product: product,
+                onStatusChanged: _adjustStatus,
               ),
               const Gap(AppSpacing.space16),
 
-              // Descrição
-              if (product.description.isNotEmpty) ...[
-                Text('Descrição', style: context.textTheme.titleMedium),
-                const Gap(AppSpacing.space8),
-                Text(product.description, style: context.textTheme.bodyMedium),
-                const Gap(AppSpacing.space16),
-              ],
-
-              // Status do Produto
-              Text('Status do Produto', style: context.textTheme.titleMedium),
-              const Gap(AppSpacing.space8),
-              Card(
-                color: context.colorScheme.surfaceContainerLow,
-                shape: RoundedRectangleBorder(
-                  borderRadius: AppSpacing.borderRadius16,
-                  side: BorderSide(color: context.colorScheme.outlineVariant),
-                ),
-                child: Padding(
-                  padding: const .all(AppSpacing.space12),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.space12),
-                        decoration: BoxDecoration(
-                          borderRadius: AppSpacing.borderRadius12,
-                          color: product.isActive
-                              ? AppColors.success.withValues(alpha: 0.1)
-                              : context.colorScheme.onSurface.withValues(alpha: 0.1),
-                        ),
-                        child: Icon(
-                          Symbols.power_settings_new_rounded,
-                          color: product.isActive
-                              ? AppColors.success
-                              : context.colorScheme.onSurface.withValues(alpha: 0.5),
-                          size: AppSpacing.icon32,
-                          weight: 900,
-                        ),
-                      ),
-                      const Gap(AppSpacing.space12),
-                      Flexible(
-                        child: AppSwitchTitle(
-                          title: product.isActive ? 'Produto Ativo' : 'Produto Desativado',
-                          subtitle: product.isActive ? 'Disponível para venda' : 'Indisponível para venda',
-                          value: product.isActive,
-                          onChanged: _adjustStatus,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              ProductStockStatusCard(
+                product: product,
+                statusText: statusText,
+                statusColor: statusColor,
+                statusIcon: statusIcon,
+                onAdjustPressed: () => StockAdjustmentBottomSheet.show(context, product, _adjustStock),
               ),
               const Gap(AppSpacing.space16),
 
-              // Status do Estoque
-              Text('Status do Estoque', style: context.textTheme.titleMedium),
-              const Gap(AppSpacing.space8),
-              Card(
-                elevation: 0,
-                color: statusColor.withValues(alpha: 0.1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: AppSpacing.borderRadius24,
-                  side: BorderSide(color: statusColor),
-                ),
-                borderOnForeground: true,
-                child: Padding(
-                  padding: const .all(AppSpacing.space12),
-                  child: Row(
-                    children: [
-                      Icon(
-                        statusIcon,
-                        color: statusColor,
-                        size: AppSpacing.icon40,
-                        weight: 500,
-                      ),
-                      const Gap(AppSpacing.space8),
-                      Flexible(
-                        child: Column(
-                          crossAxisAlignment: .start,
-                          children: [
-                            Text(
-                              statusText,
-                              style: context.textTheme.titleMedium?.copyWith(
-                                color: statusColor,
-                              ),
-                            ),
-                            Text(
-                              'Em estoque: ${product.stock} un. / Mínimo: ${product.minStock} un.',
-                              style: context.textTheme.bodySmall?.copyWith(
-                                color: context.colorScheme.onSurface.withValues(alpha: 0.8),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Gap(AppSpacing.space8),
-                      AppButton(
-                        onPressed: () => StockAdjustmentBottomSheet.show(context, product, _adjustStock),
-                        backgroundColor: AppColors.surfaceLight,
-                        borderRadius: AppSpacing.borderRadius24,
-                        child: Text(
-                          'Ajustar',
-                          style: context.textTheme.titleMedium?.copyWith(color: AppColors.textPrimaryLight),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              ProductInfoCard(
+                product: product,
+                rawProgress: rawProgress,
+                statusColor: statusColor,
               ),
               const Gap(AppSpacing.space16),
 
-              // Informações do Produto
-              Text('Informações do Produto', style: context.textTheme.titleMedium),
-              const Gap(AppSpacing.space8),
-              Card(
-                color: context.colorScheme.surfaceContainerLow,
-                shape: RoundedRectangleBorder(
-                  borderRadius: AppSpacing.borderRadius16,
-                  side: BorderSide(color: context.colorScheme.outlineVariant),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.space16),
-                  child: Column(
-                    children: [
-                      InfoRow(
-                        label: 'Código de Barras',
-                        value: product.barcode.isEmpty ? '-' : product.barcode,
-                      ),
-                      const Gap(AppSpacing.space12),
-                      InfoRow(
-                        label: 'Estoque Atual',
-                        value: '${product.stock} un.',
-                        warningColor: rawProgress < 0.50 ? statusColor : null,
-                      ),
-                      const Gap(AppSpacing.space12),
-                      InfoRow(
-                        label: 'Estoque Mínimo',
-                        value: '${product.minStock} un.',
-                      ),
-                      const Gap(AppSpacing.space12),
-                      InfoRow(
-                        label: 'Categorias',
-                        value: product.categories.isEmpty ? '-' : product.categories.map((c) => c.name).join(', '),
-                      ),
-                      const Gap(AppSpacing.space12),
-                      InfoRow(
-                        label: 'Fornecedor',
-                        value: product.supplier?.name ?? '-',
-                      ),
-                      if (product.updatedAt != null) ...[
-                        const Gap(AppSpacing.space12),
-                        InfoRow(
-                          label: 'Última Atualização',
-                          value: DateFormat('dd/MM/yyyy HH:mm').format(product.updatedAt!),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const Gap(AppSpacing.space16),
+              ProductHistoryCard(product: product),
 
-              // Histórico
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Histórico de Movimentações', style: context.textTheme.titleMedium),
-                  if (product.history.isNotEmpty)
-                    TextButton(
-                      //onPressed: () => context.push(AppRoutes.productHistory, extra: product),
-                      onPressed: () {},
-                      child: const Text('Ver Todos'),
-                    ),
-                ],
-              ),
-              const Gap(AppSpacing.space8),
-
-              if (product.history.isEmpty)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.space32),
-                    child: Text('Nenhuma movimentação registrada.'),
-                  ),
-                )
-              else
-                Builder(
-                  builder: (context) {
-                    final sortedHistory = List.from(product.history)..sort((a, b) => b.date.compareTo(a.date));
-
-                    return Column(
-                      children: sortedHistory.take(5).map<Widget>((h) {
-                        return Card(
-                          elevation: 0,
-                          color: context.colorScheme.surfaceContainerLowest,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: context.colorScheme.outlineVariant),
-                          ),
-                          child: ListTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: h.action == ProductHistoryAction.add
-                                    ? Colors.green.withValues(alpha: 0.1)
-                                    : Colors.red.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                h.action == ProductHistoryAction.add
-                                    ? Symbols.arrow_upward_rounded
-                                    : Symbols.arrow_downward_rounded,
-                                color: h.action == ProductHistoryAction.add ? Colors.green : Colors.red,
-                              ),
-                            ),
-                            title: Text(
-                              '${h.action == ProductHistoryAction.add ? "Entrada" : "Saída"} de ${h.quantity} un.',
-                              style: context.textTheme.titleSmall,
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      DateFormat('dd/MM/yyyy HH:mm').format(h.date),
-                                      style: context.textTheme.labelMedium?.copyWith(
-                                        color: context.colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                    if (h.userName != null && h.userName!.isNotEmpty) ...[
-                                      const Gap(AppSpacing.space8),
-                                      Icon(
-                                        Symbols.person_rounded,
-                                        size: 14,
-                                        color: context.colorScheme.onSurfaceVariant,
-                                      ),
-                                      const Gap(AppSpacing.space4),
-                                      Text(
-                                        h.userName!,
-                                        style: context.textTheme.labelMedium?.copyWith(
-                                          color: context.colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                if (h.note.isNotEmpty) ...[
-                                  const Gap(AppSpacing.space4),
-                                  Text(
-                                    h.note,
-                                    style: context.textTheme.bodySmall,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    );
-                  },
-                ),
-
-              const Gap(AppSpacing.space56), // Espaço pro FAB
+              const Gap(AppSpacing.space56),
             ],
           ),
         );
