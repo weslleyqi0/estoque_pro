@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   design_system:
     path: design_system
 
@@ -44,7 +46,7 @@ dependencies:
   firebase_database: 12.4.6
   flex_color_picker: 3.8.0
   equatable: 2.1.0
-  intl: 0.20.3
+  intl: 0.20.2
   local_auth: 3.0.2
   material_symbols_icons: 4.2951.0
   cached_network_image: 3.4.1

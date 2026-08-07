@@ -1,4 +1,5 @@
 import 'package:design_system/design_system.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_router.dart';
 import 'package:estoque_pro/firebase_options.dart';
@@ -27,6 +28,14 @@ class MyApp extends StatelessWidget {
       darkTheme: AppTheme.light,
       themeMode: ThemeMode.system,
       routerConfig: AppRouter.router,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+      ],
     );
   }
 }
