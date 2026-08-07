@@ -8,13 +8,13 @@ class AppRoutes {
   static const unauthorized = '/unauthorized';
 
   static const suppliers = '/suppliers';
-  static const supplierForm = '/suppliers/:id';
+  static const supplierForm = '/suppliers/form';
 
   static const categories = '/categories';
-  static const categoryForm = '/categories/:id';
+  static const categoryForm = '/categories/form';
 
   static const products = '/products';
-  static const productForm = '/products/:id';
-  static const productDetails = '/products/:id/details';
-  static const productHistory = '/products/:id/history';
+  static const productForm = '/products/form';
+  static const productDetails = '/products/details';
+  static const productHistory = '/products/history';
 }
