@@ -1,7 +1,9 @@
+import 'package:estoque_pro/app/core/utils/date_parser.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_category_model.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_history_model.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_supplier_model.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class ProductModel {
   final String id;
@@ -56,13 +58,7 @@ class ProductModel {
               ?.map((e) => ProductHistoryModel.fromMap(Map<dynamic, dynamic>.from(e as Map)))
               .toList() ??
           [],
-      updatedAt: map['updatedAt'] != null 
-          ? (map['updatedAt'] is int
-              ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
-              : (int.tryParse(map['updatedAt'].toString()) != null
-                  ? DateTime.fromMillisecondsSinceEpoch(int.parse(map['updatedAt'].toString()))
-                  : DateTime.tryParse(map['updatedAt'].toString())))
-          : null,
+      updatedAt: DateParser.parse(map['updatedAt']),
     );
   }
 
@@ -79,7 +75,7 @@ class ProductModel {
       'minStock': minStock,
       'isActive': isActive,
       'history': history.map((e) => e.toMap()).toList(),
-      if (updatedAt != null) 'updatedAt': updatedAt!.millisecondsSinceEpoch,
+      if (updatedAt != null) 'updatedAt': ServerValue.timestamp,
     };
   }
 

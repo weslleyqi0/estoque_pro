@@ -42,7 +42,8 @@ class FirebaseDatabaseService<T> {
       final dataWithId = {
         ...data,
         'id': newRef.key,
-        'createdAt': DateTime.now().toIso8601String(),
+        'createdAt': ServerValue.timestamp,
+        'updatedAt': ServerValue.timestamp,
       };
 
       await newRef.set(dataWithId);
@@ -54,7 +55,7 @@ class FirebaseDatabaseService<T> {
     return _handleError(() async {
       await _ref.child(key).update({
         ...data,
-        "updatedAt": DateTime.now().toIso8601String(),
+        "updatedAt": ServerValue.timestamp,
       });
     });
   }
