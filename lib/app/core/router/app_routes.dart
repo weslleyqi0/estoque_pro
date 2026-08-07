@@ -16,4 +16,5 @@ class AppRoutes {
   static const products = '/products';
   static const productForm = '/products/:id';
   static const productDetails = '/products/:id/details';
+  static const productHistory = '/products/:id/history';
 }

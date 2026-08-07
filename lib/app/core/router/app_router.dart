@@ -14,6 +14,7 @@ import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart'
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/product_details_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/product_form_page.dart';
+import 'package:estoque_pro/app/features/products/presentation/pages/product_history_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/products_page.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_form_page.dart';
@@ -128,6 +129,13 @@ class AppRouter {
         builder: (context, state) {
           final product = state.extra as ProductEntity;
           return ProductDetailsPage(product: product);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.productHistory,
+        builder: (context, state) {
+          final product = state.extra as ProductEntity;
+          return ProductHistoryPage(product: product);
         },
       ),
       GoRoute(

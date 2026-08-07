@@ -7,10 +7,12 @@ import 'package:material_symbols_icons/symbols.dart';
 
 class ProductHistoryItem extends StatelessWidget {
   final ProductHistoryEntity history;
+  final bool isLast;
 
   const ProductHistoryItem({
     super.key,
     required this.history,
+    this.isLast = false,
   });
 
   bool get _isPositive => history.newStock >= history.oldStock;
@@ -40,7 +42,7 @@ class ProductHistoryItem extends StatelessWidget {
         top: AppSpacing.space8,
       ),
       decoration: BoxDecoration(
-        border: BorderDirectional(
+        border: isLast ? null : BorderDirectional(
           bottom: BorderSide(color: context.colorScheme.outline, width: 1),
         ),
       ),
@@ -67,7 +69,7 @@ class ProductHistoryItem extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '${history.oldStock} ➝ ${history.newStock} unidades',
+                      '${history.oldStock} ➝ ${history.newStock} unidade${history.newStock == 1 ? '' : 's'}',
                       style: context.textTheme.titleMedium?.copyWith(
                         color: context.colorScheme.onSurface.withValues(alpha: 0.7),
                         height: 0.9,

@@ -170,7 +170,23 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               ),
               const Gap(AppSpacing.space16),
 
-              ProductHistoryCard(product: product),
+              Builder(
+                builder: (context) {
+                  final sortedHistory = List<ProductHistoryEntity>.from(product.history)
+                    ..sort((a, b) => b.date.compareTo(a.date));
+                  final displayedHistory = sortedHistory.take(5).toList();
+
+                  return ProductHistoryCard(
+                    title: 'Histórico de Movimentações',
+                    subtitle: '${sortedHistory.length} registro${sortedHistory.length == 1 ? '' : 's'}',
+                    history: displayedHistory,
+                    showEmptyMessage: true,
+                    onViewAll: sortedHistory.length > 5
+                        ? () => context.push(AppRoutes.productHistory, extra: product)
+                        : null,
+                  );
+                },
+              ),
 
               const Gap(AppSpacing.space56),
             ],

@@ -1,22 +1,28 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_history_item.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class ProductHistoryCard extends StatelessWidget {
-  final ProductEntity product;
+  final String title;
+  final String subtitle;
+  final List<ProductHistoryEntity> history;
+  final VoidCallback? onViewAll;
+  final bool showEmptyMessage;
 
   const ProductHistoryCard({
     super.key,
-    required this.product,
+    required this.title,
+    required this.subtitle,
+    required this.history,
+    this.onViewAll,
+    this.showEmptyMessage = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final sortedHistory = List.from(product.history)..sort((a, b) => b.date.compareTo(a.date));
-
     return Card(
       color: context.colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
@@ -38,7 +44,7 @@ class ProductHistoryCard extends StatelessWidget {
                   padding: const EdgeInsets.all(AppSpacing.space12),
                   decoration: BoxDecoration(
                     borderRadius: AppSpacing.borderRadius16,
-                    color: context.colorScheme.onSurface.withValues(alpha: 0.1),
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.08),
                   ),
                   child: Icon(
                     Symbols.history_rounded,
@@ -52,11 +58,11 @@ class ProductHistoryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Histórico de Movimentações',
+                      title,
                       style: context.textTheme.titleMedium,
                     ),
                     Text(
-                      '${sortedHistory.length} registro(s)',
+                      subtitle,
                       style: context.textTheme.bodySmall?.copyWith(
                         color: context.colorScheme.onSurface.withValues(alpha: 0.8),
                       ),
@@ -68,7 +74,7 @@ class ProductHistoryCard extends StatelessWidget {
           ),
           const Gap(AppSpacing.space4),
 
-          if (sortedHistory.isEmpty) ...[
+          if (history.isEmpty && showEmptyMessage) ...[
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.space48, horizontal: AppSpacing.space24),
               child: Column(
@@ -94,29 +100,38 @@ class ProductHistoryCard extends StatelessWidget {
             ),
           ],
 
-          ...sortedHistory.take(5).map((h) {
-            return ProductHistoryItem(history: h);
-          }),
+          for (int i = 0; i < history.length; i++)
+            ProductHistoryItem(
+              history: history[i],
+              isLast: i == history.length - 1,
+            ),
 
-          if (sortedHistory.isNotEmpty && sortedHistory.length > 5) ...[
+          if (onViewAll != null) ...[
             InkWell(
-              onTap: () {},
+              onTap: onViewAll,
               overlayColor: WidgetStatePropertyAll(context.colorScheme.primary.withValues(alpha: 0.1)),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(AppSpacing.radius16),
                 bottomRight: Radius.circular(AppSpacing.radius16),
               ),
-              child: Row(
-                mainAxisAlignment: .center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.space20, horizontal: AppSpacing.space12),
-                    child: Text(
-                      'Ver todas as movimentações',
-                      style: context.textTheme.titleMedium?.copyWith(color: context.colorScheme.primary),
-                    ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.space20),
+                decoration: BoxDecoration(
+                  border: BorderDirectional(
+                    top: BorderSide(color: context.colorScheme.outline, width: 1),
                   ),
-                ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Ver todas as movimentações',
+                      style: context.textTheme.titleMedium?.copyWith(
+                        color: context.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

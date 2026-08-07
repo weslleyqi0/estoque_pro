@@ -3,7 +3,6 @@ import 'package:estoque_pro/app/features/products/domain/entities/product_entity
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class StockAdjustmentBottomSheet extends StatefulWidget {
   final ProductEntity product;
