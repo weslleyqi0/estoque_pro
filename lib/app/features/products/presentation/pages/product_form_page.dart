@@ -219,21 +219,19 @@ class _ProductFormPageState extends State<ProductFormPage> {
             ),
             const Gap(AppSpacing.space16),
 
-            Expanded(
-              child: AppTextfield(
-                label: 'Preço (R\$)',
-                hint: '0,00',
-                required: true,
-                textAlign: TextAlign.center,
-                controller: _priceController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [CurrencyInputFormatter()],
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) return 'Obrigatório';
-                  if (value.toDoubleOr() <= 0) return 'Inválido';
-                  return null;
-                },
-              ),
+            AppTextfield(
+              label: 'Preço (R\$)',
+              hint: '0,00',
+              required: true,
+              textAlign: TextAlign.center,
+              controller: _priceController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [CurrencyInputFormatter()],
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) return 'Obrigatório';
+                if (value.toDoubleOr() <= 0) return 'Inválido';
+                return null;
+              },
             ),
             const Gap(AppSpacing.space16),
 
