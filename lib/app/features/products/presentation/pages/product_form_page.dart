@@ -1,5 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
@@ -122,7 +123,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     if (confirm == true) {
       final success = await _viewModel.deleteCurrentProduct();
       if (success && mounted) {
-        context.pop();
+        context.go(AppRoutes.products);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Produto excluído com sucesso!')),
         );
