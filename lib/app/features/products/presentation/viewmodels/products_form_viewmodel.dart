@@ -118,7 +118,6 @@ class ProductsFormViewModel extends ChangeNotifier {
   Future<Result<bool>> _updateProduct(ProductEntity product) async {
     try {
       await _repository.update(product);
-      notifyListeners();
       return const Success(true);
     } catch (e) {
       return Failure(Exception(e.toString()));
