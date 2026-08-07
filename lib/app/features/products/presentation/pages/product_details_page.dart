@@ -77,9 +77,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   Future<void> _adjustStatus(bool isActive) async {
     final product = _currentProduct;
     if (product.stock == 0 && isActive) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não é possível ativar um produto sem estoque.')),
-      );
+      AppSnackbar.warning(context, 'Não é possível ativar um produto sem estoque.');
       return;
     }
 
@@ -173,9 +171,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     subtitle: 'Últimas movimentações',
                     history: displayedHistory,
                     showEmptyMessage: true,
-                    onViewAll: hasMore
-                        ? () => context.push(AppRoutes.productHistory, extra: product)
-                        : null,
+                    onViewAll: hasMore ? () => context.push(AppRoutes.productHistory, extra: product) : null,
                   );
                 },
               ),

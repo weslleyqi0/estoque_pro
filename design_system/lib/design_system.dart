@@ -33,3 +33,6 @@ export 'src/dialogs/app_dialog.dart';
 
 // Component exports
 export 'src/empty/app_empty_list.dart';
+
+// Snackbar exports
+export 'src/snackbar/app_snackbar.dart';

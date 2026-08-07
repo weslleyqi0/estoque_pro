@@ -115,12 +115,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
           : _viewModel.saveProductCommand.error;
       
       if (error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.toString().replaceAll('Exception: ', '')),
-            backgroundColor: context.colorScheme.error,
-          ),
-        );
+        AppSnackbar.error(context, error.toString().replaceAll('Exception: ', ''));
       }
     }
   }
@@ -138,9 +133,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
       final success = await _viewModel.deleteCurrentProduct();
       if (success && mounted) {
         context.go(AppRoutes.products);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Produto excluído com sucesso!')),
-        );
+        AppSnackbar.success(context, 'Produto excluído com sucesso!');
       }
     }
   }
