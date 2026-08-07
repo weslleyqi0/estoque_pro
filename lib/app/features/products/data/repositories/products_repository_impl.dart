@@ -67,7 +67,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
   Future<void> save(ProductEntity product) async {
     final model = ProductModel.fromEntity(product);
     try {
-      await _firebaseDb.addOrUpdate(model.toMap());
+      await _firebaseDb.add(model.toMap());
     } catch (e) {
       debugPrint('---> Products: Erro ao salvar no Firebase: $e');
       rethrow;

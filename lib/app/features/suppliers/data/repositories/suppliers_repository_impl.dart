@@ -64,7 +64,7 @@ class SuppliersRepositoryImpl implements SuppliersRepository {
   Future<void> save(SupplierEntity supplier) async {
     final model = SupplierModel.fromEntity(supplier);
     try {
-      await _firebaseDb.addOrUpdate(model.toMap());
+      await _firebaseDb.add(model.toMap());
     } catch (e) {
       debugPrint('---> Suppliers: Erro ao salvar no Firebase: $e');
       rethrow;

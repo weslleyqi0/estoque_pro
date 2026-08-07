@@ -16,6 +16,7 @@ class ProductModel {
   final int stock;
   final int minStock;
   final bool isActive;
+  final DateTime? createdAt;
   final DateTime? updatedAt;
 
   const ProductModel({
@@ -30,6 +31,7 @@ class ProductModel {
     required this.stock,
     required this.minStock,
     this.isActive = true,
+    this.createdAt,
     this.updatedAt,
   });
 
@@ -52,6 +54,7 @@ class ProductModel {
       stock: map['stock'] as int? ?? 0,
       minStock: map['minStock'] as int? ?? 0,
       isActive: map['isActive'] as bool? ?? true,
+      createdAt: DateParser.parse(map['createdAt']),
       updatedAt: DateParser.parse(map['updatedAt']),
     );
   }
@@ -85,6 +88,7 @@ class ProductModel {
       stock: stock,
       minStock: minStock,
       isActive: isActive,
+      createdAt: createdAt,
       updatedAt: updatedAt,
     );
   }
@@ -102,6 +106,7 @@ class ProductModel {
       stock: entity.stock,
       minStock: entity.minStock,
       isActive: entity.isActive,
+      createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
   }

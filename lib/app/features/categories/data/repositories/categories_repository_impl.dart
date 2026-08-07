@@ -64,7 +64,7 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
   Future<void> save(CategoryEntity category) async {
     final model = CategoryModel.fromEntity(category);
     try {
-      await _firebaseDb.addOrUpdate(model.toMap());
+      await _firebaseDb.add(model.toMap());
     } catch (e) {
       debugPrint('---> Categories: Erro ao salvar no Firebase: $e');
       rethrow;

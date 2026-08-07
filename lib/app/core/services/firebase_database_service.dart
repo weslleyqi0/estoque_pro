@@ -35,7 +35,7 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Add an item generating an automatic key (push)
-  Future<void> addOrUpdate(Map<String, dynamic> data) async {
+  Future<void> add(Map<String, dynamic> data) async {
     return _handleError(() async {
       final newRef = _ref.push();
 
