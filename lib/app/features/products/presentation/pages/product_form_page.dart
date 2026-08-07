@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
@@ -169,10 +170,13 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   ),
                   clipBehavior: Clip.hardEdge,
                   child: url.isNotEmpty
-                      ? Image.network(
-                          url,
+                      ? CachedNetworkImage(
+                          imageUrl: url,
                           fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => const Center(
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          errorWidget: (context, url, error) => const Center(
                             child: Icon(Symbols.broken_image_rounded, size: 48),
                           ),
                         )

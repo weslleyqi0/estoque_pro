@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:flutter/material.dart';
@@ -33,10 +34,13 @@ class ProductHeaderCard extends StatelessWidget {
               ),
               clipBehavior: Clip.hardEdge,
               child: product.imgUrl.isNotEmpty
-                  ? Image.network(
-                      product.imgUrl,
+                  ? CachedNetworkImage(
+                      imageUrl: product.imgUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Center(
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      errorWidget: (context, url, error) => const Center(
                         child: Icon(Symbols.broken_image_rounded, size: 48),
                       ),
                     )

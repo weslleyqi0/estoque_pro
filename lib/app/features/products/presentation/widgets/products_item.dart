@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
@@ -69,10 +70,13 @@ class ProductsItem extends StatelessWidget {
                     ),
                     clipBehavior: Clip.hardEdge,
                     child: product.imgUrl.isNotEmpty
-                        ? Image.network(
-                            product.imgUrl,
+                        ? CachedNetworkImage(
+                            imageUrl: product.imgUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Icon(
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) => Icon(
                               Symbols.package_2_rounded,
                               size: AppSpacing.icon64,
                               weight: 300,
