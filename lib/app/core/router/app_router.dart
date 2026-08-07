@@ -60,10 +60,6 @@ class AppRouter {
         return isBiometricPage ? null : AppRoutes.biometric;
       }
 
-      if (isLoginPage || isBiometricPage) {
-        return AppRoutes.home;
-      }
-
       if (isLoginPage || isBiometricPage || (isInactivePage && currentUser?.isActive == true)) {
         return AppRoutes.home;
       }
