@@ -54,10 +54,14 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<AuthService>(() => AuthService());
   getIt.registerLazySingleton<BiometricService>(() => BiometricService());
   getIt.registerLazySingleton<AuthorizationService>(
-    () => AuthorizationService(
-      getIt<FirebaseAuth>(),
-      getIt<UsersRepository>(),
-    ),
+    () {
+      final service = AuthorizationService(
+        getIt<FirebaseAuth>(),
+        getIt<UsersRepository>(),
+      );
+      service.init();
+      return service;
+    },
   );
 
   // Repositories
