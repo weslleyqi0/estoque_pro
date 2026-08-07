@@ -21,9 +21,14 @@ class CategoriesItem extends StatelessWidget {
     final iconColor = categoryColor;
 
     return Card(
+      color: context.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppSpacing.borderRadius16,
+        side: BorderSide(color: context.colorScheme.outlineVariant),
+      ),
       child: InkWell(
         onTap: () => context.push(AppRoutes.categoryForm, extra: category),
-        borderRadius: AppSpacing.borderRadius12,
+        borderRadius: AppSpacing.borderRadius16,
         child: Padding(
           padding: const .all(AppSpacing.space12),
           child: Row(
