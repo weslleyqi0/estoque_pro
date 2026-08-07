@@ -84,8 +84,7 @@ class HomePage extends StatelessWidget {
                   padding: .symmetric(horizontal: AppSpacing.space12),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    mainAxisSpacing: AppSpacing.space4,
-                    crossAxisSpacing: AppSpacing.space4,
+                    crossAxisSpacing: AppSpacing.space8,
                     childAspectRatio: 1.35,
                   ),
                   children: [

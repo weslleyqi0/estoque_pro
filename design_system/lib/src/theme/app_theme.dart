@@ -101,6 +101,7 @@ class AppTheme {
 
     // Card Theme
     cardTheme: const CardThemeData(
+      margin: .only(bottom: AppSpacing.space8),
       elevation: AppSpacing.cardElevation,
       shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadius12),
       color: AppColors.surfaceLight,
@@ -254,6 +255,7 @@ class AppTheme {
 
     // Card Theme
     cardTheme: const CardThemeData(
+      margin: EdgeInsets.only(bottom: AppSpacing.space8),
       elevation: AppSpacing.darkCardElevation,
       shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadius12),
       color: AppColors.surfaceVariantDark,

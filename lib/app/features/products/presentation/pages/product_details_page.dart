@@ -6,6 +6,7 @@ import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewm
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
+import 'package:estoque_pro/app/features/products/presentation/widgets/info_row.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/stock_adjustment_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -100,27 +101,44 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       builder: (context, _) {
         final product = _currentProduct;
 
+        final maxProgress = product.minStock > 0 ? (product.minStock * 2).toDouble() : 10.0;
+        final rawProgress = maxProgress > 0 ? product.stock / maxProgress : 0.0;
+
+        final Color statusColor;
+        final IconData statusIcon;
+        final String statusText;
+
+        if (rawProgress <= 0.0) {
+          statusColor = AppColors.error;
+          statusIcon = Symbols.error_rounded;
+          statusText = 'Sem Estoque';
+        } else if (rawProgress < 0.25) {
+          statusColor = AppColors.error;
+          statusIcon = Symbols.info_rounded;
+          statusText = 'Estoque Crítico';
+        } else if (rawProgress < 0.50) {
+          statusColor = AppColors.warning;
+          statusIcon = Symbols.info_rounded;
+          statusText = 'Estoque Baixo';
+        } else {
+          statusColor = AppColors.success;
+          statusIcon = Symbols.check_circle_rounded;
+          statusText = 'Estoque OK';
+        }
+
         return Scaffold(
           appBar: AppBar(
             title: const Text('Detalhes do Produto'),
             actions: [
               AppIconButton(
                 icon: Symbols.edit_rounded,
-                //backgroundColor: context.colorScheme.primaryContainer.withValues(alpha: 0.2),
                 onPressed: () => context.push(AppRoutes.productForm, extra: product),
               ),
               const Gap(AppSpacing.space8),
             ],
           ),
-          floatingActionButton: AppFloatingActionButton(
-            tooltip: 'Ajustar Estoque',
-            icon: Symbols.inventory_rounded,
-            onPressed: () {
-              StockAdjustmentBottomSheet.show(context, product, _adjustStock);
-            },
-          ),
           body: ListView(
-            padding: const EdgeInsets.all(AppSpacing.space16),
+            padding: const .all(AppSpacing.space16),
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,58 +200,161 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 Text('Descrição', style: context.textTheme.titleMedium),
                 const Gap(AppSpacing.space8),
                 Text(product.description, style: context.textTheme.bodyMedium),
-                const Gap(AppSpacing.space24),
+                const Gap(AppSpacing.space16),
               ],
 
-              AppSwitchTitle(
-                title: 'Produto Ativo',
-                subtitle: 'Disponível para venda',
-                value: product.isActive,
-                onChanged: _adjustStatus,
+              // Status do Produto
+              Text('Status do Produto', style: context.textTheme.titleMedium),
+              const Gap(AppSpacing.space8),
+              Card(
+                color: context.colorScheme.surfaceContainerLow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppSpacing.borderRadius16,
+                  side: BorderSide(color: context.colorScheme.outlineVariant),
+                ),
+                child: Padding(
+                  padding: const .all(AppSpacing.space12),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.space12),
+                        decoration: BoxDecoration(
+                          borderRadius: AppSpacing.borderRadius12,
+                          color: product.isActive
+                              ? AppColors.success.withValues(alpha: 0.1)
+                              : context.colorScheme.onSurface.withValues(alpha: 0.1),
+                        ),
+                        child: Icon(
+                          Symbols.power_settings_new_rounded,
+                          color: product.isActive
+                              ? AppColors.success
+                              : context.colorScheme.onSurface.withValues(alpha: 0.5),
+                          size: AppSpacing.icon32,
+                          weight: 900,
+                        ),
+                      ),
+                      const Gap(AppSpacing.space12),
+                      Flexible(
+                        child: AppSwitchTitle(
+                          title: product.isActive ? 'Produto Ativo' : 'Produto Desativado',
+                          subtitle: product.isActive ? 'Disponível para venda' : 'Indisponível para venda',
+                          value: product.isActive,
+                          onChanged: _adjustStatus,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const Gap(AppSpacing.space24),
+              const Gap(AppSpacing.space16),
 
-              // Informações do Produto
+              // Status do Estoque
+              Text('Status do Estoque', style: context.textTheme.titleMedium),
+              const Gap(AppSpacing.space8),
               Card(
                 elevation: 0,
+                color: statusColor.withValues(alpha: 0.1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppSpacing.borderRadius24,
+                  side: BorderSide(color: statusColor),
+                ),
+                borderOnForeground: true,
+                child: Padding(
+                  padding: const .all(AppSpacing.space12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        statusIcon,
+                        color: statusColor,
+                        size: AppSpacing.icon40,
+                        weight: 500,
+                      ),
+                      const Gap(AppSpacing.space8),
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: .start,
+                          children: [
+                            Text(
+                              statusText,
+                              style: context.textTheme.titleMedium?.copyWith(
+                                color: statusColor,
+                              ),
+                            ),
+                            Text(
+                              'Em estoque: ${product.stock} un. / Mínimo: ${product.minStock} un.',
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: context.colorScheme.onSurface.withValues(alpha: 0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Gap(AppSpacing.space8),
+                      AppButton(
+                        onPressed: () => StockAdjustmentBottomSheet.show(context, product, _adjustStock),
+                        backgroundColor: AppColors.surfaceLight,
+                        borderRadius: AppSpacing.borderRadius24,
+                        child: Text(
+                          'Ajustar',
+                          style: context.textTheme.titleMedium?.copyWith(color: AppColors.textPrimaryLight),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const Gap(AppSpacing.space16),
+
+              // Informações do Produto
+              Text('Informações do Produto', style: context.textTheme.titleMedium),
+              const Gap(AppSpacing.space8),
+              Card(
                 color: context.colorScheme.surfaceContainerLow,
-                margin: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppSpacing.borderRadius16,
+                  side: BorderSide(color: context.colorScheme.outlineVariant),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.space16),
                   child: Column(
                     children: [
-                      _buildInfoRow(context, 'Código de Barras', product.barcode.isEmpty ? '-' : product.barcode),
-                      const Gap(AppSpacing.space12),
-                      _buildInfoRow(
-                        context,
-                        'Estoque Atual',
-                        '${product.stock} un.',
-                        isWarning: product.stock < product.minStock,
+                      InfoRow(
+                        label: 'Código de Barras',
+                        value: product.barcode.isEmpty ? '-' : product.barcode,
                       ),
                       const Gap(AppSpacing.space12),
-                      _buildInfoRow(context, 'Estoque Mínimo', '${product.minStock} un.'),
-                      const Gap(AppSpacing.space12),
-                      _buildInfoRow(
-                        context,
-                        'Categorias',
-                        product.categories.isEmpty ? '-' : product.categories.map((c) => c.name).join(', '),
+                      InfoRow(
+                        label: 'Estoque Atual',
+                        value: '${product.stock} un.',
+                        warningColor: rawProgress < 0.50 ? statusColor : null,
                       ),
                       const Gap(AppSpacing.space12),
-                      _buildInfoRow(context, 'Fornecedor', product.supplier?.name ?? '-'),
+                      InfoRow(
+                        label: 'Estoque Mínimo',
+                        value: '${product.minStock} un.',
+                      ),
+                      const Gap(AppSpacing.space12),
+                      InfoRow(
+                        label: 'Categorias',
+                        value: product.categories.isEmpty ? '-' : product.categories.map((c) => c.name).join(', '),
+                      ),
+                      const Gap(AppSpacing.space12),
+                      InfoRow(
+                        label: 'Fornecedor',
+                        value: product.supplier?.name ?? '-',
+                      ),
                       if (product.updatedAt != null) ...[
                         const Gap(AppSpacing.space12),
-                        _buildInfoRow(
-                          context,
-                          'Última Atualização',
-                          DateFormat('dd/MM/yyyy HH:mm').format(product.updatedAt!),
+                        InfoRow(
+                          label: 'Última Atualização',
+                          value: DateFormat('dd/MM/yyyy HH:mm').format(product.updatedAt!),
                         ),
                       ],
                     ],
                   ),
                 ),
               ),
-              const Gap(AppSpacing.space32),
+              const Gap(AppSpacing.space16),
 
               // Histórico
               Row(
@@ -265,7 +386,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     return Column(
                       children: sortedHistory.take(5).map<Widget>((h) {
                         return Card(
-                          margin: const EdgeInsets.only(bottom: AppSpacing.space8),
                           elevation: 0,
                           color: context.colorScheme.surfaceContainerLowest,
                           shape: RoundedRectangleBorder(
@@ -341,32 +461,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildInfoRow(BuildContext context, String label, String value, {bool isWarning = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const Gap(AppSpacing.space16),
-        Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: context.textTheme.titleSmall?.copyWith(
-              color: isWarning ? context.colorScheme.error : null,
-              fontWeight: isWarning ? FontWeight.bold : null,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -17,6 +17,8 @@ class AppButton extends StatelessWidget {
   final bool isFullWidth;
   final IconData? icon;
   final IconData? suffixIcon;
+  final Color? backgroundColor;
+  final BorderRadiusGeometry? borderRadius;
 
   const AppButton({
     super.key,
@@ -28,6 +30,8 @@ class AppButton extends StatelessWidget {
     this.isFullWidth = false,
     this.icon,
     this.suffixIcon,
+    this.backgroundColor,
+    this.borderRadius,
   }) : assert(
          label != null || child != null,
          'Either text or child must be provided',
@@ -42,6 +46,8 @@ class AppButton extends StatelessWidget {
     this.isFullWidth = false,
     this.icon,
     this.suffixIcon,
+    this.backgroundColor,
+    this.borderRadius,
   }) : variant = AppButtonVariant.primary,
        assert(
          label != null || child != null,
@@ -57,6 +63,8 @@ class AppButton extends StatelessWidget {
     this.isFullWidth = false,
     this.icon,
     this.suffixIcon,
+    this.backgroundColor,
+    this.borderRadius,
   }) : variant = AppButtonVariant.secondary,
        assert(
          label != null || child != null,
@@ -72,6 +80,8 @@ class AppButton extends StatelessWidget {
     this.isFullWidth = false,
     this.icon,
     this.suffixIcon,
+    this.backgroundColor,
+    this.borderRadius,
   }) : variant = AppButtonVariant.outlined,
        assert(
          label != null || child != null,
@@ -87,6 +97,8 @@ class AppButton extends StatelessWidget {
     this.isFullWidth = false,
     this.icon,
     this.suffixIcon,
+    this.backgroundColor,
+    this.borderRadius,
   }) : variant = AppButtonVariant.text,
        assert(
          label != null || child != null,
@@ -141,7 +153,7 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.primary => ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.primary,
+          backgroundColor: backgroundColor ?? colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
           disabledBackgroundColor: colorScheme.onSurface.withValues(
             alpha: 0.2,
@@ -153,8 +165,8 @@ class AppButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.space16,
           ),
-          shape: const RoundedRectangleBorder(
-            borderRadius: AppSpacing.borderRadius12,
+          shape: RoundedRectangleBorder(
+            borderRadius: borderRadius ?? AppSpacing.borderRadius12,
           ),
           elevation: 0,
         ),
@@ -163,7 +175,7 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.secondary => ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.secondary,
+          backgroundColor: backgroundColor ?? colorScheme.secondary,
           foregroundColor: colorScheme.onSecondary,
           disabledBackgroundColor: colorScheme.onSurface.withValues(
             alpha: 0.2,
@@ -173,8 +185,8 @@ class AppButton extends StatelessWidget {
           ),
           minimumSize: const Size(0, AppSpacing.buttonHeightLg),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space20),
-          shape: const RoundedRectangleBorder(
-            borderRadius: AppSpacing.borderRadius12,
+          shape: RoundedRectangleBorder(
+            borderRadius: borderRadius ?? AppSpacing.borderRadius12,
           ),
           elevation: 0,
         ),
@@ -183,6 +195,7 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.outlined => OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
+          backgroundColor: backgroundColor,
           foregroundColor: colorScheme.primary,
           disabledForegroundColor: colorScheme.onSurface.withValues(
             alpha: 0.4,
@@ -192,8 +205,8 @@ class AppButton extends StatelessWidget {
           side: BorderSide(
             color: isLoading || onPressed == null ? colorScheme.onSurface.withValues(alpha: 0.2) : colorScheme.primary,
           ),
-          shape: const RoundedRectangleBorder(
-            borderRadius: AppSpacing.borderRadius12,
+          shape: RoundedRectangleBorder(
+            borderRadius: borderRadius ?? AppSpacing.borderRadius12,
           ),
         ),
         child: _buildContent(context),
@@ -201,14 +214,15 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.text => TextButton(
         onPressed: isLoading ? null : onPressed,
         style: TextButton.styleFrom(
+          backgroundColor: backgroundColor,
           foregroundColor: colorScheme.primary,
           disabledForegroundColor: colorScheme.onSurface.withValues(
             alpha: 0.38,
           ),
           minimumSize: const Size(0, AppSpacing.buttonHeightLg),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space20),
-          shape: const RoundedRectangleBorder(
-            borderRadius: AppSpacing.borderRadius12,
+          shape: RoundedRectangleBorder(
+            borderRadius: borderRadius ?? AppSpacing.borderRadius12,
           ),
         ),
         child: _buildContent(context),

@@ -35,6 +35,11 @@ class ProductsItem extends StatelessWidget {
     final textColor = !product.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
 
     return Card(
+      color: context.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppSpacing.borderRadius16,
+        side: BorderSide(color: context.colorScheme.outlineVariant),
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radius16),
         overlayColor: WidgetStateProperty.all(statusColor.withValues(alpha: 0.1)),
@@ -179,9 +184,9 @@ class ProductsItem extends StatelessWidget {
                     LinearProgressIndicator(
                       value: progressValue,
                       borderRadius: AppSpacing.borderRadius4,
-                      backgroundColor: statusColor.withValues(alpha: 0.2),
+                      backgroundColor: context.colorScheme.outline,
                       color: statusColor,
-                      minHeight: 8,
+                      minHeight: 10,
                     ),
                   ],
                 ),
