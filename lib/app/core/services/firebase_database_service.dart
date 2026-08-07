@@ -9,7 +9,7 @@ class FirebaseDatabaseService<T> {
 
   DatabaseReference get ref => _ref;
 
-  Future<T> _handleError<T>(Future<T> Function() action) async {
+  Future<R> _handleError<R>(Future<R> Function() action) async {
     try {
       return await action();
     } on FirebaseException catch (e) {
