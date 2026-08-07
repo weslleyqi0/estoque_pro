@@ -141,4 +141,25 @@ class ProductsRepositoryImpl implements ProductsRepository {
           debugPrint('---> Products: Erro no listener de history: $e');
         });
   }
+
+  @override
+  Future<bool> checkBarcodeExists(String barcode, {String? ignoreId}) async {
+    if (barcode.isEmpty) return false;
+    try {
+      final snapshot = await _firebaseDb.ref.orderByChild('barcode').equalTo(barcode).get();
+      if (!snapshot.exists) return false;
+      
+      final data = snapshot.value as Map;
+      if (ignoreId != null) {
+        // Se houver apenas 1 produto com esse barcode e for ele mesmo, não é duplicidade.
+        if (data.length == 1 && data.keys.first == ignoreId) {
+          return false;
+        }
+      }
+      return true;
+    } catch (e) {
+      debugPrint('---> Products: Erro ao checar duplicidade de barcode: $e');
+      return false; // Falha segura
+    }
+  }
 }

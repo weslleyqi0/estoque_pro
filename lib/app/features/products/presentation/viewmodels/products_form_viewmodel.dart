@@ -105,6 +105,12 @@ class ProductsFormViewModel extends ChangeNotifier {
 
   Future<Result<bool>> _saveProduct(ProductEntity product) async {
     try {
+      if (product.barcode.isNotEmpty) {
+        final barcodeExists = await _repository.checkBarcodeExists(product.barcode);
+        if (barcodeExists) {
+          throw Exception('Já existe um produto cadastrado com este código de barras.');
+        }
+      }
       await _repository.save(product);
       return const Success(true);
     } catch (e) {
@@ -114,6 +120,12 @@ class ProductsFormViewModel extends ChangeNotifier {
 
   Future<Result<bool>> _updateProduct(ProductEntity product) async {
     try {
+      if (product.barcode.isNotEmpty) {
+        final barcodeExists = await _repository.checkBarcodeExists(product.barcode, ignoreId: product.id);
+        if (barcodeExists) {
+          throw Exception('Já existe um produto cadastrado com este código de barras.');
+        }
+      }
       await _repository.update(product);
       return const Success(true);
     } catch (e) {

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/utils/string_extensions.dart';
+
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -30,10 +32,16 @@ class ProductsViewModel extends ChangeNotifier {
   List<ProductEntity> get filteredProducts {
     if (_searchQuery.trim().isEmpty) return _products;
 
-    final query = _searchQuery.toLowerCase().trim();
+    final query = _searchQuery.withoutDiacritics.toLowerCase().trim();
 
     return _products.where((product) {
-      return product.name.toLowerCase().contains(query);
+      final matchesName = product.name.withoutDiacritics.toLowerCase().contains(query);
+      final matchesBarcode = product.barcode.withoutDiacritics.toLowerCase().contains(query);
+      final matchesDesc = product.description.withoutDiacritics.toLowerCase().contains(query);
+      final matchesSupplier = product.supplier?.name.withoutDiacritics.toLowerCase().contains(query) ?? false;
+      final matchesCategory = product.categories.any((c) => c.name.withoutDiacritics.toLowerCase().contains(query));
+      
+      return matchesName || matchesBarcode || matchesDesc || matchesSupplier || matchesCategory;
     }).toList();
   }
 

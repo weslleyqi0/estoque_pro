@@ -109,6 +109,19 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
     if (success && mounted) {
       context.pop();
+    } else if (mounted) {
+      final error = _viewModel.isEditing 
+          ? _viewModel.updateProductCommand.error 
+          : _viewModel.saveProductCommand.error;
+      
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error.toString().replaceAll('Exception: ', '')),
+            backgroundColor: context.colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
