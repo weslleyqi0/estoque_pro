@@ -95,11 +95,27 @@ class _StockAdjustmentBottomSheetState extends State<StockAdjustmentBottomSheet>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton.filledTonal(
-                  onPressed: _decrement,
-                  icon: const Icon(Symbols.remove_rounded),
-                  iconSize: 32,
-                  padding: const EdgeInsets.all(AppSpacing.space12),
+                SizedBox(
+                  height: 80,
+                  width: 80,
+                  child: AppButton(
+                    onPressed: (widget.product.stock + _adjustQty > 0) ? _decrement : null,
+                    borderRadius: AppSpacing.borderRadius16,
+                    backgroundColor: (widget.product.stock + _adjustQty > 0)
+                        ? AppColors.errorDark.withValues(alpha: 0.3)
+                        : context.colorScheme.onSurface.withValues(alpha: 0.1),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.space16),
+                      child: Text(
+                        '-',
+                        style: context.textTheme.headlineLarge?.copyWith(
+                          color: (widget.product.stock + _adjustQty > 0)
+                              ? AppColors.errorDark
+                              : context.colorScheme.onSurface.withValues(alpha: 0.3),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
                 const Gap(AppSpacing.space24),
                 SizedBox(
@@ -116,11 +132,18 @@ class _StockAdjustmentBottomSheetState extends State<StockAdjustmentBottomSheet>
                   ),
                 ),
                 const Gap(AppSpacing.space24),
-                IconButton.filledTonal(
-                  onPressed: _increment,
-                  icon: const Icon(Symbols.add_rounded),
-                  iconSize: 32,
-                  padding: const EdgeInsets.all(AppSpacing.space12),
+                SizedBox(
+                  height: 80,
+                  width: 80,
+                  child: AppButton(
+                    onPressed: _increment,
+                    borderRadius: AppSpacing.borderRadius16,
+                    backgroundColor: AppColors.successDark.withValues(alpha: 0.3),
+                    child: Padding(
+                      padding: const .all(AppSpacing.space16),
+                      child: Text('+', style: context.textTheme.headlineLarge?.copyWith(color: AppColors.successDark)),
+                    ),
+                  ),
                 ),
               ],
             ),
