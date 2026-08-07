@@ -14,6 +14,7 @@ class ProductsFormViewModel extends ChangeNotifier {
   late final Command1<bool, ProductEntity> saveProductCommand;
   late final Command1<bool, ProductEntity> updateProductCommand;
   late final Command1<bool, String> deleteProductCommand;
+  late final Command1<bool, ({String productId, int quantityDiff, ProductHistoryEntity history})> adjustStockCommand;
 
   ProductEntity? _currentProduct;
   ProductEntity? get currentProduct => _currentProduct;
@@ -21,9 +22,6 @@ class ProductsFormViewModel extends ChangeNotifier {
 
   int _stock = 0;
   int get stock => _stock;
-
-  List<ProductHistoryEntity> _history = [];
-  List<ProductHistoryEntity> get history => _history;
 
   bool _isActive = true;
   bool get isActive => _isActive;
@@ -53,12 +51,12 @@ class ProductsFormViewModel extends ChangeNotifier {
     saveProductCommand = Command1(_saveProduct);
     updateProductCommand = Command1(_updateProduct);
     deleteProductCommand = Command1(_deleteProduct);
+    adjustStockCommand = Command1(_adjustStock);
   }
 
   void init(ProductEntity? product) {
     _currentProduct = product;
     _stock = product?.stock ?? 0;
-    _history = product?.history ?? [];
     _isActive = product?.isActive ?? true;
     _selectedCategories = product?.categories ?? [];
     _selectedSupplier = product?.supplier;
@@ -87,7 +85,6 @@ class ProductsFormViewModel extends ChangeNotifier {
       stock: finalStock,
       minStock: minStock,
       isActive: finalStock == 0 ? false : (isEditing ? _isActive : true),
-      history: _history,
       updatedAt: DateTime.now(),
     );
 
@@ -127,6 +124,15 @@ class ProductsFormViewModel extends ChangeNotifier {
   Future<Result<bool>> _deleteProduct(String id) async {
     try {
       await _repository.delete(id);
+      return const Success(true);
+    } catch (e) {
+      return Failure(Exception(e.toString()));
+    }
+  }
+
+  Future<Result<bool>> _adjustStock(({String productId, int quantityDiff, ProductHistoryEntity history}) args) async {
+    try {
+      await _repository.adjustStock(args.productId, args.quantityDiff, args.history);
       return const Success(true);
     } catch (e) {
       return Failure(Exception(e.toString()));

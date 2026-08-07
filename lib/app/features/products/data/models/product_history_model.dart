@@ -23,12 +23,16 @@ class ProductHistoryModel {
     this.isNew = false,
   });
 
+  static ProductHistoryAction _parseAction(String? action) {
+    return ProductHistoryAction.values.firstWhere(
+      (e) => e.name == action,
+      orElse: () => ProductHistoryAction.add,
+    );
+  }
+
   factory ProductHistoryModel.fromMap(Map<dynamic, dynamic> map) {
     return ProductHistoryModel(
-      action: ProductHistoryAction.values.firstWhere(
-        (e) => e.name == map['action'],
-        orElse: () => ProductHistoryAction.add,
-      ),
+      action: _parseAction(map['action'] as String?),
       quantity: map['quantity'] as int? ?? 0,
       oldStock: map['oldStock'] as int? ?? 0,
       newStock: map['newStock'] as int? ?? 0,

@@ -60,6 +60,13 @@ class FirebaseDatabaseService<T> {
     });
   }
 
+  /// Perform a multi-path atomic update at the root
+  Future<void> updateMultiple(Map<String, dynamic> updates) async {
+    return _handleError(() async {
+      await _ref.root.update(updates);
+    });
+  }
+
   /// Remove an item by ID
   Future<void> delete(String key) async {
     return _handleError(() async {

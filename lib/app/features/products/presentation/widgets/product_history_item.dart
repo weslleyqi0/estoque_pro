@@ -15,7 +15,7 @@ class ProductHistoryItem extends StatelessWidget {
     this.isLast = false,
   });
 
-  bool get _isPositive => history.newStock >= history.oldStock;
+  bool get _isPositive => history.action == ProductHistoryAction.add;
 
   String get _actionText {
     switch (history.action) {
@@ -42,9 +42,11 @@ class ProductHistoryItem extends StatelessWidget {
         top: AppSpacing.space8,
       ),
       decoration: BoxDecoration(
-        border: isLast ? null : BorderDirectional(
-          bottom: BorderSide(color: context.colorScheme.outline, width: 1),
-        ),
+        border: isLast
+            ? null
+            : BorderDirectional(
+                bottom: BorderSide(color: context.colorScheme.outline, width: 1),
+              ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

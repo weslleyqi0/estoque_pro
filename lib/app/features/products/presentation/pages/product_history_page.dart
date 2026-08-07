@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
+import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_history_card.dart';
 import 'package:flutter/material.dart';
 
@@ -15,33 +19,48 @@ class ProductHistoryPage extends StatefulWidget {
 
 class _ProductHistoryPageState extends State<ProductHistoryPage> {
   final ScrollController _scrollController = ScrollController();
+  StreamSubscription? _subscription;
 
-  late final List<ProductHistoryEntity> _fullHistory;
+  List<ProductHistoryEntity> _fullHistory = [];
+  bool _isLoading = true;
+  bool _hasMore = true;
   int _itemsToShow = 20;
 
   @override
   void initState() {
     super.initState();
-    // Ordena por data decrescente
-    _fullHistory = List.from(widget.product.history)..sort((a, b) => b.date.compareTo(a.date));
-
+    _updateStream();
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _subscription?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
 
+  void _updateStream() {
+    _subscription?.cancel();
+    _subscription = getIt<ProductsRepository>()
+        .watchHistory(widget.product.id, limit: _itemsToShow)
+        .listen((data) {
+      if (mounted) {
+        setState(() {
+          _fullHistory = data;
+          _isLoading = false;
+          _hasMore = data.length >= _itemsToShow;
+        });
+      }
+    });
+  }
+
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      if (_itemsToShow < _fullHistory.length) {
+      if (_hasMore && !_isLoading) {
         setState(() {
           _itemsToShow += 20;
-          if (_itemsToShow > _fullHistory.length) {
-            _itemsToShow = _fullHistory.length;
-          }
+          _updateStream();
         });
       }
     }
@@ -79,6 +98,13 @@ class _ProductHistoryPageState extends State<ProductHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading && _fullHistory.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Histórico Completo')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     if (_fullHistory.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: const Text('Histórico Completo')),
@@ -86,10 +112,8 @@ class _ProductHistoryPageState extends State<ProductHistoryPage> {
       );
     }
 
-    final displayedHistory = _fullHistory.take(_itemsToShow).toList();
-
     final grouped = <String, List<ProductHistoryEntity>>{};
-    for (final h in displayedHistory) {
+    for (final h in _fullHistory) {
       final key = _formatDate(h.date);
       if (grouped[key] == null) grouped[key] = [];
       grouped[key]!.add(h);
@@ -103,7 +127,7 @@ class _ProductHistoryPageState extends State<ProductHistoryPage> {
       body: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(AppSpacing.space16),
-        itemCount: keys.length + (_itemsToShow < _fullHistory.length ? 1 : 0),
+        itemCount: keys.length + (_hasMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == keys.length) {
             return const Padding(

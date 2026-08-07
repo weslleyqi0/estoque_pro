@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_category_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_supplier_entity.dart';
 
 class ProductEntity extends Equatable {
@@ -15,7 +14,6 @@ class ProductEntity extends Equatable {
   final int stock;
   final int minStock;
   final bool isActive;
-  final List<ProductHistoryEntity> history;
   final DateTime? updatedAt;
 
   const ProductEntity({
@@ -30,7 +28,6 @@ class ProductEntity extends Equatable {
     required this.stock,
     required this.minStock,
     this.isActive = true,
-    this.history = const [],
     this.updatedAt,
   });
 
@@ -46,7 +43,6 @@ class ProductEntity extends Equatable {
     int? stock,
     int? minStock,
     bool? isActive,
-    List<ProductHistoryEntity>? history,
     DateTime? updatedAt,
   }) {
     return ProductEntity(
@@ -61,25 +57,23 @@ class ProductEntity extends Equatable {
       stock: stock ?? this.stock,
       minStock: minStock ?? this.minStock,
       isActive: isActive ?? this.isActive,
-      history: history ?? this.history,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        imgUrl,
-        description,
-        barcode,
-        categories,
-        supplier,
-        price,
-        stock,
-        minStock,
-        isActive,
-        history,
-        updatedAt,
-      ];
+    id,
+    name,
+    imgUrl,
+    description,
+    barcode,
+    categories,
+    supplier,
+    price,
+    stock,
+    minStock,
+    isActive,
+    updatedAt,
+  ];
 }

@@ -4,6 +4,7 @@ import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
+import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_header_card.dart';
@@ -49,38 +50,28 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   Future<void> _adjustStock(ProductHistoryAction action, int quantity, String note) async {
     final product = _currentProduct;
-
-    int newStock = product.stock;
-    if (action == ProductHistoryAction.add) {
-      newStock += quantity;
-    } else {
-      newStock = (newStock - quantity).clamp(0, 999999);
-    }
-
     final currentUser = getIt<AuthViewModel>().currentUser;
 
-    final newHistory = [
-      ProductHistoryEntity(
-        action: action,
-        quantity: quantity,
-        oldStock: product.stock,
-        newStock: newStock,
-        date: DateTime.now(),
-        note: note,
-        userName: currentUser?.name,
-        isNew: true,
-      ),
-      ...product.history,
-    ];
+    int quantityDiff = action == ProductHistoryAction.add ? quantity : -quantity;
+    int oldStock = product.stock;
+    int newStock = oldStock + quantityDiff;
 
-    final updatedProduct = product.copyWith(
-      stock: newStock,
-      isActive: newStock == 0 ? false : product.isActive,
-      history: newHistory,
-      updatedAt: DateTime.now(),
+    final history = ProductHistoryEntity(
+      action: action,
+      quantity: quantity,
+      oldStock: oldStock,
+      newStock: newStock,
+      date: DateTime.now(),
+      note: note,
+      userName: currentUser?.name,
+      isNew: true,
     );
 
-    await _formViewModel.updateProductCommand.execute(updatedProduct);
+    await _formViewModel.adjustStockCommand.execute((
+      productId: product.id,
+      quantityDiff: quantityDiff,
+      history: history,
+    ));
   }
 
   Future<void> _adjustStatus(bool isActive) async {
@@ -170,18 +161,19 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               ),
               const Gap(AppSpacing.space16),
 
-              Builder(
-                builder: (context) {
-                  final sortedHistory = List<ProductHistoryEntity>.from(product.history)
-                    ..sort((a, b) => b.date.compareTo(a.date));
-                  final displayedHistory = sortedHistory.take(5).toList();
+              StreamBuilder<List<ProductHistoryEntity>>(
+                stream: getIt<ProductsRepository>().watchHistory(product.id, limit: 6),
+                builder: (context, snapshot) {
+                  final historyList = snapshot.data ?? [];
+                  final hasMore = historyList.length > 5;
+                  final displayedHistory = hasMore ? historyList.take(5).toList() : historyList;
 
                   return ProductHistoryCard(
                     title: 'Histórico de Movimentações',
-                    subtitle: '${sortedHistory.length} registro${sortedHistory.length == 1 ? '' : 's'}',
+                    subtitle: 'Últimas movimentações',
                     history: displayedHistory,
                     showEmptyMessage: true,
-                    onViewAll: sortedHistory.length > 5
+                    onViewAll: hasMore
                         ? () => context.push(AppRoutes.productHistory, extra: product)
                         : null,
                   );
