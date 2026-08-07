@@ -14,9 +14,7 @@ class AuthorizationService extends ChangeNotifier {
   AuthorizationService(
     this._firebaseAuth,
     this._userRepository,
-  ) {
-    _init();
-  }
+  );
 
   UserEntity? _currentUser;
   bool _isLoading = false;
@@ -25,12 +23,14 @@ class AuthorizationService extends ChangeNotifier {
   bool get isAuthenticated => _firebaseAuth.currentUser != null;
 
   StreamSubscription<UserEntity?>? _userSubscription;
+  StreamSubscription<User?>? _authSubscription;
 
   bool get hasUser => _currentUser != null;
   bool get isLoading => _isLoading;
 
-  void _init() {
-    _firebaseAuth.authStateChanges().listen((fbUser) async {
+  void init() {
+    _authSubscription?.cancel();
+    _authSubscription = _firebaseAuth.authStateChanges().listen((fbUser) async {
       if (fbUser == null) {
         _userSubscription?.cancel();
         _userSubscription = null;
@@ -126,6 +126,7 @@ class AuthorizationService extends ChangeNotifier {
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
     _userSubscription?.cancel();
     super.dispose();
   }

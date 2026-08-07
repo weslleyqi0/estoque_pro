@@ -16,6 +16,11 @@ import 'package:estoque_pro/app/features/categories/domain/entities/category_ent
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
+import 'package:estoque_pro/app/features/products/data/repositories/products_repository_impl.dart';
+import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/data/repositories/users_repository_impl.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
@@ -43,15 +48,20 @@ void setupServiceLocator() {
   registerDatabaseService<UserEntity>('users');
   registerDatabaseService<SupplierEntity>('suppliers');
   registerDatabaseService<CategoryEntity>('categories');
+  registerDatabaseService<ProductEntity>('products');
 
   // Services
   getIt.registerLazySingleton<AuthService>(() => AuthService());
   getIt.registerLazySingleton<BiometricService>(() => BiometricService());
   getIt.registerLazySingleton<AuthorizationService>(
-    () => AuthorizationService(
-      getIt<FirebaseAuth>(),
-      getIt<UsersRepository>(),
-    ),
+    () {
+      final service = AuthorizationService(
+        getIt<FirebaseAuth>(),
+        getIt<UsersRepository>(),
+      );
+      service.init();
+      return service;
+    },
   );
 
   // Repositories
@@ -72,6 +82,12 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<CategoriesRepository>(
     () => CategoriesRepositoryImpl(
       getIt<FirebaseDatabaseService<CategoryEntity>>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<ProductsRepository>(
+    () => ProductsRepositoryImpl(
+      getIt<FirebaseDatabaseService<ProductEntity>>(),
     ),
   );
 
@@ -102,5 +118,12 @@ void setupServiceLocator() {
   );
   getIt.registerFactory<CategoriesFormViewmodel>(
     () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
+  );
+
+  getIt.registerFactory<ProductsViewModel>(
+    () => ProductsViewModel(getIt<ProductsRepository>()),
+  );
+  getIt.registerFactory<ProductsFormViewModel>(
+    () => ProductsFormViewModel(getIt<ProductsRepository>()),
   );
 }

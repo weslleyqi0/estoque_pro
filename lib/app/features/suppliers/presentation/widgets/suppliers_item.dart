@@ -1,5 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
+import 'package:estoque_pro/app/core/utils/cnpj_input_formatter.dart';
+import 'package:estoque_pro/app/core/utils/phone_input_formatter.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -8,31 +10,30 @@ import 'package:material_symbols_icons/symbols.dart';
 
 class SuppliersItem extends StatelessWidget {
   final SupplierEntity supplier;
+  final VoidCallback? onTap;
+  final bool showProductsTag;
 
   const SuppliersItem({
     super.key,
     required this.supplier,
+    this.onTap,
+    this.showProductsTag = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final color = !supplier.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
-    return Padding(
-      padding: const .symmetric(vertical: AppSpacing.space4),
+    return Card(
+      color: context.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppSpacing.borderRadius16,
+        side: BorderSide(color: context.colorScheme.outlineVariant),
+      ),
       child: InkWell(
-        onTap: () => context.push(AppRoutes.supplierForm, extra: supplier),
-        borderRadius: AppSpacing.borderRadius12,
-        //overlayColor: WidgetStateProperty.all(color.withValues(alpha: 0.1)),
-        child: Container(
+        onTap: onTap ?? () => context.push(AppRoutes.supplierForm, extra: supplier),
+        borderRadius: AppSpacing.borderRadius16,
+        child: Padding(
           padding: const .all(AppSpacing.space12),
-          decoration: BoxDecoration(
-            borderRadius: AppSpacing.borderRadius12,
-            color: context.colorScheme.outline.withValues(alpha: 0.4),
-            border: Border.all(
-              color: context.colorScheme.outline,
-              width: 1,
-            ),
-          ),
           child: Row(
             mainAxisAlignment: .spaceBetween,
             crossAxisAlignment: .start,
@@ -81,7 +82,7 @@ class SuppliersItem extends StatelessWidget {
                         ),
                         const Gap(AppSpacing.space4),
                         Text(
-                          supplier.cnpj ?? '',
+                          supplier.cnpj == null || supplier.cnpj!.isEmpty ? 'Não informado' : CnpjInputFormatter.formatString(supplier.cnpj!),
                           style: context.textTheme.labelLarge?.copyWith(color: color),
                         ),
                       ],
@@ -99,16 +100,17 @@ class SuppliersItem extends StatelessWidget {
                             ),
                             const Gap(AppSpacing.space4),
                             Text(
-                              supplier.phone ?? '',
+                              supplier.phone == null || supplier.phone!.isEmpty ? 'Não informado' : PhoneInputFormatter.formatString(supplier.phone!),
                               style: context.textTheme.labelLarge?.copyWith(color: color),
                             ),
                           ],
                         ),
-                        AppTag(
-                          title: '5 produtos',
-                          icon: Symbols.package_2_rounded,
-                          color: context.colorScheme.primary,
-                        ),
+                        if (showProductsTag)
+                          AppTag(
+                            title: '5 produtos',
+                            icon: Symbols.package_2_rounded,
+                            color: context.colorScheme.primary,
+                          ),
                       ],
                     ),
                   ],

@@ -11,6 +11,11 @@ import 'package:estoque_pro/app/features/categories/domain/entities/category_ent
 import 'package:estoque_pro/app/features/categories/presentation/pages/categories_page.dart';
 import 'package:estoque_pro/app/features/categories/presentation/pages/category_form_page.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
+import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/presentation/pages/product_details_page.dart';
+import 'package:estoque_pro/app/features/products/presentation/pages/product_form_page.dart';
+import 'package:estoque_pro/app/features/products/presentation/pages/product_history_page.dart';
+import 'package:estoque_pro/app/features/products/presentation/pages/products_page.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_form_page.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/suppliers_page.dart';
@@ -53,10 +58,6 @@ class AppRouter {
 
       if (!isBiometricAuth) {
         return isBiometricPage ? null : AppRoutes.biometric;
-      }
-
-      if (isLoginPage || isBiometricPage) {
-        return AppRoutes.home;
       }
 
       if (isLoginPage || isBiometricPage || (isInactivePage && currentUser?.isActive == true)) {
@@ -106,6 +107,31 @@ class AppRouter {
         builder: (context, state) {
           final category = state.extra as CategoryEntity?;
           return CategoryFormPage(category: category);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.products,
+        builder: (context, state) => const ProductsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.productForm,
+        builder: (context, state) {
+          final product = state.extra as ProductEntity?;
+          return ProductFormPage(product: product);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.productDetails,
+        builder: (context, state) {
+          final product = state.extra as ProductEntity;
+          return ProductDetailsPage(product: product);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.productHistory,
+        builder: (context, state) {
+          final product = state.extra as ProductEntity;
+          return ProductHistoryPage(product: product);
         },
       ),
       GoRoute(

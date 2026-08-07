@@ -57,7 +57,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
       id: _currentCategory?.id ?? '',
       name: _nameController.text.trim(),
       icon: _selectedIcon,
-      color: _selectedColor == Colors.transparent ? null : _selectedColor.value,
+      color: _selectedColor == Colors.transparent ? null : _selectedColor.toARGB32(),
     );
 
     if (_isEditing) {

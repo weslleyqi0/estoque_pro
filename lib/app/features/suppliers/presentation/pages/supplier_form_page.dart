@@ -1,5 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/core/utils/cnpj_input_formatter.dart';
+import 'package:estoque_pro/app/core/utils/phone_input_formatter.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_form_viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -127,6 +129,7 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
               controller: _cnpjController,
               keyboardType: TextInputType.number,
               prefixIcon: Symbols.home_work_rounded,
+              inputFormatters: [CnpjInputFormatter()],
             ),
             const Gap(AppSpacing.space16),
             AppTextfield(
@@ -135,6 +138,7 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               prefixIcon: Symbols.phone,
+              inputFormatters: [PhoneInputFormatter()],
             ),
             const Gap(AppSpacing.space24),
             AppSwitchTitle(

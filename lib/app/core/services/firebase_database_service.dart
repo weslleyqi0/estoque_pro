@@ -9,7 +9,7 @@ class FirebaseDatabaseService<T> {
 
   DatabaseReference get ref => _ref;
 
-  Future<T> _handleError<T>(Future<T> Function() action) async {
+  Future<R> _handleError<R>(Future<R> Function() action) async {
     try {
       return await action();
     } on FirebaseException catch (e) {
@@ -35,14 +35,15 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Add an item generating an automatic key (push)
-  Future<void> addOrUpdate(Map<String, dynamic> data) async {
+  Future<void> add(Map<String, dynamic> data) async {
     return _handleError(() async {
       final newRef = _ref.push();
 
       final dataWithId = {
         ...data,
         'id': newRef.key,
-        'createdAt': DateTime.now().toIso8601String(),
+        'createdAt': ServerValue.timestamp,
+        'updatedAt': ServerValue.timestamp,
       };
 
       await newRef.set(dataWithId);
@@ -54,8 +55,15 @@ class FirebaseDatabaseService<T> {
     return _handleError(() async {
       await _ref.child(key).update({
         ...data,
-        "updatedAt": DateTime.now().toIso8601String(),
+        "updatedAt": ServerValue.timestamp,
       });
+    });
+  }
+
+  /// Perform a multi-path atomic update at the root
+  Future<void> updateMultiple(Map<String, dynamic> updates) async {
+    return _handleError(() async {
+      await _ref.root.update(updates);
     });
   }
 

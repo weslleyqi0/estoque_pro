@@ -35,7 +35,7 @@ class AppColors {
   static const Color infoDark = Color(0xFF2563EB);
 
   // Neutral Colors - Light Mode
-  static const Color backgroundLight = Color(0xFFFAFAFA);
+  static const Color backgroundLight = Color(0xFFF7F7F7);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceVariantLight = Color(0xFFF5F5F5);
 
