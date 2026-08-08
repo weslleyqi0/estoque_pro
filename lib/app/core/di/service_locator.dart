@@ -2,6 +2,7 @@ import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
@@ -125,5 +126,9 @@ void setupServiceLocator() {
   );
   getIt.registerFactory<ProductsFormViewModel>(
     () => ProductsFormViewModel(getIt<ProductsRepository>()),
+  );
+
+  getIt.registerFactory<CartViewModel>(
+    () => CartViewModel(),
   );
 }
