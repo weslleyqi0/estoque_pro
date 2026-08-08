@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -63,7 +64,7 @@ class ProductHeaderCard extends StatelessWidget {
                       style: context.textTheme.titleLarge?.copyWith(),
                     ),
                     Text(
-                      'R\$ ${product.price.toStringAsFixed(2)}',
+                      CurrencyInputFormatter.formatCurrency(product.price),
                       style: context.textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.w900,
                       ),

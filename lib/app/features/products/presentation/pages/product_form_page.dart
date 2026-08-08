@@ -110,10 +110,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
     if (success && mounted) {
       context.pop();
     } else if (mounted) {
-      final error = _viewModel.isEditing 
-          ? _viewModel.updateProductCommand.error 
-          : _viewModel.saveProductCommand.error;
-      
+      final error = _viewModel.isEditing ? _viewModel.updateProductCommand.error : _viewModel.saveProductCommand.error;
+
       if (error != null) {
         AppSnackbar.error(context, error.toString().replaceAll('Exception: ', ''));
       }
@@ -275,8 +273,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
                       },
                     ),
                   ),
+                  const Gap(AppSpacing.space16),
                 ],
-                const Gap(AppSpacing.space16),
                 Expanded(
                   child: AppTextfield(
                     label: 'Estoque Mínimo',

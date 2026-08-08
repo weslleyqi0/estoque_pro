@@ -28,6 +28,10 @@ class CurrencyInputFormatter extends TextInputFormatter {
     return formatString(newString);
   }
 
+  static String formatCurrency(double value) {
+    return 'R\$ ${formatDouble(value)}';
+  }
+
   static String formatString(String value) {
     List<String> parts = value.split(',');
     String intPart = parts[0];
