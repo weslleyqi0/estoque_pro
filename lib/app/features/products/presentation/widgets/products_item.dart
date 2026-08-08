@@ -1,8 +1,8 @@
-
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/presentation/extensions/product_stock_ui_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -18,20 +18,9 @@ class ProductsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxProgress = product.minStock > 0 ? (product.minStock * 2).toDouble() : 10.0;
-    final rawProgress = maxProgress > 0 ? product.stock / maxProgress : 0.0;
-    final progressValue = rawProgress.clamp(0.0, 1.0);
-
-    Color statusColor;
-    if (rawProgress < 0.25) {
-      statusColor = AppColors.error;
-    } else if (rawProgress < 0.50) {
-      statusColor = AppColors.warning;
-    } else if (rawProgress < 0.75) {
-      statusColor = AppColors.success;
-    } else {
-      statusColor = AppColors.info;
-    }
+    final statusColor = product.stockStatusColor;
+    final progressValue = product.stockProgressValue;
+    final rawProgress = product.rawStockProgress;
 
     final textColor = !product.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
 

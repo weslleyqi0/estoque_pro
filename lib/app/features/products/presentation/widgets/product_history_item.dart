@@ -117,7 +117,7 @@ class ProductHistoryItem extends StatelessWidget {
                     ),
                     if (history.userName != null && history.userName!.isNotEmpty) ...[
                       Text(
-                        ' - ',
+                        ' • ',
                         style: context.textTheme.labelLarge?.copyWith(
                           color: context.colorScheme.onSurface.withValues(alpha: 0.7),
                           fontWeight: FontWeight.normal,

@@ -12,6 +12,7 @@ import 'package:estoque_pro/app/features/products/presentation/widgets/product_h
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_info_card.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_status_card.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_stock_status_card.dart';
+import 'package:estoque_pro/app/features/products/presentation/extensions/product_stock_ui_extension.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/stock_adjustment_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -95,9 +96,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       listenable: _viewModel,
       builder: (context, _) {
         final product = _currentProduct;
-
-        final maxProgress = product.minStock > 0 ? (product.minStock * 2).toDouble() : 10.0;
-        final rawProgress = maxProgress > 0 ? product.stock / maxProgress : 0.0;
+        final rawProgress = product.rawStockProgress;
 
         final Color statusColor;
         final IconData statusIcon;
