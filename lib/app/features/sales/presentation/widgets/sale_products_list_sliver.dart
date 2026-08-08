@@ -58,12 +58,24 @@ class SaleProductsListSliver extends StatelessWidget {
             return ProductSaleCard(
               product: product,
               cartQuantity: cartQty,
-              onAdd: () => cartVM.addProduct(product),
+              onAdd: () => _onAddProduct(context, product),
             );
           },
           childCount: products.length,
         ),
       ),
     );
+  }
+
+  void _onAddProduct(BuildContext context, product) {
+    final added = cartVM.addProduct(product);
+    if (!added) {
+      final stock = product.stock;
+      final unidade = stock == 1 ? 'unidade disponível' : 'unidades disponíveis';
+      AppSnackbar.warning(
+        context,
+        'Estoque insuficiente! Apenas $stock $unidade de "${product.name}".',
+      );
+    }
   }
 }

@@ -11,14 +11,17 @@ class CartViewModel extends ChangeNotifier {
     return index >= 0 ? _items[index].quantity : 0;
   }
 
-  void addProduct(ProductEntity product) {
+  bool addProduct(ProductEntity product) {
     final index = _items.indexWhere((item) => item.product.id == product.id);
     if (index >= 0) {
       final current = _items[index];
+      if (current.quantity >= product.stock) return false;
       _items[index] = current.copyWith(quantity: current.quantity + 1);
     } else {
+      if (product.stock <= 0) return false;
       _items.add(CartItem(product: product, quantity: 1));
     }
     notifyListeners();
+    return true;
   }
 }
