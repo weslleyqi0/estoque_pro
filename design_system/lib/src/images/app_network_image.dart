@@ -6,6 +6,7 @@ import 'package:material_symbols_icons/symbols.dart';
 class AppNetworkImage extends StatelessWidget {
   final String imageUrl;
   final double size;
+  final BoxFit? fit;
   final BorderRadius? borderRadius;
   final IconData placeholderIcon;
   final double? placeholderIconSize;
@@ -14,6 +15,7 @@ class AppNetworkImage extends StatelessWidget {
     super.key,
     required this.imageUrl,
     this.size = 80,
+    this.fit,
     this.borderRadius,
     this.placeholderIcon = Symbols.package_2_rounded,
     this.placeholderIconSize,
@@ -42,7 +44,7 @@ class AppNetworkImage extends StatelessWidget {
       child: imageUrl.isNotEmpty
           ? CachedNetworkImage(
               imageUrl: imageUrl,
-              fit: BoxFit.cover,
+              fit: fit ?? BoxFit.cover,
               placeholder: (context, url) => const Center(
                 child: CircularProgressIndicator(),
               ),
