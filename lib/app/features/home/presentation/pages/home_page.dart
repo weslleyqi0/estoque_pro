@@ -35,47 +35,51 @@ class HomePage extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: context.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(AppSpacing.radius24),
-                  ),
-                  child: Padding(
-                    padding: const .all(AppSpacing.space24),
-                    child: Row(
-                      mainAxisAlignment: .start,
-                      crossAxisAlignment: .center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(AppSpacing.space16),
-                          decoration: BoxDecoration(
-                            color: AppColors.white.withValues(alpha: 0.2),
-                            borderRadius: AppSpacing.borderRadius12,
-                          ),
-                          child: Icon(
-                            Symbols.add_2_rounded,
-                            color: AppColors.white,
-                            size: AppSpacing.icon28,
-                            weight: 600,
-                          ),
-                        ),
-                        const Gap(AppSpacing.space12),
-                        Column(
-                          mainAxisAlignment: .center,
-                          crossAxisAlignment: .start,
-                          children: [
-                            Text(
-                              'Nova Venda',
-                              style: context.textTheme.headlineSmall?.copyWith(color: AppColors.white, height: 0.9),
+                child: InkWell(
+                  onTap: () => context.push(AppRoutes.newSale),
+                  borderRadius: BorderRadius.circular(AppSpacing.radius24),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(AppSpacing.radius24),
+                    ),
+                    child: Padding(
+                      padding: const .all(AppSpacing.space24),
+                      child: Row(
+                        mainAxisAlignment: .start,
+                        crossAxisAlignment: .center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.space16),
+                            decoration: BoxDecoration(
+                              color: AppColors.white.withValues(alpha: 0.2),
+                              borderRadius: AppSpacing.borderRadius12,
                             ),
-                            Text(
-                              'Iniciar uma nova venda',
-                              style: context.textTheme.bodyMedium?.copyWith(color: AppColors.white),
+                            child: Icon(
+                              Symbols.add_2_rounded,
+                              color: AppColors.white,
+                              size: AppSpacing.icon28,
+                              weight: 600,
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          const Gap(AppSpacing.space12),
+                          Column(
+                            mainAxisAlignment: .center,
+                            crossAxisAlignment: .start,
+                            children: [
+                              Text(
+                                'Nova Venda',
+                                style: context.textTheme.headlineSmall?.copyWith(color: AppColors.white, height: 0.9),
+                              ),
+                              Text(
+                                'Iniciar uma nova venda',
+                                style: context.textTheme.bodyMedium?.copyWith(color: AppColors.white),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

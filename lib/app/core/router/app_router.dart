@@ -16,6 +16,7 @@ import 'package:estoque_pro/app/features/products/presentation/pages/product_det
 import 'package:estoque_pro/app/features/products/presentation/pages/product_form_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/product_history_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/products_page.dart';
+import 'package:estoque_pro/app/features/sales/presentation/pages/new_sale_page.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_form_page.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/suppliers_page.dart';
@@ -134,6 +135,11 @@ class AppRouter {
           return ProductHistoryPage(product: product);
         },
       ),
+      GoRoute(
+        path: AppRoutes.newSale,
+        builder: (context, state) => const NewSalePage(),
+      ),
+
       GoRoute(
         path: AppRoutes.inactive,
         builder: (context, state) => InactivePage(viewModel: getIt<AuthViewModel>()),
