@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -35,42 +35,7 @@ class ProductSaleCard extends StatelessWidget {
         padding: const .symmetric(horizontal: AppSpacing.radius12, vertical: AppSpacing.radius8),
         child: Row(
           children: [
-            Container(
-              height: 80,
-              width: 80,
-              decoration: BoxDecoration(
-                color: context.colorScheme.onSurface.withValues(alpha: 0.05),
-                borderRadius: AppSpacing.borderRadius16,
-              ),
-              foregroundDecoration: BoxDecoration(
-                borderRadius: AppSpacing.borderRadius16,
-                border: Border.all(
-                  color: context.colorScheme.outline,
-                  width: 0.5,
-                ),
-              ),
-              clipBehavior: Clip.hardEdge,
-              child: product.imgUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: product.imgUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorWidget: (context, url, error) => Icon(
-                        Symbols.package_2_rounded,
-                        size: AppSpacing.icon64,
-                        weight: 300,
-                        color: context.colorScheme.onSurface.withValues(alpha: 0.5),
-                      ),
-                    )
-                  : Icon(
-                      Symbols.package_2_rounded,
-                      size: AppSpacing.icon64,
-                      weight: 300,
-                      color: context.colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-            ),
+            AppNetworkImage(imageUrl: product.imgUrl),
             const Gap(AppSpacing.space8),
             Expanded(
               child: Column(

@@ -34,5 +34,8 @@ export 'src/dialogs/app_dialog.dart';
 // Component exports
 export 'src/empty/app_empty_list.dart';
 
+// Image exports
+export 'src/images/app_network_image.dart';
+
 // Snackbar exports
 export 'src/snackbar/app_snackbar.dart';

@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -22,32 +22,10 @@ class ProductHeaderCard extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 130,
-              width: 130,
-              decoration: BoxDecoration(
-                color: context.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppSpacing.space16),
-              ),
-              foregroundDecoration: BoxDecoration(
-                borderRadius: AppSpacing.borderRadius16,
-                border: Border.all(color: context.colorScheme.outline, width: 1),
-              ),
-              clipBehavior: Clip.hardEdge,
-              child: product.imgUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: product.imgUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorWidget: (context, url, error) => const Center(
-                        child: Icon(Symbols.broken_image_rounded, size: 48),
-                      ),
-                    )
-                  : const Center(
-                      child: Icon(Symbols.image_rounded, size: 48),
-                    ),
+            AppNetworkImage(
+              imageUrl: product.imgUrl,
+              size: 130,
+              placeholderIcon: Symbols.image_rounded,
             ),
             const Gap(AppSpacing.space12),
             Expanded(
