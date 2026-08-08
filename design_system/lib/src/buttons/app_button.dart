@@ -242,6 +242,7 @@ class AppIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
   final AppIconButtonSize size;
+  final AppButtonVariant variant;
   final Color? iconColor;
   final Color? backgroundColor;
   final String? tooltip;
@@ -251,10 +252,44 @@ class AppIconButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.size = AppIconButtonSize.large,
+    this.variant = AppButtonVariant.primary,
     this.iconColor,
     this.backgroundColor,
     this.tooltip,
-  });
+  }) : assert(
+         variant != AppButtonVariant.text,
+         'AppIconButton does not support text variant',
+       );
+
+  const AppIconButton.primary({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    this.size = AppIconButtonSize.large,
+    this.iconColor,
+    this.backgroundColor,
+    this.tooltip,
+  }) : variant = AppButtonVariant.primary;
+
+  const AppIconButton.secondary({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    this.size = AppIconButtonSize.large,
+    this.iconColor,
+    this.backgroundColor,
+    this.tooltip,
+  }) : variant = AppButtonVariant.secondary;
+
+  const AppIconButton.outlined({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    this.size = AppIconButtonSize.large,
+    this.iconColor,
+    this.backgroundColor,
+    this.tooltip,
+  }) : variant = AppButtonVariant.outlined;
 
   double get _iconSize => switch (size) {
     AppIconButtonSize.small => AppSpacing.icon16,
@@ -270,14 +305,43 @@ class AppIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+
+    final defaultBgColor = switch (variant) {
+      AppButtonVariant.primary => colorScheme.primary,
+      AppButtonVariant.secondary => colorScheme.secondary,
+      AppButtonVariant.outlined => null,
+      AppButtonVariant.text => null,
+    };
+
+    final defaultIconColor = switch (variant) {
+      AppButtonVariant.primary => colorScheme.onPrimary,
+      AppButtonVariant.secondary => colorScheme.onSecondary,
+      AppButtonVariant.outlined => colorScheme.primary,
+      AppButtonVariant.text => colorScheme.primary,
+    };
+
+    final effectiveBgColor = backgroundColor ?? defaultBgColor;
+    final effectiveIconColor = iconColor ?? defaultIconColor;
+
+    final border = variant == AppButtonVariant.outlined
+        ? BorderSide(
+            color: onPressed == null ? colorScheme.onSurface.withValues(alpha: 0.2) : (effectiveIconColor),
+          )
+        : BorderSide.none;
+
     final button = IconButton(
       icon: Icon(icon, size: _iconSize),
       onPressed: onPressed,
-      color: iconColor ?? context.colorScheme.primary,
       style: IconButton.styleFrom(
-        backgroundColor: backgroundColor,
+        backgroundColor: effectiveBgColor,
+        foregroundColor: effectiveIconColor,
+        disabledBackgroundColor: effectiveBgColor != null ? colorScheme.onSurface.withValues(alpha: 0.12) : null,
+        disabledForegroundColor: colorScheme.onSurface.withValues(alpha: 0.38),
         minimumSize: Size(_buttonSize, _buttonSize),
         maximumSize: Size(_buttonSize, _buttonSize),
+        padding: EdgeInsets.zero,
+        side: border,
       ),
     );
 
