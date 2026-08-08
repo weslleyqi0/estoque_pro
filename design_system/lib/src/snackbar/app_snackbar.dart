@@ -6,6 +6,9 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 enum AppSnackbarType { success, error, warning, info }
 
 class AppSnackbar {
+  static bool _isShowing = false;
+  static String? _currentText;
+
   static (Color, Color, IconData) _getSpecificsByType(AppSnackbarType type) {
     switch (type) {
       case AppSnackbarType.success:
@@ -39,6 +42,19 @@ class AppSnackbar {
     if (!context.mounted) {
       return;
     }
+
+    if (_isShowing && _currentText == text) {
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+    if (_isShowing) {
+      messenger.clearSnackBars();
+    }
+
+    _isShowing = true;
+    _currentText = text;
+
     final (backgroundColor, iconColor, icon) = _getSpecificsByType(type);
     final snackbar = SnackBar(
       showCloseIcon: true,
@@ -66,7 +82,24 @@ class AppSnackbar {
       backgroundColor: backgroundColor,
       behavior: SnackBarBehavior.floating,
     );
-    ScaffoldMessenger.of(context).showSnackBar(snackbar);
+
+    try {
+      final controller = messenger.showSnackBar(snackbar);
+      controller.closed.then((_) {
+        if (_currentText == text) {
+          _isShowing = false;
+          _currentText = null;
+        }
+      }).catchError((_) {
+        if (_currentText == text) {
+          _isShowing = false;
+          _currentText = null;
+        }
+      });
+    } catch (_) {
+      _isShowing = false;
+      _currentText = null;
+    }
   }
 
   static void success(BuildContext context, String text) {
