@@ -1,6 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/presentation/extensions/product_stock_ui_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -19,6 +20,8 @@ class ProductSaleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final stockStatusColor = product.stockStatusColor;
+
     return Card(
       color: context.colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
@@ -45,20 +48,19 @@ class ProductSaleCard extends StatelessWidget {
                     product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.titleMedium?.copyWith(
+                    style: context.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     product.categories.isNotEmpty ? product.categories.map((e) => e.name).join(', ') : 'Sem categoria',
-                    style: context.textTheme.labelMedium?.copyWith(),
+                    style: context.textTheme.labelSmall?.copyWith(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     product.barcode.isNotEmpty ? product.barcode : 'Sem código',
-                    style: context.textTheme.labelMedium?.copyWith(),
-                    maxLines: 1,
+                    style: context.textTheme.labelSmall?.copyWith(),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Row(
@@ -74,7 +76,8 @@ class ProductSaleCard extends StatelessWidget {
                       Text(
                         '${product.stock} un.',
                         style: context.textTheme.titleSmall?.copyWith(
-                          color: product.stock <= product.minStock ? AppColors.error : context.colorScheme.outline,
+                          color: stockStatusColor,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -95,7 +98,9 @@ class ProductSaleCard extends StatelessWidget {
               child: AppButton(
                 onPressed: onAdd,
                 borderRadius: AppSpacing.borderRadius16,
-                backgroundColor: context.colorScheme.primaryContainer,
+                backgroundColor: cartQuantity >= product.stock
+                    ? context.colorScheme.outline
+                    : context.colorScheme.primaryContainer,
                 child: const Icon(
                   Symbols.add_2_rounded,
                   color: AppColors.white,
