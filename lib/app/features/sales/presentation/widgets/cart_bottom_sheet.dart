@@ -28,33 +28,20 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
   final DraggableScrollableController _sheetController = DraggableScrollableController();
   final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
+  static const double _collapsedSize = 0.12;
+  static const double _expandedSize = 1.0;
+
   @override
   void dispose() {
     _sheetController.dispose();
     super.dispose();
   }
 
-  double _getExpandedChildSize(BuildContext context, int itemCount) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
-    if (screenHeight <= 0) return 0.75;
-
-    final bottomInset = mediaQuery.padding.bottom;
-    const headerHeight = 80.0;
-    const itemHeight = 76.0;
-    const summaryAndPadding = 110.0;
-
-    final totalHeight = headerHeight + (itemCount * itemHeight) + summaryAndPadding + bottomInset;
-    final targetSize = totalHeight / screenHeight;
-
-    return targetSize.clamp(0.20, 0.85);
-  }
-
-  void _toggleExpand(double expandedSize) {
+  void _toggleExpand() {
     if (!_sheetController.isAttached) return;
     final currentSize = _sheetController.size;
-    final isExpanded = currentSize > (0.12 + expandedSize) / 2;
-    final target = isExpanded ? 0.12 : expandedSize;
+    final isExpanded = currentSize > (_collapsedSize + _expandedSize) / 2;
+    final target = isExpanded ? _collapsedSize : _expandedSize;
     _sheetController.animateTo(
       target,
       duration: const Duration(milliseconds: 250),
@@ -73,186 +60,245 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
           return const SizedBox.shrink();
         }
 
-        final expandedSize = _getExpandedChildSize(context, vm.items.length);
-
         return DraggableScrollableSheet(
           controller: _sheetController,
-          initialChildSize: 0.12,
-          minChildSize: 0.12,
-          maxChildSize: expandedSize,
+          initialChildSize: _collapsedSize,
+          minChildSize: _collapsedSize,
+          maxChildSize: _expandedSize,
           snap: true,
-          snapSizes: [0.12, expandedSize],
+          snapSizes: const [_collapsedSize, _expandedSize],
           builder: (context, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: context.colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(AppSpacing.radius24),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 16,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: ListView(
-                controller: scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
-                children: [
-                  // Drag Handle & Collapsed Bar Header
-                  AnimatedBuilder(
-                    animation: _sheetController,
-                    builder: (context, _) {
-                      final isExpanded = _sheetController.isAttached
-                          ? _sheetController.size > (0.12 + expandedSize) / 2
-                          : false;
+            return AnimatedBuilder(
+              animation: _sheetController,
+              builder: (context, _) {
+                final isExpanded = _sheetController.isAttached
+                    ? _sheetController.size > (_collapsedSize + _expandedSize) / 2
+                    : false;
 
-                      return GestureDetector(
-                        onTap: () => _toggleExpand(expandedSize),
+                return Container(
+                  decoration: BoxDecoration(
+                    color: context.colorScheme.surface,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(isExpanded ? 0 : AppSpacing.radius24),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 16,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Header Section (Fixed at top)
+                      GestureDetector(
+                        onTap: _toggleExpand,
                         behavior: HitTestBehavior.opaque,
-                        child: Column(
-                          children: [
-                            const Gap(AppSpacing.space8),
-                            Center(
-                              child: Container(
-                                width: 40,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: context.colorScheme.outlineVariant,
-                                  borderRadius: BorderRadius.circular(2),
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: AppSpacing.space16,
+                            right: AppSpacing.space16,
+                            top: isExpanded ? MediaQuery.of(context).padding.top : 0,
+                          ),
+                          child: Column(
+                            children: [
+                              const Gap(AppSpacing.space8),
+                              Center(
+                                child: Container(
+                                  width: 40,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: context.colorScheme.outlineVariant,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
                                 ),
                               ),
-                            ),
-                            const Gap(AppSpacing.space8),
-                            if (!isExpanded) ...[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Badge(
-                                        isLabelVisible: vm.totalItems > 0,
-                                        backgroundColor: AppColors.warning,
-                                        label: Text(
-                                          '${vm.totalItems}',
-                                          style: context.textTheme.titleSmall?.copyWith(
-                                            color: context.colorScheme.onPrimary,
-                                          ),
-                                        ),
-                                        child: AppButton(
-                                          onPressed: () {},
-                                          borderRadius: AppSpacing.borderRadius16,
-                                          backgroundColor: context.colorScheme.primaryContainer,
-                                          child: const Icon(
-                                            Symbols.shopping_cart_rounded,
-                                            color: AppColors.white,
-                                            size: AppSpacing.icon28,
-                                            weight: 600,
-                                          ),
-                                        ),
-                                      ),
-                                      const Gap(AppSpacing.space16),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                              const Gap(AppSpacing.space8),
+                              AnimatedCrossFade(
+                                duration: const Duration(milliseconds: 150),
+                                crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                                firstChild: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
                                         children: [
-                                          Text(
-                                            'Venda ${vm.saleNumber}',
-                                            style: context.textTheme.titleSmall?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${vm.totalItems} ${vm.totalItems == 1 ? 'item' : 'itens'}',
-                                            style: context.textTheme.bodySmall,
+                                          const Gap(AppSpacing.space8),
+                                          Row(
+                                            children: [
+                                              Badge(
+                                                isLabelVisible: vm.totalItems > 0,
+                                                backgroundColor: AppColors.warning,
+                                                label: Text(
+                                                  '${vm.totalItems}',
+                                                  style: context.textTheme.titleSmall?.copyWith(
+                                                    color: context.colorScheme.onPrimary,
+                                                  ),
+                                                ),
+                                                child: AppButton(
+                                                  onPressed: () {},
+                                                  borderRadius: AppSpacing.borderRadius16,
+                                                  backgroundColor: context.colorScheme.primaryContainer,
+                                                  child: const Icon(
+                                                    Symbols.shopping_cart_rounded,
+                                                    color: AppColors.white,
+                                                    size: AppSpacing.icon28,
+                                                    weight: 600,
+                                                  ),
+                                                ),
+                                              ),
+                                              const Gap(AppSpacing.space16),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      'Venda ${vm.saleNumber}',
+                                                      style: context.textTheme.titleSmall?.copyWith(
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                    Text(
+                                                      '${vm.totalItems} ${vm.totalItems == 1 ? 'item' : 'itens'}',
+                                                      style: context.textTheme.bodySmall,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                  Text(
-                                    currencyFormat.format(vm.total),
-                                    style: context.textTheme.headlineMedium?.copyWith(
-                                      color: context.colorScheme.primary,
-                                      fontWeight: FontWeight.w800,
                                     ),
-                                  ),
-                                  Icon(
-                                    isExpanded ? Icons.keyboard_arrow_down_rounded : Icons.keyboard_arrow_up_rounded,
-                                    color: context.colorScheme.primary,
-                                  ),
-                                ],
+                                    const Gap(AppSpacing.space8),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          currencyFormat.format(vm.total),
+                                          style: context.textTheme.titleLarge?.copyWith(
+                                            color: context.colorScheme.primary,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                        const Gap(AppSpacing.space4),
+                                        Icon(
+                                          Icons.keyboard_arrow_up_rounded,
+                                          color: context.colorScheme.primary,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                secondChild: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Carrinho',
+                                          style: context.textTheme.titleLarge,
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              'Venda ',
+                                              style: context.textTheme.bodySmall,
+                                            ),
+                                            Text(
+                                              vm.saleNumber,
+                                              style: context.textTheme.bodySmall?.copyWith(
+                                                color: context.colorScheme.primary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              ' • ${vm.totalItems} ${vm.totalItems == 1 ? 'item' : 'itens'}',
+                                              style: context.textTheme.bodySmall,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: context.colorScheme.primary,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ] else ...[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Carrinho',
-                                        style: context.textTheme.titleLarge,
-                                      ),
-                                      Text(
-                                        'Venda ${vm.saleNumber} • ${vm.totalItems} ${vm.totalItems == 1 ? 'item' : 'itens'}',
-                                        style: context.textTheme.bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                                  Icon(
-                                    isExpanded ? Icons.keyboard_arrow_down_rounded : Icons.keyboard_arrow_up_rounded,
-                                    color: context.colorScheme.primary,
-                                  ),
-                                ],
-                              ),
+                              const Gap(AppSpacing.space8),
                             ],
-                            const Gap(AppSpacing.space8),
-                          ],
+                          ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
 
-                  // Expanded Section
-                  AnimatedBuilder(
-                    animation: _sheetController,
-                    builder: (context, _) {
-                      final isExpanded = _sheetController.isAttached
-                          ? _sheetController.size > (0.12 + expandedSize) / 2
-                          : false;
+                      AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: isExpanded ? 1.0 : 0.0,
+                        child: const Divider(height: 1),
+                      ),
 
-                      if (!isExpanded) return const SizedBox.shrink();
-
-                      return Column(
-                        children: [
-                          const Divider(),
-                          const Gap(AppSpacing.space8),
-
-                          // Cart Items List
-                          ...vm.items.map((cartItem) {
+                      // Cart Items List (Scrollable middle section)
+                      Expanded(
+                        child: ListView.separated(
+                          controller: scrollController,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.space16,
+                            vertical: AppSpacing.space8,
+                          ),
+                          itemCount: vm.items.length,
+                          separatorBuilder: (context, index) => const Gap(AppSpacing.space8),
+                          itemBuilder: (context, index) {
+                            final cartItem = vm.items[index];
                             return CartItemTile(
                               item: cartItem,
                               onIncrease: () => vm.increaseQty(cartItem.product.id),
                               onDecrease: () => vm.decreaseQty(cartItem.product.id),
                               onRemove: () => vm.removeProduct(cartItem.product.id),
                             );
-                          }),
-                          const Gap(AppSpacing.space12),
+                          },
+                        ),
+                      ),
 
-                          // Summary
-                          CartSummaryWidget(
-                            total: vm.total,
+                      // Summary & Checkout Button (Fixed at bottom)
+                      Visibility(
+                        visible: isExpanded,
+                        maintainState: true,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: AppSpacing.space16,
+                            right: AppSpacing.space16,
+                            top: AppSpacing.space12,
+                            bottom: MediaQuery.of(context).padding.bottom + AppSpacing.space16,
                           ),
-
-                          const Gap(AppSpacing.space24),
-                        ],
-                      );
-                    },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CartSummaryWidget(
+                                total: vm.total,
+                              ),
+                              const Gap(AppSpacing.space16),
+                              AppButton(
+                                label: 'Finalizar venda',
+                                isFullWidth: true,
+                                onPressed: () {},
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         );

@@ -26,17 +26,17 @@ class _NewSalePageState extends State<NewSalePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nova Venda'),
-        centerTitle: true,
-      ),
-      body: ListenableBuilder(
-        listenable: Listenable.merge([_productsViewModel, _cartViewModel]),
-        builder: (context, _) {
-          return Stack(
-            children: [
-              CustomScrollView(
+    return ListenableBuilder(
+      listenable: Listenable.merge([_productsViewModel, _cartViewModel]),
+      builder: (context, _) {
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: AppBar(
+                title: const Text('Nova Venda'),
+                centerTitle: true,
+              ),
+              body: CustomScrollView(
                 slivers: [
                   // Top Search
                   AppFloatingSearch(
@@ -51,20 +51,20 @@ class _NewSalePageState extends State<NewSalePage> {
                   ),
                 ],
               ),
+            ),
 
-              // Persistent Cart Bottom Sheet
-              CartBottomSheet(
-                cartViewModel: _cartViewModel,
-                availableProducts: _productsViewModel.products,
-                onSaleSuccess: () {
-                  AppSnackbar.success(context, 'Venda realizada com sucesso!');
-                  context.pop();
-                },
-              ),
-            ],
-          );
-        },
-      ),
+            // Persistent Cart Bottom Sheet
+            CartBottomSheet(
+              cartViewModel: _cartViewModel,
+              availableProducts: _productsViewModel.products,
+              onSaleSuccess: () {
+                AppSnackbar.success(context, 'Venda realizada com sucesso!');
+                context.pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
