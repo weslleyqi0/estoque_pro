@@ -65,20 +65,20 @@ class SalesListSliver extends StatelessWidget {
     final slivers = <Widget>[];
 
     for (final entry in groupedSales.entries) {
-      final dayTotalItems = entry.value.fold<int>(0, (sum, sale) => sum + sale.totalItems);
-      final itemsText = dayTotalItems == 1 ? '1 item' : '$dayTotalItems itens';
+      final salesCount = entry.value.length;
+      final salesText = salesCount == 1 ? '1 venda' : '$salesCount vendas';
 
       slivers.add(
         SliverToBoxAdapter(
           child: Padding(
-            padding: const .only(
+            padding: const EdgeInsets.only(
               left: AppSpacing.space16,
               right: AppSpacing.space16,
               top: AppSpacing.space16,
               bottom: AppSpacing.space8,
             ),
             child: Text(
-              '${_formatDateHeader(entry.key)} • $itemsText',
+              '${_formatDateHeader(entry.key)} • $salesText',
               style: context.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w400,
                 color: context.colorScheme.onSurface.withValues(alpha: 0.6),
