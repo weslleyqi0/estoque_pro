@@ -84,7 +84,9 @@ class SuppliersItem extends StatelessWidget {
                         ),
                         const Gap(AppSpacing.space4),
                         Text(
-                          supplier.cnpj == null || supplier.cnpj!.isEmpty ? 'Não informado' : CnpjInputFormatter.formatString(supplier.cnpj!),
+                          supplier.cnpj == null || supplier.cnpj!.isEmpty
+                              ? 'Não informado'
+                              : CnpjInputFormatter.formatString(supplier.cnpj!),
                           style: context.textTheme.labelLarge?.copyWith(color: color),
                         ),
                       ],
@@ -102,7 +104,9 @@ class SuppliersItem extends StatelessWidget {
                             ),
                             const Gap(AppSpacing.space4),
                             Text(
-                              supplier.phone == null || supplier.phone!.isEmpty ? 'Não informado' : PhoneInputFormatter.formatString(supplier.phone!),
+                              supplier.phone == null || supplier.phone!.isEmpty
+                                  ? 'Não informado'
+                                  : PhoneInputFormatter.formatString(supplier.phone!),
                               style: context.textTheme.labelLarge?.copyWith(color: color),
                             ),
                           ],
@@ -112,6 +116,7 @@ class SuppliersItem extends StatelessWidget {
                             title: countText,
                             icon: AppIcons.package2,
                             color: context.colorScheme.primary,
+                            onTap: () => context.push(AppRoutes.products, extra: supplier.name),
                           ),
                       ],
                     ),
