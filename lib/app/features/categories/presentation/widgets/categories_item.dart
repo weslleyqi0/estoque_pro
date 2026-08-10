@@ -61,6 +61,7 @@ class CategoriesItem extends StatelessWidget {
                     title: countText,
                     icon: AppIcons.package2,
                     color: context.colorScheme.primary,
+                    onTap: () => context.push(AppRoutes.products, extra: category.name),
                   ),
                 ],
               ),
