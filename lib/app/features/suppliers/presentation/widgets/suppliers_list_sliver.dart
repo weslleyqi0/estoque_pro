@@ -57,7 +57,11 @@ class SuppliersListSliver extends StatelessWidget {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final supplier = viewModel.filteredSuppliers[index];
-            return SuppliersItem(supplier: supplier);
+            final productCount = viewModel.getProductCountForSupplier(supplier.id);
+            return SuppliersItem(
+              supplier: supplier,
+              productCount: productCount,
+            );
           },
           childCount: viewModel.filteredSuppliers.length,
         ),

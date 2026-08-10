@@ -9,12 +9,14 @@ import 'package:go_router/go_router.dart';
 
 class SuppliersItem extends StatelessWidget {
   final SupplierEntity supplier;
+  final int productCount;
   final VoidCallback? onTap;
   final bool showProductsTag;
 
   const SuppliersItem({
     super.key,
     required this.supplier,
+    this.productCount = 0,
     this.onTap,
     this.showProductsTag = true,
   });
@@ -22,6 +24,7 @@ class SuppliersItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = !supplier.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
+    final countText = productCount == 1 ? '1 produto' : '$productCount produtos';
     return Card(
       color: context.colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
@@ -106,7 +109,7 @@ class SuppliersItem extends StatelessWidget {
                         ),
                         if (showProductsTag)
                           AppTag(
-                            title: '5 produtos',
+                            title: countText,
                             icon: AppIcons.package2,
                             color: context.colorScheme.primary,
                           ),
