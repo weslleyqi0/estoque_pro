@@ -125,7 +125,10 @@ class _PaymentSheetState extends State<PaymentSheet> {
                     ),
                   ],
                 ),
-                const Gap(AppSpacing.space16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.space16),
+                  child: Divider(),
+                ),
 
                 Flexible(
                   child: SingleChildScrollView(

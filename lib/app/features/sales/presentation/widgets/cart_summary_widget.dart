@@ -24,26 +24,36 @@ class CartSummaryWidget extends StatelessWidget {
       children: [
         if (hasSubtotal)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .spaceBetween,
             children: [
-              Text('Subtotal', style: context.textTheme.bodyMedium),
+              Text('Subtotal', style: context.textTheme.bodyLarge),
               Text(
                 CurrencyInputFormatter.formatCurrency(subtotal!),
-                style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                style: context.textTheme.bodyLarge?.copyWith(fontWeight: .w700),
               ),
             ],
           ),
         if (hasDiscount) ...[
           if (hasSubtotal) const Gap(4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Desconto', style: context.textTheme.bodyMedium?.copyWith(color: AppColors.error)),
-              Text(
-                '- ${CurrencyInputFormatter.formatCurrency(discount!)}',
-                style: context.textTheme.bodyMedium?.copyWith(color: AppColors.error, fontWeight: FontWeight.w600),
-              ),
-            ],
+          Builder(
+            builder: (context) {
+              String discountLabel = 'Desconto';
+              if (hasSubtotal && subtotal! > 0) {
+                final pct = (discount! / subtotal!) * 100;
+                final pctStr = pct % 1 == 0 ? pct.toInt().toString() : pct.toStringAsFixed(1);
+                discountLabel = 'Desconto ($pctStr%)';
+              }
+              return Row(
+                mainAxisAlignment: .spaceBetween,
+                children: [
+                  Text(discountLabel, style: context.textTheme.bodySmall?.copyWith(color: AppColors.error)),
+                  Text(
+                    '- ${CurrencyInputFormatter.formatCurrency(discount!)}',
+                    style: context.textTheme.bodySmall?.copyWith(color: AppColors.error, fontWeight: .w600),
+                  ),
+                ],
+              );
+            },
           ),
         ],
         if (hasSubtotal || hasDiscount)
@@ -52,14 +62,14 @@ class CartSummaryWidget extends StatelessWidget {
             child: Divider(),
           ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: .spaceBetween,
           children: [
-            Text('Total', style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Total', style: context.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
             Text(
               CurrencyInputFormatter.formatCurrency(total),
               style: context.textTheme.headlineSmall?.copyWith(
                 color: context.colorScheme.primary,
-                fontWeight: FontWeight.w800,
+                fontWeight: .w800,
               ),
             ),
           ],

@@ -39,7 +39,7 @@ class PaymentMethodCard extends StatelessWidget {
           horizontal: AppSpacing.space8,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor.withValues(alpha: 0.2) : context.colorScheme.outline.withValues(alpha: 0.3),
+          color: isSelected ? primaryColor.withValues(alpha: 0.2) : context.colorScheme.outline.withValues(alpha: 0.5),
           borderRadius: .circular(AppSpacing.radius16),
           border: .all(
             color: isSelected ? primaryColor : context.colorScheme.outline,

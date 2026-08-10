@@ -24,7 +24,7 @@ class DiscountOptionCard extends StatelessWidget {
         width: 68,
         height: 68,
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor.withValues(alpha: 0.08) : context.colorScheme.surface,
+          color: isSelected ? primaryColor.withValues(alpha: 0.2) : context.colorScheme.outline.withValues(alpha: 0.5),
           borderRadius: .circular(AppSpacing.radius16),
           border: .all(
             color: isSelected ? primaryColor : context.colorScheme.outline,
