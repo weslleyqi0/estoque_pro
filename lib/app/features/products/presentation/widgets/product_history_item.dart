@@ -14,7 +14,9 @@ class ProductHistoryItem extends StatelessWidget {
     this.isLast = false,
   });
 
-  bool get _isPositive => history.action == ProductHistoryAction.add;
+  bool get _isPositive =>
+      history.action == ProductHistoryAction.add ||
+      (history.action == ProductHistoryAction.set && history.newStock >= history.oldStock);
 
   String get _actionText {
     switch (history.action) {
@@ -85,24 +87,35 @@ class ProductHistoryItem extends StatelessWidget {
                     ),
                   ],
                 ),
-                Text(
-                  '"$_actionText"',
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-                    fontWeight: FontWeight.normal,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                if (history.note.isNotEmpty) ...[
-                  const Gap(AppSpacing.space4),
+                if (history.action == ProductHistoryAction.sale) ...[
                   Text(
-                    '"${history.note}"',
+                    '"${history.note.isNotEmpty ? history.note : _actionText}"',
                     style: context.textTheme.labelLarge?.copyWith(
                       color: context.colorScheme.onSurface.withValues(alpha: 0.7),
                       fontWeight: FontWeight.normal,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
+                ] else ...[
+                  Text(
+                    '"$_actionText"',
+                    style: context.textTheme.labelLarge?.copyWith(
+                      color: context.colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.normal,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  if (history.note.isNotEmpty) ...[
+                    const Gap(AppSpacing.space4),
+                    Text(
+                      '"${history.note}"',
+                      style: context.textTheme.labelLarge?.copyWith(
+                        color: context.colorScheme.onSurface.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.normal,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
                 ],
                 const Gap(AppSpacing.space4),
                 Row(

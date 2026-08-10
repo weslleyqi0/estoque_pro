@@ -66,14 +66,17 @@ class SalesRepositoryImpl implements SalesRepository {
             continue;
           }
 
+          final currentStock = (prodSnapshot.child('stock').value as num?)?.toInt() ?? 0;
+          final newStock = currentStock - item.quantity;
+
           final movPushRef = _firebaseDb.ref.root.child('stock_movements').child(productId).push();
 
           final historyModel = ProductHistoryModel.fromEntity(
             ProductHistoryEntity(
               action: ProductHistoryAction.sale,
               quantity: item.quantity,
-              oldStock: 0, // snapshot for audit
-              newStock: 0,
+              oldStock: currentStock,
+              newStock: newStock,
               date: DateTime.now(),
               note: 'Venda $saleNumber',
               userName: finalSale.userName,
