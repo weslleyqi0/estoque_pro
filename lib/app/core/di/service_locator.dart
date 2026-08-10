@@ -6,6 +6,7 @@ import 'package:estoque_pro/app/features/sales/data/repositories/sales_repositor
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
@@ -136,6 +137,10 @@ void setupServiceLocator() {
   );
   getIt.registerFactory<ProductsFormViewModel>(
     () => ProductsFormViewModel(getIt<ProductsRepository>()),
+  );
+
+  getIt.registerFactory<SalesViewModel>(
+    () => SalesViewModel(getIt<SalesRepository>()),
   );
 
   getIt.registerFactory<CartViewModel>(

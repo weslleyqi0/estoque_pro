@@ -18,6 +18,8 @@ class AppSpacing {
   static const double space40 = _base * 10;
   static const double space48 = _base * 12;
   static const double space56 = _base * 14;
+  static const double space64 = _base * 16;
+  static const double space80 = _base * 20;
 
   /// Radius scale
   static const double radius2 = 2.0;

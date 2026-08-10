@@ -59,6 +59,10 @@ abstract class AppIcons {
   static const IconData creditCard = Symbols.credit_card_rounded;
   static const IconData creditScore = Symbols.credit_score_rounded;
   static const IconData receiptLong = Symbols.receipt_long_rounded;
+  static const IconData receipt = Symbols.receipt_long_rounded;
+  static const IconData tune = Symbols.tune_rounded;
+  static const IconData assignmentReturn = Symbols.assignment_return_rounded;
+  static const IconData editNote = Symbols.edit_note_rounded;
   static const IconData fingerprint = Symbols.fingerprint;
   static const IconData keyboard = Symbols.keyboard;
   static const IconData lists = Symbols.lists_rounded;

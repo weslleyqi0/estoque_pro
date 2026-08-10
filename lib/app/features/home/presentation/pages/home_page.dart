@@ -55,7 +55,7 @@ class HomePage extends StatelessWidget {
                               color: AppColors.white.withValues(alpha: 0.2),
                               borderRadius: AppSpacing.borderRadius12,
                             ),
-                             child: Icon(
+                            child: Icon(
                               AppIcons.add2,
                               color: AppColors.white,
                               size: AppSpacing.icon28,
@@ -105,7 +105,7 @@ class HomePage extends StatelessWidget {
                       subTitle: 'Histórico e andamento',
                       color: Colors.green,
                       icon: AppIcons.orderApprove,
-                      onPressed: () {},
+                      onPressed: () => context.push(AppRoutes.sales),
                     ),
 
                     HomeButton(
