@@ -2,7 +2,6 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
 import 'package:estoque_pro/app/features/categories/presentation/widgets/categories_item.dart';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CategoriesListSliver extends StatelessWidget {
   final CategoriesViewModel viewModel;
@@ -30,7 +29,7 @@ class CategoriesListSliver extends StatelessWidget {
       return const SliverFillRemaining(
         child: AppEmptyList(
           message: 'Nenhuma categoria cadastrada!\nClique no botão abaixo para cadastrar uma nova categoria.',
-          icon: Symbols.stacks_rounded,
+          icon: AppIcons.stacks,
           iconColor: Colors.deepPurple,
           iconSize: AppSpacing.icon48,
         ),
@@ -41,7 +40,7 @@ class CategoriesListSliver extends StatelessWidget {
       return const SliverFillRemaining(
         child: AppEmptyList(
           message: 'Nenhuma categoria encontrada para essa pesquisa.',
-          icon: Symbols.search_off_rounded,
+          icon: AppIcons.searchOff,
           iconColor: Colors.grey,
           iconSize: AppSpacing.icon48,
         ),

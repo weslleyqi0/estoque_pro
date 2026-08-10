@@ -17,7 +17,6 @@ import 'package:estoque_pro/app/features/products/presentation/widgets/stock_adj
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
@@ -104,19 +103,19 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
         if (rawProgress <= 0.0) {
           statusColor = AppColors.error;
-          statusIcon = Symbols.error_rounded;
+          statusIcon = AppIcons.error;
           statusText = 'Sem Estoque';
         } else if (rawProgress < 0.25) {
           statusColor = AppColors.error;
-          statusIcon = Symbols.info_rounded;
+          statusIcon = AppIcons.info;
           statusText = 'Estoque Crítico';
         } else if (rawProgress < 0.50) {
           statusColor = AppColors.warning;
-          statusIcon = Symbols.info_rounded;
+          statusIcon = AppIcons.info;
           statusText = 'Estoque Baixo';
         } else {
           statusColor = AppColors.success;
-          statusIcon = Symbols.check_circle_rounded;
+          statusIcon = AppIcons.checkCircle;
           statusText = 'Estoque OK';
         }
 
@@ -125,7 +124,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             title: const Text('Detalhes do Produto'),
             actions: [
               AppIconButton(
-                icon: Symbols.edit_rounded,
+                icon: AppIcons.edit,
                 onPressed: () => context.push(AppRoutes.productForm, extra: product),
               ),
               const Gap(AppSpacing.space8),

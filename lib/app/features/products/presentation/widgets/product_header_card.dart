@@ -4,7 +4,6 @@ import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductHeaderCard extends StatelessWidget {
   final ProductEntity product;
@@ -25,7 +24,7 @@ class ProductHeaderCard extends StatelessWidget {
             AppNetworkImage(
               imageUrl: product.imgUrl,
               size: 130,
-              placeholderIcon: Symbols.image_rounded,
+              placeholderIcon: AppIcons.image,
             ),
             const Gap(AppSpacing.space12),
             Expanded(

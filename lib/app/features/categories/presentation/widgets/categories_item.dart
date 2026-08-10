@@ -5,7 +5,6 @@ import 'package:estoque_pro/app/features/categories/presentation/utils/category_
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CategoriesItem extends StatelessWidget {
   final CategoryEntity category;
@@ -57,7 +56,7 @@ class CategoriesItem extends StatelessWidget {
                   ),
                   AppTag(
                     title: '5 produtos',
-                    icon: Symbols.package_2_rounded,
+                    icon: AppIcons.package2,
                     color: context.colorScheme.primary,
                   ),
                 ],

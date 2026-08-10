@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class AppNetworkImage extends StatelessWidget {
   final String imageUrl;
@@ -17,7 +16,7 @@ class AppNetworkImage extends StatelessWidget {
     this.size = 80,
     this.fit,
     this.borderRadius,
-    this.placeholderIcon = Symbols.package_2_rounded,
+    this.placeholderIcon = AppIcons.package2,
     this.placeholderIconSize,
   });
 

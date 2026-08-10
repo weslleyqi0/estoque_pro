@@ -5,7 +5,6 @@ import 'package:estoque_pro/app/features/categories/presentation/viewmodels/cate
 import 'package:estoque_pro/app/features/categories/presentation/widgets/categories_list_sliver.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({
@@ -40,7 +39,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
       floatingActionButton: AppFloatingActionButton(
         tooltip: 'Adicionar nova categoria',
-        icon: Symbols.add_rounded,
+        icon: AppIcons.add,
         onPressed: () => context.push(AppRoutes.categoryForm),
       ),
 

@@ -6,7 +6,6 @@ import 'package:estoque_pro/app/features/products/presentation/extensions/produc
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductsItem extends StatelessWidget {
   final ProductEntity product;
@@ -107,7 +106,7 @@ class ProductsItem extends StatelessWidget {
                   ),
                   if (rawProgress < 0.50) ...[
                     Icon(
-                      product.stock <= 0 ? Symbols.cancel_rounded : Symbols.info_rounded,
+                      product.stock <= 0 ? AppIcons.cancel : AppIcons.info,
                       size: AppSpacing.icon24,
                       color: statusColor,
                       weight: 900,

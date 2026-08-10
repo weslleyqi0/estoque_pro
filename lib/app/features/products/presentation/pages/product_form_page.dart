@@ -13,7 +13,6 @@ import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppl
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductFormPage extends StatefulWidget {
   final ProductEntity? product;
@@ -144,12 +143,12 @@ class _ProductFormPageState extends State<ProductFormPage> {
         title: Text(_viewModel.isEditing ? 'Editar Produto' : 'Novo Produto'),
         actions: [
           AppIconButton(
-            icon: Symbols.save_rounded,
+            icon: AppIcons.save,
             onPressed: () => _save(),
           ),
           if (_viewModel.isEditing)
             AppIconButton(
-              icon: Symbols.delete,
+              icon: AppIcons.delete,
               iconColor: context.colorScheme.error,
               onPressed: () => _delete(),
             ),
@@ -181,11 +180,11 @@ class _ProductFormPageState extends State<ProductFormPage> {
                             child: CircularProgressIndicator(),
                           ),
                           errorWidget: (context, url, error) => const Center(
-                            child: Icon(Symbols.broken_image_rounded, size: 48),
+                            child: Icon(AppIcons.brokenImage, size: 48),
                           ),
                         )
                       : const Center(
-                          child: Icon(Symbols.image_rounded, size: 48),
+                          child: Icon(AppIcons.image, size: 48),
                         ),
                 );
               },
@@ -254,14 +253,14 @@ class _ProductFormPageState extends State<ProductFormPage> {
                       textAlign: TextAlign.center,
                       controller: _initialStockController,
                       keyboardType: TextInputType.number,
-                      prefixIcon: Symbols.remove,
+                      prefixIcon: AppIcons.remove,
                       onPrefixIconPressed: () {
                         int val = _initialStockController.text.toIntOr();
                         if (val > 0) {
                           _initialStockController.text = (val - 1).toString();
                         }
                       },
-                      suffixIcon: Symbols.add,
+                      suffixIcon: AppIcons.add,
                       onSuffixIconPressed: () {
                         int val = _initialStockController.text.toIntOr();
                         _initialStockController.text = (val + 1).toString();
@@ -283,14 +282,14 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     textAlign: TextAlign.center,
                     controller: _minStockController,
                     keyboardType: TextInputType.number,
-                    prefixIcon: Symbols.remove,
+                    prefixIcon: AppIcons.remove,
                     onPrefixIconPressed: () {
                       int val = _minStockController.text.toIntOr();
                       if (val > 0) {
                         _minStockController.text = (val - 1).toString();
                       }
                     },
-                    suffixIcon: Symbols.add,
+                    suffixIcon: AppIcons.add,
                     onSuffixIconPressed: () {
                       int val = _minStockController.text.toIntOr();
                       _minStockController.text = (val + 1).toString();
@@ -314,12 +313,12 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 final categories = _viewModel.selectedCategories;
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Symbols.stacks_rounded, size: AppSpacing.icon40),
+                  leading: const Icon(AppIcons.stacks, size: AppSpacing.icon40),
                   title: const Text('Categorias'),
                   subtitle: Text(
                     categories.isEmpty ? 'Nenhuma selecionada' : categories.map((e) => e.name).join(', '),
                   ),
-                  trailing: const Icon(Symbols.chevron_right_rounded),
+                  trailing: const Icon(AppIcons.chevronRight),
                   onTap: () {
                     CategoriesBottomSheet.show(
                       context: context,
@@ -339,10 +338,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 final supplier = _viewModel.selectedSupplier;
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Symbols.local_shipping_rounded, size: AppSpacing.icon40),
+                  leading: const Icon(AppIcons.localShipping, size: AppSpacing.icon40),
                   title: const Text('Fornecedor'),
                   subtitle: Text(supplier?.name ?? 'Nenhum selecionado'),
-                  trailing: const Icon(Symbols.chevron_right_rounded),
+                  trailing: const Icon(AppIcons.chevronRight),
                   onTap: () {
                     SupplierBottomSheet.show(
                       context: context,

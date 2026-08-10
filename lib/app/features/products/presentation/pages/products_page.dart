@@ -5,7 +5,6 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/produc
 import 'package:estoque_pro/app/features/products/presentation/widgets/products_list_sliver.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -33,7 +32,7 @@ class _ProductsPageState extends State<ProductsPage> {
       ),
       floatingActionButton: AppFloatingActionButton(
         tooltip: 'Adicionar novo produto',
-        icon: Symbols.add_rounded,
+        icon: AppIcons.add,
         onPressed: () => context.push(AppRoutes.productForm),
       ),
       body: ListenableBuilder(

@@ -2,7 +2,6 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class PaymentMethodCard extends StatelessWidget {
   final PaymentMethod method;
@@ -17,11 +16,11 @@ class PaymentMethodCard extends StatelessWidget {
   });
 
   IconData get _icon => switch (method) {
-    PaymentMethod.dinheiro => Symbols.universal_currency_alt_rounded,
-    PaymentMethod.pix => Symbols.qr_code_2_rounded,
-    PaymentMethod.credito => Symbols.credit_card_rounded,
-    PaymentMethod.debito => Symbols.credit_score_rounded,
-    PaymentMethod.fiado => Symbols.receipt_long_rounded,
+    PaymentMethod.dinheiro => AppIcons.currency,
+    PaymentMethod.pix => AppIcons.qrCode,
+    PaymentMethod.credito => AppIcons.creditCard,
+    PaymentMethod.debito => AppIcons.creditScore,
+    PaymentMethod.fiado => AppIcons.receiptLong,
   };
 
   @override

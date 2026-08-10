@@ -6,7 +6,6 @@ import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_enti
 import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_form_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class SupplierFormPage extends StatefulWidget {
   final SupplierEntity? supplier;
@@ -91,13 +90,13 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
         title: Text(_isEditing ? 'Editar Fornecedor' : 'Novo Fornecedor'),
         actions: [
           AppIconButton(
-            icon: Symbols.save_rounded,
+            icon: AppIcons.save,
             tooltip: 'Salvar',
             onPressed: () => _save(),
           ),
           if (_currentSupplier != null)
             AppIconButton(
-              icon: Symbols.delete,
+              icon: AppIcons.delete,
               tooltip: 'Excluir',
               onPressed: () => _delete(),
             ),
@@ -128,7 +127,7 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
               hint: '00.000.000/0000-00',
               controller: _cnpjController,
               keyboardType: TextInputType.number,
-              prefixIcon: Symbols.home_work_rounded,
+              prefixIcon: AppIcons.homeWork,
               inputFormatters: [CnpjInputFormatter()],
             ),
             const Gap(AppSpacing.space16),
@@ -137,7 +136,7 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
               hint: '(00) 00000-0000',
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              prefixIcon: Symbols.phone,
+              prefixIcon: AppIcons.phone,
               inputFormatters: [PhoneInputFormatter()],
             ),
             const Gap(AppSpacing.space24),

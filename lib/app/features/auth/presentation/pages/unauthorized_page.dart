@@ -2,7 +2,6 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class UnauthorizedPage extends StatelessWidget {
   const UnauthorizedPage({super.key});
@@ -19,7 +18,7 @@ class UnauthorizedPage extends StatelessWidget {
             children: [
               const Spacer(),
               Icon(
-                Symbols.lock_person,
+                AppIcons.lockPerson,
                 size: 80,
                 color: context.colorScheme.error,
                 weight: 600,

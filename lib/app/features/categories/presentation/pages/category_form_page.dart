@@ -6,7 +6,6 @@ import 'package:estoque_pro/app/features/categories/presentation/viewmodels/cate
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CategoryFormPage extends StatefulWidget {
   final CategoryEntity? category;
@@ -121,12 +120,12 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
         title: Text(_isEditing ? 'Editar Categoria' : 'Nova Categoria'),
         actions: [
           AppIconButton(
-            icon: Symbols.save_rounded,
+            icon: AppIcons.save,
             onPressed: () => _save(),
           ),
           if (_currentCategory != null)
             AppIconButton(
-              icon: Symbols.delete,
+              icon: AppIcons.delete,
               onPressed: () => _delete(),
             ),
           const Gap(AppSpacing.space4),
@@ -173,7 +172,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                     ),
                     trailing: _selectedColor != Colors.transparent 
                       ? IconButton(
-                          icon: const Icon(Symbols.close_rounded),
+                          icon: const Icon(AppIcons.close),
                           onPressed: () => setState(() => _selectedColor = Colors.transparent),
                         )
                       : null,

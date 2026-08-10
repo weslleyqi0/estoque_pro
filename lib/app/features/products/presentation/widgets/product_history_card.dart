@@ -3,7 +3,6 @@ import 'package:estoque_pro/app/features/products/domain/entities/product_histor
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_history_item.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductHistoryCard extends StatelessWidget {
   final String title;
@@ -47,7 +46,7 @@ class ProductHistoryCard extends StatelessWidget {
                     color: context.colorScheme.onSurface.withValues(alpha: 0.08),
                   ),
                   child: Icon(
-                    Symbols.history_rounded,
+                    AppIcons.history,
                     color: context.colorScheme.onSurface.withValues(alpha: 0.5),
                     size: AppSpacing.icon24,
                     weight: 900,
@@ -80,7 +79,7 @@ class ProductHistoryCard extends StatelessWidget {
               child: Column(
                 children: [
                   Icon(
-                    Symbols.history_rounded,
+                    AppIcons.history,
                     color: context.colorScheme.onSurface.withValues(alpha: 0.8),
                     size: AppSpacing.icon40,
                     weight: 400,

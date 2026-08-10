@@ -133,7 +133,7 @@ class _AppTextfieldState extends State<AppTextfield> {
     if (widget.showPasswordToggle && widget.obscureText) {
       suffixIconWidget = IconButton(
         icon: Icon(
-          _obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+          _obscureText ? AppIcons.visibility : AppIcons.visibilityOff,
           size: AppSpacing.icon20,
         ),
         onPressed: _togglePasswordVisibility,

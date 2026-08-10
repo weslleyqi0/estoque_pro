@@ -4,7 +4,6 @@ import 'package:estoque_pro/app/features/products/domain/entities/product_entity
 import 'package:estoque_pro/app/features/products/presentation/extensions/product_stock_ui_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductSaleCard extends StatelessWidget {
   final ProductEntity product;
@@ -102,7 +101,7 @@ class ProductSaleCard extends StatelessWidget {
                     ? context.colorScheme.outline
                     : context.colorScheme.primaryContainer,
                 child: const Icon(
-                  Symbols.add_2_rounded,
+                  AppIcons.add2,
                   color: AppColors.white,
                   size: AppSpacing.icon28,
                   weight: 600,

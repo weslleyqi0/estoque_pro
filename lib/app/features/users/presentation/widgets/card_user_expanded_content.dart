@@ -7,7 +7,6 @@ import 'package:estoque_pro/app/features/users/presentation/widgets/card_user_in
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CardUserExpandedContent extends StatelessWidget {
   final UsersViewModel viewModel;
@@ -71,13 +70,13 @@ class CardUserExpandedContent extends StatelessWidget {
                       children: [
                         AppButton(
                           onPressed: () => viewModel.updateUserRole(user, UserRole.seller),
-                          icon: Symbols.shopping_bag_rounded,
+                          icon: AppIcons.shoppingBag,
                           variant: user.role == UserRole.admin ? AppButtonVariant.outlined : AppButtonVariant.primary,
                           label: 'Vendedor',
                         ),
                         AppButton(
                           onPressed: () => viewModel.updateUserRole(user, UserRole.admin),
-                          icon: Symbols.shield_person,
+                          icon: AppIcons.shieldPerson,
                           variant: user.role == UserRole.seller ? AppButtonVariant.outlined : AppButtonVariant.primary,
                           label: 'Administrador',
                         ),

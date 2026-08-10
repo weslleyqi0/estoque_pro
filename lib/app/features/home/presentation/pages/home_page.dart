@@ -7,7 +7,6 @@ import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -19,7 +18,7 @@ class HomePage extends StatelessWidget {
         title: const Text('Home'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(AppIcons.logout),
             tooltip: 'Sair',
             onPressed: () => getIt<AuthViewModel>().logoutCommand.execute(),
           ),
@@ -56,8 +55,8 @@ class HomePage extends StatelessWidget {
                               color: AppColors.white.withValues(alpha: 0.2),
                               borderRadius: AppSpacing.borderRadius12,
                             ),
-                            child: Icon(
-                              Symbols.add_2_rounded,
+                             child: Icon(
+                              AppIcons.add2,
                               color: AppColors.white,
                               size: AppSpacing.icon28,
                               weight: 600,
@@ -98,14 +97,14 @@ class HomePage extends StatelessWidget {
                       title: 'Produtos',
                       subTitle: 'Gerenciar Catalogo',
                       color: AppColors.primary,
-                      icon: Symbols.lists_rounded,
+                      icon: AppIcons.lists,
                       onPressed: () => context.push(AppRoutes.products),
                     ),
                     HomeButton(
                       title: 'Vendas',
                       subTitle: 'Histórico e andamento',
                       color: Colors.green,
-                      icon: Symbols.order_approve_sharp,
+                      icon: AppIcons.orderApprove,
                       onPressed: () {},
                     ),
 
@@ -113,28 +112,28 @@ class HomePage extends StatelessWidget {
                       title: 'Categorias',
                       subTitle: 'Organizar produtos',
                       color: Colors.deepPurple,
-                      icon: Symbols.stacks_rounded,
+                      icon: AppIcons.stacks,
                       onPressed: () => context.push(AppRoutes.categories),
                     ),
                     HomeButton(
                       title: 'Fornecedores',
                       subTitle: 'Gerenciar paceiros',
                       color: Colors.cyan,
-                      icon: Symbols.local_shipping_rounded,
+                      icon: AppIcons.localShipping,
                       onPressed: () => context.push(AppRoutes.suppliers),
                     ),
                     HomeButton(
                       title: 'Clientes',
                       subTitle: 'Cadastros e fiados',
                       color: Colors.pink,
-                      icon: Symbols.group_rounded,
+                      icon: AppIcons.group,
                       onPressed: () {},
                     ),
                     HomeButton(
                       title: 'Entregas',
                       subTitle: 'Gerenciar entregas',
                       color: Colors.orange,
-                      icon: Symbols.delivery_truck_speed_rounded,
+                      icon: AppIcons.deliveryTruck,
                       onPressed: () {},
                     ),
                     if (isManager) ...[
@@ -142,14 +141,14 @@ class HomePage extends StatelessWidget {
                         title: 'Relatórios',
                         subTitle: 'Análise completa',
                         color: Colors.blue,
-                        icon: Symbols.bar_chart_rounded,
+                        icon: AppIcons.barChart,
                         onPressed: () {},
                       ),
                       HomeButton(
                         title: 'Usuários',
                         subTitle: 'Gerenciar equipe',
                         color: Colors.blueGrey,
-                        icon: Symbols.supervisor_account_rounded,
+                        icon: AppIcons.supervisorAccount,
                         onPressed: () => context.push(AppRoutes.users),
                       ),
                     ],

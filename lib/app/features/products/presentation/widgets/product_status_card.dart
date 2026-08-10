@@ -2,7 +2,6 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductStatusCard extends StatelessWidget {
   final ProductEntity product;
@@ -40,7 +39,7 @@ class ProductStatusCard extends StatelessWidget {
                         : context.colorScheme.onSurface.withValues(alpha: 0.1),
                   ),
                   child: Icon(
-                    Symbols.power_settings_new_rounded,
+                    AppIcons.powerSettings,
                     color: product.isActive
                         ? AppColors.success
                         : context.colorScheme.onSurface.withValues(alpha: 0.5),

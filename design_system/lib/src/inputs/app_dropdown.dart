@@ -63,7 +63,7 @@ class AppDropdown<T> extends StatelessWidget {
           ),
           borderRadius: AppSpacing.borderRadius12,
           icon: Icon(
-            Icons.arrow_drop_down,
+            AppIcons.dropDown,
             color: context.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           decoration: InputDecoration(

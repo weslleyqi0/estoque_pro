@@ -2,7 +2,6 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class BiometricPage extends StatefulWidget {
   final BiometricViewModel viewModel;
@@ -45,7 +44,7 @@ class _BiometricPageState extends State<BiometricPage> {
                 crossAxisAlignment: .stretch,
                 children: [
                   Icon(
-                    Symbols.fingerprint,
+                    AppIcons.fingerprint,
                     size: 100,
                     color: context.colorScheme.primary,
                     fontWeight: FontWeight.w600,
@@ -62,14 +61,14 @@ class _BiometricPageState extends State<BiometricPage> {
             AppButton(
               onPressed: () => viewModel.authenticateCommand.execute(),
               label: 'Usar digital',
-              icon: Symbols.fingerprint,
+              icon: AppIcons.fingerprint,
               isFullWidth: true,
             ),
             Gap(AppSpacing.space8),
             AppButton.text(
               onPressed: () => viewModel.usePassword(),
               label: 'USAR SENHA',
-              icon: Symbols.keyboard,
+              icon: AppIcons.keyboard,
               isFullWidth: true,
             ),
             Gap(AppSpacing.space24),

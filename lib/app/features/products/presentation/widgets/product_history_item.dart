@@ -3,7 +3,6 @@ import 'package:estoque_pro/app/features/products/domain/entities/product_histor
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductHistoryItem extends StatelessWidget {
   final ProductHistoryEntity history;
@@ -58,7 +57,7 @@ class ProductHistoryItem extends StatelessWidget {
               color: color.withValues(alpha: 0.1),
             ),
             child: Icon(
-              _isPositive ? Symbols.trending_up_rounded : Symbols.trending_down_rounded,
+              _isPositive ? AppIcons.trendingUp : AppIcons.trendingDown,
               color: color,
               weight: 700,
             ),

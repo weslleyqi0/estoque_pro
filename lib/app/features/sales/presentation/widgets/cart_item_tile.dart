@@ -3,7 +3,6 @@ import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CartItemTile extends StatelessWidget {
   final CartItem item;
@@ -67,7 +66,7 @@ class CartItemTile extends StatelessWidget {
                 AppIconButton.outlined(
                   onPressed: onDecrease,
                   size: AppIconButtonSize.medium,
-                  icon: Symbols.remove_rounded,
+                  icon: AppIcons.remove,
                   iconColor: AppColors.errorDark,
                   backgroundColor: context.colorScheme.error.withValues(alpha: 0.3),
                 )
@@ -75,7 +74,7 @@ class CartItemTile extends StatelessWidget {
                 AppIconButton.outlined(
                   onPressed: onRemove,
                   size: AppIconButtonSize.medium,
-                  icon: Symbols.delete_outline_rounded,
+                  icon: AppIcons.delete,
                   iconColor: AppColors.errorDark,
                   backgroundColor: context.colorScheme.error.withValues(alpha: 0.3),
                 ),
@@ -92,7 +91,7 @@ class CartItemTile extends StatelessWidget {
               AppIconButton.outlined(
                 size: AppIconButtonSize.medium,
                 onPressed: item.quantity >= item.product.stock ? null : onIncrease,
-                icon: Symbols.add_rounded,
+                icon: AppIcons.add,
                 backgroundColor: context.colorScheme.primary.withValues(alpha: 0.3),
               ),
             ],

@@ -7,7 +7,6 @@ import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_summary
 import 'package:estoque_pro/app/features/sales/presentation/widgets/payment_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CartBottomSheet extends StatefulWidget {
   final CartViewModel cartViewModel;
@@ -148,7 +147,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                                     borderRadius: AppSpacing.borderRadius16,
                                                     backgroundColor: context.colorScheme.primaryContainer,
                                                     child: const Icon(
-                                                      Symbols.shopping_cart_rounded,
+                                                      AppIcons.shoppingCart,
                                                       color: AppColors.white,
                                                       size: AppSpacing.icon28,
                                                       weight: 600,
@@ -235,7 +234,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                         ],
                                       ),
                                       Icon(
-                                        Icons.keyboard_arrow_down_rounded,
+                                        AppIcons.arrowDown,
                                         color: context.colorScheme.primary,
                                       ),
                                     ],

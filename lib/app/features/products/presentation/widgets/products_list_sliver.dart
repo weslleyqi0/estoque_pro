@@ -2,7 +2,6 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/products_item.dart';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductsListSliver extends StatelessWidget {
   final ProductsViewModel viewModel;
@@ -30,7 +29,7 @@ class ProductsListSliver extends StatelessWidget {
       return const SliverFillRemaining(
         child: AppEmptyList(
           message: 'Nenhum produto cadastrado!\nClique no botão abaixo para cadastrar um novo produto.',
-          icon: Symbols.inventory_2_rounded,
+          icon: AppIcons.inventory2,
           iconColor: Colors.cyan,
           iconSize: AppSpacing.icon48,
         ),
@@ -41,7 +40,7 @@ class ProductsListSliver extends StatelessWidget {
       return const SliverFillRemaining(
         child: AppEmptyList(
           message: 'Nenhum produto encontrado para essa pesquisa.',
-          icon: Symbols.search_off_rounded,
+          icon: AppIcons.searchOff,
           iconColor: Colors.grey,
           iconSize: AppSpacing.icon48,
         ),

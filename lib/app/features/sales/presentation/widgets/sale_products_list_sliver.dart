@@ -4,7 +4,6 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/produc
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/product_sale_card.dart';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class SaleProductsListSliver extends StatelessWidget {
   final ProductsViewModel productsViewModel;
@@ -38,7 +37,7 @@ class SaleProductsListSliver extends StatelessWidget {
           message: productsViewModel.searchQuery.isNotEmpty
               ? 'Nenhum produto encontrado para "${productsViewModel.searchQuery}"'
               : 'Nenhum produto disponível para venda.',
-          icon: productsViewModel.searchQuery.isNotEmpty ? Symbols.search_off_rounded : Symbols.inventory_2_rounded,
+          icon: productsViewModel.searchQuery.isNotEmpty ? AppIcons.searchOff : AppIcons.inventory2,
           iconColor: productsViewModel.searchQuery.isNotEmpty ? Colors.grey : Colors.cyan,
           iconSize: AppSpacing.icon48,
         ),

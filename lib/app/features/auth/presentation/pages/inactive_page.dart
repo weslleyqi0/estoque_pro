@@ -2,7 +2,6 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class InactivePage extends StatelessWidget {
   final AuthViewModel viewModel;
@@ -24,7 +23,7 @@ class InactivePage extends StatelessWidget {
             children: [
               const Spacer(),
               Icon(
-                Symbols.block,
+                AppIcons.block,
                 size: 100,
                 color: context.colorScheme.error,
                 weight: 700,

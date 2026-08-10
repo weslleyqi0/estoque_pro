@@ -1,7 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 enum AppSnackbarType { success, error, warning, info }
 
@@ -15,25 +14,25 @@ class AppSnackbar {
         return (
           Color.lerp(AppColors.success, Colors.white, 0.5)!,
           Color.lerp(AppColors.success, Colors.black, 0.5)!,
-          Symbols.check_circle_outline_rounded,
+          AppIcons.checkCircleOutline,
         );
       case AppSnackbarType.error:
         return (
           Color.lerp(AppColors.error, Colors.white, 0.5)!,
           Color.lerp(AppColors.error, Colors.black, 0.3)!,
-          Symbols.error_circle_rounded,
+          AppIcons.errorCircle,
         );
       case AppSnackbarType.warning:
         return (
           Color.lerp(AppColors.warning, Colors.white, 0.4)!,
           Color.lerp(AppColors.warning, Colors.black, 0.4)!,
-          Symbols.warning_rounded,
+          AppIcons.warning,
         );
       case AppSnackbarType.info:
         return (
           Color.lerp(AppColors.info, Colors.white, 0.5)!,
           Color.lerp(AppColors.info, Colors.black, 0.4)!,
-          Symbols.info_rounded,
+          AppIcons.info,
         );
     }
   }

@@ -6,7 +6,6 @@ import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_enti
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class SuppliersItem extends StatelessWidget {
   final SupplierEntity supplier;
@@ -45,7 +44,7 @@ class SuppliersItem extends StatelessWidget {
                   color: context.colorScheme.outline,
                 ),
                 child: Icon(
-                  Symbols.local_shipping_rounded,
+                  AppIcons.localShipping,
                   color: color,
                   size: AppSpacing.icon32,
                   weight: 600,
@@ -75,7 +74,7 @@ class SuppliersItem extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          Symbols.home_work_rounded,
+                          AppIcons.homeWork,
                           color: color,
                           size: AppSpacing.icon16,
                           weight: 600,
@@ -93,7 +92,7 @@ class SuppliersItem extends StatelessWidget {
                         Row(
                           children: [
                             Icon(
-                              Symbols.phone,
+                              AppIcons.phone,
                               color: color,
                               size: AppSpacing.icon16,
                               weight: 600,
@@ -108,7 +107,7 @@ class SuppliersItem extends StatelessWidget {
                         if (showProductsTag)
                           AppTag(
                             title: '5 produtos',
-                            icon: Symbols.package_2_rounded,
+                            icon: AppIcons.package2,
                             color: context.colorScheme.primary,
                           ),
                       ],

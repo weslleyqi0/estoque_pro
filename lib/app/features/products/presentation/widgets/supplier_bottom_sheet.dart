@@ -5,7 +5,6 @@ import 'package:estoque_pro/app/features/suppliers/presentation/widgets/supplier
 import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class SupplierBottomSheet extends StatelessWidget {
   final SuppliersViewModel suppliersVM;
@@ -71,7 +70,7 @@ class SupplierBottomSheet extends StatelessWidget {
                       ),
                       TextButton.icon(
                         onPressed: () => context.push(AppRoutes.supplierForm),
-                        icon: const Icon(Symbols.add_rounded, size: AppSpacing.icon24, weight: 600),
+                        icon: const Icon(AppIcons.add, size: AppSpacing.icon24, weight: 600),
                         label: Text(
                           'Novo',
                           style: context.textTheme.titleSmall?.copyWith(color: context.colorScheme.primary),

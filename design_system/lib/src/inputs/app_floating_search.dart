@@ -1,6 +1,5 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 /// Design System Floating Search Sliver
 class AppFloatingSearch extends StatefulWidget {
@@ -58,8 +57,8 @@ class _AppFloatingSearchState extends State<AppFloatingSearch> {
       title: AppTextfield(
         controller: _controller,
         hint: widget.hint,
-        prefixIcon: Symbols.search_rounded,
-        suffixIcon: _hasText ? Symbols.close_rounded : null,
+        prefixIcon: AppIcons.search,
+        suffixIcon: _hasText ? AppIcons.close : null,
         onSuffixIconPressed: _hasText ? _clearSearch : null,
         filled: true,
         filledColor: context.colorScheme.surface,
