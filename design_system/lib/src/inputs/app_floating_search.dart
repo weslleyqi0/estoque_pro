@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 /// Design System Floating Search Sliver
 class AppFloatingSearch extends StatefulWidget {
   final String hint;
+  final String? initialValue;
   final ValueChanged<String>? onChanged;
 
   const AppFloatingSearch({
     super.key,
     this.hint = 'Pesquisar...',
+    this.initialValue,
     this.onChanged,
   });
 
@@ -17,12 +19,14 @@ class AppFloatingSearch extends StatefulWidget {
 }
 
 class _AppFloatingSearchState extends State<AppFloatingSearch> {
-  final _controller = TextEditingController();
+  late final TextEditingController _controller;
   bool _hasText = false;
 
   @override
   void initState() {
     super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+    _hasText = _controller.text.isNotEmpty;
     _controller.addListener(_onTextChanged);
   }
 
