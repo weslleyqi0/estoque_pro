@@ -2,9 +2,19 @@ import 'package:estoque_pro/app/features/products/domain/entities/product_entity
 import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
+import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class CartViewModel extends ChangeNotifier {
+  final SalesRepository _salesRepository;
+
+  CartViewModel(this._salesRepository) {
+    _initSaleNumber();
+  }
+
   final List<CartItem> _items = [];
   List<CartItem> get items => _items;
 
@@ -42,10 +52,6 @@ class CartViewModel extends ChangeNotifier {
   double get change {
     if (_paymentMethod != PaymentMethod.dinheiro) return 0.0;
     return (_amountPaid - total);
-  }
-
-  CartViewModel() {
-    _initSaleNumber();
   }
 
   void _initSaleNumber() {
@@ -116,5 +122,79 @@ class CartViewModel extends ChangeNotifier {
   void setAmountPaid(double amount) {
     _amountPaid = amount;
     notifyListeners();
+  }
+
+  void _resetActiveFields() {
+    _discountType = DiscountType.valueAmount;
+    _discountValue = 0.0;
+    _paymentMethod = null;
+    _amountPaid = 0.0;
+    _initSaleNumber();
+  }
+
+  void clearCart() {
+    _resetActiveFields();
+    notifyListeners();
+  }
+
+  List<ProductEntity> getOutOfStockProducts(List<ProductEntity> availableProducts) {
+    final List<ProductEntity> invalid = [];
+    for (final item in _items) {
+      final matched = availableProducts.firstWhere(
+        (p) => p.id == item.product.id,
+        orElse: () => item.product.copyWith(stock: 0),
+      );
+      if (item.quantity > matched.stock) {
+        invalid.add(matched);
+      }
+    }
+    return invalid;
+  }
+
+  Future<bool> executeFinalize({
+    required String userId,
+    required String userName,
+    required List<ProductEntity> availableProducts,
+  }) async {
+    final outOfStock = getOutOfStockProducts(availableProducts);
+    if (outOfStock.isNotEmpty) {
+      final names = outOfStock.map((p) => '${p.name} (Estoque: ${p.stock})').join(', ');
+      throw Exception('Estoque insuficiente para: $names');
+    }
+
+    final saleItems = _items
+        .map(
+          (item) => SaleItemEntity(
+            productId: item.product.id,
+            productName: item.product.name,
+            productImgUrl: item.product.imgUrl,
+            unitPrice: item.product.price,
+            quantity: item.quantity,
+          ),
+        )
+        .toList();
+
+    final sale = SaleEntity(
+      id: '',
+      saleNumber: _saleNumber,
+      items: saleItems,
+      subtotal: subtotal,
+      discountType: _discountType,
+      discountValue: _discountValue,
+      total: total,
+      paymentMethod: _paymentMethod!,
+      amountPaid: _paymentMethod == PaymentMethod.dinheiro ? _amountPaid : null,
+      change: _paymentMethod == PaymentMethod.dinheiro ? change : null,
+      customerId: '',
+      customerName: '',
+      userId: userId,
+      userName: userName,
+      status: SaleStatus.completed,
+      createdAt: DateTime.now(),
+    );
+
+    await _salesRepository.save(sale);
+    clearCart();
+    return true;
   }
 }

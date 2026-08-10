@@ -303,11 +303,11 @@ class _PaymentSheetState extends State<PaymentSheet> {
         throw Exception('Usuário não autenticado.');
       }
 
-      /* await widget.cartViewModel.executeFinalize(
+      await widget.cartViewModel.executeFinalize(
         userId: currentUser.uid,
         userName: currentUser.name,
         availableProducts: widget.availableProducts,
-      ); */
+      );
 
       if (mounted) {
         Navigator.pop(context);
