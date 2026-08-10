@@ -7,7 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class ProductsPage extends StatefulWidget {
-  const ProductsPage({super.key});
+  final String? initialSearchQuery;
+
+  const ProductsPage({
+    super.key,
+    this.initialSearchQuery,
+  });
 
   @override
   State<ProductsPage> createState() => _ProductsPageState();
@@ -19,7 +24,9 @@ class _ProductsPageState extends State<ProductsPage> {
   @override
   void initState() {
     super.initState();
-
+    if (widget.initialSearchQuery != null && widget.initialSearchQuery!.isNotEmpty) {
+      _viewModel.setSearchQuery(widget.initialSearchQuery!);
+    }
     _viewModel.listenAll();
   }
 
@@ -44,6 +51,7 @@ class _ProductsPageState extends State<ProductsPage> {
               if (_viewModel.products.isNotEmpty)
                 AppFloatingSearch(
                   hint: 'Pesquisar produto...',
+                  initialValue: _viewModel.searchQuery,
                   onChanged: _viewModel.setSearchQuery,
                 ),
               ProductsListSliver(viewModel: _viewModel),

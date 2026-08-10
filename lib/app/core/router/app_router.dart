@@ -112,7 +112,10 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.products,
-        builder: (context, state) => const ProductsPage(),
+        builder: (context, state) {
+          final initialSearchQuery = state.extra as String?;
+          return ProductsPage(initialSearchQuery: initialSearchQuery);
+        },
       ),
       GoRoute(
         path: AppRoutes.productForm,
