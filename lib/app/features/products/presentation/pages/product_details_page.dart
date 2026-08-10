@@ -31,14 +31,20 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  late final ProductsViewModel _viewModel;
-  late final ProductsFormViewModel _formViewModel;
+  final _viewModel = getIt<ProductsViewModel>();
+  final _formViewModel = getIt<ProductsFormViewModel>();
 
   @override
   void initState() {
     super.initState();
-    _viewModel = getIt<ProductsViewModel>();
-    _formViewModel = getIt<ProductsFormViewModel>();
+    _viewModel.listenAll();
+  }
+
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    _formViewModel.dispose();
+    super.dispose();
   }
 
   ProductEntity get _currentProduct {
@@ -92,7 +98,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _viewModel,
+      listenable: Listenable.merge([_viewModel, _formViewModel]),
       builder: (context, _) {
         final product = _currentProduct;
         final rawProgress = product.rawStockProgress;

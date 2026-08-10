@@ -15,6 +15,8 @@ class CartViewModel extends ChangeNotifier {
     _initSaleNumber();
   }
 
+  final DateTime _createdAt = DateTime.now();
+
   final List<CartItem> _items = [];
   List<CartItem> get items => _items;
 
@@ -125,6 +127,7 @@ class CartViewModel extends ChangeNotifier {
   }
 
   void _resetActiveFields() {
+    _items.clear();
     _discountType = DiscountType.valueAmount;
     _discountValue = 0.0;
     _paymentMethod = null;
@@ -191,6 +194,57 @@ class CartViewModel extends ChangeNotifier {
       userName: userName,
       status: SaleStatus.completed,
       createdAt: DateTime.now(),
+    );
+
+    await _salesRepository.save(sale);
+    clearCart();
+    return true;
+  }
+
+  Future<bool> saveInProgressToFirebase({
+    required String userId,
+    required String userName,
+    required List<ProductEntity> availableProducts,
+  }) async {
+    if (_items.isEmpty) {
+      throw Exception('O carrinho está vazio.');
+    }
+
+    final outOfStock = getOutOfStockProducts(availableProducts);
+    if (outOfStock.isNotEmpty) {
+      final names = outOfStock.map((p) => '${p.name} (Estoque: ${p.stock})').join(', ');
+      throw Exception('Estoque insuficiente para: $names');
+    }
+
+    final saleItems = _items
+        .map(
+          (item) => SaleItemEntity(
+            productId: item.product.id,
+            productName: item.product.name,
+            productImgUrl: item.product.imgUrl,
+            unitPrice: item.product.price,
+            quantity: item.quantity,
+          ),
+        )
+        .toList();
+
+    final sale = SaleEntity(
+      id: '',
+      saleNumber: _saleNumber,
+      items: saleItems,
+      subtotal: subtotal,
+      discountType: _discountType,
+      discountValue: _discountValue,
+      total: total,
+      paymentMethod: _paymentMethod ?? PaymentMethod.dinheiro,
+      amountPaid: _amountPaid,
+      change: change,
+      customerId: '',
+      customerName: '',
+      userId: userId,
+      userName: userName,
+      status: SaleStatus.inProgress,
+      createdAt: _createdAt,
     );
 
     await _salesRepository.save(sale);

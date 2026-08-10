@@ -1,5 +1,7 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_item_tile.dart';
@@ -46,6 +48,30 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
     );
+  }
+
+  void _saveInProgress(BuildContext context, CartViewModel vm) async {
+    try {
+      final authVM = getIt<AuthViewModel>();
+      final currentUser = authVM.currentUser;
+      final userId = currentUser?.uid ?? '';
+      final userName = currentUser?.name ?? 'Vendedor';
+
+      await vm.saveInProgressToFirebase(
+        userId: userId,
+        userName: userName,
+        availableProducts: widget.availableProducts,
+      );
+
+      if (context.mounted) {
+        AppSnackbar.success(context, 'Venda em andamento salva com sucesso!');
+        Navigator.of(context).maybePop();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.error(context, e.toString().replaceAll('Exception: ', ''));
+      }
+    }
   }
 
   @override
@@ -279,30 +305,41 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                           visible: isExpanded,
                           maintainState: true,
                           child: Padding(
-                            padding: EdgeInsets.only(
+                            padding: .only(
                               left: AppSpacing.space16,
                               right: AppSpacing.space16,
-                              top: AppSpacing.space12,
+                              top: AppSpacing.space4,
                               bottom: MediaQuery.of(context).padding.bottom + AppSpacing.space16,
                             ),
                             child: Column(
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisSize: .min,
                               children: [
                                 CartSummaryWidget(
                                   total: vm.subtotal,
                                 ),
-                                const Gap(AppSpacing.space16),
-                                AppButton(
-                                  label: 'Finalizar venda',
-                                  isFullWidth: true,
-                                  onPressed: () {
-                                    PaymentSheet.show(
-                                      context: context,
-                                      cartViewModel: vm,
-                                      availableProducts: widget.availableProducts,
-                                      onSaleSuccess: widget.onSaleSuccess,
-                                    );
-                                  },
+                                const Gap(AppSpacing.space8),
+                                Column(
+                                  children: [
+                                    AppButton.outlined(
+                                      onPressed: () => _saveInProgress(context, vm),
+                                      icon: AppIcons.bookmarkAdd,
+                                      label: 'Salvar em andamento',
+                                      isFullWidth: true,
+                                    ),
+                                    const Gap(AppSpacing.space12),
+                                    AppButton(
+                                      label: 'Finalizar venda',
+                                      isFullWidth: true,
+                                      onPressed: () {
+                                        PaymentSheet.show(
+                                          context: context,
+                                          cartViewModel: vm,
+                                          availableProducts: widget.availableProducts,
+                                          onSaleSuccess: widget.onSaleSuccess,
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),

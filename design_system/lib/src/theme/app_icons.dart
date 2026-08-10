@@ -20,6 +20,7 @@ abstract class AppIcons {
   static const IconData checkCircle = Symbols.check_circle_rounded;
   static const IconData checkCircleOutline = Symbols.check_circle_outline_rounded;
   static const IconData save = Symbols.save_rounded;
+  static const IconData bookmarkAdd = Symbols.bookmark_add_rounded;
   static const IconData package2 = Symbols.package_2_rounded;
   static const IconData stacks = Symbols.stacks_rounded;
   static const IconData remove = Symbols.remove_rounded;
