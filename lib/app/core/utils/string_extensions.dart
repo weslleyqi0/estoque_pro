@@ -4,8 +4,9 @@ extension StringNumberParsing on String {
   }
 
   double toDoubleOr([double defaultValue = 0.0]) {
-    final normalized = replaceAll('.', '').replaceAll(',', '.');
-    return double.tryParse(normalized) ?? defaultValue;
+    final digits = replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return defaultValue;
+    return (double.tryParse(digits) ?? 0.0) / 100;
   }
 
   String get withoutDiacritics {

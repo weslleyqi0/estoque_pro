@@ -27,6 +27,8 @@ class AppTextfield extends StatefulWidget {
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
+  final String? prefixText;
+  final String? suffixText;
   final IconData? prefixIcon;
   final VoidCallback? onPrefixIconPressed;
   final IconData? suffixIcon;
@@ -40,6 +42,8 @@ class AppTextfield extends StatefulWidget {
     super.key,
     this.label,
     this.hint,
+    this.prefixText,
+    this.suffixText,
     this.required = false,
     this.filled = false,
     this.filledColor,
@@ -149,6 +153,28 @@ class _AppTextfieldState extends State<AppTextfield> {
             );
     }
 
+    Widget? prefixTextWidget;
+    if (widget.prefixText != null) {
+      prefixTextWidget = Text(
+        widget.prefixText!,
+        style: context.textTheme.bodyLarge?.copyWith(
+          color: context.colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+    }
+
+    Widget? suffixTextWidget;
+    if (widget.suffixText != null) {
+      suffixTextWidget = Text(
+        widget.suffixText!,
+        style: context.textTheme.bodyLarge?.copyWith(
+          color: context.colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -188,8 +214,9 @@ class _AppTextfieldState extends State<AppTextfield> {
             helperText: widget.helperText,
             errorText: widget.errorText,
             prefixIcon: prefixIconWidget,
+            prefix: widget.prefixIcon == null ? prefixTextWidget : null,
             suffixIcon: suffixIconWidget,
-            counterText: widget.showCharacterCounter ? null : '',
+            suffix: (widget.suffixIcon == null && !widget.showPasswordToggle) ? suffixTextWidget : null,
             border: OutlineInputBorder(
               borderRadius: AppSpacing.borderRadius12,
               borderSide: BorderSide(color: context.colorScheme.outline),

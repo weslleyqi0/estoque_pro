@@ -9,6 +9,7 @@ export 'src/theme/app_colors.dart';
 export 'src/theme/app_typography.dart';
 export 'src/theme/app_spacing.dart';
 export 'src/theme/app_theme.dart';
+export 'src/theme/app_icons.dart';
 export 'src/theme/context_theme_extension.dart';
 
 // Button exports
@@ -36,6 +37,7 @@ export 'src/empty/app_empty_list.dart';
 
 // Image exports
 export 'src/images/app_network_image.dart';
+export 'src/images/app_svg.dart';
 
 // Snackbar exports
 export 'src/snackbar/app_snackbar.dart';

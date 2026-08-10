@@ -73,7 +73,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     _descriptionController.text = currentProduct.description;
     _barcodeController.text = currentProduct.barcode;
 
-    String initialPrice = CurrencyInputFormatter.formatDouble(currentProduct.price);
+    String initialPrice = CurrencyInputFormatter.formatCurrency(currentProduct.price);
     _priceController.text = initialPrice;
 
     _minStockController.text = currentProduct.minStock.toString();
@@ -228,12 +228,12 @@ class _ProductFormPageState extends State<ProductFormPage> {
             const Gap(AppSpacing.space16),
 
             AppTextfield(
-              label: 'Preço (R\$)',
-              hint: '0,00',
+              label: 'Preço',
+              hint: 'R\$ 0,00',
               required: true,
               textAlign: TextAlign.center,
               controller: _priceController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: TextInputType.number,
               inputFormatters: [CurrencyInputFormatter()],
               validator: (value) {
                 if (value == null || value.trim().isEmpty) return 'Obrigatório';

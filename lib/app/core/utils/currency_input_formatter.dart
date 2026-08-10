@@ -1,6 +1,10 @@
 import 'package:flutter/services.dart';
 
 class CurrencyInputFormatter extends TextInputFormatter {
+  final bool includeSymbol;
+
+  CurrencyInputFormatter({this.includeSymbol = true});
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
@@ -14,8 +18,8 @@ class CurrencyInputFormatter extends TextInputFormatter {
     if (newText.isEmpty) newText = '0';
     double value = double.parse(newText) / 100;
 
-    String newString = value.toStringAsFixed(2).replaceAll('.', ',');
-    newString = formatString(newString);
+    String formatted = formatDouble(value);
+    String newString = includeSymbol ? 'R\$ $formatted' : formatted;
 
     return newValue.copyWith(
       text: newString,

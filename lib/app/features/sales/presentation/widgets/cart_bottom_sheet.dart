@@ -1,11 +1,12 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_item_tile.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_summary_widget.dart';
+import 'package:estoque_pro/app/features/sales/presentation/widgets/payment_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class CartBottomSheet extends StatefulWidget {
@@ -26,7 +27,6 @@ class CartBottomSheet extends StatefulWidget {
 
 class _CartBottomSheetState extends State<CartBottomSheet> {
   final DraggableScrollableController _sheetController = DraggableScrollableController();
-  final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
   static const double _collapsedSize = 0.12;
   static const double _expandedSize = 1.0;
@@ -188,7 +188,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            currencyFormat.format(vm.total),
+                                            CurrencyInputFormatter.formatCurrency(vm.total),
                                             style: context.textTheme.titleLarge?.copyWith(
                                               color: context.colorScheme.primary,
                                               fontWeight: FontWeight.w800,
@@ -296,7 +296,14 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                 AppButton(
                                   label: 'Finalizar venda',
                                   isFullWidth: true,
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    PaymentSheet.show(
+                                      context: context,
+                                      cartViewModel: vm,
+                                      availableProducts: widget.availableProducts,
+                                      onSaleSuccess: widget.onSaleSuccess,
+                                    );
+                                  },
                                 ),
                               ],
                             ),
