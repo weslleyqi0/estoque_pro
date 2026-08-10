@@ -188,7 +188,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            CurrencyInputFormatter.formatCurrency(vm.total),
+                                            CurrencyInputFormatter.formatCurrency(vm.subtotal),
                                             style: context.textTheme.titleLarge?.copyWith(
                                               color: context.colorScheme.primary,
                                               fontWeight: FontWeight.w800,
@@ -290,7 +290,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 CartSummaryWidget(
-                                  total: vm.total,
+                                  total: vm.subtotal,
                                 ),
                                 const Gap(AppSpacing.space16),
                                 AppButton(
