@@ -57,7 +57,11 @@ class CategoriesListSliver extends StatelessWidget {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final category = viewModel.filteredCategories[index];
-            return CategoriesItem(category: category);
+            final productCount = viewModel.getProductCountForCategory(category.id);
+            return CategoriesItem(
+              category: category,
+              productCount: productCount,
+            );
           },
           childCount: viewModel.filteredCategories.length,
         ),

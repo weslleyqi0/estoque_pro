@@ -8,16 +8,19 @@ import 'package:go_router/go_router.dart';
 
 class CategoriesItem extends StatelessWidget {
   final CategoryEntity category;
+  final int productCount;
 
   const CategoriesItem({
     super.key,
     required this.category,
+    this.productCount = 0,
   });
 
   @override
   Widget build(BuildContext context) {
     final categoryColor = category.color != null ? Color(category.color!) : context.colorScheme.primary;
     final iconColor = categoryColor;
+    final countText = productCount == 1 ? '1 produto' : '$productCount produtos';
 
     return Card(
       color: context.colorScheme.surfaceContainerLow,
@@ -55,7 +58,7 @@ class CategoriesItem extends StatelessWidget {
                     style: context.textTheme.titleMedium,
                   ),
                   AppTag(
-                    title: '5 produtos',
+                    title: countText,
                     icon: AppIcons.package2,
                     color: context.colorScheme.primary,
                   ),
