@@ -85,6 +85,8 @@ class SalesViewModel extends ChangeNotifier {
   }
 
   void listenAll() {
+    if (_salesSubscription != null) return;
+
     _state = SalesLoadState.loading;
     notifyListeners();
 

@@ -42,8 +42,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   @override
   void dispose() {
-    _viewModel.dispose();
-    _formViewModel.dispose();
     super.dispose();
   }
 

@@ -22,7 +22,10 @@ class ProductsViewModel extends ChangeNotifier {
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
 
-  bool get hasLowStock => _products.any((p) => p.stock < p.minStock && p.isActive);
+  List<ProductEntity> get lowStockProducts =>
+      _products.where((p) => p.stock < p.minStock && p.isActive).toList();
+
+  bool get hasLowStock => lowStockProducts.isNotEmpty;
 
   void setSearchQuery(String query) {
     _searchQuery = query;
@@ -51,6 +54,8 @@ class ProductsViewModel extends ChangeNotifier {
   ProductsViewModel(this._repository);
 
   void listenAll() {
+    if (_subscription != null) return;
+
     _state = ProductsLoadState.loading;
     notifyListeners();
 

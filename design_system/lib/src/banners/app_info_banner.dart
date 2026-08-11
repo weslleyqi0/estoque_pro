@@ -64,7 +64,7 @@ class AppInfoBanner extends StatelessWidget {
           children: [
             if (icon != null) ...[
               Container(
-                padding: const EdgeInsets.all(AppSpacing.space8),
+                padding: const EdgeInsets.all(AppSpacing.space12),
                 decoration: BoxDecoration(
                   color: effectiveColor,
                   borderRadius: AppSpacing.borderRadius12,
@@ -72,10 +72,10 @@ class AppInfoBanner extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: AppColors.white,
-                  size: AppSpacing.icon28,
+                  size: AppSpacing.icon32,
                 ),
               ),
-              const Gap(AppSpacing.space12),
+              const Gap(AppSpacing.space8),
             ],
             Expanded(
               child: Column(
@@ -87,10 +87,10 @@ class AppInfoBanner extends StatelessWidget {
                     style: context.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: context.colorScheme.onSurface,
+                      height: 1.3,
                     ),
                   ),
                   if (subtitle != null) ...[
-                    const Gap(2),
                     Text(
                       subtitle!,
                       style: context.textTheme.bodySmall,
