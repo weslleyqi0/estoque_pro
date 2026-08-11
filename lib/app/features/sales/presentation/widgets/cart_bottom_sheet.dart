@@ -14,12 +14,14 @@ class CartBottomSheet extends StatefulWidget {
   final CartViewModel cartViewModel;
   final List<ProductEntity> availableProducts;
   final VoidCallback onSaleSuccess;
+  final DraggableScrollableController? controller;
 
   const CartBottomSheet({
     super.key,
     required this.cartViewModel,
     required this.availableProducts,
     required this.onSaleSuccess,
+    this.controller,
   });
 
   @override
@@ -27,14 +29,21 @@ class CartBottomSheet extends StatefulWidget {
 }
 
 class _CartBottomSheetState extends State<CartBottomSheet> {
-  final DraggableScrollableController _sheetController = DraggableScrollableController();
+  late final DraggableScrollableController _internalSheetController;
+  DraggableScrollableController get _sheetController => widget.controller ?? _internalSheetController;
 
   static const double _collapsedSize = 0.12;
   static const double _expandedSize = 1.0;
 
   @override
+  void initState() {
+    super.initState();
+    _internalSheetController = DraggableScrollableController();
+  }
+
+  @override
   void dispose() {
-    _sheetController.dispose();
+    _internalSheetController.dispose();
     super.dispose();
   }
 
@@ -65,7 +74,6 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
 
       if (context.mounted) {
         AppSnackbar.success(context, 'Venda em andamento salva com sucesso!');
-        Navigator.of(context).maybePop();
       }
     } catch (e) {
       if (context.mounted) {
@@ -92,21 +100,14 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                 ? _sheetController.size > (_collapsedSize + _expandedSize) / 2
                 : false;
 
-            return PopScope(
-              canPop: !isExpanded,
-              onPopInvokedWithResult: (didPop, _) {
-                if (!didPop && isExpanded) {
-                  _toggleExpand();
-                }
-              },
-              child: DraggableScrollableSheet(
-                controller: _sheetController,
-                initialChildSize: _collapsedSize,
-                minChildSize: _collapsedSize,
-                maxChildSize: _expandedSize,
-                snap: true,
-                snapSizes: const [_collapsedSize, _expandedSize],
-                builder: (context, scrollController) {
+            return DraggableScrollableSheet(
+              controller: _sheetController,
+              initialChildSize: _collapsedSize,
+              minChildSize: _collapsedSize,
+              maxChildSize: _expandedSize,
+              snap: true,
+              snapSizes: const [_collapsedSize, _expandedSize],
+              builder: (context, scrollController) {
                   return Container(
                     decoration: BoxDecoration(
                       color: context.colorScheme.surface,
@@ -323,7 +324,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                     AppButton.outlined(
                                       onPressed: () => _saveInProgress(context, vm),
                                       icon: AppIcons.bookmarkAdd,
-                                      label: 'Salvar em andamento',
+                                      label: 'Salvar e continuar depois',
                                       isFullWidth: true,
                                     ),
                                     const Gap(AppSpacing.space12),
@@ -349,11 +350,10 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                     ),
                   );
                 },
-              ),
-            );
-          },
-        );
-      },
-    );
+              );
+            },
+          );
+        },
+      );
   }
 }
