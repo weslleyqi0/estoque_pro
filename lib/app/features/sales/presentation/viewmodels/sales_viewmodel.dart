@@ -132,6 +132,17 @@ class SalesViewModel extends ChangeNotifier {
     );
   }
 
+  Future<void> deleteSale(String saleId) async {
+    try {
+      await _repository.delete(saleId);
+      notifyListeners();
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   @override
   void dispose() {
     _salesSubscription?.cancel();

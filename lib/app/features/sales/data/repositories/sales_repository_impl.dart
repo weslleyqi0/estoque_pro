@@ -111,4 +111,14 @@ class SalesRepositoryImpl implements SalesRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> delete(String saleId) async {
+    try {
+      await _firebaseDb.delete(saleId);
+    } catch (e) {
+      debugPrint('---> Sales: Erro ao deletar venda: $e');
+      rethrow;
+    }
+  }
 }

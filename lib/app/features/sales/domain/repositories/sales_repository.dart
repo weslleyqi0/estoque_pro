@@ -4,4 +4,5 @@ abstract class SalesRepository {
   Future<void> save(SaleEntity sale);
   Stream<List<SaleEntity>> watchAll({int limit});
   Future<void> updateSale(SaleEntity sale);
+  Future<void> delete(String saleId);
 }

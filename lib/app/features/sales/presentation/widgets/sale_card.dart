@@ -1,7 +1,9 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +28,30 @@ class SaleCard extends StatelessWidget {
     SaleStatus.exchanged => AppColors.warning,
     SaleStatus.corrected => AppColors.warning,
   };
+
+  void _cancelSale(BuildContext context) async {
+    final confirmed = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Cancelar Venda',
+      content: 'Deseja realmente cancelar e excluir a Venda ${sale.saleNumber} em andamento?',
+      confirmLabel: 'Sim, Cancelar',
+      cancelLabel: 'Voltar',
+      isDestructive: true,
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        await getIt<SalesViewModel>().deleteSale(sale.id);
+        if (context.mounted) {
+          AppSnackbar.success(context, 'Venda cancelada com sucesso!');
+        }
+      } catch (e) {
+        if (context.mounted) {
+          AppSnackbar.error(context, e.toString().replaceAll('Exception: ', ''));
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,6 +208,37 @@ class SaleCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (sale.status == SaleStatus.inProgress) ...[
+                  const Gap(AppSpacing.space12),
+                  Row(
+                    mainAxisAlignment: .spaceBetween,
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: AppSpacing.space48,
+                          child: AppButton.outlined(
+                            onPressed: () => _cancelSale(context),
+                            icon: AppIcons.close,
+                            borderColor: context.colorScheme.error,
+                            backgroundColor: context.colorScheme.error.withValues(alpha: 0.2),
+                            label: 'Cancelar',
+                          ),
+                        ),
+                      ),
+                      const Gap(AppSpacing.space8),
+                      Expanded(
+                        child: SizedBox(
+                          height: AppSpacing.space48,
+                          child: AppButton(
+                            onPressed: () {},
+                            icon: AppIcons.play,
+                            label: 'Continuar',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ],
           ),
