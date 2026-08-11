@@ -1,17 +1,20 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 /// Design System Floating Search Sliver
 class AppFloatingSearch extends StatefulWidget {
   final String hint;
   final String? initialValue;
   final ValueChanged<String>? onChanged;
+  final Widget? trailing;
 
   const AppFloatingSearch({
     super.key,
     this.hint = 'Pesquisar...',
     this.initialValue,
     this.onChanged,
+    this.trailing,
   });
 
   @override
@@ -58,15 +61,25 @@ class _AppFloatingSearchState extends State<AppFloatingSearch> {
       toolbarHeight: 90,
       backgroundColor: AppColors.transparent,
       scrolledUnderElevation: 0,
-      title: AppTextfield(
-        controller: _controller,
-        hint: widget.hint,
-        prefixIcon: AppIcons.search,
-        suffixIcon: _hasText ? AppIcons.close : null,
-        onSuffixIconPressed: _hasText ? _clearSearch : null,
-        filled: true,
-        filledColor: context.colorScheme.surface,
-        onChanged: widget.onChanged,
+      title: Row(
+        children: [
+          Expanded(
+            child: AppTextfield(
+              controller: _controller,
+              hint: widget.hint,
+              prefixIcon: AppIcons.search,
+              suffixIcon: _hasText ? AppIcons.close : null,
+              onSuffixIconPressed: _hasText ? _clearSearch : null,
+              filled: true,
+              filledColor: context.colorScheme.surface,
+              onChanged: widget.onChanged,
+            ),
+          ),
+          if (widget.trailing != null) ...[
+            const Gap(AppSpacing.space8),
+            widget.trailing!,
+          ],
+        ],
       ),
     );
   }
