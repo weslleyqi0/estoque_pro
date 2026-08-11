@@ -24,9 +24,7 @@ class _ProductsPageState extends State<ProductsPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialSearchQuery != null && widget.initialSearchQuery!.isNotEmpty) {
-      _viewModel.setSearchQuery(widget.initialSearchQuery!);
-    }
+    _viewModel.setSearchQuery(widget.initialSearchQuery ?? '');
     _viewModel.listenAll();
   }
 
@@ -50,6 +48,7 @@ class _ProductsPageState extends State<ProductsPage> {
             slivers: [
               if (_viewModel.products.isNotEmpty)
                 AppFloatingSearch(
+                  key: ValueKey(_viewModel.searchQuery),
                   hint: 'Pesquisar produto...',
                   initialValue: _viewModel.searchQuery,
                   onChanged: _viewModel.setSearchQuery,

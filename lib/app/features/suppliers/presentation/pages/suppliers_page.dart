@@ -21,6 +21,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
   @override
   void initState() {
     super.initState();
+    _viewModel.setSearchQuery('');
     _viewModel.listenAll();
   }
 
@@ -51,7 +52,9 @@ class _SuppliersPageState extends State<SuppliersPage> {
             slivers: [
               if (_viewModel.suppliers.isNotEmpty)
                 AppFloatingSearch(
+                  key: ValueKey(_viewModel.searchQuery),
                   hint: 'Pesquisar fornecedor...',
+                  initialValue: _viewModel.searchQuery,
                   onChanged: _viewModel.setSearchQuery,
                 ),
               SuppliersListSliver(viewModel: _viewModel),
