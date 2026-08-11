@@ -3,13 +3,29 @@ import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/widgets/home_button.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final _authVM = getIt<AuthViewModel>();
+  final _salesVM = getIt<SalesViewModel>();
+
+  @override
+  void initState() {
+    super.initState();
+    _salesVM.listenAll();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +36,16 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: const Icon(AppIcons.logout),
             tooltip: 'Sair',
-            onPressed: () => getIt<AuthViewModel>().logoutCommand.execute(),
+            onPressed: () => _authVM.logoutCommand.execute(),
           ),
         ],
       ),
       body: ListenableBuilder(
-        listenable: getIt<AuthViewModel>(),
+        listenable: Listenable.merge([_authVM, _salesVM]),
         builder: (context, _) {
-          final currentUser = getIt<AuthViewModel>().currentUser;
+          final currentUser = _authVM.currentUser;
           final isManager = currentUser?.role == UserRole.owner || currentUser?.role == UserRole.admin;
+          final allInProgressSales = _salesVM.inProgressSales;
 
           return Column(
             children: [
@@ -83,6 +100,21 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
+              if (allInProgressSales.isNotEmpty) ...[
+                const Gap(AppSpacing.space12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
+                  child: AppInfoBanner(
+                    title: allInProgressSales.length == 1
+                        ? '1 venda aguardando finalização'
+                        : '${allInProgressSales.length} vendas aguardando finalização',
+                    subtitle: 'Toque para ver ou gerenciar as vendas em andamento',
+                    icon: Symbols.shopping_cart_rounded,
+                    type: AppInfoBannerType.warning,
+                    onTap: () => context.push(AppRoutes.sales),
+                  ),
+                ),
+              ],
               const Gap(AppSpacing.space16),
               Flexible(
                 child: GridView(
@@ -103,6 +135,8 @@ class HomePage extends StatelessWidget {
                     HomeButton(
                       title: 'Vendas',
                       subTitle: 'Histórico e andamento',
+                      badgerContent: allInProgressSales.isNotEmpty ? '${allInProgressSales.length}' : null,
+                      badgerColor: AppColors.warning,
                       color: Colors.green,
                       icon: AppIcons.orderApprove,
                       onPressed: () => context.push(AppRoutes.sales),

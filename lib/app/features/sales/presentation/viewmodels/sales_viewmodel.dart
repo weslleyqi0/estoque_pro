@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:flutter/foundation.dart';
 
@@ -37,6 +39,8 @@ class SalesViewModel extends ChangeNotifier {
 
   Object? _error;
   Object? get error => _error;
+
+  List<SaleEntity> get inProgressSales => _sales.where((s) => s.status == SaleStatus.inProgress).toList();
 
   SalesViewModel(this._repository);
 

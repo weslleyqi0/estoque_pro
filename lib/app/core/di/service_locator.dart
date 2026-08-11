@@ -139,7 +139,7 @@ void setupServiceLocator() {
     () => ProductsFormViewModel(getIt<ProductsRepository>()),
   );
 
-  getIt.registerFactory<SalesViewModel>(
+  getIt.registerLazySingleton<SalesViewModel>(
     () => SalesViewModel(getIt<SalesRepository>()),
   );
 
