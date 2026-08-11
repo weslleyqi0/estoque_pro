@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -25,6 +26,10 @@ class RouteGuard {
         if (path == inactiveRedirectPath) return null;
         return inactiveRedirectPath;
       }
+    }
+
+    if (user != null && (user.role == UserRole.owner || user.role == UserRole.admin)) {
+      return null;
     }
 
     UserPermission? requiredPermission;

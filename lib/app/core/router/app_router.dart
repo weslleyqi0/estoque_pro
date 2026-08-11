@@ -22,6 +22,7 @@ import 'package:estoque_pro/app/features/sales/presentation/pages/sales_page.dar
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_form_page.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/suppliers_page.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/presentation/pages/users_page.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
@@ -31,8 +32,16 @@ import 'package:go_router/go_router.dart';
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+  static ProductEntity? _lastSelectedProduct;
+
   static final _routeGuard = RouteGuard(
-    routePermissions: {},
+    routePermissions: {
+      AppRoutes.productHistory: UserPermission.viewHistory,
+      AppRoutes.suppliers: UserPermission.manageSuppliers,
+      AppRoutes.supplierForm: UserPermission.manageSuppliers,
+      AppRoutes.categories: UserPermission.manageCategories,
+      AppRoutes.categoryForm: UserPermission.manageCategories,
+    },
   );
 
   static final router = GoRouter(
@@ -129,8 +138,12 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.productDetails,
         builder: (context, state) {
-          final product = state.extra as ProductEntity;
-          return ProductDetailsPage(product: product);
+          final product = (state.extra as ProductEntity?) ?? _lastSelectedProduct;
+          if (product != null) {
+            _lastSelectedProduct = product;
+            return ProductDetailsPage(product: product);
+          }
+          return const ProductsPage();
         },
       ),
       GoRoute(

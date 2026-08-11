@@ -24,8 +24,12 @@ class _ProductsPageState extends State<ProductsPage> {
   @override
   void initState() {
     super.initState();
-    _viewModel.setSearchQuery(widget.initialSearchQuery ?? '');
     _viewModel.listenAll();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.initialSearchQuery != null) {
+        _viewModel.setSearchQuery(widget.initialSearchQuery ?? '');
+      }
+    });
   }
 
   @override

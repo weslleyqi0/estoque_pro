@@ -49,7 +49,10 @@ class SaleCard extends StatelessWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          AppSnackbar.error(context, e.toString().replaceAll('Exception: ', ''));
+          AppSnackbar.error(
+            context,
+            'Erro ao cancelar venda. Talvez você não tenha permissão para realizar essa ação.',
+          );
         }
       }
     }

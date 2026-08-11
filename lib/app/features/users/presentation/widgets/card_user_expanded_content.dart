@@ -97,6 +97,18 @@ class CardUserExpandedContent extends StatelessWidget {
               ],
               if (user.role == UserRole.seller && user.isActive) ...[
                 Gap(AppSpacing.space24),
+                Text(
+                  'Permissões',
+                  style: context.textTheme.titleLarge,
+                ),
+                Gap(AppSpacing.space8),
+                Text(
+                  'Controle o que este vendedor pode acessar e modificar no sistema.',
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                Gap(AppSpacing.space16),
                 ...UserPermission.values.asMap().entries.map((entry) {
                   final index = entry.key;
                   final permission = entry.value;
