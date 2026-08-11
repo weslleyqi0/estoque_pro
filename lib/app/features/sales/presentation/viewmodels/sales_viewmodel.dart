@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
@@ -23,6 +24,8 @@ enum SalesFilterTab {
 class SalesViewModel extends ChangeNotifier {
   final SalesRepository _repository;
 
+  SalesViewModel(this._repository);
+
   StreamSubscription<List<SaleEntity>>? _salesSubscription;
 
   SalesLoadState _state = SalesLoadState.idle;
@@ -40,9 +43,24 @@ class SalesViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
+  SalesFilterTab _selectedTab = SalesFilterTab.all;
+  SalesFilterTab get selectedTab => _selectedTab;
+
+  void setSelectedTab(SalesFilterTab tab) {
+    _selectedTab = tab;
+    notifyListeners();
+  }
+
   List<SaleEntity> get inProgressSales => _sales.where((s) => s.status == SaleStatus.inProgress).toList();
 
-  SalesViewModel(this._repository);
+  int getTabCount(SalesFilterTab tab, {List<SaleEntity>? draftSales}) => switch (tab) {
+    SalesFilterTab.all => _sales.length,
+    SalesFilterTab.inProgress => _sales.where((s) => s.status == SaleStatus.inProgress).length,
+    SalesFilterTab.completed => _sales.where((s) => s.status == SaleStatus.completed).length,
+    SalesFilterTab.fiado => _sales.where((s) => s.paymentMethod == PaymentMethod.fiado).length,
+    SalesFilterTab.edited => _sales.where((s) => s.updatedAt != null).length,
+    SalesFilterTab.cancelled => _sales.where((s) => s.status == SaleStatus.cancelled).length,
+  };
 
   void setSearchQuery(String query) {
     _searchQuery = query;
@@ -59,11 +77,20 @@ class SalesViewModel extends ChangeNotifier {
   }
 
   List<SaleEntity> get filteredSales {
-    if (_searchQuery.trim().isEmpty) return _sales;
+    final list = switch (_selectedTab) {
+      SalesFilterTab.all => _sales,
+      SalesFilterTab.inProgress => _sales.where((s) => s.status == SaleStatus.inProgress),
+      SalesFilterTab.completed => _sales.where((s) => s.status == SaleStatus.completed),
+      SalesFilterTab.fiado => _sales.where((s) => s.paymentMethod == PaymentMethod.fiado),
+      SalesFilterTab.edited => _sales.where((s) => s.updatedAt != null),
+      SalesFilterTab.cancelled => _sales.where((s) => s.status == SaleStatus.cancelled),
+    }.toList();
+
+    if (_searchQuery.trim().isEmpty) return list;
 
     final query = _searchQuery.withoutDiacritics.toLowerCase().trim();
 
-    return _sales.where((sale) {
+    return list.where((sale) {
       final matchesNumber = sale.saleNumber.toLowerCase().contains(query);
       final matchesCustomer = sale.customerName?.withoutDiacritics.toLowerCase().contains(query) ?? false;
       final matchesPayment = sale.paymentMethod.label.withoutDiacritics.toLowerCase().contains(query);

@@ -71,16 +71,16 @@ class SalesListSliver extends StatelessWidget {
       slivers.add(
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.only(
+            padding: const .only(
               left: AppSpacing.space16,
               right: AppSpacing.space16,
-              top: AppSpacing.space16,
+              top: AppSpacing.space12,
               bottom: AppSpacing.space8,
             ),
             child: Text(
               '${_formatDateHeader(entry.key)} • $salesText',
               style: context.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w400,
+                fontWeight: .w400,
                 color: context.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),

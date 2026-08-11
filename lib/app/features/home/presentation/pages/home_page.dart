@@ -124,7 +124,10 @@ class _HomePageState extends State<HomePage> {
                                   subtitle: 'Toque para ver ou gerenciar as vendas em andamento',
                                   icon: AppIcons.shoppingCart,
                                   type: AppInfoBannerType.warning,
-                                  onTap: () => context.push(AppRoutes.sales),
+                                  onTap: () {
+                                    _salesVM.setSelectedTab(SalesFilterTab.inProgress);
+                                    context.push(AppRoutes.sales);
+                                  },
                                 ),
                               ),
                             ],
@@ -175,7 +178,10 @@ class _HomePageState extends State<HomePage> {
                             badgerColor: AppColors.warning,
                             color: Colors.green,
                             icon: AppIcons.orderApprove,
-                            onPressed: () => context.push(AppRoutes.sales),
+                            onPressed: () {
+                              _salesVM.setSelectedTab(SalesFilterTab.all);
+                              context.push(AppRoutes.sales);
+                            },
                           ),
                           HomeButton(
                             title: 'Categorias',
