@@ -39,5 +39,8 @@ export 'src/empty/app_empty_list.dart';
 export 'src/images/app_network_image.dart';
 export 'src/images/app_svg.dart';
 
+// Banner exports
+export 'src/banners/app_info_banner.dart';
+
 // Snackbar exports
 export 'src/snackbar/app_snackbar.dart';
