@@ -156,7 +156,10 @@ class _HomePageState extends State<HomePage> {
                                     subtitle: 'Toque para gerenciar o estoque dos produtos',
                                     icon: AppIcons.package2,
                                     type: AppInfoBannerType.error,
-                                    onTap: () => context.push(AppRoutes.products),
+                                    onTap: () {
+                                      _productsVM.setShowOnlyLowStock(true);
+                                      context.push(AppRoutes.products);
+                                    },
                                   ),
                                 ),
                               ],
@@ -183,7 +186,10 @@ class _HomePageState extends State<HomePage> {
                               badgerColor: AppColors.error,
                               color: AppColors.primary,
                               icon: AppIcons.lists,
-                              onPressed: () => context.push(AppRoutes.products),
+                              onPressed: () {
+                                _productsVM.setShowOnlyLowStock(false);
+                                context.push(AppRoutes.products);
+                              },
                             ),
                             HomeButton(
                               title: 'Vendas',

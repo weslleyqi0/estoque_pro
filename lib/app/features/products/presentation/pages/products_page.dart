@@ -27,6 +27,7 @@ class _ProductsPageState extends State<ProductsPage> {
     _viewModel.listenAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.initialSearchQuery != null) {
+        _viewModel.clearLowStockFilter();
         _viewModel.setSearchQuery(widget.initialSearchQuery ?? '');
       }
     });
@@ -50,13 +51,37 @@ class _ProductsPageState extends State<ProductsPage> {
           return CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              if (_viewModel.products.isNotEmpty)
+              if (_viewModel.products.isNotEmpty) ...[
                 AppFloatingSearch(
                   key: ValueKey(_viewModel.searchQuery),
                   hint: 'Pesquisar produto...',
                   initialValue: _viewModel.searchQuery,
                   onChanged: _viewModel.setSearchQuery,
                 ),
+                if (_viewModel.showOnlyLowStock)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.space16,
+                        right: AppSpacing.space16,
+                        bottom: AppSpacing.space12,
+                      ),
+                      child: AppInfoBanner(
+                        title: _viewModel.lowStockProducts.length == 1
+                            ? '1 produto com estoque baixo'
+                            : '${_viewModel.lowStockProducts.length} produtos com estoque baixo',
+                        subtitle: 'Exibindo apenas produtos em baixa no estoque',
+                        icon: AppIcons.package2,
+                        type: AppInfoBannerType.error,
+                        trailing: IconButton(
+                          icon: const Icon(AppIcons.close),
+                          tooltip: 'Exibir todos os produtos',
+                          onPressed: _viewModel.clearLowStockFilter,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
               ProductsListSliver(viewModel: _viewModel),
             ],
           );

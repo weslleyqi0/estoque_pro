@@ -22,10 +22,23 @@ class ProductsViewModel extends ChangeNotifier {
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
 
+  bool _showOnlyLowStock = false;
+  bool get showOnlyLowStock => _showOnlyLowStock;
+
   List<ProductEntity> get lowStockProducts =>
       _products.where((p) => p.stock < p.minStock && p.isActive).toList();
 
   bool get hasLowStock => lowStockProducts.isNotEmpty;
+
+  void setShowOnlyLowStock(bool value) {
+    _showOnlyLowStock = value;
+    notifyListeners();
+  }
+
+  void clearLowStockFilter() {
+    _showOnlyLowStock = false;
+    notifyListeners();
+  }
 
   void setSearchQuery(String query) {
     _searchQuery = query;
@@ -33,17 +46,19 @@ class ProductsViewModel extends ChangeNotifier {
   }
 
   List<ProductEntity> get filteredProducts {
-    if (_searchQuery.trim().isEmpty) return _products;
+    final list = _showOnlyLowStock ? lowStockProducts : _products;
+
+    if (_searchQuery.trim().isEmpty) return list;
 
     final query = _searchQuery.withoutDiacritics.toLowerCase().trim();
 
-    return _products.where((product) {
+    return list.where((product) {
       final matchesName = product.name.withoutDiacritics.toLowerCase().contains(query);
       final matchesBarcode = product.barcode.withoutDiacritics.toLowerCase().contains(query);
       final matchesDesc = product.description.withoutDiacritics.toLowerCase().contains(query);
       final matchesSupplier = product.supplier?.name.withoutDiacritics.toLowerCase().contains(query) ?? false;
       final matchesCategory = product.categories.any((c) => c.name.withoutDiacritics.toLowerCase().contains(query));
-      
+
       return matchesName || matchesBarcode || matchesDesc || matchesSupplier || matchesCategory;
     }).toList();
   }

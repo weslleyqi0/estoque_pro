@@ -51,7 +51,12 @@ class AppInfoBanner extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radius24),
       child: Container(
-        padding: const .symmetric(horizontal: AppSpacing.space12, vertical: AppSpacing.space8),
+        padding: .only(
+          left: AppSpacing.space12,
+          right: trailing == null ? AppSpacing.space12 : 0,
+          top: AppSpacing.space8,
+          bottom: AppSpacing.space8,
+        ),
         decoration: BoxDecoration(
           color: effectiveColor.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(AppSpacing.radius16),
