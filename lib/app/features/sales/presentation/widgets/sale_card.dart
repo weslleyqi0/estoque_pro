@@ -2,9 +2,12 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -30,6 +33,21 @@ class SaleCard extends StatelessWidget {
     SaleStatus.exchanged => AppColors.warning,
     SaleStatus.corrected => AppColors.warning,
   };
+
+  bool get _canCancelSale {
+    final currentUser = getIt<AuthViewModel>().currentUser;
+    if (currentUser == null || !currentUser.isActive) return false;
+
+    if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) {
+      return true;
+    }
+
+    if (sale.userId == currentUser.uid) {
+      return true;
+    }
+
+    return currentUser.hasPermission(UserPermission.deleteSales);
+  }
 
   void _cancelSale(BuildContext context) async {
     final confirmed = await AppDialog.showConfirmation(
@@ -218,19 +236,21 @@ class SaleCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: .spaceBetween,
                     children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSpacing.space48,
-                          child: AppButton.outlined(
-                            onPressed: () => _cancelSale(context),
-                            icon: AppIcons.close,
-                            borderColor: context.colorScheme.error,
-                            backgroundColor: context.colorScheme.error.withValues(alpha: 0.2),
-                            label: 'Cancelar',
+                      if (_canCancelSale) ...[
+                        Expanded(
+                          child: SizedBox(
+                            height: AppSpacing.space48,
+                            child: AppButton.outlined(
+                              onPressed: () => _cancelSale(context),
+                              icon: AppIcons.close,
+                              borderColor: context.colorScheme.error,
+                              backgroundColor: context.colorScheme.error.withValues(alpha: 0.2),
+                              label: 'Cancelar',
+                            ),
                           ),
                         ),
-                      ),
-                      const Gap(AppSpacing.space8),
+                        const Gap(AppSpacing.space8),
+                      ],
                       Expanded(
                         child: SizedBox(
                           height: AppSpacing.space48,
