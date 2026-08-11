@@ -18,6 +18,7 @@ class AppButton extends StatelessWidget {
   final IconData? icon;
   final IconData? suffixIcon;
   final Color? backgroundColor;
+  final Color? borderColor;
   final BorderRadiusGeometry? borderRadius;
 
   const AppButton({
@@ -31,6 +32,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.suffixIcon,
     this.backgroundColor,
+    this.borderColor,
     this.borderRadius,
   }) : assert(
          label != null || child != null,
@@ -47,6 +49,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.suffixIcon,
     this.backgroundColor,
+    this.borderColor,
     this.borderRadius,
   }) : variant = AppButtonVariant.primary,
        assert(
@@ -64,6 +67,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.suffixIcon,
     this.backgroundColor,
+    this.borderColor,
     this.borderRadius,
   }) : variant = AppButtonVariant.secondary,
        assert(
@@ -81,6 +85,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.suffixIcon,
     this.backgroundColor,
+    this.borderColor,
     this.borderRadius,
   }) : variant = AppButtonVariant.outlined,
        assert(
@@ -98,6 +103,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.suffixIcon,
     this.backgroundColor,
+    this.borderColor,
     this.borderRadius,
   }) : variant = AppButtonVariant.text,
        assert(
@@ -115,7 +121,7 @@ class AppButton extends StatelessWidget {
           valueColor: AlwaysStoppedAnimation<Color>(
             variant == AppButtonVariant.primary || variant == AppButtonVariant.secondary
                 ? Colors.white
-                : Theme.of(context).colorScheme.primary,
+                : (borderColor ?? Theme.of(context).colorScheme.primary),
           ),
         ),
       );
@@ -196,14 +202,16 @@ class AppButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
           backgroundColor: backgroundColor,
-          foregroundColor: colorScheme.primary,
+          foregroundColor: borderColor ?? colorScheme.primary,
           disabledForegroundColor: colorScheme.onSurface.withValues(
             alpha: 0.4,
           ),
           minimumSize: const Size(0, AppSpacing.buttonHeightLg),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space20),
           side: BorderSide(
-            color: isLoading || onPressed == null ? colorScheme.onSurface.withValues(alpha: 0.2) : colorScheme.primary,
+            color: isLoading || onPressed == null
+                ? colorScheme.onSurface.withValues(alpha: 0.2)
+                : (borderColor ?? colorScheme.primary),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius ?? AppSpacing.borderRadius12,
@@ -245,6 +253,7 @@ class AppIconButton extends StatelessWidget {
   final AppButtonVariant variant;
   final Color? iconColor;
   final Color? backgroundColor;
+  final Color? borderColor;
   final String? tooltip;
 
   const AppIconButton({
@@ -255,6 +264,7 @@ class AppIconButton extends StatelessWidget {
     this.variant = AppButtonVariant.primary,
     this.iconColor,
     this.backgroundColor,
+    this.borderColor,
     this.tooltip,
   }) : assert(
          variant != AppButtonVariant.text,
@@ -268,6 +278,7 @@ class AppIconButton extends StatelessWidget {
     this.size = AppIconButtonSize.large,
     this.iconColor,
     this.backgroundColor,
+    this.borderColor,
     this.tooltip,
   }) : variant = AppButtonVariant.primary;
 
@@ -278,6 +289,7 @@ class AppIconButton extends StatelessWidget {
     this.size = AppIconButtonSize.large,
     this.iconColor,
     this.backgroundColor,
+    this.borderColor,
     this.tooltip,
   }) : variant = AppButtonVariant.secondary;
 
@@ -288,6 +300,7 @@ class AppIconButton extends StatelessWidget {
     this.size = AppIconButtonSize.large,
     this.iconColor,
     this.backgroundColor,
+    this.borderColor,
     this.tooltip,
   }) : variant = AppButtonVariant.outlined;
 
@@ -322,11 +335,12 @@ class AppIconButton extends StatelessWidget {
     };
 
     final effectiveBgColor = backgroundColor ?? defaultBgColor;
-    final effectiveIconColor = iconColor ?? defaultIconColor;
+    final effectiveIconColor = iconColor ?? (borderColor ?? defaultIconColor);
+    final effectiveBorderColor = borderColor ?? effectiveIconColor;
 
     final border = variant == AppButtonVariant.outlined
         ? BorderSide(
-            color: onPressed == null ? colorScheme.onSurface.withValues(alpha: 0.2) : (effectiveIconColor),
+            color: onPressed == null ? colorScheme.onSurface.withValues(alpha: 0.2) : effectiveBorderColor,
           )
         : BorderSide.none;
 
