@@ -2,6 +2,7 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_products_list_sliver.dart';
@@ -9,7 +10,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class NewSalePage extends StatefulWidget {
-  const NewSalePage({super.key});
+  final SaleEntity? initialSale;
+
+  const NewSalePage({
+    super.key,
+    this.initialSale,
+  });
 
   @override
   State<NewSalePage> createState() => _NewSalePageState();
@@ -27,6 +33,11 @@ class _NewSalePageState extends State<NewSalePage> {
   void initState() {
     super.initState();
     _productsViewModel.listenAll();
+    if (widget.initialSale != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _cartViewModel.loadSale(widget.initialSale!, _productsViewModel.products);
+      });
+    }
   }
 
   @override

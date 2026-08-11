@@ -126,8 +126,40 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  String? _editingSaleId;
+  String? get editingSaleId => _editingSaleId;
+
+  void loadSale(SaleEntity sale, List<ProductEntity> availableProducts) {
+    _items.clear();
+    _editingSaleId = sale.id;
+    _saleNumber = sale.saleNumber;
+    _discountType = sale.discountType;
+    _discountValue = sale.discountValue;
+    _paymentMethod = sale.paymentMethod;
+    _amountPaid = sale.amountPaid ?? 0.0;
+
+    for (final item in sale.items) {
+      final matchedProduct = availableProducts.firstWhere(
+        (p) => p.id == item.productId,
+        orElse: () => ProductEntity(
+          id: item.productId,
+          name: item.productName,
+          price: item.unitPrice,
+          stock: item.quantity,
+          imgUrl: item.productImgUrl,
+          description: '',
+          categories: const [],
+          minStock: 0,
+        ),
+      );
+      _items.add(CartItem(product: matchedProduct, quantity: item.quantity));
+    }
+    notifyListeners();
+  }
+
   void _resetActiveFields() {
     _items.clear();
+    _editingSaleId = null;
     _discountType = DiscountType.valueAmount;
     _discountValue = 0.0;
     _paymentMethod = null;
@@ -178,7 +210,7 @@ class CartViewModel extends ChangeNotifier {
         .toList();
 
     final sale = SaleEntity(
-      id: '',
+      id: _editingSaleId ?? '',
       saleNumber: _saleNumber,
       items: saleItems,
       subtotal: subtotal,
@@ -196,7 +228,11 @@ class CartViewModel extends ChangeNotifier {
       createdAt: DateTime.now(),
     );
 
-    await _salesRepository.save(sale);
+    if (_editingSaleId != null && _editingSaleId!.isNotEmpty) {
+      await _salesRepository.updateSale(sale);
+    } else {
+      await _salesRepository.save(sale);
+    }
     clearCart();
     return true;
   }
@@ -229,7 +265,7 @@ class CartViewModel extends ChangeNotifier {
         .toList();
 
     final sale = SaleEntity(
-      id: '',
+      id: _editingSaleId ?? '',
       saleNumber: _saleNumber,
       items: saleItems,
       subtotal: subtotal,
@@ -247,7 +283,11 @@ class CartViewModel extends ChangeNotifier {
       createdAt: _createdAt,
     );
 
-    await _salesRepository.save(sale);
+    if (_editingSaleId != null && _editingSaleId!.isNotEmpty) {
+      await _salesRepository.updateSale(sale);
+    } else {
+      await _salesRepository.save(sale);
+    }
     clearCart();
     return true;
   }

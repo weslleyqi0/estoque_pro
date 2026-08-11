@@ -1,11 +1,13 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class SaleCard extends StatelessWidget {
@@ -230,7 +232,7 @@ class SaleCard extends StatelessWidget {
                         child: SizedBox(
                           height: AppSpacing.space48,
                           child: AppButton(
-                            onPressed: () {},
+                            onPressed: () => context.push(AppRoutes.newSale, extra: sale),
                             icon: AppIcons.play,
                             label: 'Continuar',
                           ),
