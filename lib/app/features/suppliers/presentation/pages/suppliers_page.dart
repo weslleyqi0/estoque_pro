@@ -21,8 +21,10 @@ class _SuppliersPageState extends State<SuppliersPage> {
   @override
   void initState() {
     super.initState();
-    _viewModel.setSearchQuery('');
     _viewModel.listenAll();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.setSearchQuery('');
+    });
   }
 
   @override

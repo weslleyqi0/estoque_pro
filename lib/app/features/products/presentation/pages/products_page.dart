@@ -34,6 +34,12 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   @override
+  void dispose() {
+    _viewModel.setSearchQuery('');
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

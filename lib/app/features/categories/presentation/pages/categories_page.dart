@@ -21,8 +21,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   void initState() {
     super.initState();
-    _viewModel.setSearchQuery('');
     _viewModel.listenAll();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.setSearchQuery('');
+    });
   }
 
   @override
