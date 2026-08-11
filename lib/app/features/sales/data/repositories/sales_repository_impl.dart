@@ -40,6 +40,42 @@ class SalesRepositoryImpl implements SalesRepository {
         });
   }
 
+  Future<void> _addStockDeductionUpdates(
+    SaleEntity sale,
+    Map<String, dynamic> updates,
+  ) async {
+    for (final item in sale.items) {
+      final productId = item.productId;
+      final prodSnapshot = await _firebaseDb.ref.root.child('products').child(productId).get();
+      if (!prodSnapshot.exists) {
+        debugPrint('---> Sales: Produto $productId não existe no Firebase ao salvar venda. Pulando baixa.');
+        continue;
+      }
+
+      final currentStock = (prodSnapshot.child('stock').value as num?)?.toInt() ?? 0;
+      final newStock = currentStock - item.quantity;
+
+      final movPushRef = _firebaseDb.ref.root.child('stock_movements').child(productId).push();
+
+      final historyModel = ProductHistoryModel.fromEntity(
+        ProductHistoryEntity(
+          action: ProductHistoryAction.sale,
+          quantity: item.quantity,
+          oldStock: currentStock,
+          newStock: newStock,
+          date: DateTime.now(),
+          note: 'Venda ${sale.saleNumber}',
+          userName: sale.userName,
+          isNew: true,
+        ),
+      );
+
+      updates['products/$productId/stock'] = ServerValue.increment(-item.quantity);
+      updates['products/$productId/updatedAt'] = ServerValue.timestamp;
+      updates['stock_movements/$productId/${movPushRef.key}'] = historyModel.toMap();
+    }
+  }
+
   @override
   Future<void> save(SaleEntity sale) async {
     try {
@@ -58,36 +94,7 @@ class SalesRepositoryImpl implements SalesRepository {
       updates['sales/$saleId'] = saleModel.toMap();
 
       if (finalSale.status != SaleStatus.inProgress) {
-        for (final item in finalSale.items) {
-          final productId = item.productId;
-          final prodSnapshot = await _firebaseDb.ref.root.child('products').child(productId).get();
-          if (!prodSnapshot.exists || prodSnapshot.child('name').value == null) {
-            debugPrint('---> Sales: Produto $productId não existe no Firebase ao salvar venda. Pulando baixa.');
-            continue;
-          }
-
-          final currentStock = (prodSnapshot.child('stock').value as num?)?.toInt() ?? 0;
-          final newStock = currentStock - item.quantity;
-
-          final movPushRef = _firebaseDb.ref.root.child('stock_movements').child(productId).push();
-
-          final historyModel = ProductHistoryModel.fromEntity(
-            ProductHistoryEntity(
-              action: ProductHistoryAction.sale,
-              quantity: item.quantity,
-              oldStock: currentStock,
-              newStock: newStock,
-              date: DateTime.now(),
-              note: 'Venda $saleNumber',
-              userName: finalSale.userName,
-              isNew: true,
-            ),
-          );
-
-          updates['products/$productId/stock'] = ServerValue.increment(-item.quantity);
-          updates['products/$productId/updatedAt'] = ServerValue.timestamp;
-          updates['stock_movements/$productId/${movPushRef.key}'] = historyModel.toMap();
-        }
+        await _addStockDeductionUpdates(finalSale, updates);
       }
 
       await _firebaseDb.updateMultiple(updates);
@@ -100,10 +107,17 @@ class SalesRepositoryImpl implements SalesRepository {
   @override
   Future<void> updateSale(SaleEntity sale) async {
     try {
+      final oldSaleSnapshot = await _firebaseDb.ref.child(sale.id).get();
+      final oldStatus = oldSaleSnapshot.child('status').value as String?;
+
       final saleModel = SaleModel.fromEntity(sale.copyWith(updatedAt: DateTime.now()));
 
       final Map<String, dynamic> updates = {};
       updates['sales/${sale.id}'] = saleModel.toMap();
+
+      if (oldStatus == SaleStatus.inProgress.value && sale.status == SaleStatus.completed) {
+        await _addStockDeductionUpdates(sale, updates);
+      }
 
       await _firebaseDb.updateMultiple(updates);
     } catch (e) {
