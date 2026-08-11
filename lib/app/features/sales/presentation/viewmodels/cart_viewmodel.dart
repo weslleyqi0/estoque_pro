@@ -5,13 +5,13 @@ import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.da
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
-import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_case.dart';
 import 'package:flutter/foundation.dart';
 
 class CartViewModel extends ChangeNotifier {
-  final SalesRepository _salesRepository;
+  final SaveSaleUseCase _saveSaleUseCase;
 
-  CartViewModel(this._salesRepository) {
+  CartViewModel(this._saveSaleUseCase) {
     _initSaleNumber();
   }
 
@@ -228,11 +228,9 @@ class CartViewModel extends ChangeNotifier {
       createdAt: DateTime.now(),
     );
 
-    if (_editingSaleId != null && _editingSaleId!.isNotEmpty) {
-      await _salesRepository.updateSale(sale);
-    } else {
-      await _salesRepository.save(sale);
-    }
+    final isUpdate = _editingSaleId != null && _editingSaleId!.isNotEmpty;
+    await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
+
     clearCart();
     return true;
   }
@@ -283,11 +281,9 @@ class CartViewModel extends ChangeNotifier {
       createdAt: _createdAt,
     );
 
-    if (_editingSaleId != null && _editingSaleId!.isNotEmpty) {
-      await _salesRepository.updateSale(sale);
-    } else {
-      await _salesRepository.save(sale);
-    }
+    final isUpdate = _editingSaleId != null && _editingSaleId!.isNotEmpty;
+    await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
+
     clearCart();
     return true;
   }

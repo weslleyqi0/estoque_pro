@@ -43,16 +43,11 @@ class SalesRepositoryImpl implements SalesRepository {
   Future<void> _addStockDeductionUpdates(
     SaleEntity sale,
     Map<String, dynamic> updates,
+    Map<String, int> productStocks,
   ) async {
     for (final item in sale.items) {
       final productId = item.productId;
-      final prodSnapshot = await _firebaseDb.ref.root.child('products').child(productId).get();
-      if (!prodSnapshot.exists) {
-        debugPrint('---> Sales: Produto $productId não existe no Firebase ao salvar venda. Pulando baixa.');
-        continue;
-      }
-
-      final currentStock = (prodSnapshot.child('stock').value as num?)?.toInt() ?? 0;
+      final currentStock = productStocks[productId] ?? 0;
       final newStock = currentStock - item.quantity;
 
       final movPushRef = _firebaseDb.ref.root.child('stock_movements').child(productId).push();
@@ -77,7 +72,7 @@ class SalesRepositoryImpl implements SalesRepository {
   }
 
   @override
-  Future<void> save(SaleEntity sale) async {
+  Future<void> save(SaleEntity sale, {Map<String, int>? productStocks}) async {
     try {
       final pushRef = _firebaseDb.ref.push();
       final saleId = pushRef.key!;
@@ -94,7 +89,7 @@ class SalesRepositoryImpl implements SalesRepository {
       updates['sales/$saleId'] = saleModel.toMap();
 
       if (finalSale.status != SaleStatus.inProgress) {
-        await _addStockDeductionUpdates(finalSale, updates);
+        await _addStockDeductionUpdates(finalSale, updates, productStocks ?? {});
       }
 
       await _firebaseDb.updateMultiple(updates);
@@ -105,10 +100,14 @@ class SalesRepositoryImpl implements SalesRepository {
   }
 
   @override
-  Future<void> updateSale(SaleEntity sale) async {
+  Future<void> updateSale(SaleEntity sale, {Map<String, int>? productStocks}) async {
     try {
       final oldSaleSnapshot = await _firebaseDb.ref.child(sale.id).get();
-      final oldStatus = oldSaleSnapshot.child('status').value as String?;
+      String? oldStatus;
+      final oldVal = oldSaleSnapshot.value;
+      if (oldVal is Map) {
+        oldStatus = oldVal['status'] as String?;
+      }
 
       final saleModel = SaleModel.fromEntity(sale.copyWith(updatedAt: DateTime.now()));
 
@@ -116,7 +115,7 @@ class SalesRepositoryImpl implements SalesRepository {
       updates['sales/${sale.id}'] = saleModel.toMap();
 
       if (oldStatus == SaleStatus.inProgress.value && sale.status == SaleStatus.completed) {
-        await _addStockDeductionUpdates(sale, updates);
+        await _addStockDeductionUpdates(sale, updates, productStocks ?? {});
       }
 
       await _firebaseDb.updateMultiple(updates);
