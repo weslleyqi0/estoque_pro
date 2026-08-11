@@ -12,26 +12,26 @@ class AppSnackbar {
     switch (type) {
       case AppSnackbarType.success:
         return (
-          Color.lerp(AppColors.success, Colors.white, 0.5)!,
-          Color.lerp(AppColors.success, Colors.black, 0.5)!,
+          Color.lerp(AppColors.success, Colors.white, 0.6)!,
+          Color.lerp(AppColors.success, Colors.black, 0.2)!,
           AppIcons.checkCircleOutline,
         );
       case AppSnackbarType.error:
         return (
-          Color.lerp(AppColors.error, Colors.white, 0.5)!,
-          Color.lerp(AppColors.error, Colors.black, 0.3)!,
+          Color.lerp(AppColors.error, Colors.white, 0.6)!,
+          Color.lerp(AppColors.error, Colors.black, 0.1)!,
           AppIcons.errorCircle,
         );
       case AppSnackbarType.warning:
         return (
-          Color.lerp(AppColors.warning, Colors.white, 0.4)!,
-          Color.lerp(AppColors.warning, Colors.black, 0.4)!,
+          Color.lerp(AppColors.warning, Colors.white, 0.6)!,
+          Color.lerp(AppColors.warning, Colors.black, 0.1)!,
           AppIcons.warning,
         );
       case AppSnackbarType.info:
         return (
           Color.lerp(AppColors.info, Colors.white, 0.5)!,
-          Color.lerp(AppColors.info, Colors.black, 0.4)!,
+          Color.lerp(AppColors.info, Colors.black, 0.1)!,
           AppIcons.info,
         );
     }
@@ -69,7 +69,7 @@ class AppSnackbar {
           Expanded(
             child: Text(
               text,
-              style: AppTypography.bodyMedium.copyWith(color: iconColor),
+              style: AppTypography.bodyMedium.copyWith(color: context.colorScheme.onSurface),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -77,24 +77,29 @@ class AppSnackbar {
         ],
       ),
       padding: .only(left: AppSpacing.space12, top: AppSpacing.space12, bottom: AppSpacing.space12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radius16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radius16),
+        side: BorderSide(color: iconColor, width: 1.5),
+      ),
       backgroundColor: backgroundColor,
       behavior: SnackBarBehavior.floating,
     );
 
     try {
       final controller = messenger.showSnackBar(snackbar);
-      controller.closed.then((_) {
-        if (_currentText == text) {
-          _isShowing = false;
-          _currentText = null;
-        }
-      }).catchError((_) {
-        if (_currentText == text) {
-          _isShowing = false;
-          _currentText = null;
-        }
-      });
+      controller.closed
+          .then((_) {
+            if (_currentText == text) {
+              _isShowing = false;
+              _currentText = null;
+            }
+          })
+          .catchError((_) {
+            if (_currentText == text) {
+              _isShowing = false;
+              _currentText = null;
+            }
+          });
     } catch (_) {
       _isShowing = false;
       _currentText = null;
