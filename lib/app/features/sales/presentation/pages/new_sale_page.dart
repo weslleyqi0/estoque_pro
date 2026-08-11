@@ -36,6 +36,7 @@ class _NewSalePageState extends State<NewSalePage> {
     if (widget.initialSale != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _cartViewModel.loadSale(widget.initialSale!, _productsViewModel.products);
+        _productsViewModel.setSearchQuery('');
       });
     }
   }
@@ -43,6 +44,7 @@ class _NewSalePageState extends State<NewSalePage> {
   @override
   void dispose() {
     _sheetController.dispose();
+    _productsViewModel.setSearchQuery('');
     super.dispose();
   }
 
@@ -139,7 +141,28 @@ class _NewSalePageState extends State<NewSalePage> {
                   slivers: [
                     AppFloatingSearch(
                       hint: 'Buscar por nome, categoria, fornecedor ou código...',
+                      initialValue: _productsViewModel.searchQuery,
                       onChanged: _productsViewModel.setSearchQuery,
+                      trailing: Tooltip(
+                        message: 'Abrir leitor de código de barras',
+                        child: InkWell(
+                          onTap: () {},
+                          child: Container(
+                            height: 68,
+                            width: 68,
+                            decoration: BoxDecoration(
+                              color: context.colorScheme.primary,
+                              borderRadius: BorderRadius.circular(AppSpacing.radius16),
+                              border: .all(color: context.colorScheme.primary, width: 1.0),
+                            ),
+                            child: Icon(
+                              AppIcons.barcodeScanner,
+                              color: context.colorScheme.surface,
+                              size: AppSpacing.icon32,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
 
                     SaleProductsListSliver(

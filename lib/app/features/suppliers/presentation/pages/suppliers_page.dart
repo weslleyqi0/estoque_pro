@@ -52,7 +52,6 @@ class _SuppliersPageState extends State<SuppliersPage> {
             slivers: [
               if (_viewModel.suppliers.isNotEmpty)
                 AppFloatingSearch(
-                  key: ValueKey(_viewModel.searchQuery),
                   hint: 'Pesquisar fornecedor...',
                   initialValue: _viewModel.searchQuery,
                   onChanged: _viewModel.setSearchQuery,

@@ -52,7 +52,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
             slivers: [
               if (_viewModel.categories.isNotEmpty)
                 AppFloatingSearch(
-                  key: ValueKey(_viewModel.searchQuery),
                   hint: 'Pesquisar categoria...',
                   initialValue: _viewModel.searchQuery,
                   onChanged: _viewModel.setSearchQuery,

@@ -34,6 +34,15 @@ class _AppFloatingSearchState extends State<AppFloatingSearch> {
   }
 
   @override
+  void didUpdateWidget(AppFloatingSearch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialValue != oldWidget.initialValue &&
+        widget.initialValue != _controller.text) {
+      _controller.text = widget.initialValue ?? '';
+    }
+  }
+
+  @override
   void dispose() {
     _controller.removeListener(_onTextChanged);
     _controller.dispose();

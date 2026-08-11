@@ -41,6 +41,7 @@ abstract class AppIcons {
   static const IconData assignmentReturn = Symbols.assignment_return_rounded;
   static const IconData badge = Symbols.badge_rounded;
   static const IconData barChart = Symbols.bar_chart_rounded;
+  static const IconData barcodeScanner = Symbols.barcode_scanner_rounded;
   static const IconData block = Symbols.block_rounded;
   static const IconData brokenImage = Symbols.broken_image_rounded;
   static const IconData cancel = Symbols.cancel_rounded;
