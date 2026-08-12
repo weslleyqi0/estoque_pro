@@ -6,6 +6,8 @@ import 'package:estoque_pro/app/features/sales/data/repositories/sales_repositor
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/finalize_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/save_draft_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
@@ -117,6 +119,14 @@ void setupServiceLocator() {
     ),
   );
 
+  getIt.registerFactory<FinalizeSaleUseCase>(
+    () => FinalizeSaleUseCase(getIt<SaveSaleUseCase>()),
+  );
+
+  getIt.registerFactory<SaveDraftSaleUseCase>(
+    () => SaveDraftSaleUseCase(getIt<SaveSaleUseCase>()),
+  );
+
   // ViewModels
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(
@@ -166,6 +176,9 @@ void setupServiceLocator() {
   );
 
   getIt.registerFactory<CartViewModel>(
-    () => CartViewModel(getIt<SaveSaleUseCase>()),
+    () => CartViewModel(
+      getIt<FinalizeSaleUseCase>(),
+      getIt<SaveDraftSaleUseCase>(),
+    ),
   );
 }

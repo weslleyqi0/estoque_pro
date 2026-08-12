@@ -5,39 +5,36 @@ class CountProductsUseCase {
 
   const CountProductsUseCase(this._productsRepository);
 
-  /// Stream de contagem de produtos por fornecedor
+  /// Stream of product count by supplier
   Stream<int> countBySupplier(String supplierId) {
     return _productsRepository.watchAll().map(
       (products) => products.where((p) => p.supplier?.id == supplierId).length,
     );
   }
 
-  /// Contagem one-shot por fornecedor
+  /// One-shot product count by supplier
   Future<int> executeBySupplier(String supplierId) async {
     final products = await _productsRepository.getAll();
     return products.where((p) => p.supplier?.id == supplierId).length;
   }
 
-  /// Stream de contagem de produtos por categoria
+  /// Stream of product count by category
   Stream<int> countByCategory(String categoryId) {
     return _productsRepository.watchAll().map(
-      (products) => products
-          .where((p) => p.categories.any((c) => c.id == categoryId))
-          .length,
+      (products) => products.where((p) => p.categories.any((c) => c.id == categoryId)).length,
     );
   }
 
-  /// Contagem one-shot por categoria
+  /// One-shot product count by category
   Future<int> executeByCategory(String categoryId) async {
     final products = await _productsRepository.getAll();
     return products.where((p) => p.categories.any((c) => c.id == categoryId)).length;
   }
 
-  /// Stream de contagem de produtos com estoque baixo
+  /// Stream of low-stock product count
   Stream<int> countLowStock() {
     return _productsRepository.watchAll().map(
-      (products) =>
-          products.where((p) => p.stock < p.minStock && p.isActive).length,
+      (products) => products.where((p) => p.stock < p.minStock && p.isActive).length,
     );
   }
 }

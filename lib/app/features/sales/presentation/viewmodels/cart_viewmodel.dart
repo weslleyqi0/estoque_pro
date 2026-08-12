@@ -3,15 +3,18 @@ import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
-import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
-import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
-import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/finalize_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/save_draft_sale_use_case.dart';
 import 'package:flutter/foundation.dart';
 
 class CartViewModel extends ChangeNotifier {
-  final SaveSaleUseCase _saveSaleUseCase;
+  final FinalizeSaleUseCase _finalizeSaleUseCase;
+  final SaveDraftSaleUseCase _saveDraftSaleUseCase;
 
-  CartViewModel(this._saveSaleUseCase) {
+  CartViewModel(
+    this._finalizeSaleUseCase,
+    this._saveDraftSaleUseCase,
+  ) {
     _initSaleNumber();
   }
 
@@ -191,45 +194,21 @@ class CartViewModel extends ChangeNotifier {
     required String userName,
     required List<ProductEntity> availableProducts,
   }) async {
-    final outOfStock = getOutOfStockProducts(availableProducts);
-    if (outOfStock.isNotEmpty) {
-      final names = outOfStock.map((p) => '${p.name} (Estoque: ${p.stock})').join(', ');
-      throw Exception('Estoque insuficiente para: $names');
-    }
-
-    final saleItems = _items
-        .map(
-          (item) => SaleItemEntity(
-            productId: item.product.id,
-            productName: item.product.name,
-            productImgUrl: item.product.imgUrl,
-            unitPrice: item.product.price,
-            quantity: item.quantity,
-          ),
-        )
-        .toList();
-
-    final sale = SaleEntity(
-      id: _editingSaleId ?? '',
+    await _finalizeSaleUseCase.execute(
+      items: _items,
       saleNumber: _saleNumber,
-      items: saleItems,
-      subtotal: subtotal,
+      editingSaleId: _editingSaleId,
       discountType: _discountType,
       discountValue: _discountValue,
+      subtotal: subtotal,
       total: total,
       paymentMethod: _paymentMethod!,
-      amountPaid: _paymentMethod == PaymentMethod.dinheiro ? _amountPaid : null,
-      change: _paymentMethod == PaymentMethod.dinheiro ? change : null,
-      customerId: '',
-      customerName: '',
+      amountPaid: _amountPaid,
+      change: change,
       userId: userId,
       userName: userName,
-      status: SaleStatus.completed,
-      createdAt: DateTime.now(),
+      availableProducts: availableProducts,
     );
-
-    final isUpdate = _editingSaleId != null && _editingSaleId!.isNotEmpty;
-    await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
 
     clearCart();
     return true;
@@ -240,49 +219,22 @@ class CartViewModel extends ChangeNotifier {
     required String userName,
     required List<ProductEntity> availableProducts,
   }) async {
-    if (_items.isEmpty) {
-      throw Exception('O carrinho está vazio.');
-    }
-
-    final outOfStock = getOutOfStockProducts(availableProducts);
-    if (outOfStock.isNotEmpty) {
-      final names = outOfStock.map((p) => '${p.name} (Estoque: ${p.stock})').join(', ');
-      throw Exception('Estoque insuficiente para: $names');
-    }
-
-    final saleItems = _items
-        .map(
-          (item) => SaleItemEntity(
-            productId: item.product.id,
-            productName: item.product.name,
-            productImgUrl: item.product.imgUrl,
-            unitPrice: item.product.price,
-            quantity: item.quantity,
-          ),
-        )
-        .toList();
-
-    final sale = SaleEntity(
-      id: _editingSaleId ?? '',
+    await _saveDraftSaleUseCase.execute(
+      items: _items,
       saleNumber: _saleNumber,
-      items: saleItems,
-      subtotal: subtotal,
+      editingSaleId: _editingSaleId,
       discountType: _discountType,
       discountValue: _discountValue,
+      subtotal: subtotal,
       total: total,
       paymentMethod: _paymentMethod ?? PaymentMethod.dinheiro,
       amountPaid: _amountPaid,
       change: change,
-      customerId: '',
-      customerName: '',
       userId: userId,
       userName: userName,
-      status: SaleStatus.inProgress,
+      availableProducts: availableProducts,
       createdAt: _createdAt,
     );
-
-    final isUpdate = _editingSaleId != null && _editingSaleId!.isNotEmpty;
-    await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
 
     clearCart();
     return true;

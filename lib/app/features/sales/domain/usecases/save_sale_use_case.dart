@@ -3,6 +3,12 @@ import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart'
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 
+/// Persists a sale entity, handling stock validation for completed sales.
+///
+/// Responsibilities:
+/// - validate sale has items;
+/// - for completed sales (not inProgress), verify stock availability;
+/// - delegate to repository for save or update.
 class SaveSaleUseCase {
   final SalesRepository _salesRepository;
   final ProductsRepository _productsRepository;
