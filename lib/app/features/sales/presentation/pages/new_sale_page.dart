@@ -1,5 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
@@ -28,6 +29,12 @@ class _NewSalePageState extends State<NewSalePage> {
 
   static const double _collapsedSize = 0.12;
   static const double _expandedSize = 1.0;
+
+  EdgeInsets get _snackbarMargin => EdgeInsets.only(
+    bottom: _collapsedSize * MediaQuery.of(context).size.height + 16,
+    left: AppSpacing.space16,
+    right: AppSpacing.space16,
+  );
 
   @override
   void initState() {
@@ -88,18 +95,54 @@ class _NewSalePageState extends State<NewSalePage> {
         );
 
         if (context.mounted) {
-          AppSnackbar.success(context, 'Venda em andamento salva com sucesso!');
+          AppSnackbar.success(
+            context,
+            'Venda em andamento salva com sucesso!',
+          );
         }
         return true;
       } catch (e) {
         if (context.mounted) {
-          AppSnackbar.error(context, e.toString().replaceAll('Exception: ', ''));
+          AppSnackbar.error(
+            context,
+            e.toString().replaceAll('Exception: ', ''),
+          );
         }
         return false;
       }
     } else {
       _cartViewModel.clearCart();
       return true;
+    }
+  }
+
+  void _openBarcodeScanner() async {
+    final scannedCode = await context.push<String>(AppRoutes.saleScanner);
+    if (scannedCode == null || scannedCode.isEmpty || !mounted) return;
+
+    final matchedProduct = _productsViewModel.findProductByBarcode(scannedCode);
+    if (matchedProduct == null) {
+      AppSnackbar.error(
+        context,
+        margin: _snackbarMargin,
+        'Produto não localizado com o código: $scannedCode',
+      );
+      return;
+    }
+
+    final added = _cartViewModel.addProduct(matchedProduct);
+    if (added) {
+      AppSnackbar.success(
+        context,
+        margin: _snackbarMargin,
+        '${matchedProduct.name} adicionado ao carrinho!',
+      );
+    } else {
+      AppSnackbar.error(
+        context,
+        margin: _snackbarMargin,
+        'Estoque insuficiente para adicionar ${matchedProduct.name}.',
+      );
     }
   }
 
@@ -146,7 +189,7 @@ class _NewSalePageState extends State<NewSalePage> {
                       trailing: Tooltip(
                         message: 'Abrir leitor de código de barras',
                         child: InkWell(
-                          onTap: () {},
+                          onTap: _openBarcodeScanner,
                           child: Container(
                             height: 68,
                             width: 68,

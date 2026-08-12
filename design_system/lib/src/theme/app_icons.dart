@@ -53,6 +53,8 @@ abstract class AppIcons {
   static const IconData deliveryTruck = Symbols.delivery_truck_speed_rounded;
   static const IconData editNote = Symbols.edit_note_rounded;
   static const IconData fingerprint = Symbols.fingerprint;
+  static const IconData flashOn = Symbols.flash_on_rounded;
+  static const IconData flashOff = Symbols.flash_off_rounded;
   static const IconData group = Symbols.group_rounded;
   static const IconData history = Symbols.history_rounded;
   static const IconData homeWork = Symbols.home_work_rounded;

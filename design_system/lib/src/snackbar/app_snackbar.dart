@@ -37,7 +37,21 @@ class AppSnackbar {
     }
   }
 
-  static void _showSnackbar(BuildContext context, String text, AppSnackbarType type) {
+  static void dismiss(BuildContext context) {
+    if (!context.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).clearSnackBars();
+    _isShowing = false;
+    _currentText = null;
+  }
+
+  static void _showSnackbar(
+    BuildContext context,
+    String text,
+    AppSnackbarType type, {
+    EdgeInsetsGeometry? margin,
+  }) {
     if (!context.mounted) {
       return;
     }
@@ -76,7 +90,8 @@ class AppSnackbar {
           ),
         ],
       ),
-      padding: .only(left: AppSpacing.space12, top: AppSpacing.space12, bottom: AppSpacing.space12),
+      margin: margin,
+      padding: const EdgeInsets.only(left: AppSpacing.space12, top: AppSpacing.space12, bottom: AppSpacing.space12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radius16),
         side: BorderSide(color: iconColor, width: 1.5),
@@ -106,19 +121,19 @@ class AppSnackbar {
     }
   }
 
-  static void success(BuildContext context, String text) {
-    _showSnackbar(context, text, AppSnackbarType.success);
+  static void success(BuildContext context, String text, {EdgeInsetsGeometry? margin}) {
+    _showSnackbar(context, text, AppSnackbarType.success, margin: margin);
   }
 
-  static void error(BuildContext context, String text) {
-    _showSnackbar(context, text, AppSnackbarType.error);
+  static void error(BuildContext context, String text, {EdgeInsetsGeometry? margin}) {
+    _showSnackbar(context, text, AppSnackbarType.error, margin: margin);
   }
 
-  static void warning(BuildContext context, String text) {
-    _showSnackbar(context, text, AppSnackbarType.warning);
+  static void warning(BuildContext context, String text, {EdgeInsetsGeometry? margin}) {
+    _showSnackbar(context, text, AppSnackbarType.warning, margin: margin);
   }
 
-  static void info(BuildContext context, String text) {
-    _showSnackbar(context, text, AppSnackbarType.info);
+  static void info(BuildContext context, String text, {EdgeInsetsGeometry? margin}) {
+    _showSnackbar(context, text, AppSnackbarType.info, margin: margin);
   }
 }

@@ -45,6 +45,16 @@ class ProductsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  ProductEntity? findProductByBarcode(String barcode) {
+    final normalized = barcode.trim();
+    for (final product in _products) {
+      if (product.isActive && product.barcode.trim() == normalized) {
+        return product;
+      }
+    }
+    return null;
+  }
+
   List<ProductEntity> get filteredProducts {
     final list = _showOnlyLowStock ? lowStockProducts : _products;
 
