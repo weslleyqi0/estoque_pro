@@ -20,6 +20,9 @@ class _SalesPageState extends State<SalesPage> {
   void initState() {
     super.initState();
     widget.viewModel.listenAll();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.viewModel.setSearchQuery('');
+    });
   }
 
   @override
