@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
@@ -11,10 +10,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class NewSalePage extends StatefulWidget {
+  final ProductsViewModel productsViewModel;
+  final CartViewModel cartViewModel;
+  final AuthViewModel authViewModel;
   final SaleEntity? initialSale;
 
   const NewSalePage({
     super.key,
+    required this.productsViewModel,
+    required this.cartViewModel,
+    required this.authViewModel,
     this.initialSale,
   });
 
@@ -23,8 +28,6 @@ class NewSalePage extends StatefulWidget {
 }
 
 class _NewSalePageState extends State<NewSalePage> {
-  final _productsViewModel = getIt<ProductsViewModel>();
-  final _cartViewModel = getIt<CartViewModel>();
   final _sheetController = DraggableScrollableController();
 
   static const double _collapsedSize = 0.12;
@@ -39,11 +42,11 @@ class _NewSalePageState extends State<NewSalePage> {
   @override
   void initState() {
     super.initState();
-    _productsViewModel.listenAll();
+    widget.productsViewModel.listenAll();
     if (widget.initialSale != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _cartViewModel.loadSale(widget.initialSale!, _productsViewModel.products);
-        _productsViewModel.setSearchQuery('');
+        widget.cartViewModel.loadSale(widget.initialSale!, widget.productsViewModel.products);
+        widget.productsViewModel.setSearchQuery('');
       });
     }
   }
@@ -51,7 +54,7 @@ class _NewSalePageState extends State<NewSalePage> {
   @override
   void dispose() {
     _sheetController.dispose();
-    _productsViewModel.setSearchQuery('');
+    widget.productsViewModel.setSearchQuery('');
     super.dispose();
   }
 
@@ -83,15 +86,14 @@ class _NewSalePageState extends State<NewSalePage> {
 
     if (confirmed) {
       try {
-        final authVM = getIt<AuthViewModel>();
-        final currentUser = authVM.currentUser;
+        final currentUser = widget.authViewModel.currentUser;
         final userId = currentUser?.uid ?? '';
         final userName = currentUser?.name ?? 'Vendedor';
 
-        await _cartViewModel.saveInProgressToFirebase(
+        await widget.cartViewModel.saveInProgressToFirebase(
           userId: userId,
           userName: userName,
-          availableProducts: _productsViewModel.products,
+          availableProducts: widget.productsViewModel.products,
         );
 
         if (context.mounted) {
@@ -111,7 +113,7 @@ class _NewSalePageState extends State<NewSalePage> {
         return false;
       }
     } else {
-      _cartViewModel.clearCart();
+      widget.cartViewModel.clearCart();
       return true;
     }
   }
@@ -120,7 +122,7 @@ class _NewSalePageState extends State<NewSalePage> {
     final scannedCode = await context.push<String>(AppRoutes.saleScanner);
     if (scannedCode == null || scannedCode.isEmpty || !mounted) return;
 
-    final matchedProduct = _productsViewModel.findProductByBarcode(scannedCode);
+    final matchedProduct = widget.productsViewModel.findProductByBarcode(scannedCode);
     if (matchedProduct == null) {
       AppSnackbar.error(
         context,
@@ -130,7 +132,7 @@ class _NewSalePageState extends State<NewSalePage> {
       return;
     }
 
-    final added = _cartViewModel.addProduct(matchedProduct);
+    final added = widget.cartViewModel.addProduct(matchedProduct);
     if (added) {
       AppSnackbar.success(
         context,
@@ -149,7 +151,7 @@ class _NewSalePageState extends State<NewSalePage> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([_productsViewModel, _cartViewModel]),
+      listenable: Listenable.merge([widget.productsViewModel, widget.cartViewModel]),
       builder: (context, _) {
         return PopScope(
           canPop: false,
@@ -161,7 +163,7 @@ class _NewSalePageState extends State<NewSalePage> {
               return;
             }
 
-            if (_cartViewModel.items.isNotEmpty) {
+            if (widget.cartViewModel.items.isNotEmpty) {
               final shouldPop = await _showSaveDraftDialog(context);
               if (shouldPop && context.mounted) {
                 context.pop();
@@ -184,8 +186,8 @@ class _NewSalePageState extends State<NewSalePage> {
                   slivers: [
                     AppFloatingSearch(
                       hint: 'Buscar por nome, categoria, fornecedor ou código...',
-                      initialValue: _productsViewModel.searchQuery,
-                      onChanged: _productsViewModel.setSearchQuery,
+                      initialValue: widget.productsViewModel.searchQuery,
+                      onChanged: widget.productsViewModel.setSearchQuery,
                       trailing: Tooltip(
                         message: 'Abrir leitor de código de barras',
                         child: InkWell(
@@ -209,16 +211,16 @@ class _NewSalePageState extends State<NewSalePage> {
                     ),
 
                     SaleProductsListSliver(
-                      productsViewModel: _productsViewModel,
-                      cartViewModel: _cartViewModel,
+                      productsViewModel: widget.productsViewModel,
+                      cartViewModel: widget.cartViewModel,
                     ),
                   ],
                 ),
               ),
 
               CartBottomSheet(
-                cartViewModel: _cartViewModel,
-                availableProducts: _productsViewModel.products,
+                cartViewModel: widget.cartViewModel,
+                availableProducts: widget.productsViewModel.products,
                 controller: _sheetController,
                 onSaleSuccess: () {
                   AppSnackbar.success(context, 'Venda realizada com sucesso!');

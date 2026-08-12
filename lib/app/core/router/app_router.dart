@@ -23,6 +23,8 @@ import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart'
 import 'package:estoque_pro/app/features/sales/presentation/pages/new_sale_page.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/sale_scanner_page.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/sales_page.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_form_page.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/suppliers_page.dart';
@@ -170,13 +172,18 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.sales,
-        builder: (context, state) => const SalesPage(),
+        builder: (context, state) => SalesPage(viewModel: getIt<SalesViewModel>()),
       ),
       GoRoute(
         path: AppRoutes.newSale,
         builder: (context, state) {
           final sale = state.extra as SaleEntity?;
-          return NewSalePage(initialSale: sale);
+          return NewSalePage(
+            productsViewModel: getIt<ProductsViewModel>(),
+            cartViewModel: getIt<CartViewModel>(),
+            authViewModel: getIt<AuthViewModel>(),
+            initialSale: sale,
+          );
         },
       ),
       GoRoute(
