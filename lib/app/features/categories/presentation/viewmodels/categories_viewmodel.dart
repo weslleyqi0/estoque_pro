@@ -2,18 +2,17 @@ import 'dart:async';
 
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
-import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
 import 'package:flutter/foundation.dart';
 
 enum CategoriesLoadState { idle, loading, success, failure }
 
 class CategoriesViewModel extends ChangeNotifier {
   final CategoriesRepository _repository;
-  final ProductsRepository _productsRepository;
+  final CountProductsUseCase _countProductsUseCase;
 
   StreamSubscription<List<CategoryEntity>>? _categoriesSubscription;
-  StreamSubscription<List<ProductEntity>>? _productsSubscription;
+  final List<StreamSubscription<int>> _productCountSubscriptions = [];
 
   CategoriesLoadState _state = CategoriesLoadState.idle;
   CategoriesLoadState get state => _state;
@@ -21,7 +20,7 @@ class CategoriesViewModel extends ChangeNotifier {
   List<CategoryEntity> _categories = [];
   List<CategoryEntity> get categories => _categories;
 
-  List<ProductEntity> _products = [];
+  final Map<String, int> _categoryProductCounts = {};
 
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
@@ -33,7 +32,7 @@ class CategoriesViewModel extends ChangeNotifier {
 
   List<CategoryEntity> get filteredCategories {
     if (_searchQuery.trim().isEmpty) return _categories;
-    
+
     final query = _searchQuery.toLowerCase().trim();
 
     return _categories.where((category) {
@@ -42,13 +41,28 @@ class CategoriesViewModel extends ChangeNotifier {
   }
 
   int getProductCountForCategory(String categoryId) {
-    return _products.where((p) => p.categories.any((c) => c.id == categoryId)).length;
+    return _categoryProductCounts[categoryId] ?? 0;
+  }
+
+  void _loadProductCounts() {
+    for (final subscription in _productCountSubscriptions) {
+      subscription.cancel();
+    }
+    _productCountSubscriptions.clear();
+
+    for (final category in _categories) {
+      final subscription = _countProductsUseCase.countByCategory(category.id).listen((count) {
+        _categoryProductCounts[category.id] = count;
+        notifyListeners();
+      });
+      _productCountSubscriptions.add(subscription);
+    }
   }
 
   Object? _error;
   Object? get error => _error;
 
-  CategoriesViewModel(this._repository, this._productsRepository);
+  CategoriesViewModel(this._repository, this._countProductsUseCase);
 
   void listenAll() {
     _state = CategoriesLoadState.loading;
@@ -68,17 +82,15 @@ class CategoriesViewModel extends ChangeNotifier {
       },
     );
 
-    _productsSubscription?.cancel();
-    _productsSubscription = _productsRepository.watchAll().listen((productsList) {
-      _products = productsList;
-      notifyListeners();
-    });
+    _loadProductCounts();
   }
 
   @override
   void dispose() {
     _categoriesSubscription?.cancel();
-    _productsSubscription?.cancel();
+    for (final subscription in _productCountSubscriptions) {
+      subscription.cancel();
+    }
     super.dispose();
   }
 }

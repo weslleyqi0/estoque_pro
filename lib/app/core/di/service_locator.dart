@@ -5,6 +5,7 @@ import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dar
 import 'package:estoque_pro/app/features/sales/data/repositories/sales_repository_impl.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
@@ -105,6 +106,10 @@ void setupServiceLocator() {
   );
 
   // UseCases
+  getIt.registerFactory<CountProductsUseCase>(
+    () => CountProductsUseCase(getIt<ProductsRepository>()),
+  );
+
   getIt.registerFactory<SaveSaleUseCase>(
     () => SaveSaleUseCase(
       getIt<SalesRepository>(),
@@ -135,7 +140,10 @@ void setupServiceLocator() {
   );
 
   getIt.registerFactory<CategoriesViewModel>(
-    () => CategoriesViewModel(getIt<CategoriesRepository>(), getIt<ProductsRepository>()),
+    () => CategoriesViewModel(
+      getIt<CategoriesRepository>(),
+      getIt<CountProductsUseCase>(),
+    ),
   );
   getIt.registerFactory<CategoriesFormViewmodel>(
     () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
