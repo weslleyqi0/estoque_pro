@@ -109,7 +109,9 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.suppliers,
-        builder: (context, state) => SuppliersPage(viewModel: getIt<SuppliersViewModel>()),
+        builder: (context, state) => SuppliersPage(
+          viewModelFactory: () => getIt<SuppliersViewModel>(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.supplierForm,

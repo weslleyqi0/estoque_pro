@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class SuppliersPage extends StatefulWidget {
-  final SuppliersViewModel viewModel;
+  final SuppliersViewModel Function() viewModelFactory;
 
   const SuppliersPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
   });
 
   @override
@@ -18,18 +18,21 @@ class SuppliersPage extends StatefulWidget {
 }
 
 class _SuppliersPageState extends State<SuppliersPage> {
+  late final SuppliersViewModel viewModel;
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.listenAll();
+    viewModel = widget.viewModelFactory();
+    viewModel.listenAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.viewModel.setSearchQuery('');
+      viewModel.setSearchQuery('');
     });
   }
 
   @override
   void dispose() {
-    widget.viewModel.dispose();
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -47,18 +50,18 @@ class _SuppliersPageState extends State<SuppliersPage> {
       ),
 
       body: ListenableBuilder(
-        listenable: widget.viewModel,
+        listenable: viewModel,
         builder: (context, _) {
           return CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              if (widget.viewModel.suppliers.isNotEmpty)
+              if (viewModel.suppliers.isNotEmpty)
                 AppFloatingSearch(
                   hint: 'Pesquisar fornecedor...',
-                  initialValue: widget.viewModel.searchQuery,
-                  onChanged: widget.viewModel.setSearchQuery,
+                  initialValue: viewModel.searchQuery,
+                  onChanged: viewModel.setSearchQuery,
                 ),
-              SuppliersListSliver(viewModel: widget.viewModel),
+              SuppliersListSliver(viewModel: viewModel),
             ],
           );
         },
