@@ -34,8 +34,8 @@ class _ProductsPageState extends State<ProductsPage> {
 
   @override
   void dispose() {
-    widget.viewModel.setSearchQuery('');
-    widget.viewModel.clearLowStockFilter();
+    widget.viewModel.setSearchQuery('', notify: false);
+    widget.viewModel.clearLowStockFilter(notify: false);
     super.dispose();
   }
 

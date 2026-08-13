@@ -25,24 +25,26 @@ class ProductsViewModel extends ChangeNotifier {
   bool _showOnlyLowStock = false;
   bool get showOnlyLowStock => _showOnlyLowStock;
 
-  List<ProductEntity> get lowStockProducts =>
-      _products.where((p) => p.stock < p.minStock && p.isActive).toList();
+  List<ProductEntity> get lowStockProducts => _products.where((p) => p.stock < p.minStock && p.isActive).toList();
 
   bool get hasLowStock => lowStockProducts.isNotEmpty;
 
-  void setShowOnlyLowStock(bool value) {
+  void setShowOnlyLowStock(bool value, {bool notify = true}) {
+    if (_showOnlyLowStock == value) return;
     _showOnlyLowStock = value;
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
-  void clearLowStockFilter() {
+  void clearLowStockFilter({bool notify = true}) {
+    if (!_showOnlyLowStock) return;
     _showOnlyLowStock = false;
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
-  void setSearchQuery(String query) {
+  void setSearchQuery(String query, {bool notify = true}) {
+    if (_searchQuery == query) return;
     _searchQuery = query;
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   ProductEntity? findProductByBarcode(String barcode) {

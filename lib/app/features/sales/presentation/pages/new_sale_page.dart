@@ -43,12 +43,11 @@ class _NewSalePageState extends State<NewSalePage> {
   void initState() {
     super.initState();
     widget.productsViewModel.listenAll();
-    widget.productsViewModel.clearLowStockFilter();
-    widget.productsViewModel.setSearchQuery('');
     if (widget.initialSale != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         widget.cartViewModel.loadSale(widget.initialSale!, widget.productsViewModel.products);
-        widget.productsViewModel.setSearchQuery('');
+        widget.productsViewModel.clearLowStockFilter();
+        widget.productsViewModel.setSearchQuery('', notify: false);
       });
     }
   }
@@ -56,8 +55,8 @@ class _NewSalePageState extends State<NewSalePage> {
   @override
   void dispose() {
     _sheetController.dispose();
-    widget.productsViewModel.setSearchQuery('');
-    widget.productsViewModel.clearLowStockFilter();
+    widget.productsViewModel.setSearchQuery('', notify: false);
+    widget.productsViewModel.clearLowStockFilter(notify: false);
     super.dispose();
   }
 
