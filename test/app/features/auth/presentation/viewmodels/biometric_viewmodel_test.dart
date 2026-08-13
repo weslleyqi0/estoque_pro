@@ -23,7 +23,7 @@ void main() {
     await getIt.reset();
     getIt.registerLazySingleton<AuthRepository>(() => mockAuthRepository);
 
-    viewModel = BiometricViewModel();
+    viewModel = BiometricViewModel(getIt<AuthRepository>());
   });
 
   group('BiometricViewModel Tests', () {
