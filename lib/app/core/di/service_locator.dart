@@ -127,14 +127,15 @@ void setupServiceLocator() {
     () => SaveDraftSaleUseCase(getIt<SaveSaleUseCase>()),
   );
 
-  // ViewModels
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(
       getIt<AuthRepository>(),
       getIt<AuthorizationService>(),
     ),
   );
-  getIt.registerLazySingleton<BiometricViewModel>(() => BiometricViewModel());
+  getIt.registerLazySingleton<BiometricViewModel>(
+    () => BiometricViewModel(getIt<AuthRepository>()),
+  );
   getIt.registerFactory<UsersViewModel>(
     () => UsersViewModel(
       getIt<UsersRepository>(),
