@@ -73,6 +73,7 @@ class CategoriesViewModel extends ChangeNotifier {
       (list) {
         _categories = list..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         _state = CategoriesLoadState.success;
+        _loadProductCounts();
         notifyListeners();
       },
       onError: (e) {
@@ -81,8 +82,6 @@ class CategoriesViewModel extends ChangeNotifier {
         notifyListeners();
       },
     );
-
-    _loadProductCounts();
   }
 
   @override

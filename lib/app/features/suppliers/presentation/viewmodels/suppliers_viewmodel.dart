@@ -91,6 +91,7 @@ class SuppliersViewModel extends ChangeNotifier {
       (list) {
         _suppliers = list..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         _state = SuppliersLoadState.success;
+        _loadProductCounts();
         notifyListeners();
       },
       onError: (e) {
@@ -99,8 +100,6 @@ class SuppliersViewModel extends ChangeNotifier {
         notifyListeners();
       },
     );
-
-    _loadProductCounts();
   }
 
   @override
