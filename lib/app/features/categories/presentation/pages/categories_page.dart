@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class CategoriesPage extends StatefulWidget {
-  final CategoriesViewModel viewModel;
+  final CategoriesViewModel Function() viewModelFactory;
 
   const CategoriesPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
   });
 
   @override
@@ -18,19 +18,16 @@ class CategoriesPage extends StatefulWidget {
 }
 
 class _CategoriesPageState extends State<CategoriesPage> {
+  late final CategoriesViewModel viewModel;
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.listenAll();
+    viewModel = widget.viewModelFactory();
+    viewModel.listenAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.viewModel.setSearchQuery('');
+      viewModel.setSearchQuery('');
     });
-  }
-
-  @override
-  void dispose() {
-    widget.viewModel.dispose();
-    super.dispose();
   }
 
   @override
@@ -47,18 +44,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
       ),
 
       body: ListenableBuilder(
-        listenable: widget.viewModel,
+        listenable: viewModel,
         builder: (context, _) {
           return CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              if (widget.viewModel.categories.isNotEmpty)
+              if (viewModel.categories.isNotEmpty)
                 AppFloatingSearch(
                   hint: 'Pesquisar categoria...',
-                  initialValue: widget.viewModel.searchQuery,
-                  onChanged: widget.viewModel.setSearchQuery,
+                  initialValue: viewModel.searchQuery,
+                  onChanged: viewModel.setSearchQuery,
                 ),
-              CategoriesListSliver(viewModel: widget.viewModel),
+              CategoriesListSliver(viewModel: viewModel),
             ],
           );
         },

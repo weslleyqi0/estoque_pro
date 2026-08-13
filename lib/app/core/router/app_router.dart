@@ -123,7 +123,9 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.categories,
-        builder: (context, state) => CategoriesPage(viewModel: getIt<CategoriesViewModel>()),
+        builder: (context, state) => CategoriesPage(
+          viewModelFactory: () => getIt<CategoriesViewModel>(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.categoryForm,
