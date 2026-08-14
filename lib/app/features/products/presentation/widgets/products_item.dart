@@ -42,7 +42,10 @@ class ProductsItem extends StatelessWidget {
               Row(
                 crossAxisAlignment: .start,
                 children: [
-                  AppNetworkImage(imageUrl: product.imgUrl),
+                  AppNetworkImage(
+                    imageUrl: product.imgUrl,
+                    isGrayscale: !product.isActive,
+                  ),
                   const Gap(AppSpacing.space16),
                   Expanded(
                     child: Column(

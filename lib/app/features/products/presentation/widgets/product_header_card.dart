@@ -1,4 +1,3 @@
-
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -25,6 +24,7 @@ class ProductHeaderCard extends StatelessWidget {
               imageUrl: product.imgUrl,
               size: 130,
               placeholderIcon: AppIcons.image,
+              isGrayscale: !product.isActive,
             ),
             const Gap(AppSpacing.space12),
             Expanded(
