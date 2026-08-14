@@ -58,6 +58,16 @@ enum UserPermission {
     'deliveries',
     'Entregas',
     'Gerenciar entregas',
+  ),
+  cancelCompletedSales(
+    'cancel_completed_sales',
+    'Cancelar Vendas Concluídas',
+    'Permitir cancelar vendas que já foram finalizadas',
+  ),
+  viewSalesHistory(
+    'view_sales_history',
+    'Ver Histórico de Edição de Vendas',
+    'Permitir visualizar o histórico de edições de vendas',
   );
 
   final String value;
