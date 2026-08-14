@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/utils/date_parser.dart';
+import 'package:estoque_pro/app/features/sales/data/models/sale_edit_history_model.dart';
 import 'package:estoque_pro/app/features/sales/data/models/sale_item_model.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
@@ -23,6 +24,7 @@ class SaleModel {
   final String userName;
   final String status;
   final String observations;
+  final List<SaleEditHistoryModel> editHistory;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -43,18 +45,16 @@ class SaleModel {
     required this.userName,
     required this.status,
     required this.observations,
+    this.editHistory = const [],
     required this.createdAt,
     this.updatedAt,
   });
 
   factory SaleModel.fromMap(String id, Map<dynamic, dynamic> map) {
-    final rawItems = map['items'] as List<dynamic>? ?? [];
     return SaleModel(
       id: id,
       saleNumber: map['sale_number'] as String? ?? '',
-      items: rawItems
-          .map((e) => SaleItemModel.fromMap(Map<dynamic, dynamic>.from(e as Map)))
-          .toList(),
+      items: _parseList(map['items'], SaleItemModel.fromMap),
       subtotal: (map['subtotal'] as num?)?.toDouble() ?? 0.0,
       discountType: map['discount_type'] as String? ?? 'value',
       discountValue: (map['discount_value'] as num?)?.toDouble() ?? 0.0,
@@ -68,9 +68,24 @@ class SaleModel {
       userName: map['user_name'] as String? ?? '',
       status: map['status'] as String? ?? 'completed',
       observations: map['observations'] as String? ?? '',
+      editHistory: _parseList(map['edit_history'], SaleEditHistoryModel.fromMap),
       createdAt: DateParser.parse(map['created_at']) ?? DateTime.now(),
       updatedAt: DateParser.parse(map['updated_at']),
     );
+  }
+
+  static List<T> _parseList<T>(dynamic raw, T Function(Map<dynamic, dynamic>) mapper) {
+    if (raw == null) return [];
+    if (raw is List) {
+      return raw.where((e) => e != null && e is Map).map((e) => mapper(Map<dynamic, dynamic>.from(e as Map))).toList();
+    }
+    if (raw is Map) {
+      return raw.values
+          .where((e) => e != null && e is Map)
+          .map((e) => mapper(Map<dynamic, dynamic>.from(e as Map)))
+          .toList();
+    }
+    return [];
   }
 
   Map<String, dynamic> toMap() {
@@ -90,6 +105,7 @@ class SaleModel {
       'user_name': userName,
       'status': status,
       'observations': observations,
+      'edit_history': editHistory.map((e) => e.toMap()).toList(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': ServerValue.timestamp,
     };
@@ -113,6 +129,7 @@ class SaleModel {
       userName: userName,
       status: SaleStatus.fromValue(status),
       observations: observations,
+      editHistory: editHistory.map((e) => e.toEntity()).toList(),
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -136,6 +153,7 @@ class SaleModel {
       userName: entity.userName,
       status: entity.status.value,
       observations: entity.observations,
+      editHistory: entity.editHistory.map((e) => SaleEditHistoryModel.fromEntity(e)).toList(),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
