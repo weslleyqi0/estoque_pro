@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 
@@ -21,6 +22,7 @@ class SaleEntity extends Equatable {
   final String userName;
   final SaleStatus status;
   final String observations;
+  final List<SaleEditHistoryEntity> editHistory;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -43,6 +45,7 @@ class SaleEntity extends Equatable {
     required this.userName,
     this.status = SaleStatus.completed,
     this.observations = '',
+    this.editHistory = const [],
     required this.createdAt,
     this.updatedAt,
   });
@@ -64,6 +67,7 @@ class SaleEntity extends Equatable {
     String? userName,
     SaleStatus? status,
     String? observations,
+    List<SaleEditHistoryEntity>? editHistory,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -84,6 +88,7 @@ class SaleEntity extends Equatable {
       userName: userName ?? this.userName,
       status: status ?? this.status,
       observations: observations ?? this.observations,
+      editHistory: editHistory ?? this.editHistory,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -91,23 +96,24 @@ class SaleEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        saleNumber,
-        items,
-        subtotal,
-        discountType,
-        discountValue,
-        total,
-        paymentMethod,
-        amountPaid,
-        change,
-        customerId,
-        customerName,
-        userId,
-        userName,
-        status,
-        observations,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    saleNumber,
+    items,
+    subtotal,
+    discountType,
+    discountValue,
+    total,
+    paymentMethod,
+    amountPaid,
+    change,
+    customerId,
+    customerName,
+    userId,
+    userName,
+    status,
+    observations,
+    editHistory,
+    createdAt,
+    updatedAt,
+  ];
 }
