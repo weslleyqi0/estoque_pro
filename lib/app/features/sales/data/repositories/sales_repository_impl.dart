@@ -2,6 +2,7 @@ import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_history_model.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/sales/data/models/sale_model.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
@@ -25,11 +26,15 @@ class SalesRepositoryImpl implements SalesRepository {
           if (value is Map) {
             for (final entry in value.entries) {
               if (entry.value is Map) {
-                final model = SaleModel.fromMap(
-                  entry.key,
-                  Map<dynamic, dynamic>.from(entry.value as Map),
-                );
-                sales.add(model.toEntity());
+                try {
+                  final model = SaleModel.fromMap(
+                    entry.key.toString(),
+                    Map<dynamic, dynamic>.from(entry.value as Map),
+                  );
+                  sales.add(model.toEntity());
+                } catch (e, stack) {
+                  debugPrint('---> Sales: Erro ao parsear venda ${entry.key}: $e\n$stack');
+                }
               }
             }
           }
@@ -121,6 +126,75 @@ class SalesRepositoryImpl implements SalesRepository {
       await _firebaseDb.updateMultiple(updates);
     } catch (e) {
       debugPrint('---> Sales: Erro ao atualizar venda pós-venda atômicamente: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateSaleWithStockAndHistory({
+    required SaleEntity sale,
+    required Map<String, int> stockDeltas,
+    required SaleEditHistoryEntity editHistoryEntry,
+    Map<String, int>? currentProductStocks,
+  }) async {
+    try {
+      final saleModel = SaleModel.fromEntity(sale.copyWith(updatedAt: DateTime.now()));
+
+      final Map<String, dynamic> updates = {};
+      updates['sales/${sale.id}'] = saleModel.toMap();
+
+      final Map<String, int> stocksMap = {};
+      if (currentProductStocks != null) {
+        stocksMap.addAll(currentProductStocks);
+      } else {
+        final productsSnap = await _firebaseDb.ref.root.child('products').get();
+        if (productsSnap.exists && productsSnap.value is Map) {
+          final pMap = productsSnap.value as Map;
+          for (final entry in pMap.entries) {
+            if (entry.value is Map) {
+              final stock = (entry.value['stock'] as num?)?.toInt() ?? 0;
+              stocksMap[entry.key.toString()] = stock;
+            }
+          }
+        }
+      }
+
+      for (final entry in stockDeltas.entries) {
+        final productId = entry.key;
+        final delta = entry.value;
+
+        if (delta != 0 && productId.trim().isNotEmpty) {
+          final movPushRef = _firebaseDb.ref.root.child('stock_movements').child(productId).push();
+          final action = delta > 0 ? ProductHistoryAction.remove : ProductHistoryAction.add;
+          final note = sale.status == SaleStatus.cancelled
+              ? 'Estorno por cancelamento da Venda ${sale.saleNumber}'
+              : 'Edição na Venda ${sale.saleNumber} (${editHistoryEntry.reason})';
+
+          final oldStock = stocksMap[productId] ?? 0;
+          final newStock = oldStock - delta;
+
+          final historyModel = ProductHistoryModel.fromEntity(
+            ProductHistoryEntity(
+              action: action,
+              quantity: delta.abs(),
+              oldStock: oldStock,
+              newStock: newStock,
+              date: DateTime.now(),
+              note: note,
+              userName: editHistoryEntry.userName,
+              isNew: false,
+            ),
+          );
+
+          updates['products/$productId/stock'] = ServerValue.increment(-delta);
+          updates['products/$productId/updatedAt'] = ServerValue.timestamp;
+          updates['stock_movements/$productId/${movPushRef.key}'] = historyModel.toMap();
+        }
+      }
+
+      await _firebaseDb.updateMultiple(updates);
+    } catch (e) {
+      debugPrint('---> Sales: Erro ao atualizar venda com histórico atômicamente: $e');
       rethrow;
     }
   }
