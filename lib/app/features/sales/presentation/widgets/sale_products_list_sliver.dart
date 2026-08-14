@@ -4,6 +4,7 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/produc
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/product_sale_card.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SaleProductsListSliver extends StatelessWidget {
   final ProductsViewModel productsViewModel;
@@ -72,12 +73,19 @@ class SaleProductsListSliver extends StatelessWidget {
   void _onAddProduct(BuildContext context, ProductEntity product) {
     final added = cartViewModel.addProduct(product);
     if (!added) {
-      final stock = product.stock;
-      final unidade = stock == 1 ? 'unidade disponível' : 'unidades disponíveis';
-      AppSnackbar.warning(
-        context,
-        'Estoque insuficiente! Apenas $stock $unidade de "${product.name}".',
-      );
+      _showInsufficientStockToast(product.name, product.stock);
     }
+  }
+
+  void _showInsufficientStockToast(String productName, int availableStock) {
+    Fluttertoast.showToast(
+      msg: 'Estoque insuficiente para "$productName". Disponível em estoque: $availableStock',
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 3,
+      backgroundColor: Colors.orange.shade800,
+      textColor: Colors.white,
+      fontSize: 14.0,
+    );
   }
 }
