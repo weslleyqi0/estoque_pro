@@ -32,6 +32,7 @@ class SaleCard extends StatelessWidget {
     SaleStatus.returned => AppColors.warning,
     SaleStatus.exchanged => AppColors.warning,
     SaleStatus.corrected => AppColors.warning,
+    SaleStatus.edited => AppColors.warning,
   };
 
   bool get _canCancelSale {
