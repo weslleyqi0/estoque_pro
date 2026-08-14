@@ -38,10 +38,10 @@ class _SalesPageState extends State<SalesPage> {
               preferredSize: const Size.fromHeight(60.0),
               child: Container(
                 padding: const EdgeInsets.only(bottom: AppSpacing.space12),
-                color: context.colorScheme.surfaceContainerHighest,
-                child: SalesStatusTabs(
-                  viewModel: widget.viewModel,
-                ),
+                color: context.isDark
+                    ? context.colorScheme.surfaceContainerLow
+                    : context.colorScheme.surfaceContainerHighest,
+                child: SalesStatusTabs(viewModel: widget.viewModel),
               ),
             ),
           ),

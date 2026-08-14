@@ -18,7 +18,7 @@ class SalesStatusTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = context.colorScheme.primaryContainer;
+    final primaryColor = context.colorScheme.primary;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

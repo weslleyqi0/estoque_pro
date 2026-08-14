@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: context.colorScheme.primaryContainer,
+                        color: context.colorScheme.primary,
                         borderRadius: BorderRadius.circular(AppSpacing.radius24),
                       ),
                       child: Padding(
