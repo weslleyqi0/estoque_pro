@@ -87,36 +87,14 @@ class ProductHistoryItem extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (history.action == ProductHistoryAction.sale) ...[
-                  Text(
-                    '"${history.note.isNotEmpty ? history.note : _actionText}"',
-                    style: context.textTheme.labelLarge?.copyWith(
-                      color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.normal,
-                      fontStyle: FontStyle.italic,
-                    ),
+                Text(
+                  history.note.isNotEmpty ? history.note : _actionText,
+                  style: context.textTheme.labelLarge?.copyWith(
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.normal,
+                    fontStyle: FontStyle.italic,
                   ),
-                ] else ...[
-                  Text(
-                    '"$_actionText"',
-                    style: context.textTheme.labelLarge?.copyWith(
-                      color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.normal,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  if (history.note.isNotEmpty) ...[
-                    const Gap(AppSpacing.space4),
-                    Text(
-                      '"${history.note}"',
-                      style: context.textTheme.labelLarge?.copyWith(
-                        color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-                        fontWeight: FontWeight.normal,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ],
+                ),
                 const Gap(AppSpacing.space4),
                 Row(
                   children: [
