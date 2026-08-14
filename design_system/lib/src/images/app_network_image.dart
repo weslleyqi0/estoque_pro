@@ -9,6 +9,7 @@ class AppNetworkImage extends StatelessWidget {
   final BorderRadius? borderRadius;
   final IconData placeholderIcon;
   final double? placeholderIconSize;
+  final bool isGrayscale;
 
   const AppNetworkImage({
     super.key,
@@ -18,12 +19,57 @@ class AppNetworkImage extends StatelessWidget {
     this.borderRadius,
     this.placeholderIcon = AppIcons.package2,
     this.placeholderIconSize,
+    this.isGrayscale = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius ?? AppSpacing.borderRadius16;
     final iconSize = placeholderIconSize ?? (size * 0.8);
+
+    Widget imageContent;
+
+    if (imageUrl.isNotEmpty) {
+      final cachedImage = CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: fit ?? BoxFit.cover,
+        placeholder: (context, url) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        errorWidget: (context, url, error) => Center(
+          child: Icon(
+            placeholderIcon,
+            size: iconSize,
+            weight: 300,
+            color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+        ),
+      );
+
+      if (isGrayscale) {
+        imageContent = Opacity(
+          opacity: 0.5,
+          child: ColorFiltered(
+            colorFilter: const ColorFilter.mode(
+              Colors.grey,
+              BlendMode.saturation,
+            ),
+            child: cachedImage,
+          ),
+        );
+      } else {
+        imageContent = cachedImage;
+      }
+    } else {
+      imageContent = Center(
+        child: Icon(
+          placeholderIcon,
+          size: iconSize,
+          weight: 300,
+          color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+        ),
+      );
+    }
 
     return Container(
       height: size,
@@ -40,30 +86,7 @@ class AppNetworkImage extends StatelessWidget {
         ),
       ),
       clipBehavior: Clip.hardEdge,
-      child: imageUrl.isNotEmpty
-          ? CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: fit ?? BoxFit.cover,
-              placeholder: (context, url) => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              errorWidget: (context, url, error) => Center(
-                child: Icon(
-                  placeholderIcon,
-                  size: iconSize,
-                  weight: 300,
-                  color: context.colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-              ),
-            )
-          : Center(
-              child: Icon(
-                placeholderIcon,
-                size: iconSize,
-                weight: 300,
-                color: context.colorScheme.onSurface.withValues(alpha: 0.5),
-              ),
-            ),
+      child: imageContent,
     );
   }
 }
