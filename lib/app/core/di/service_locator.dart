@@ -6,10 +6,13 @@ import 'package:estoque_pro/app/features/sales/data/repositories/sales_repositor
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/cancel_completed_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/edit_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/finalize_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/save_draft_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
@@ -127,6 +130,18 @@ void setupServiceLocator() {
     () => SaveDraftSaleUseCase(getIt<SaveSaleUseCase>()),
   );
 
+  getIt.registerFactory<EditSaleUseCase>(
+    () => EditSaleUseCase(
+      getIt<SalesRepository>(),
+      getIt<ProductsRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<CancelCompletedSaleUseCase>(
+    () => CancelCompletedSaleUseCase(getIt<SalesRepository>()),
+  );
+
+  // ViewModels
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(
       getIt<AuthRepository>(),
@@ -180,6 +195,13 @@ void setupServiceLocator() {
     () => CartViewModel(
       getIt<FinalizeSaleUseCase>(),
       getIt<SaveDraftSaleUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<EditSaleViewModel>(
+    () => EditSaleViewModel(
+      getIt<EditSaleUseCase>(),
+      getIt<CancelCompletedSaleUseCase>(),
     ),
   );
 }
