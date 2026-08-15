@@ -202,6 +202,7 @@ void setupServiceLocator() {
     () => EditSaleViewModel(
       getIt<EditSaleUseCase>(),
       getIt<CancelCompletedSaleUseCase>(),
+      getIt<ProductsRepository>(),
     ),
   );
 }

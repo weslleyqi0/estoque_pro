@@ -6,8 +6,8 @@ import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewm
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
-import 'package:estoque_pro/app/features/sales/presentation/widgets/digital_invoice_sheet.dart';
-import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale_bottom_sheet.dart';
+import 'package:estoque_pro/app/features/sales/presentation/widgets/sheets/digital_invoice_sheet.dart';
+import 'package:estoque_pro/app/features/sales/presentation/widgets/sheets/edit_sale_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/material.dart';
@@ -71,6 +71,7 @@ class SaleCard extends StatelessWidget {
   bool get _canDeleteWithoutStock {
     final currentUser = getIt<AuthViewModel>().currentUser;
     if (currentUser == null || !currentUser.isActive) return false;
+    if (!_canEditSale) return false;
     if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) return true;
     return currentUser.hasPermission(UserPermission.deleteSales) ||
         currentUser.hasPermission(UserPermission.cancelCompletedSales);

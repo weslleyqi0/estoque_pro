@@ -1,5 +1,7 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_reason.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/cancel_completed_sale_use_case.dart';
@@ -10,20 +12,25 @@ import 'package:flutter/foundation.dart';
 class EditSaleViewModel extends ChangeNotifier {
   final EditSaleUseCase _editSaleUseCase;
   final CancelCompletedSaleUseCase _cancelCompletedSaleUseCase;
+  final ProductsRepository _productsRepository;
 
   EditSaleViewModel(
     this._editSaleUseCase,
     this._cancelCompletedSaleUseCase,
+    this._productsRepository,
   );
 
   late SaleEntity _originalSale;
   SaleEntity get originalSale => _originalSale;
 
+  List<ProductEntity> _products = [];
+  List<ProductEntity> get products => List.unmodifiable(_products);
+
   final List<SaleItemEntity> _draftItems = [];
   List<SaleItemEntity> get draftItems => List.unmodifiable(_draftItems);
 
-  String _selectedReason = 'Devolução';
-  String get selectedReason => _selectedReason;
+  SaleEditReason _selectedReason = SaleEditReason.addition;
+  SaleEditReason get selectedReason => _selectedReason;
 
   String _comment = '';
   String get comment => _comment;
@@ -38,14 +45,20 @@ class EditSaleViewModel extends ChangeNotifier {
     _originalSale = sale;
     _draftItems.clear();
     _draftItems.addAll(sale.items);
-    _selectedReason = 'Devolução';
+    _selectedReason = SaleEditReason.addition;
     _comment = '';
     _errorMessage = null;
     _isSaving = false;
     notifyListeners();
   }
 
-  void setReason(String reason) {
+  Future<List<ProductEntity>> loadProducts() async {
+    _products = await _productsRepository.getAll();
+    notifyListeners();
+    return _products;
+  }
+
+  void setReason(SaleEditReason reason) {
     _selectedReason = reason;
     notifyListeners();
   }
@@ -130,9 +143,9 @@ class EditSaleViewModel extends ChangeNotifier {
   }
 
   double get newSubtotal => _draftItems.fold(
-        0.0,
-        (sum, item) => sum + (item.unitPrice * item.quantity),
-      );
+    0.0,
+    (sum, item) => sum + (item.unitPrice * item.quantity),
+  );
 
   double get newTotal {
     if (_originalSale.discountValue > 0) {
@@ -151,7 +164,7 @@ class EditSaleViewModel extends ChangeNotifier {
     final result = await _editSaleUseCase.call(
       originalSale: _originalSale,
       updatedItems: _draftItems,
-      reason: _selectedReason,
+      reason: _selectedReason.label,
       comment: _comment.isNotEmpty ? _comment : null,
       currentUser: currentUser,
     );

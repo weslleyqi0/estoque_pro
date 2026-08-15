@@ -4,7 +4,7 @@ import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewm
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
-import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_bottom_sheet.dart';
+import 'package:estoque_pro/app/features/sales/presentation/widgets/sheets/cart_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_products_list_sliver.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -224,6 +224,7 @@ class _NewSalePageState extends State<NewSalePage> {
 
               CartBottomSheet(
                 cartViewModel: widget.cartViewModel,
+                authViewModel: widget.authViewModel,
                 availableProducts: widget.productsViewModel.products,
                 controller: _sheetController,
                 onSaleSuccess: () {

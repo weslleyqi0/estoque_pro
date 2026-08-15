@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -14,12 +13,14 @@ import 'package:gap/gap.dart';
 
 class PaymentSheet extends StatefulWidget {
   final CartViewModel cartViewModel;
+  final AuthViewModel authViewModel;
   final List<ProductEntity> availableProducts;
   final VoidCallback onSaleSuccess;
 
   const PaymentSheet({
     super.key,
     required this.cartViewModel,
+    required this.authViewModel,
     required this.availableProducts,
     required this.onSaleSuccess,
   });
@@ -27,6 +28,7 @@ class PaymentSheet extends StatefulWidget {
   static Future<void> show({
     required BuildContext context,
     required CartViewModel cartViewModel,
+    required AuthViewModel authViewModel,
     required List<ProductEntity> availableProducts,
     required VoidCallback onSaleSuccess,
   }) {
@@ -34,6 +36,7 @@ class PaymentSheet extends StatefulWidget {
       context: context,
       builder: (_) => PaymentSheet(
         cartViewModel: cartViewModel,
+        authViewModel: authViewModel,
         availableProducts: availableProducts,
         onSaleSuccess: onSaleSuccess,
       ),
@@ -67,8 +70,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
   void _handleConfirm() async {
     setState(() => _isLoading = true);
     try {
-      final authVM = getIt<AuthViewModel>();
-      final currentUser = authVM.currentUser;
+      final currentUser = widget.authViewModel.currentUser;
 
       if (currentUser == null) {
         throw Exception('Usuário não autenticado.');
