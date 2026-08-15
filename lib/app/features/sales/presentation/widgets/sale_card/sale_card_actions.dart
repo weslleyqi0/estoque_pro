@@ -43,10 +43,8 @@ class SaleCardActions extends StatelessWidget {
   bool get _canDeleteWithoutStock {
     final currentUser = authViewModel.currentUser;
     if (currentUser == null || !currentUser.isActive) return false;
-    if (!_canEditSale) return false;
-    if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) return true;
-    return currentUser.hasPermission(UserPermission.deleteSales) ||
-        currentUser.hasPermission(UserPermission.cancelCompletedSales);
+    if (sale.status == SaleStatus.cancelled || sale.status == SaleStatus.inProgress) return false;
+    return currentUser.hasPermission(UserPermission.cancelCompletedSales);
   }
 
   void _deleteSaleWithoutStock(BuildContext context) async {
@@ -170,7 +168,11 @@ class SaleCardActions extends StatelessWidget {
                 SizedBox(
                   height: AppSpacing.space48,
                   child: AppButton.outlined(
-                    onPressed: () => EditSaleBottomSheet.show(context, sale),
+                    onPressed: () => EditSaleBottomSheet.show(
+                      context,
+                      sale,
+                      authViewModel: authViewModel,
+                    ),
                     icon: Icons.edit,
                     child: Text(
                       'Editar',

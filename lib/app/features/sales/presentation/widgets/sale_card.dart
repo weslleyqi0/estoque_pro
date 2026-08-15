@@ -51,7 +51,10 @@ class SaleCard extends StatelessWidget {
               SaleCardSummary(sale: sale, isExpanded: isExpanded),
               if (isExpanded) ...[
                 SaleCardExpandedItems(sale: sale),
-                SaleCardEditHistory(sale: sale),
+                SaleCardEditHistory(
+                  sale: sale,
+                  authViewModel: authViewModel,
+                ),
                 SaleCardActions(
                   sale: sale,
                   authViewModel: authViewModel,

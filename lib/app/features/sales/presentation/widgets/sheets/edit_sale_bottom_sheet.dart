@@ -13,25 +13,33 @@ import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/ed
 import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/edit_sale_reason_selector.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/edit_sale_swap_product_dialog.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
-import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class EditSaleBottomSheet extends StatefulWidget {
   final SaleEntity sale;
+  final AuthViewModel authViewModel;
 
   const EditSaleBottomSheet({
     super.key,
     required this.sale,
+    required this.authViewModel,
   });
 
-  static Future<void> show(BuildContext context, SaleEntity sale) {
+  static Future<void> show(
+    BuildContext context,
+    SaleEntity sale, {
+    required AuthViewModel authViewModel,
+  }) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => EditSaleBottomSheet(sale: sale),
+      builder: (_) => EditSaleBottomSheet(
+        sale: sale,
+        authViewModel: authViewModel,
+      ),
     );
   }
 
@@ -96,19 +104,17 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
   @override
   void dispose() {
     _commentController.dispose();
-    _viewModel.dispose();
     super.dispose();
   }
 
   bool get _canCancel {
-    final currentUser = getIt<AuthViewModel>().currentUser;
+    final currentUser = widget.authViewModel.currentUser;
     if (currentUser == null || !currentUser.isActive) return false;
-    if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) return true;
     return currentUser.hasPermission(UserPermission.cancelCompletedSales);
   }
 
   void _onSave(BuildContext context) async {
-    final currentUser = getIt<AuthViewModel>().currentUser;
+    final currentUser = widget.authViewModel.currentUser;
     if (currentUser == null) return;
 
     _viewModel.setComment(_commentController.text.trim());
@@ -127,6 +133,14 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
   }
 
   void _onCancelSale(BuildContext context) async {
+    if (!_canCancel) {
+      AppSnackbar.error(
+        context,
+        'Você não possui permissão para cancelar vendas finalizadas.',
+      );
+      return;
+    }
+
     final confirmed = await AppDialog.showConfirmation(
       context: context,
       title: 'Cancelar Venda Finalizada',
@@ -138,7 +152,7 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
     );
 
     if (confirmed == true && context.mounted) {
-      final currentUser = getIt<AuthViewModel>().currentUser;
+      final currentUser = widget.authViewModel.currentUser;
       if (currentUser == null) return;
 
       final result = await _viewModel.cancelSale(

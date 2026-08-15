@@ -21,7 +21,7 @@ class UserEntity extends Equatable {
 
   bool hasPermission(UserPermission permission) {
     if (!isActive) return false;
-    if (role == UserRole.owner) return true;
+    if (role == UserRole.owner || role == UserRole.admin) return true;
     return permissions.contains(permission);
   }
 

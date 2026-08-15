@@ -1,21 +1,33 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_card/sale_card_full_history_sheet.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
 class SaleCardEditHistory extends StatelessWidget {
   final SaleEntity sale;
+  final AuthViewModel authViewModel;
 
   const SaleCardEditHistory({
     super.key,
     required this.sale,
+    required this.authViewModel,
   });
+
+  bool get _canViewSalesHistory {
+    final currentUser = authViewModel.currentUser;
+    if (currentUser == null || !currentUser.isActive) return false;
+    if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) return true;
+    return currentUser.hasPermission(UserPermission.viewSalesHistory);
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (sale.editHistory.isEmpty) return const SizedBox.shrink();
+    if (sale.editHistory.isEmpty || !_canViewSalesHistory) return const SizedBox.shrink();
 
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
@@ -49,7 +61,9 @@ class SaleCardEditHistory extends StatelessWidget {
           ],
         ),
         const Gap(AppSpacing.space8),
-        ...sale.editHistory.reversed.take(3).map(
+        ...sale.editHistory.reversed
+            .take(3)
+            .map(
               (entry) => Container(
                 margin: const EdgeInsets.only(bottom: AppSpacing.space8),
                 padding: const EdgeInsets.all(AppSpacing.space12),
