@@ -112,7 +112,7 @@ class SalesListSliver extends StatelessWidget {
 
     slivers.add(
       const SliverToBoxAdapter(
-        child: SizedBox(height: AppSpacing.space80),
+        child: SizedBox(height: 100),
       ),
     );
 
