@@ -176,7 +176,10 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.sales,
-        builder: (context, state) => SalesPage(viewModel: getIt<SalesViewModel>()),
+        builder: (context, state) => SalesPage(
+          viewModel: getIt<SalesViewModel>(),
+          authViewModel: getIt<AuthViewModel>(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.newSale,

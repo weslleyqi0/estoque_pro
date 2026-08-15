@@ -1,4 +1,5 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_card.dart';
 import 'package:flutter/material.dart';
@@ -6,10 +7,12 @@ import 'package:intl/intl.dart';
 
 class SalesListSliver extends StatelessWidget {
   final SalesViewModel viewModel;
+  final AuthViewModel authViewModel;
 
   const SalesListSliver({
     super.key,
     required this.viewModel,
+    required this.authViewModel,
   });
 
   String _formatDateHeader(DateTime date) {
@@ -101,6 +104,8 @@ class SalesListSliver extends StatelessWidget {
                   sale: sale,
                   isExpanded: isExpanded,
                   onToggleExpand: () => viewModel.toggleExpand(sale.id),
+                  authViewModel: authViewModel,
+                  salesViewModel: viewModel,
                 );
               },
               childCount: entry.value.length,

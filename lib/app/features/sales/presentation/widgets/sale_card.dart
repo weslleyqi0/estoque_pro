@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
@@ -19,12 +18,16 @@ class SaleCard extends StatelessWidget {
   final SaleEntity sale;
   final bool isExpanded;
   final VoidCallback onToggleExpand;
+  final AuthViewModel authViewModel;
+  final SalesViewModel salesViewModel;
 
   const SaleCard({
     super.key,
     required this.sale,
     required this.isExpanded,
     required this.onToggleExpand,
+    required this.authViewModel,
+    required this.salesViewModel,
   });
 
   Color _getStatusColor(SaleStatus status) => switch (status) {
@@ -38,7 +41,7 @@ class SaleCard extends StatelessWidget {
   };
 
   bool get _canCancelSale {
-    final currentUser = getIt<AuthViewModel>().currentUser;
+    final currentUser = authViewModel.currentUser;
     if (currentUser == null || !currentUser.isActive) return false;
 
     if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) {
@@ -53,7 +56,7 @@ class SaleCard extends StatelessWidget {
   }
 
   bool get _canEditSale {
-    final currentUser = getIt<AuthViewModel>().currentUser;
+    final currentUser = authViewModel.currentUser;
     if (currentUser == null || !currentUser.isActive) return false;
     if (sale.status == SaleStatus.cancelled || sale.status == SaleStatus.inProgress) return false;
     if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) return true;
@@ -61,15 +64,14 @@ class SaleCard extends StatelessWidget {
   }
 
   bool get _canViewSalesHistory {
-    final currentUser = getIt<AuthViewModel>().currentUser;
+    final currentUser = authViewModel.currentUser;
     if (currentUser == null || !currentUser.isActive) return false;
     if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) return true;
-    return currentUser.hasPermission(UserPermission.viewSalesHistory) ||
-        currentUser.hasPermission(UserPermission.editSales);
+    return currentUser.hasPermission(UserPermission.viewSalesHistory);
   }
 
   bool get _canDeleteWithoutStock {
-    final currentUser = getIt<AuthViewModel>().currentUser;
+    final currentUser = authViewModel.currentUser;
     if (currentUser == null || !currentUser.isActive) return false;
     if (!_canEditSale) return false;
     if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) return true;
@@ -99,7 +101,7 @@ class SaleCard extends StatelessWidget {
 
     if (confirmed == true && context.mounted) {
       try {
-        await getIt<SalesViewModel>().deleteSale(sale.id);
+        await salesViewModel.deleteSale(sale.id);
         if (context.mounted) {
           AppToast.info(
             'Venda ${sale.saleNumber} excluída sem alterar o estoque.',
@@ -128,7 +130,7 @@ class SaleCard extends StatelessWidget {
 
     if (confirmed == true && context.mounted) {
       try {
-        await getIt<SalesViewModel>().deleteSale(sale.id);
+        await salesViewModel.deleteSale(sale.id);
         if (context.mounted) {
           AppSnackbar.success(context, 'Venda cancelada com sucesso!');
         }

@@ -1,5 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sales_list_sliver.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sales_status_tabs.dart';
@@ -8,8 +9,13 @@ import 'package:go_router/go_router.dart';
 
 class SalesPage extends StatefulWidget {
   final SalesViewModel viewModel;
+  final AuthViewModel authViewModel;
 
-  const SalesPage({super.key, required this.viewModel});
+  const SalesPage({
+    super.key,
+    required this.viewModel,
+    required this.authViewModel,
+  });
 
   @override
   State<SalesPage> createState() => _SalesPageState();
@@ -59,7 +65,10 @@ class _SalesPageState extends State<SalesPage> {
                   initialValue: widget.viewModel.searchQuery,
                   onChanged: widget.viewModel.setSearchQuery,
                 ),
-              SalesListSliver(viewModel: widget.viewModel),
+              SalesListSliver(
+                viewModel: widget.viewModel,
+                authViewModel: widget.authViewModel,
+              ),
             ],
           ),
         );
