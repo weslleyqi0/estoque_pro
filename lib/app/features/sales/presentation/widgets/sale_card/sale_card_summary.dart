@@ -1,0 +1,63 @@
+import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+
+class SaleCardSummary extends StatelessWidget {
+  final SaleEntity sale;
+  final bool isExpanded;
+
+  const SaleCardSummary({
+    super.key,
+    required this.sale,
+    required this.isExpanded,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${sale.totalItems} ${sale.totalItems == 1 ? 'item' : 'itens'} • ${sale.paymentMethod.label}',
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  CurrencyInputFormatter.formatCurrency(sale.total),
+                  style: context.textTheme.titleMedium?.copyWith(
+                    color: context.colorScheme.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const Gap(AppSpacing.space4),
+                Icon(
+                  isExpanded ? AppIcons.arrowUp : AppIcons.arrowDown,
+                  color: context.colorScheme.primary,
+                ),
+              ],
+            ),
+          ],
+        ),
+        if (sale.customerName?.isNotEmpty == true) ...[
+          const Gap(4),
+          Text(
+            'Cliente: ${sale.customerName}',
+            style: context.textTheme.bodySmall?.copyWith(
+              color: context.colorScheme.outline,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
