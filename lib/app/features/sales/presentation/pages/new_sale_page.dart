@@ -7,7 +7,6 @@ import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_view
 import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_products_list_sliver.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 
 class NewSalePage extends StatefulWidget {
@@ -148,14 +147,8 @@ class _NewSalePageState extends State<NewSalePage> {
   }
 
   void _showInsufficientStockToast(String productName, int availableStock) {
-    Fluttertoast.showToast(
-      msg: 'Estoque insuficiente para "$productName". Disponível em estoque: $availableStock',
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 3,
-      backgroundColor: Colors.orange.shade800,
-      textColor: Colors.white,
-      fontSize: 14.0,
+    AppToast.warning(
+      'Estoque insuficiente para "$productName". Disponível em estoque: $availableStock',
     );
   }
 
