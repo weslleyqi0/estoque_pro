@@ -48,9 +48,11 @@ class ProductsViewModel extends ChangeNotifier {
   }
 
   ProductEntity? findProductByBarcode(String barcode) {
-    final normalized = barcode.trim();
+    final normalized = barcode.normalizedBarcode;
+    if (normalized.isEmpty) return null;
     for (final product in _products) {
-      if (product.isActive && product.barcode.trim() == normalized) {
+      if (product.isActive &&
+          (product.barcode.trim() == barcode.trim() || product.barcode.normalizedBarcode == normalized)) {
         return product;
       }
     }

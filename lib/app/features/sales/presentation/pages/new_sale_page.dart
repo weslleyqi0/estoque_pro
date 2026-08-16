@@ -11,14 +11,14 @@ import 'package:go_router/go_router.dart';
 
 class NewSalePage extends StatefulWidget {
   final ProductsViewModel productsViewModel;
-  final CartViewModel cartViewModel;
+  final CartViewModel Function() cartViewModelFactory;
   final AuthViewModel authViewModel;
   final SaleEntity? initialSale;
 
   const NewSalePage({
     super.key,
     required this.productsViewModel,
-    required this.cartViewModel,
+    required this.cartViewModelFactory,
     required this.authViewModel,
     this.initialSale,
   });
@@ -28,6 +28,7 @@ class NewSalePage extends StatefulWidget {
 }
 
 class _NewSalePageState extends State<NewSalePage> {
+  late final CartViewModel cartViewModel;
   final _sheetController = DraggableScrollableController();
 
   static const double _collapsedSize = 0.12;
@@ -42,10 +43,11 @@ class _NewSalePageState extends State<NewSalePage> {
   @override
   void initState() {
     super.initState();
+    cartViewModel = widget.cartViewModelFactory();
     widget.productsViewModel.listenAll();
     if (widget.initialSale != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.cartViewModel.loadSale(widget.initialSale!, widget.productsViewModel.products);
+        cartViewModel.loadSale(widget.initialSale!, widget.productsViewModel.products);
         widget.productsViewModel.clearLowStockFilter();
         widget.productsViewModel.setSearchQuery('', notify: false);
       });
@@ -54,6 +56,7 @@ class _NewSalePageState extends State<NewSalePage> {
 
   @override
   void dispose() {
+    cartViewModel.dispose();
     _sheetController.dispose();
     widget.productsViewModel.setSearchQuery('', notify: false);
     widget.productsViewModel.clearLowStockFilter(notify: false);
@@ -92,7 +95,7 @@ class _NewSalePageState extends State<NewSalePage> {
         final userId = currentUser?.uid ?? '';
         final userName = currentUser?.name ?? 'Vendedor';
 
-        await widget.cartViewModel.saveInProgressToFirebase(
+        await cartViewModel.saveInProgressToFirebase(
           userId: userId,
           userName: userName,
           availableProducts: widget.productsViewModel.products,
@@ -115,7 +118,7 @@ class _NewSalePageState extends State<NewSalePage> {
         return false;
       }
     } else {
-      widget.cartViewModel.clearCart();
+      cartViewModel.clearCart();
       return true;
     }
   }
@@ -124,38 +127,49 @@ class _NewSalePageState extends State<NewSalePage> {
     final scannedCode = await context.push<String>(AppRoutes.saleScanner);
     if (scannedCode == null || scannedCode.isEmpty || !mounted) return;
 
-    final matchedProduct = widget.productsViewModel.findProductByBarcode(scannedCode);
-    if (matchedProduct == null) {
-      AppSnackbar.error(
-        context,
-        margin: _snackbarMargin,
-        'Produto não localizado com o código: $scannedCode',
-      );
-      return;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
 
-    final added = widget.cartViewModel.addProduct(matchedProduct);
-    if (added) {
-      AppSnackbar.success(
-        context,
-        margin: _snackbarMargin,
-        '${matchedProduct.name} adicionado ao carrinho!',
-      );
-    } else {
-      _showInsufficientStockToast(matchedProduct.name, matchedProduct.stock);
-    }
+      final matchedProduct = widget.productsViewModel.findProductByBarcode(scannedCode);
+      if (matchedProduct == null) {
+        AppSnackbar.error(
+          context,
+          margin: _snackbarMargin,
+          'Produto não localizado com o código: $scannedCode',
+        );
+        return;
+      }
+
+      final previousQty = cartViewModel.getQuantityInCart(matchedProduct.id);
+      final added = cartViewModel.addProduct(matchedProduct);
+      if (added) {
+        final currentQty = cartViewModel.getQuantityInCart(matchedProduct.id);
+        final message = previousQty > 0
+            ? '${matchedProduct.name} (x$currentQty no carrinho)'
+            : '${matchedProduct.name} adicionado ao carrinho!';
+        AppSnackbar.success(
+          context,
+          margin: _snackbarMargin,
+          message,
+        );
+      } else {
+        _showInsufficientStockToast(matchedProduct.name, matchedProduct.stock);
+      }
+    });
   }
 
   void _showInsufficientStockToast(String productName, int availableStock) {
-    AppToast.warning(
-      'Estoque insuficiente para "$productName". Disponível em estoque: $availableStock',
-    );
+    final message = availableStock <= 0
+        ? 'Produto "$productName" sem estoque disponível.'
+        : 'Estoque insuficiente para "$productName". Disponível em estoque: $availableStock';
+
+    AppToast.warning(message);
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([widget.productsViewModel, widget.cartViewModel]),
+      listenable: Listenable.merge([widget.productsViewModel, cartViewModel]),
       builder: (context, _) {
         return PopScope(
           canPop: false,
@@ -167,7 +181,7 @@ class _NewSalePageState extends State<NewSalePage> {
               return;
             }
 
-            if (widget.cartViewModel.items.isNotEmpty) {
+            if (cartViewModel.items.isNotEmpty) {
               final shouldPop = await _showSaveDraftDialog(context);
               if (shouldPop && context.mounted) {
                 context.pop();
@@ -216,14 +230,14 @@ class _NewSalePageState extends State<NewSalePage> {
 
                     SaleProductsListSliver(
                       productsViewModel: widget.productsViewModel,
-                      cartViewModel: widget.cartViewModel,
+                      cartViewModel: cartViewModel,
                     ),
                   ],
                 ),
               ),
 
               CartBottomSheet(
-                cartViewModel: widget.cartViewModel,
+                cartViewModel: cartViewModel,
                 authViewModel: widget.authViewModel,
                 availableProducts: widget.productsViewModel.products,
                 controller: _sheetController,
