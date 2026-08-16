@@ -140,11 +140,11 @@ class AppButton extends StatelessWidget {
       children: [
         if (icon != null) ...[
           Icon(icon, size: AppSpacing.icon24, weight: 600),
-          const SizedBox(width: AppSpacing.space8),
+          const SizedBox(width: AppSpacing.space4),
         ],
         Flexible(child: labelText),
         if (suffixIcon != null) ...[
-          const SizedBox(width: AppSpacing.space8),
+          const SizedBox(width: AppSpacing.space4),
           Icon(suffixIcon, size: AppSpacing.icon24, weight: 600),
         ],
       ],
