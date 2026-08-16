@@ -135,6 +135,13 @@ class _ProductFormPageState extends State<ProductFormPage> {
     }
   }
 
+  Future<void> _scanBarcode() async {
+    final scannedCode = await context.push<String>(AppRoutes.saleScanner);
+    if (scannedCode != null && mounted) {
+      _barcodeController.text = scannedCode;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -216,6 +223,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
               hint: '1234567890123',
               controller: _barcodeController,
               keyboardType: TextInputType.number,
+              suffixIcon: AppIcons.barcodeScanner,
+              onSuffixIconPressed: _scanBarcode,
             ),
             const Gap(AppSpacing.space16),
 

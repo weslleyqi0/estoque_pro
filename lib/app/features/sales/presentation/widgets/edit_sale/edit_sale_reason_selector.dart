@@ -57,12 +57,12 @@ class EditSaleReasonCard extends StatelessWidget {
   });
 
   IconData get _icon => switch (reason) {
-        SaleEditReason.addition => Icons.add_circle_outline_rounded,
-        SaleEditReason.returnItem => Icons.assignment_return_rounded,
-        SaleEditReason.exchange => Icons.swap_horiz_rounded,
-        SaleEditReason.correction => Icons.edit_note_rounded,
-        SaleEditReason.removal => Icons.remove_circle_outline_rounded,
-      };
+    SaleEditReason.addition => Icons.add_circle_outline_rounded,
+    SaleEditReason.returnItem => Icons.assignment_return_rounded,
+    SaleEditReason.exchange => Icons.swap_horiz_rounded,
+    SaleEditReason.correction => Icons.edit_note_rounded,
+    SaleEditReason.removal => Icons.remove_circle_outline_rounded,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class EditSaleReasonCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radius16),
       child: Container(
-        width: 130,
+        width: 120,
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.space8, horizontal: AppSpacing.space8),
         decoration: BoxDecoration(
           color: isSelected ? primaryColor.withValues(alpha: 0.2) : context.colorScheme.outline.withValues(alpha: 0.5),
