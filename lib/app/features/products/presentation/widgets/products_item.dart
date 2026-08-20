@@ -1,12 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/presentation/extensions/product_stock_ui_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductsItem extends StatelessWidget {
   final ProductEntity product;
@@ -18,20 +17,9 @@ class ProductsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxProgress = product.minStock > 0 ? (product.minStock * 2).toDouble() : 10.0;
-    final rawProgress = maxProgress > 0 ? product.stock / maxProgress : 0.0;
-    final progressValue = rawProgress.clamp(0.0, 1.0);
-
-    Color statusColor;
-    if (rawProgress < 0.25) {
-      statusColor = AppColors.error;
-    } else if (rawProgress < 0.50) {
-      statusColor = AppColors.warning;
-    } else if (rawProgress < 0.75) {
-      statusColor = AppColors.success;
-    } else {
-      statusColor = AppColors.info;
-    }
+    final statusColor = product.stockStatusColor;
+    final progressValue = product.stockProgressValue;
+    final rawProgress = product.rawStockProgress;
 
     final textColor = !product.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
 
@@ -54,41 +42,9 @@ class ProductsItem extends StatelessWidget {
               Row(
                 crossAxisAlignment: .start,
                 children: [
-                  Container(
-                    height: 80,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      color: context.colorScheme.onSurface.withValues(alpha: 0.05),
-                      borderRadius: AppSpacing.borderRadius16,
-                    ),
-                    foregroundDecoration: BoxDecoration(
-                      borderRadius: AppSpacing.borderRadius16,
-                      border: Border.all(
-                        color: context.colorScheme.outline,
-                        width: 0.5,
-                      ),
-                    ),
-                    clipBehavior: Clip.hardEdge,
-                    child: product.imgUrl.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: product.imgUrl,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            errorWidget: (context, url, error) => Icon(
-                              Symbols.package_2_rounded,
-                              size: AppSpacing.icon64,
-                              weight: 300,
-                              color: context.colorScheme.onSurface.withValues(alpha: 0.5),
-                            ),
-                          )
-                        : Icon(
-                            Symbols.package_2_rounded,
-                            size: AppSpacing.icon64,
-                            weight: 300,
-                            color: context.colorScheme.onSurface.withValues(alpha: 0.5),
-                          ),
+                  AppNetworkImage(
+                    imageUrl: product.imgUrl,
+                    isGrayscale: !product.isActive,
                   ),
                   const Gap(AppSpacing.space16),
                   Expanded(
@@ -153,7 +109,7 @@ class ProductsItem extends StatelessWidget {
                   ),
                   if (rawProgress < 0.50) ...[
                     Icon(
-                      product.stock <= 0 ? Symbols.cancel_rounded : Symbols.info_rounded,
+                      product.stock <= 0 ? AppIcons.cancel : AppIcons.info,
                       size: AppSpacing.icon24,
                       color: statusColor,
                       weight: 900,

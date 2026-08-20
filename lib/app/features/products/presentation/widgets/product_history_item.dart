@@ -3,7 +3,6 @@ import 'package:estoque_pro/app/features/products/domain/entities/product_histor
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductHistoryItem extends StatelessWidget {
   final ProductHistoryEntity history;
@@ -15,7 +14,9 @@ class ProductHistoryItem extends StatelessWidget {
     this.isLast = false,
   });
 
-  bool get _isPositive => history.action == ProductHistoryAction.add;
+  bool get _isPositive =>
+      history.action == ProductHistoryAction.add ||
+      (history.action == ProductHistoryAction.set && history.newStock >= history.oldStock);
 
   String get _actionText {
     switch (history.action) {
@@ -58,7 +59,7 @@ class ProductHistoryItem extends StatelessWidget {
               color: color.withValues(alpha: 0.1),
             ),
             child: Icon(
-              _isPositive ? Symbols.trending_up_rounded : Symbols.trending_down_rounded,
+              _isPositive ? AppIcons.trendingUp : AppIcons.trendingDown,
               color: color,
               weight: 700,
             ),
@@ -87,24 +88,13 @@ class ProductHistoryItem extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '"$_actionText"',
+                  history.note.isNotEmpty ? history.note : _actionText,
                   style: context.textTheme.labelLarge?.copyWith(
                     color: context.colorScheme.onSurface.withValues(alpha: 0.7),
                     fontWeight: FontWeight.normal,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
-                if (history.note.isNotEmpty) ...[
-                  const Gap(AppSpacing.space4),
-                  Text(
-                    '"${history.note}"',
-                    style: context.textTheme.labelLarge?.copyWith(
-                      color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.normal,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
                 const Gap(AppSpacing.space4),
                 Row(
                   children: [
@@ -117,7 +107,7 @@ class ProductHistoryItem extends StatelessWidget {
                     ),
                     if (history.userName != null && history.userName!.isNotEmpty) ...[
                       Text(
-                        ' - ',
+                        ' • ',
                         style: context.textTheme.labelLarge?.copyWith(
                           color: context.colorScheme.onSurface.withValues(alpha: 0.7),
                           fontWeight: FontWeight.normal,

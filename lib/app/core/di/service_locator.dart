@@ -2,6 +2,18 @@ import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
+import 'package:estoque_pro/app/features/sales/data/repositories/sales_repository_impl.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
+import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/cancel_completed_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/edit_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/finalize_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/save_draft_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
@@ -49,6 +61,7 @@ void setupServiceLocator() {
   registerDatabaseService<SupplierEntity>('suppliers');
   registerDatabaseService<CategoryEntity>('categories');
   registerDatabaseService<ProductEntity>('products');
+  registerDatabaseService<SaleEntity>('sales');
 
   // Services
   getIt.registerLazySingleton<AuthService>(() => AuthService());
@@ -91,6 +104,43 @@ void setupServiceLocator() {
     ),
   );
 
+  getIt.registerLazySingleton<SalesRepository>(
+    () => SalesRepositoryImpl(
+      getIt<FirebaseDatabaseService<SaleEntity>>(),
+    ),
+  );
+
+  // UseCases
+  getIt.registerFactory<CountProductsUseCase>(
+    () => CountProductsUseCase(getIt<ProductsRepository>()),
+  );
+
+  getIt.registerFactory<SaveSaleUseCase>(
+    () => SaveSaleUseCase(
+      getIt<SalesRepository>(),
+      getIt<ProductsRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<FinalizeSaleUseCase>(
+    () => FinalizeSaleUseCase(getIt<SaveSaleUseCase>()),
+  );
+
+  getIt.registerFactory<SaveDraftSaleUseCase>(
+    () => SaveDraftSaleUseCase(getIt<SaveSaleUseCase>()),
+  );
+
+  getIt.registerFactory<EditSaleUseCase>(
+    () => EditSaleUseCase(
+      getIt<SalesRepository>(),
+      getIt<ProductsRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<CancelCompletedSaleUseCase>(
+    () => CancelCompletedSaleUseCase(getIt<SalesRepository>()),
+  );
+
   // ViewModels
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(
@@ -98,7 +148,9 @@ void setupServiceLocator() {
       getIt<AuthorizationService>(),
     ),
   );
-  getIt.registerLazySingleton<BiometricViewModel>(() => BiometricViewModel());
+  getIt.registerLazySingleton<BiometricViewModel>(
+    () => BiometricViewModel(getIt<AuthRepository>()),
+  );
   getIt.registerFactory<UsersViewModel>(
     () => UsersViewModel(
       getIt<UsersRepository>(),
@@ -107,23 +159,50 @@ void setupServiceLocator() {
   );
 
   getIt.registerFactory<SuppliersViewModel>(
-    () => SuppliersViewModel(getIt<SuppliersRepository>()),
+    () => SuppliersViewModel(
+      getIt<SuppliersRepository>(),
+      getIt<CountProductsUseCase>(),
+    ),
   );
   getIt.registerFactory<SuppliersFormViewmodel>(
     () => SuppliersFormViewmodel(getIt<SuppliersRepository>()),
   );
 
   getIt.registerFactory<CategoriesViewModel>(
-    () => CategoriesViewModel(getIt<CategoriesRepository>()),
+    () => CategoriesViewModel(
+      getIt<CategoriesRepository>(),
+      getIt<CountProductsUseCase>(),
+    ),
   );
   getIt.registerFactory<CategoriesFormViewmodel>(
     () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
   );
 
-  getIt.registerFactory<ProductsViewModel>(
+  getIt.registerLazySingleton<ProductsViewModel>(
     () => ProductsViewModel(getIt<ProductsRepository>()),
   );
   getIt.registerFactory<ProductsFormViewModel>(
-    () => ProductsFormViewModel(getIt<ProductsRepository>()),
+    () => ProductsFormViewModel(
+      getIt<ProductsRepository>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<SalesViewModel>(
+    () => SalesViewModel(getIt<SalesRepository>()),
+  );
+
+  getIt.registerFactory<CartViewModel>(
+    () => CartViewModel(
+      getIt<FinalizeSaleUseCase>(),
+      getIt<SaveDraftSaleUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<EditSaleViewModel>(
+    () => EditSaleViewModel(
+      getIt<EditSaleUseCase>(),
+      getIt<CancelCompletedSaleUseCase>(),
+      getIt<ProductsRepository>(),
+    ),
   );
 }

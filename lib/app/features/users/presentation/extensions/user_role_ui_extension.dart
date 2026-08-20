@@ -1,7 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 extension UserRoleUIExtension on UserRole {
   Color color(BuildContext context) {
@@ -18,11 +17,11 @@ extension UserRoleUIExtension on UserRole {
   IconData get icon {
     switch (this) {
       case UserRole.owner:
-        return Symbols.crown;
+        return AppIcons.crown;
       case UserRole.admin:
-        return Symbols.shield_person;
+        return AppIcons.shieldPerson;
       case UserRole.seller:
-        return Symbols.shopping_bag_rounded;
+        return AppIcons.shoppingBag;
     }
   }
 }

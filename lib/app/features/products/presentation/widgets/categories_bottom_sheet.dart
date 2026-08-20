@@ -5,7 +5,6 @@ import 'package:estoque_pro/app/features/categories/presentation/widgets/categor
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CategoriesBottomSheet extends StatefulWidget {
   final CategoriesViewModel categoriesVM;
@@ -94,7 +93,7 @@ class _CategoriesBottomSheetState extends State<CategoriesBottomSheet> {
                       ),
                       TextButton.icon(
                         onPressed: () => context.push(AppRoutes.categoryForm),
-                        icon: const Icon(Symbols.add_rounded, size: AppSpacing.icon24, weight: 600),
+                        icon: const Icon(AppIcons.add, size: AppSpacing.icon24, weight: 600),
                         label: Text(
                           'Nova',
                           style: context.textTheme.titleSmall?.copyWith(color: context.colorScheme.primary),

@@ -144,7 +144,11 @@ class ProductsFormViewModel extends ChangeNotifier {
 
   Future<Result<bool>> _adjustStock(({String productId, int quantityDiff, ProductHistoryEntity history}) args) async {
     try {
-      await _repository.adjustStock(args.productId, args.quantityDiff, args.history);
+      await _repository.adjustStock(
+        args.productId,
+        args.quantityDiff,
+        args.history,
+      );
       return const Success(true);
     } catch (e) {
       return Failure(Exception(e.toString()));

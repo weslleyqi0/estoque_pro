@@ -1,9 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductHeaderCard extends StatelessWidget {
   final ProductEntity product;
@@ -21,32 +20,11 @@ class ProductHeaderCard extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 130,
-              width: 130,
-              decoration: BoxDecoration(
-                color: context.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppSpacing.space16),
-              ),
-              foregroundDecoration: BoxDecoration(
-                borderRadius: AppSpacing.borderRadius16,
-                border: Border.all(color: context.colorScheme.outline, width: 1),
-              ),
-              clipBehavior: Clip.hardEdge,
-              child: product.imgUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: product.imgUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorWidget: (context, url, error) => const Center(
-                        child: Icon(Symbols.broken_image_rounded, size: 48),
-                      ),
-                    )
-                  : const Center(
-                      child: Icon(Symbols.image_rounded, size: 48),
-                    ),
+            AppNetworkImage(
+              imageUrl: product.imgUrl,
+              size: 130,
+              placeholderIcon: AppIcons.image,
+              isGrayscale: !product.isActive,
             ),
             const Gap(AppSpacing.space12),
             Expanded(
@@ -63,7 +41,7 @@ class ProductHeaderCard extends StatelessWidget {
                       style: context.textTheme.titleLarge?.copyWith(),
                     ),
                     Text(
-                      'R\$ ${product.price.toStringAsFixed(2)}',
+                      CurrencyInputFormatter.formatCurrency(product.price),
                       style: context.textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.w900,
                       ),

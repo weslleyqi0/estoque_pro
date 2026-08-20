@@ -30,32 +30,40 @@ class AppDialog {
     required String content,
     String confirmLabel = 'Confirmar',
     String cancelLabel = 'Cancelar',
+    Color? confirmColor,
+    Color? cancelColor,
     bool isDestructive = false,
   }) {
-    return showDialog<bool>(
+    return show<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          AppButton.text(
-            label: cancelLabel,
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          isDestructive
-              ? AppButton.text(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(
-                    confirmLabel,
-                    style: TextStyle(color: context.colorScheme.error, fontWeight: FontWeight.bold),
-                  ),
-                )
-              : AppButton.text(
-                  label: confirmLabel,
-                  onPressed: () => Navigator.pop(context, true),
-                ),
-        ],
-      ),
+      builder: (context) {
+        final effectiveConfirmColor = confirmColor ?? (isDestructive ? context.colorScheme.error : null);
+
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            AppButton.text(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                cancelLabel,
+                style: cancelColor != null
+                    ? context.textTheme.bodyLarge?.copyWith(color: cancelColor, fontWeight: .bold)
+                    : context.textTheme.bodyLarge,
+              ),
+            ),
+            AppButton.text(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                confirmLabel,
+                style: effectiveConfirmColor != null
+                    ? context.textTheme.bodyLarge?.copyWith(color: effectiveConfirmColor, fontWeight: .bold)
+                    : context.textTheme.bodyLarge?.copyWith(color: context.colorScheme.primary, fontWeight: .bold),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

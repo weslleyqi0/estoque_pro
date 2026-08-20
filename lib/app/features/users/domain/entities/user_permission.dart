@@ -4,10 +4,15 @@ enum UserPermission {
     'Editar Produtos',
     'Permitir editar informações de produtos existentes',
   ),
-  editSales(
-    'edit_sales',
-    'Editar Vendas',
-    'Permitir alterar vendas já finalizadas (trocas, devoluções, correções)',
+  deleteProducts(
+    'delete_products',
+    'Excluir Produtos',
+    'Permitir remover produtos do sistema',
+  ),
+  manageStock(
+    'manage_stock',
+    'Gerenciar Estoque',
+    'Permitir ajustar quantidades de estoque',
   ),
   manageCategories(
     'manage_categories',
@@ -24,31 +29,45 @@ enum UserPermission {
     'Gerenciar Clientes',
     'Permitir adicionar, editar e remover clientes',
   ),
+  editSales(
+    'edit_sales',
+    'Editar Vendas',
+    'Permitir alterar vendas já finalizadas (trocas, devoluções, correções)',
+  ),
+  deleteSales(
+    'delete_sales',
+    'Excluir Vendas de Outros',
+    'Permitir cancelar e excluir vendas em andamento de outros vendedores',
+  ),
+  viewHistory(
+    'view_history',
+    'Ver Histórico de Estoque',
+    'Permitir visualizar o histórico de movimentações de estoque dos produtos',
+  ),
   viewReports(
     'view_reports',
     'Ver Relatórios',
     'Permitir acessar relatórios e estatísticas',
+  ),
+  changeSalePrice(
+    'change_sale_price',
+    'Alterar Preço na Venda',
+    'Permitir mudar o preço dos produtos durante a venda',
   ),
   deliveries(
     'deliveries',
     'Entregas',
     'Gerenciar entregas',
   ),
-
-  changeSalePrice(
-    'change_sale_price',
-    'Alterar Preço na Venda',
-    'Permitir mudar o preço dos produtos durante a venda',
+  cancelCompletedSales(
+    'cancel_completed_sales',
+    'Cancelar Vendas Concluídas',
+    'Permitir cancelar vendas que já foram finalizadas',
   ),
-  deleteProducts(
-    'delete_products',
-    'Excluir Produtos',
-    'Permitir remover produtos do sistema',
-  ),
-  manageStock(
-    'manage_stock',
-    'Gerenciar Estoque',
-    'Permitir ajustar quantidades de estoque',
+  viewSalesHistory(
+    'view_sales_history',
+    'Ver Histórico de Edição de Vendas',
+    'Permitir visualizar o histórico de edições de vendas',
   );
 
   final String value;

@@ -5,6 +5,7 @@ import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewm
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/presentation/extensions/product_stock_ui_extension.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_header_card.dart';
@@ -13,10 +14,10 @@ import 'package:estoque_pro/app/features/products/presentation/widgets/product_i
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_status_card.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_stock_status_card.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/stock_adjustment_bottom_sheet.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
@@ -31,14 +32,14 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  late final ProductsViewModel _viewModel;
-  late final ProductsFormViewModel _formViewModel;
+  final _viewModel = getIt<ProductsViewModel>();
+  final _formViewModel = getIt<ProductsFormViewModel>();
+  final _authViewModel = getIt<AuthViewModel>();
 
   @override
   void initState() {
     super.initState();
-    _viewModel = getIt<ProductsViewModel>();
-    _formViewModel = getIt<ProductsFormViewModel>();
+    _viewModel.listenAll();
   }
 
   ProductEntity get _currentProduct {
@@ -50,7 +51,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   Future<void> _adjustStock(ProductHistoryAction action, int quantity, String note) async {
     final product = _currentProduct;
-    final currentUser = getIt<AuthViewModel>().currentUser;
+    final currentUser = _authViewModel.currentUser;
 
     int quantityDiff = action == ProductHistoryAction.add ? quantity : -quantity;
     int oldStock = product.stock;
@@ -92,12 +93,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _viewModel,
+      listenable: Listenable.merge([_viewModel, _formViewModel, _authViewModel]),
       builder: (context, _) {
         final product = _currentProduct;
-
-        final maxProgress = product.minStock > 0 ? (product.minStock * 2).toDouble() : 10.0;
-        final rawProgress = maxProgress > 0 ? product.stock / maxProgress : 0.0;
+        final rawProgress = product.rawStockProgress;
+        final currentUser = _authViewModel.currentUser;
+        final canViewHistory = currentUser?.hasPermission(UserPermission.viewHistory) ?? false;
 
         final Color statusColor;
         final IconData statusIcon;
@@ -105,19 +106,19 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
         if (rawProgress <= 0.0) {
           statusColor = AppColors.error;
-          statusIcon = Symbols.error_rounded;
+          statusIcon = AppIcons.error;
           statusText = 'Sem Estoque';
         } else if (rawProgress < 0.25) {
           statusColor = AppColors.error;
-          statusIcon = Symbols.info_rounded;
+          statusIcon = AppIcons.info;
           statusText = 'Estoque Crítico';
         } else if (rawProgress < 0.50) {
           statusColor = AppColors.warning;
-          statusIcon = Symbols.info_rounded;
+          statusIcon = AppIcons.info;
           statusText = 'Estoque Baixo';
         } else {
           statusColor = AppColors.success;
-          statusIcon = Symbols.check_circle_rounded;
+          statusIcon = AppIcons.checkCircle;
           statusText = 'Estoque OK';
         }
 
@@ -126,7 +127,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             title: const Text('Detalhes do Produto'),
             actions: [
               AppIconButton(
-                icon: Symbols.edit_rounded,
+                icon: AppIcons.edit,
                 onPressed: () => context.push(AppRoutes.productForm, extra: product),
               ),
               const Gap(AppSpacing.space8),
@@ -159,22 +160,28 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               ),
               const Gap(AppSpacing.space16),
 
-              StreamBuilder<List<ProductHistoryEntity>>(
-                stream: getIt<ProductsRepository>().watchHistory(product.id, limit: 6),
-                builder: (context, snapshot) {
-                  final historyList = snapshot.data ?? [];
-                  final hasMore = historyList.length > 5;
-                  final displayedHistory = hasMore ? historyList.take(5).toList() : historyList;
+              if (canViewHistory) ...[
+                StreamBuilder<List<ProductHistoryEntity>>(
+                  stream: getIt<ProductsRepository>().watchHistory(product.id, limit: 6),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const SizedBox.shrink();
+                    }
+                    final historyList = snapshot.data ?? [];
+                    final hasMore = historyList.length > 5;
+                    final displayedHistory = hasMore ? historyList.take(5).toList() : historyList;
 
-                  return ProductHistoryCard(
-                    title: 'Histórico de Movimentações',
-                    subtitle: 'Últimas movimentações',
-                    history: displayedHistory,
-                    showEmptyMessage: true,
-                    onViewAll: hasMore ? () => context.push(AppRoutes.productHistory, extra: product) : null,
-                  );
-                },
-              ),
+                    return ProductHistoryCard(
+                      title: 'Histórico de Movimentações',
+                      subtitle: 'Últimas movimentações',
+                      history: displayedHistory,
+                      showEmptyMessage: true,
+                      onViewAll: hasMore ? () => context.push(AppRoutes.productHistory, extra: product) : null,
+                    );
+                  },
+                ),
+                const Gap(AppSpacing.space16),
+              ],
 
               const Gap(AppSpacing.space56),
             ],

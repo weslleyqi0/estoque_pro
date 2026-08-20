@@ -6,16 +6,17 @@ import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_enti
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class SuppliersItem extends StatelessWidget {
   final SupplierEntity supplier;
+  final int productCount;
   final VoidCallback? onTap;
   final bool showProductsTag;
 
   const SuppliersItem({
     super.key,
     required this.supplier,
+    this.productCount = 0,
     this.onTap,
     this.showProductsTag = true,
   });
@@ -23,6 +24,7 @@ class SuppliersItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = !supplier.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
+    final countText = productCount == 1 ? '1 produto' : '$productCount produtos';
     return Card(
       color: context.colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
@@ -45,7 +47,7 @@ class SuppliersItem extends StatelessWidget {
                   color: context.colorScheme.outline,
                 ),
                 child: Icon(
-                  Symbols.local_shipping_rounded,
+                  AppIcons.localShipping,
                   color: color,
                   size: AppSpacing.icon32,
                   weight: 600,
@@ -75,14 +77,16 @@ class SuppliersItem extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          Symbols.home_work_rounded,
+                          AppIcons.homeWork,
                           color: color,
                           size: AppSpacing.icon16,
                           weight: 600,
                         ),
                         const Gap(AppSpacing.space4),
                         Text(
-                          supplier.cnpj == null || supplier.cnpj!.isEmpty ? 'Não informado' : CnpjInputFormatter.formatString(supplier.cnpj!),
+                          supplier.cnpj == null || supplier.cnpj!.isEmpty
+                              ? 'Não informado'
+                              : CnpjInputFormatter.formatString(supplier.cnpj!),
                           style: context.textTheme.labelLarge?.copyWith(color: color),
                         ),
                       ],
@@ -93,23 +97,26 @@ class SuppliersItem extends StatelessWidget {
                         Row(
                           children: [
                             Icon(
-                              Symbols.phone,
+                              AppIcons.phone,
                               color: color,
                               size: AppSpacing.icon16,
                               weight: 600,
                             ),
                             const Gap(AppSpacing.space4),
                             Text(
-                              supplier.phone == null || supplier.phone!.isEmpty ? 'Não informado' : PhoneInputFormatter.formatString(supplier.phone!),
+                              supplier.phone == null || supplier.phone!.isEmpty
+                                  ? 'Não informado'
+                                  : PhoneInputFormatter.formatString(supplier.phone!),
                               style: context.textTheme.labelLarge?.copyWith(color: color),
                             ),
                           ],
                         ),
                         if (showProductsTag)
                           AppTag(
-                            title: '5 produtos',
-                            icon: Symbols.package_2_rounded,
+                            title: countText,
+                            icon: AppIcons.package2,
                             color: context.colorScheme.primary,
+                            onTap: () => context.push(AppRoutes.products, extra: supplier.name),
                           ),
                       ],
                     ),

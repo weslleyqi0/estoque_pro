@@ -1,18 +1,18 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/presentation/utils/category_icons.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_form_viewmodel.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CategoryFormPage extends StatefulWidget {
+  final CategoriesFormViewmodel viewModel;
   final CategoryEntity? category;
 
   const CategoryFormPage({
     super.key,
+    required this.viewModel,
     this.category,
   });
 
@@ -21,7 +21,6 @@ class CategoryFormPage extends StatefulWidget {
 }
 
 class _CategoryFormPageState extends State<CategoryFormPage> {
-  final _viewModel = getIt<CategoriesFormViewmodel>();
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _nameController;
@@ -61,13 +60,13 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     );
 
     if (_isEditing) {
-      await _viewModel.updateCategoryCommand.execute(category);
-      if (_viewModel.updateCategoryCommand.isSuccess && mounted) {
+      await widget.viewModel.updateCategoryCommand.execute(category);
+      if (widget.viewModel.updateCategoryCommand.isSuccess && mounted) {
         Navigator.pop(context);
       }
     } else {
-      await _viewModel.saveCategoryCommand.execute(category);
-      if (_viewModel.saveCategoryCommand.isSuccess && mounted) {
+      await widget.viewModel.saveCategoryCommand.execute(category);
+      if (widget.viewModel.saveCategoryCommand.isSuccess && mounted) {
         Navigator.pop(context);
       }
     }
@@ -76,9 +75,9 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   Future<void> _delete() async {
     if (_currentCategory == null) return;
 
-    await _viewModel.deleteCategoryCommand.execute(_currentCategory!.id);
+    await widget.viewModel.deleteCategoryCommand.execute(_currentCategory!.id);
 
-    if (_viewModel.deleteCategoryCommand.isSuccess && mounted) {
+    if (widget.viewModel.deleteCategoryCommand.isSuccess && mounted) {
       Navigator.pop(context);
     }
   }
@@ -121,12 +120,12 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
         title: Text(_isEditing ? 'Editar Categoria' : 'Nova Categoria'),
         actions: [
           AppIconButton(
-            icon: Symbols.save_rounded,
+            icon: AppIcons.save,
             onPressed: () => _save(),
           ),
           if (_currentCategory != null)
             AppIconButton(
-              icon: Symbols.delete,
+              icon: AppIcons.delete,
               onPressed: () => _delete(),
             ),
           const Gap(AppSpacing.space4),
@@ -156,27 +155,24 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                     },
                   ),
                   const Gap(AppSpacing.space24),
-                  
+
                   Text('Cor (Opcional)', style: context.textTheme.labelLarge),
                   const Gap(AppSpacing.space8),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(
-                      backgroundColor: _selectedColor == Colors.transparent 
-                          ? context.colorScheme.primary 
+                      backgroundColor: _selectedColor == Colors.transparent
+                          ? context.colorScheme.primary
                           : _selectedColor,
                     ),
                     title: const Text('Selecionar cor'),
-                    subtitle: Text(_selectedColor == Colors.transparent 
-                        ? 'Padrão do sistema' 
-                        : 'Cor personalizada'
-                    ),
-                    trailing: _selectedColor != Colors.transparent 
-                      ? IconButton(
-                          icon: const Icon(Symbols.close_rounded),
-                          onPressed: () => setState(() => _selectedColor = Colors.transparent),
-                        )
-                      : null,
+                    subtitle: Text(_selectedColor == Colors.transparent ? 'Padrão do sistema' : 'Cor personalizada'),
+                    trailing: _selectedColor != Colors.transparent
+                        ? IconButton(
+                            icon: const Icon(AppIcons.close),
+                            onPressed: () => setState(() => _selectedColor = Colors.transparent),
+                          )
+                        : null,
                     onTap: _pickColor,
                   ),
                   const Gap(AppSpacing.space24),
@@ -186,7 +182,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                 ],
               ),
             ),
-            
+
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
@@ -197,17 +193,18 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                 ),
               ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.all(AppSpacing.space16),
               child: ListenableBuilder(
                 listenable: Listenable.merge([
-                  _viewModel.saveCategoryCommand,
-                  _viewModel.updateCategoryCommand,
+                  widget.viewModel.saveCategoryCommand,
+                  widget.viewModel.updateCategoryCommand,
                 ]),
                 builder: (context, _) {
                   final isLoading =
-                      _viewModel.saveCategoryCommand.isRunning || _viewModel.updateCategoryCommand.isRunning;
+                      widget.viewModel.saveCategoryCommand.isRunning ||
+                      widget.viewModel.updateCategoryCommand.isRunning;
                   return AppButton.primary(
                     label: _isEditing ? 'Salvar Alterações' : 'Salvar Categoria',
                     isFullWidth: true,

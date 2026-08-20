@@ -5,20 +5,22 @@ import 'package:estoque_pro/app/features/categories/presentation/utils/category_
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class CategoriesItem extends StatelessWidget {
   final CategoryEntity category;
+  final int productCount;
 
   const CategoriesItem({
     super.key,
     required this.category,
+    this.productCount = 0,
   });
 
   @override
   Widget build(BuildContext context) {
     final categoryColor = category.color != null ? Color(category.color!) : context.colorScheme.primary;
     final iconColor = categoryColor;
+    final countText = productCount == 1 ? '1 produto' : '$productCount produtos';
 
     return Card(
       color: context.colorScheme.surfaceContainerLow,
@@ -56,9 +58,10 @@ class CategoriesItem extends StatelessWidget {
                     style: context.textTheme.titleMedium,
                   ),
                   AppTag(
-                    title: '5 produtos',
-                    icon: Symbols.package_2_rounded,
+                    title: countText,
+                    icon: AppIcons.package2,
                     color: context.colorScheme.primary,
+                    onTap: () => context.push(AppRoutes.products, extra: category.name),
                   ),
                 ],
               ),

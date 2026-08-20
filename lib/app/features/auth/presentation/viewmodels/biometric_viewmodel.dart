@@ -1,10 +1,9 @@
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:flutter/widgets.dart';
 
 class BiometricViewModel extends ChangeNotifier with WidgetsBindingObserver {
-  final _authRepository = getIt<AuthRepository>();
+  final AuthRepository _authRepository;
 
   @visibleForTesting
   DateTime? get backgroundTimestamp => _authRepository.backgroundTimestamp;
@@ -14,7 +13,7 @@ class BiometricViewModel extends ChangeNotifier with WidgetsBindingObserver {
 
   late final Command0<bool> authenticateCommand;
 
-  BiometricViewModel() {
+  BiometricViewModel(this._authRepository) {
     WidgetsBinding.instance.addObserver(this);
     _authRepository.addListener(notifyListeners);
 

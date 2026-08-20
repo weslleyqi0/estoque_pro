@@ -2,7 +2,6 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/widgets/suppliers_item.dart';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class SuppliersListSliver extends StatelessWidget {
   final SuppliersViewModel viewModel;
@@ -30,7 +29,7 @@ class SuppliersListSliver extends StatelessWidget {
       return const SliverFillRemaining(
         child: AppEmptyList(
           message: 'Nenhum fornecedor cadastrado!\nClique no botão abaixo para cadastrar um novo fornecedor.',
-          icon: Symbols.local_shipping_rounded,
+          icon: AppIcons.localShipping,
           iconColor: Colors.cyan,
           iconSize: AppSpacing.icon48,
         ),
@@ -41,7 +40,7 @@ class SuppliersListSliver extends StatelessWidget {
       return const SliverFillRemaining(
         child: AppEmptyList(
           message: 'Nenhum fornecedor encontrado para essa pesquisa.',
-          icon: Symbols.search_off_rounded,
+          icon: AppIcons.searchOff,
           iconColor: Colors.grey,
           iconSize: AppSpacing.icon48,
         ),
@@ -58,7 +57,11 @@ class SuppliersListSliver extends StatelessWidget {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final supplier = viewModel.filteredSuppliers[index];
-            return SuppliersItem(supplier: supplier);
+            final productCount = viewModel.getProductCountForSupplier(supplier.id);
+            return SuppliersItem(
+              supplier: supplier,
+              productCount: productCount,
+            );
           },
           childCount: viewModel.filteredSuppliers.length,
         ),

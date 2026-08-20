@@ -97,16 +97,23 @@ class ProductsRepositoryImpl implements ProductsRepository {
 
   @override
   Future<void> adjustStock(String productId, int quantityDiff, ProductHistoryEntity history) async {
+    if (productId.trim().isEmpty) {
+      throw Exception('ID do produto inválido.');
+    }
+    if (quantityDiff == 0) {
+      throw Exception('A quantidade de alteração de estoque não pode ser zero.');
+    }
+
     try {
       final pushRef = _firebaseDb.ref.root.child('stock_movements').child(productId).push();
       final historyModel = ProductHistoryModel.fromEntity(history);
-      
+
       final updates = {
         'products/$productId/stock': ServerValue.increment(quantityDiff),
         'products/$productId/updatedAt': ServerValue.timestamp,
         'stock_movements/$productId/${pushRef.key}': historyModel.toMap(),
       };
-      
+
       await _firebaseDb.updateMultiple(updates);
     } catch (e) {
       debugPrint('---> Products: Erro ao ajustar estoque atômicamente no Firebase: $e');
@@ -148,7 +155,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
     try {
       final snapshot = await _firebaseDb.ref.orderByChild('barcode').equalTo(barcode).get();
       if (!snapshot.exists) return false;
-      
+
       final data = snapshot.value as Map;
       if (ignoreId != null) {
         // Se houver apenas 1 produto com esse barcode e for ele mesmo, não é duplicidade.

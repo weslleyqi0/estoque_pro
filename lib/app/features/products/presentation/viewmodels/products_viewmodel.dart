@@ -22,25 +22,57 @@ class ProductsViewModel extends ChangeNotifier {
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
 
-  bool get hasLowStock => _products.any((p) => p.stock < p.minStock && p.isActive);
+  bool _showOnlyLowStock = false;
+  bool get showOnlyLowStock => _showOnlyLowStock;
 
-  void setSearchQuery(String query) {
+  List<ProductEntity> get lowStockProducts => _products.where((p) => p.stock < p.minStock && p.isActive).toList();
+
+  bool get hasLowStock => lowStockProducts.isNotEmpty;
+
+  void setShowOnlyLowStock(bool value, {bool notify = true}) {
+    if (_showOnlyLowStock == value) return;
+    _showOnlyLowStock = value;
+    if (notify) notifyListeners();
+  }
+
+  void clearLowStockFilter({bool notify = true}) {
+    if (!_showOnlyLowStock) return;
+    _showOnlyLowStock = false;
+    if (notify) notifyListeners();
+  }
+
+  void setSearchQuery(String query, {bool notify = true}) {
+    if (_searchQuery == query) return;
     _searchQuery = query;
-    notifyListeners();
+    if (notify) notifyListeners();
+  }
+
+  ProductEntity? findProductByBarcode(String barcode) {
+    final normalized = barcode.normalizedBarcode;
+    if (normalized.isEmpty) return null;
+    for (final product in _products) {
+      if (product.isActive &&
+          (product.barcode.trim() == barcode.trim() || product.barcode.normalizedBarcode == normalized)) {
+        return product;
+      }
+    }
+    return null;
   }
 
   List<ProductEntity> get filteredProducts {
-    if (_searchQuery.trim().isEmpty) return _products;
+    final list = _showOnlyLowStock ? lowStockProducts : _products;
+
+    if (_searchQuery.trim().isEmpty) return list;
 
     final query = _searchQuery.withoutDiacritics.toLowerCase().trim();
 
-    return _products.where((product) {
+    return list.where((product) {
       final matchesName = product.name.withoutDiacritics.toLowerCase().contains(query);
       final matchesBarcode = product.barcode.withoutDiacritics.toLowerCase().contains(query);
       final matchesDesc = product.description.withoutDiacritics.toLowerCase().contains(query);
       final matchesSupplier = product.supplier?.name.withoutDiacritics.toLowerCase().contains(query) ?? false;
       final matchesCategory = product.categories.any((c) => c.name.withoutDiacritics.toLowerCase().contains(query));
-      
+
       return matchesName || matchesBarcode || matchesDesc || matchesSupplier || matchesCategory;
     }).toList();
   }
@@ -51,6 +83,8 @@ class ProductsViewModel extends ChangeNotifier {
   ProductsViewModel(this._repository);
 
   void listenAll() {
+    if (_subscription != null) return;
+
     _state = ProductsLoadState.loading;
     notifyListeners();
 
