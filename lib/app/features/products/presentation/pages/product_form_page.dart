@@ -129,7 +129,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     if (confirm == true) {
       final success = await _viewModel.deleteCurrentProduct();
       if (success && mounted) {
-        context.go(AppRoutes.products);
+        context.pop(true);
         AppSnackbar.success(context, 'Produto excluído com sucesso!');
       }
     }

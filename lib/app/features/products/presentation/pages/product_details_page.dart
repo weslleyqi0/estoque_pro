@@ -128,7 +128,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             actions: [
               AppIconButton(
                 icon: AppIcons.edit,
-                onPressed: () => context.push(AppRoutes.productForm, extra: product),
+                onPressed: () async {
+                  final deleted = await context.push<bool>(AppRoutes.productForm, extra: product);
+                  if (deleted == true && context.mounted) {
+                    context.pop();
+                  }
+                },
               ),
               const Gap(AppSpacing.space8),
             ],
