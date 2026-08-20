@@ -50,8 +50,8 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: const Text('Home'),
           actions: [
-            IconButton(
-              icon: const Icon(AppIcons.logout),
+            AppIconButton(
+              icon: AppIcons.logout,
               tooltip: 'Sair',
               onPressed: () => _authVM.logoutCommand.execute(),
             ),

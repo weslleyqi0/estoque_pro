@@ -52,8 +52,8 @@ class EditSaleSwapProductDialog extends StatelessWidget {
                 'Substituir "${targetItem.productName}"',
                 style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
-              IconButton(
-                icon: const Icon(AppIcons.close),
+              AppIconButton(
+                icon: AppIcons.close,
                 onPressed: () => Navigator.pop(context),
               ),
             ],

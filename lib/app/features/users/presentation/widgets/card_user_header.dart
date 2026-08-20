@@ -86,13 +86,10 @@ class CardUserHeader extends StatelessWidget {
               ),
             ],
           ),
-          IconButton(
+          AppIconButton(
             onPressed: onExpanded,
-            icon: Icon(
-              isExpanded ? AppIcons.arrowUp : AppIcons.arrowDown,
-              color: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-              size: AppSpacing.icon32,
-            ),
+            icon: isExpanded ? AppIcons.arrowUp : AppIcons.arrowDown,
+            iconColor: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
           ),
         ],
       ),

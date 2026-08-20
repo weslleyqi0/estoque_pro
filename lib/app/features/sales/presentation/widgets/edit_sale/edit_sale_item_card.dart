@@ -53,8 +53,8 @@ class EditSaleItemCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(AppIcons.remove),
+                    AppIconButton(
+                      icon: AppIcons.remove,
                       onPressed: onDecrease,
                     ),
                     Text(
@@ -63,8 +63,8 @@ class EditSaleItemCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(AppIcons.add),
+                    AppIconButton(
+                      icon: AppIcons.add,
                       onPressed: onIncrease,
                     ),
                   ],
@@ -88,8 +88,9 @@ class EditSaleItemCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(AppIcons.delete, color: context.colorScheme.error),
+                AppIconButton(
+                  icon: AppIcons.delete,
+                  iconColor: context.colorScheme.error,
                   onPressed: onRemove,
                 ),
               ],

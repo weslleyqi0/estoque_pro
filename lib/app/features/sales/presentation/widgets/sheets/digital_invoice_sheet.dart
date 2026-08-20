@@ -162,8 +162,8 @@ class _DigitalInvoiceSheetState extends State<DigitalInvoiceSheet> {
                     ),
                   ],
                 ),
-                IconButton(
-                  icon: const Icon(AppIcons.close),
+                AppIconButton(
+                  icon: AppIcons.close,
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

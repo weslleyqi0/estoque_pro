@@ -54,13 +54,10 @@ class SaleCardHeader extends StatelessWidget {
             AppTag(title: sale.status.label, color: statusColor),
             if (sale.status != SaleStatus.inProgress) ...[
               const Gap(AppSpacing.space4),
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                icon: Icon(
-                  Icons.receipt_long_rounded,
-                  size: AppSpacing.icon20,
-                  color: context.colorScheme.primary,
-                ),
+              AppIconButton(
+                size: AppIconButtonSize.medium,
+                icon: Icons.receipt_long_rounded,
+                iconColor: context.colorScheme.primary,
                 tooltip: 'Comprovante de Venda',
                 onPressed: () => DigitalInvoiceSheet.show(context, sale),
               ),
