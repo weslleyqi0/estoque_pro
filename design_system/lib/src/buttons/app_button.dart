@@ -321,15 +321,15 @@ class AppIconButton extends StatelessWidget {
     final colorScheme = context.colorScheme;
 
     final defaultBgColor = switch (variant) {
-      AppButtonVariant.primary => colorScheme.primary,
+      AppButtonVariant.primary => Colors.transparent,
       AppButtonVariant.secondary => colorScheme.secondary,
-      AppButtonVariant.outlined => null,
-      AppButtonVariant.text => null,
+      AppButtonVariant.outlined => Colors.transparent,
+      AppButtonVariant.text => Colors.transparent,
     };
 
     final defaultIconColor = switch (variant) {
-      AppButtonVariant.primary => colorScheme.onPrimary,
-      AppButtonVariant.secondary => colorScheme.onSecondary,
+      AppButtonVariant.primary => backgroundColor != null ? colorScheme.onPrimary : colorScheme.primary,
+      AppButtonVariant.secondary => backgroundColor != null ? colorScheme.onSecondary : colorScheme.secondary,
       AppButtonVariant.outlined => colorScheme.primary,
       AppButtonVariant.text => colorScheme.primary,
     };
@@ -350,7 +350,8 @@ class AppIconButton extends StatelessWidget {
       style: IconButton.styleFrom(
         backgroundColor: effectiveBgColor,
         foregroundColor: effectiveIconColor,
-        disabledBackgroundColor: effectiveBgColor != null ? colorScheme.onSurface.withValues(alpha: 0.12) : null,
+        disabledBackgroundColor:
+            effectiveBgColor != Colors.transparent ? colorScheme.onSurface.withValues(alpha: 0.12) : null,
         disabledForegroundColor: colorScheme.onSurface.withValues(alpha: 0.38),
         minimumSize: Size(_buttonSize, _buttonSize),
         maximumSize: Size(_buttonSize, _buttonSize),
