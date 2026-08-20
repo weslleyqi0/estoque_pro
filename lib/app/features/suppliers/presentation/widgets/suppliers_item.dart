@@ -63,10 +63,12 @@ class SuppliersItem extends StatelessWidget {
                       mainAxisAlignment: .spaceBetween,
                       crossAxisAlignment: .start,
                       children: [
-                        Text(
-                          supplier.name,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textTheme.titleMedium?.copyWith(color: color),
+                        Expanded(
+                          child: Text(
+                            supplier.name,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.textTheme.titleMedium?.copyWith(color: color),
+                          ),
                         ),
                         Text(
                           !supplier.isActive ? 'Inativo' : '',
