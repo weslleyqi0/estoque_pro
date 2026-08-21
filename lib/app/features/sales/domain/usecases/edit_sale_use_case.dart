@@ -1,5 +1,6 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
@@ -95,7 +96,10 @@ class EditSaleUseCase {
 
       double newTotal = newSubtotal;
       if (originalSale.discountValue > 0) {
-        newTotal = (newSubtotal - originalSale.discountValue).clamp(0.0, double.infinity);
+        final calculatedDiscount = originalSale.discountType == DiscountType.percent
+            ? newSubtotal * (originalSale.discountValue / 100)
+            : originalSale.discountValue;
+        newTotal = (newSubtotal - calculatedDiscount).clamp(0.0, double.infinity);
       }
 
       final nextSequence = originalSale.editHistory.length + 1;
