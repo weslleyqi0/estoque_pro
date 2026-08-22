@@ -58,7 +58,7 @@ class SalesViewModel extends ChangeNotifier {
     SalesFilterTab.inProgress => _sales.where((s) => s.status == SaleStatus.inProgress).length,
     SalesFilterTab.completed => _sales.where((s) => s.status == SaleStatus.completed).length,
     SalesFilterTab.fiado => _sales.where((s) => s.paymentMethod == PaymentMethod.fiado).length,
-    SalesFilterTab.edited => _sales.where((s) => s.updatedAt != null).length,
+    SalesFilterTab.edited => _sales.where((s) => s.isEdited).length,
     SalesFilterTab.cancelled => _sales.where((s) => s.status == SaleStatus.cancelled).length,
   };
 
@@ -82,7 +82,7 @@ class SalesViewModel extends ChangeNotifier {
       SalesFilterTab.inProgress => _sales.where((s) => s.status == SaleStatus.inProgress),
       SalesFilterTab.completed => _sales.where((s) => s.status == SaleStatus.completed),
       SalesFilterTab.fiado => _sales.where((s) => s.paymentMethod == PaymentMethod.fiado),
-      SalesFilterTab.edited => _sales.where((s) => s.updatedAt != null),
+      SalesFilterTab.edited => _sales.where((s) => s.isEdited),
       SalesFilterTab.cancelled => _sales.where((s) => s.status == SaleStatus.cancelled),
     }.toList();
 

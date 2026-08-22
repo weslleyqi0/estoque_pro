@@ -28,6 +28,13 @@ class SaleEntity extends Equatable {
 
   int get totalItems => items.fold(0, (sum, item) => sum + item.quantity);
 
+  bool get isEdited =>
+      editHistory.isNotEmpty ||
+      status == SaleStatus.edited ||
+      status == SaleStatus.corrected ||
+      status == SaleStatus.exchanged ||
+      status == SaleStatus.returned;
+
   double get calculatedDiscount {
     if (discountValue <= 0 || subtotal <= 0) return 0.0;
     if (discountType == DiscountType.percent) {
