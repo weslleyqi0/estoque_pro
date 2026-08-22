@@ -80,6 +80,7 @@ class _ProductsPageState extends State<ProductsPage> {
                         type: AppInfoBannerType.error,
                         trailing: AppIconButton(
                           icon: AppIcons.close,
+                          iconColor: AppColors.errorDark,
                           tooltip: 'Exibir todos os produtos',
                           onPressed: widget.viewModel.clearLowStockFilter,
                         ),
