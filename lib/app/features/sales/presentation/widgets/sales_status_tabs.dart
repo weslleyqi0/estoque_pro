@@ -52,9 +52,7 @@ class SalesStatusTabs extends StatelessWidget {
                     Text(
                       tab.label,
                       style: context.textTheme.bodyMedium?.copyWith(
-                        color: isSelected
-                            ? context.colorScheme.surface
-                            : context.colorScheme.onSurface.withValues(alpha: 0.8),
+                        color: isSelected ? AppColors.white : context.colorScheme.onSurface.withValues(alpha: 0.8),
                         fontWeight: isSelected ? .bold : .w500,
                       ),
                     ),
