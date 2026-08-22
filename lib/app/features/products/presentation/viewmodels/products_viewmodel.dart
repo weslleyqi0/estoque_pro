@@ -19,6 +19,10 @@ class ProductsViewModel extends ChangeNotifier {
   List<ProductEntity> _products = [];
   List<ProductEntity> get products => _products;
 
+  List<ProductEntity> get activeProducts => _products.where((p) => p.isActive).toList();
+
+  List<ProductEntity> get archivedProducts => _products.where((p) => !p.isActive).toList();
+
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
 
@@ -60,7 +64,25 @@ class ProductsViewModel extends ChangeNotifier {
   }
 
   List<ProductEntity> get filteredProducts {
-    final list = _showOnlyLowStock ? lowStockProducts : _products;
+    final list = _showOnlyLowStock ? lowStockProducts : activeProducts;
+
+    if (_searchQuery.trim().isEmpty) return list;
+
+    final query = _searchQuery.withoutDiacritics.toLowerCase().trim();
+
+    return list.where((product) {
+      final matchesName = product.name.withoutDiacritics.toLowerCase().contains(query);
+      final matchesBarcode = product.barcode.withoutDiacritics.toLowerCase().contains(query);
+      final matchesDesc = product.description.withoutDiacritics.toLowerCase().contains(query);
+      final matchesSupplier = product.supplier?.name.withoutDiacritics.toLowerCase().contains(query) ?? false;
+      final matchesCategory = product.categories.any((c) => c.name.withoutDiacritics.toLowerCase().contains(query));
+
+      return matchesName || matchesBarcode || matchesDesc || matchesSupplier || matchesCategory;
+    }).toList();
+  }
+
+  List<ProductEntity> get filteredArchivedProducts {
+    final list = archivedProducts;
 
     if (_searchQuery.trim().isEmpty) return list;
 
@@ -101,6 +123,48 @@ class ProductsViewModel extends ChangeNotifier {
         notifyListeners();
       },
     );
+  }
+
+  Future<void> archiveProduct(String id) async {
+    try {
+      final index = _products.indexWhere((p) => p.id == id);
+      if (index != -1) {
+        _products[index] = _products[index].copyWith(isActive: false);
+        notifyListeners();
+      }
+      await _repository.archive(id);
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> unarchiveProduct(String id) async {
+    try {
+      final index = _products.indexWhere((p) => p.id == id);
+      if (index != -1) {
+        _products[index] = _products[index].copyWith(isActive: true);
+        notifyListeners();
+      }
+      await _repository.unarchive(id);
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> deletePermanently(String id) async {
+    try {
+      _products.removeWhere((p) => p.id == id);
+      notifyListeners();
+      await _repository.deletePermanently(id);
+    } catch (e) {
+      _error = e;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   @override
