@@ -6,7 +6,6 @@ abstract class ProductsRepository {
   Future<List<ProductEntity>> getAll();
   Future<void> save(ProductEntity product);
   Future<void> update(ProductEntity product);
-  Future<void> delete(String id);
   Future<void> archive(String id);
   Future<void> unarchive(String id);
   Future<void> deletePermanently(String id);
