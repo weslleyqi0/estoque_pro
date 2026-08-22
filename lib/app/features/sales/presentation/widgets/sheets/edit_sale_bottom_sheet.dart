@@ -132,45 +132,21 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
     }
   }
 
-  void _onCancelSale(BuildContext context) async {
-    if (!_canCancel) {
-      AppSnackbar.error(
-        context,
-        'Você não possui permissão para cancelar vendas finalizadas.',
+  void _onCancelEdit(BuildContext context) async {
+    if (_viewModel.hasChanges) {
+      final confirmed = await AppDialog.showConfirmation(
+        context: context,
+        title: 'Descartar alterações?',
+        content: 'Você possui alterações não salvas na edição. Deseja descartá-las?',
+        confirmLabel: 'Descartar',
+        cancelLabel: 'Continuar editando',
+        isDestructive: true,
       );
-      return;
-    }
-
-    final confirmed = await AppDialog.showConfirmation(
-      context: context,
-      title: 'Cancelar Venda Finalizada',
-      content:
-          'Tem certeza que deseja cancelar a Venda ${widget.sale.saleNumber}? Todos os itens retornarão ao estoque.',
-      confirmLabel: 'Sim, Cancelar',
-      cancelLabel: 'Voltar',
-      isDestructive: true,
-    );
-
-    if (confirmed == true && context.mounted) {
-      final currentUser = widget.authViewModel.currentUser;
-      if (currentUser == null) return;
-
-      final result = await _viewModel.cancelSale(
-        currentUser: currentUser,
-        comment: _commentController.text.trim(),
-      );
-
-      if (context.mounted) {
-        if (result.isSuccess) {
-          AppSnackbar.success(context, 'Venda cancelada e estoque estornado com sucesso!');
-          Navigator.of(context).pop();
-        } else {
-          AppSnackbar.error(
-            context,
-            result.error?.toString().replaceAll('Exception: ', '') ?? 'Erro ao cancelar venda',
-          );
-        }
+      if (confirmed == true && context.mounted) {
+        Navigator.of(context).pop();
       }
+    } else {
+      Navigator.of(context).pop();
     }
   }
 
@@ -246,9 +222,7 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
         ),
       );
 
-      final targetQty = isAlreadyInDraft
-          ? existingDraftItem.quantity + item.quantity
-          : item.quantity;
+      final targetQty = isAlreadyInDraft ? existingDraftItem.quantity + item.quantity : item.quantity;
 
       final currentStock = selectedProduct.stock;
       final origItem = widget.sale.items.firstWhere(
@@ -368,7 +342,7 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
                   canCancel: _canCancel,
                   isSaving: _viewModel.isSaving,
                   hasChanges: _viewModel.hasChanges,
-                  onCancelSale: () => _onCancelSale(context),
+                  onCancelSale: () => _onCancelEdit(context),
                   onSaveEdit: () => _onSave(context),
                 ),
               ],
