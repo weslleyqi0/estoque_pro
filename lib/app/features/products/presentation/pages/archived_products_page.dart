@@ -1,0 +1,190 @@
+import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+
+class ArchivedProductsPage extends StatefulWidget {
+  final ProductsViewModel viewModel;
+
+  const ArchivedProductsPage({
+    super.key,
+    required this.viewModel,
+  });
+
+  @override
+  State<ArchivedProductsPage> createState() => _ArchivedProductsPageState();
+}
+
+class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
+  @override
+  void initState() {
+    super.initState();
+    widget.viewModel.listenAll();
+  }
+
+  @override
+  void dispose() {
+    widget.viewModel.setSearchQuery('', notify: false);
+    super.dispose();
+  }
+
+  Future<void> _unarchive(String id, String name) async {
+    try {
+      await widget.viewModel.unarchiveProduct(id);
+      if (mounted) {
+        AppSnackbar.success(context, 'Produto "$name" restaurado para a lista ativa!');
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.error(context, 'Erro ao restaurar produto: $e');
+      }
+    }
+  }
+
+  Future<void> _deletePermanently(String id, String name) async {
+    final confirmed = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Excluir Permanentemente',
+      content:
+          'Atenção! Ao excluir permanentemente o produto "$name", TODO O SEU HISTÓRICO DE MOVIMENTAÇÕES DE ESTOQUE SERÁ EXCLUÍDO e os registros vinculados não poderão ser recuperados.\n\nDeseja continuar?',
+      confirmLabel: 'Sim, Excluir Permanentemente',
+      cancelLabel: 'Cancelar',
+      isDestructive: true,
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await widget.viewModel.deletePermanently(id);
+        if (mounted) {
+          AppSnackbar.success(context, 'Produto e histórico de movimentações excluídos permanentemente.');
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackbar.error(context, 'Erro ao excluir permanentemente: $e');
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Produtos Arquivados'),
+        centerTitle: true,
+      ),
+      body: ListenableBuilder(
+        listenable: widget.viewModel,
+        builder: (context, _) {
+          final archivedList = widget.viewModel.filteredArchivedProducts;
+
+          return CustomScrollView(
+            slivers: [
+              if (widget.viewModel.archivedProducts.isNotEmpty)
+                AppFloatingSearch(
+                  hint: 'Pesquisar produto arquivado...',
+                  initialValue: widget.viewModel.searchQuery,
+                  onChanged: widget.viewModel.setSearchQuery,
+                ),
+              if (widget.viewModel.state == ProductsLoadState.loading)
+                const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (widget.viewModel.archivedProducts.isEmpty)
+                const SliverFillRemaining(
+                  child: AppEmptyList(
+                    message: 'Nenhum produto arquivado.',
+                    icon: AppIcons.inventory2,
+                  ),
+                )
+              else if (archivedList.isEmpty)
+                SliverFillRemaining(
+                  child: AppEmptyList(
+                    message: 'Nenhum produto arquivado encontrado para "${widget.viewModel.searchQuery}".',
+                    icon: AppIcons.searchOff,
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.all(AppSpacing.space16),
+                  sliver: SliverList.builder(
+                    itemCount: archivedList.length,
+                    itemBuilder: (context, index) {
+                      final product = archivedList[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.space12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppSpacing.borderRadius16,
+                          side: BorderSide(
+                            color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.space12),
+                          child: Row(
+                            children: [
+                              AppNetworkImage(imageUrl: product.imgUrl),
+                              const Gap(AppSpacing.space12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product.name,
+                                      style: context.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const Gap(2),
+                                    Text(
+                                      CurrencyInputFormatter.formatCurrency(product.price),
+                                      style: context.textTheme.bodyMedium?.copyWith(
+                                        color: context.colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const Gap(2),
+                                    Text(
+                                      'Estoque: ${product.stock} un.',
+                                      style: context.textTheme.bodySmall?.copyWith(
+                                        color: context.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AppIconButton(
+                                    size: AppIconButtonSize.medium,
+                                    icon: Icons.unarchive_outlined,
+                                    iconColor: context.colorScheme.primary,
+                                    tooltip: 'Restaurar produto',
+                                    onPressed: () => _unarchive(product.id, product.name),
+                                  ),
+                                  const Gap(AppSpacing.space4),
+                                  AppIconButton(
+                                    size: AppIconButtonSize.medium,
+                                    icon: Icons.delete_forever_outlined,
+                                    iconColor: context.colorScheme.error,
+                                    tooltip: 'Excluir permanentemente',
+                                    onPressed: () => _deletePermanently(product.id, product.name),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}

@@ -120,17 +120,17 @@ class _ProductFormPageState extends State<ProductFormPage> {
   Future<void> _delete() async {
     final confirm = await AppDialog.showConfirmation(
       context: context,
-      title: 'Excluir Produto',
-      content: 'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.',
-      confirmLabel: 'Excluir',
+      title: 'Arquivar Produto',
+      content: 'Deseja arquivar este produto? Ele será movido para a lista de Arquivados e o seu histórico continuará salvo.',
+      confirmLabel: 'Arquivar',
       isDestructive: true,
     );
 
     if (confirm == true) {
-      final success = await _viewModel.deleteCurrentProduct();
+      final success = await _viewModel.archiveCurrentProduct();
       if (success && mounted) {
         context.pop(true);
-        AppSnackbar.success(context, 'Produto excluído com sucesso!');
+        AppSnackbar.success(context, 'Produto arquivado com sucesso!');
       }
     }
   }
@@ -151,12 +151,14 @@ class _ProductFormPageState extends State<ProductFormPage> {
         actions: [
           AppIconButton(
             icon: AppIcons.save,
+            tooltip: 'Salvar',
             onPressed: () => _save(),
           ),
           if (_viewModel.isEditing)
             AppIconButton(
-              icon: AppIcons.delete,
+              icon: AppIcons.inventory2,
               iconColor: context.colorScheme.error,
+              tooltip: 'Arquivar produto',
               onPressed: () => _delete(),
             ),
           const Gap(AppSpacing.space8),
@@ -369,7 +371,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
               listenable: Listenable.merge([
                 _viewModel.saveProductCommand,
                 _viewModel.updateProductCommand,
-                _viewModel.deleteProductCommand,
+                _viewModel.archiveProductCommand,
               ]),
               builder: (context, _) {
                 final isLoading = _viewModel.saveProductCommand.isRunning || _viewModel.updateProductCommand.isRunning;
@@ -384,9 +386,9 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     if (_viewModel.isEditing) ...[
                       const Gap(AppSpacing.space16),
                       AppButton.outlined(
-                        label: 'Excluir Produto',
+                        label: 'Arquivar Produto',
                         isFullWidth: true,
-                        isLoading: _viewModel.deleteProductCommand.isRunning,
+                        isLoading: _viewModel.archiveProductCommand.isRunning,
                         onPressed: _delete,
                       ),
                     ],
