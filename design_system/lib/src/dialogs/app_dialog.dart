@@ -33,8 +33,8 @@ class AppDialog {
     Color? confirmColor,
     Color? cancelColor,
     bool isDestructive = false,
-  }) {
-    return show<bool>(
+  }) async {
+    final result = await show<bool>(
       context: context,
       builder: (context) {
         final effectiveConfirmColor = confirmColor ?? (isDestructive ? context.colorScheme.error : null);
@@ -43,20 +43,24 @@ class AppDialog {
           title: Text(title),
           content: Text(content),
           actions: [
-            AppButton.text(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(
-                cancelLabel,
-                style: cancelColor != null
-                    ? context.textTheme.bodyLarge?.copyWith(color: cancelColor, fontWeight: .bold)
+            SizedBox(
+              height: AppSpacing.space40,
+              child: AppButton.text(
+                onPressed: () => Navigator.pop(context, false),
+                label: cancelLabel,
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.space8),
+                textStyle: cancelColor != null
+                    ? context.textTheme.bodyLarge?.copyWith(color: cancelColor, fontWeight: FontWeight.bold)
                     : context.textTheme.bodyLarge,
               ),
             ),
-            AppButton.text(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(
-                confirmLabel,
-                style: effectiveConfirmColor != null
+            SizedBox(
+              height: AppSpacing.space40,
+              child: AppButton.text(
+                onPressed: () => Navigator.pop(context, true),
+                label: confirmLabel,
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.space8),
+                textStyle: effectiveConfirmColor != null
                     ? context.textTheme.bodyLarge?.copyWith(color: effectiveConfirmColor, fontWeight: .bold)
                     : context.textTheme.bodyLarge?.copyWith(color: context.colorScheme.primary, fontWeight: .bold),
               ),
@@ -65,5 +69,11 @@ class AppDialog {
         );
       },
     );
+
+    if (result != null) {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+
+    return result;
   }
 }

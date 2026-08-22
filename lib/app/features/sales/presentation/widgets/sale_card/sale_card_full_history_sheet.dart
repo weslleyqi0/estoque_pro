@@ -55,8 +55,8 @@ class SaleCardFullHistorySheet extends StatelessWidget {
                   'Histórico de Edições - Venda ${sale.saleNumber}',
                   style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                IconButton(
-                  icon: const Icon(AppIcons.close),
+                AppIconButton(
+                  icon: AppIcons.close,
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

@@ -86,11 +86,47 @@ class ProductsRepositoryImpl implements ProductsRepository {
   }
 
   @override
-  Future<void> delete(String id) async {
+  Future<void> archive(String id) async {
     try {
-      await _firebaseDb.delete(id);
+      unawaited(
+        _firebaseDb.update(id, {'isActive': false}).catchError((e) {
+          debugPrint('---> Products: Erro ao arquivar no Firebase em background: $e');
+        }),
+      );
     } catch (e) {
-      debugPrint('---> Products: Erro ao deletar no Firebase: $e');
+      debugPrint('---> Products: Erro ao arquivar no Firebase: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> unarchive(String id) async {
+    try {
+      unawaited(
+        _firebaseDb.update(id, {'isActive': true}).catchError((e) {
+          debugPrint('---> Products: Erro ao desarquivar no Firebase em background: $e');
+        }),
+      );
+    } catch (e) {
+      debugPrint('---> Products: Erro ao desarquivar no Firebase: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deletePermanently(String id) async {
+    try {
+      final updates = {
+        'products/$id': null,
+        'stock_movements/$id': null,
+      };
+      unawaited(
+        _firebaseDb.updateMultiple(updates).catchError((e) {
+          debugPrint('---> Products: Erro ao deletar permanentemente no Firebase em background: $e');
+        }),
+      );
+    } catch (e) {
+      debugPrint('---> Products: Erro ao deletar permanentemente no Firebase: $e');
       rethrow;
     }
   }

@@ -47,8 +47,8 @@ class EditSaleAddProductDialog extends StatelessWidget {
                 'Adicionar Produto',
                 style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
-              IconButton(
-                icon: const Icon(AppIcons.close),
+              AppIconButton(
+                icon: AppIcons.close,
                 onPressed: () => Navigator.pop(context),
               ),
             ],

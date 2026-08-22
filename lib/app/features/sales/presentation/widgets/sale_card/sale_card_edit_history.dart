@@ -43,19 +43,16 @@ class SaleCardEditHistory extends StatelessWidget {
               style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (sale.editHistory.length > 3)
-              TextButton(
-                onPressed: () => SaleCardFullHistorySheet.show(context, sale),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Ver todas',
-                  style: context.textTheme.labelMedium?.copyWith(
-                    color: context.colorScheme.primary,
+              SizedBox(
+                height: AppSpacing.space40,
+                child: AppButton.text(
+                  label: 'Ver todas',
+                  padding: const .symmetric(horizontal: AppSpacing.space8),
+                  textStyle: context.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: context.colorScheme.primary,
                   ),
+                  onPressed: () => SaleCardFullHistorySheet.show(context, sale),
                 ),
               ),
           ],
