@@ -127,12 +127,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
       isDestructive: true,
     );
 
-    if (confirm == true) {
-      final success = await _viewModel.archiveCurrentProduct();
-      if (success && mounted) {
-        context.pop(true);
-        AppSnackbar.success(context, 'Produto arquivado com sucesso!');
-      }
+    if (confirm == true && mounted) {
+      context.pop(true);
+      _viewModel.archiveCurrentProduct();
+      AppSnackbar.success(context, 'Produto arquivado com sucesso!');
     }
   }
 
@@ -145,12 +143,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
       confirmLabel: 'Restaurar',
     );
 
-    if (confirm == true) {
-      final success = await _viewModel.unarchiveCurrentProduct();
-      if (success && mounted) {
-        context.pop(true);
-        AppSnackbar.success(context, 'Produto restaurado com sucesso!');
-      }
+    if (confirm == true && mounted) {
+      context.pop(true);
+      _viewModel.unarchiveCurrentProduct();
+      AppSnackbar.success(context, 'Produto restaurado com sucesso!');
     }
   }
 

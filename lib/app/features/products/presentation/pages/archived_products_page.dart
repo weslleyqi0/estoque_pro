@@ -1,13 +1,13 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
-import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/archived_products_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 class ArchivedProductsPage extends StatefulWidget {
-  final ProductsViewModel viewModel;
+  final ArchivedProductsViewModel viewModel;
 
   const ArchivedProductsPage({
     super.key,
@@ -89,7 +89,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                   initialValue: widget.viewModel.searchQuery,
                   onChanged: widget.viewModel.setSearchQuery,
                 ),
-              if (widget.viewModel.state == ProductsLoadState.loading)
+              if (widget.viewModel.state == ArchivedProductsLoadState.loading)
                 const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
                 )

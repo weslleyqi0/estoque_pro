@@ -20,6 +20,7 @@ import 'package:estoque_pro/app/features/products/presentation/pages/product_for
 import 'package:estoque_pro/app/features/products/presentation/pages/product_history_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/products_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/select_product_page.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/archived_products_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/new_sale_page.dart';
@@ -202,7 +203,7 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.archivedProducts,
         builder: (context, state) => ArchivedProductsPage(
-          viewModel: getIt<ProductsViewModel>(),
+          viewModel: getIt<ArchivedProductsViewModel>(),
         ),
       ),
       GoRoute(

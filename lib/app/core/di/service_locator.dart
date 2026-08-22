@@ -31,6 +31,7 @@ import 'package:estoque_pro/app/features/categories/presentation/viewmodels/cate
 import 'package:estoque_pro/app/features/products/data/repositories/products_repository_impl.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/archived_products_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/data/repositories/users_repository_impl.dart';
@@ -180,6 +181,9 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<ProductsViewModel>(
     () => ProductsViewModel(getIt<ProductsRepository>()),
+  );
+  getIt.registerFactory<ArchivedProductsViewModel>(
+    () => ArchivedProductsViewModel(getIt<ProductsRepository>()),
   );
   getIt.registerFactory<ProductsFormViewModel>(
     () => ProductsFormViewModel(

@@ -88,7 +88,11 @@ class ProductsRepositoryImpl implements ProductsRepository {
   @override
   Future<void> archive(String id) async {
     try {
-      await _firebaseDb.update(id, {'isActive': false});
+      unawaited(
+        _firebaseDb.update(id, {'isActive': false}).catchError((e) {
+          debugPrint('---> Products: Erro ao arquivar no Firebase em background: $e');
+        }),
+      );
     } catch (e) {
       debugPrint('---> Products: Erro ao arquivar no Firebase: $e');
       rethrow;
@@ -98,7 +102,11 @@ class ProductsRepositoryImpl implements ProductsRepository {
   @override
   Future<void> unarchive(String id) async {
     try {
-      await _firebaseDb.update(id, {'isActive': true});
+      unawaited(
+        _firebaseDb.update(id, {'isActive': true}).catchError((e) {
+          debugPrint('---> Products: Erro ao desarquivar no Firebase em background: $e');
+        }),
+      );
     } catch (e) {
       debugPrint('---> Products: Erro ao desarquivar no Firebase: $e');
       rethrow;
@@ -112,7 +120,11 @@ class ProductsRepositoryImpl implements ProductsRepository {
         'products/$id': null,
         'stock_movements/$id': null,
       };
-      await _firebaseDb.updateMultiple(updates);
+      unawaited(
+        _firebaseDb.updateMultiple(updates).catchError((e) {
+          debugPrint('---> Products: Erro ao deletar permanentemente no Firebase em background: $e');
+        }),
+      );
     } catch (e) {
       debugPrint('---> Products: Erro ao deletar permanentemente no Firebase: $e');
       rethrow;
