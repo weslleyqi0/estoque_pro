@@ -121,7 +121,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
     final confirm = await AppDialog.showConfirmation(
       context: context,
       title: 'Arquivar Produto',
-      content: 'Deseja arquivar este produto? Ele será movido para a lista de Arquivados e o seu histórico continuará salvo.',
+      content:
+          'Deseja arquivar este produto? Ele será movido para a lista de Arquivados e o seu histórico continuará salvo.',
       confirmLabel: 'Arquivar',
       isDestructive: true,
     );
@@ -157,7 +158,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
           if (_viewModel.isEditing)
             AppIconButton(
               icon: AppIcons.inventory2,
-              iconColor: context.colorScheme.error,
               tooltip: 'Arquivar produto',
               onPressed: () => _delete(),
             ),

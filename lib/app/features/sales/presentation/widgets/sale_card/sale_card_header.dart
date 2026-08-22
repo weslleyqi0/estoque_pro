@@ -69,9 +69,10 @@ class SaleCardHeader extends StatelessWidget {
             if (_canEditSale) ...[
               const Gap(AppSpacing.space4),
               AppIconButton(
-                size: .medium,
+                size: AppIconButtonSize.large,
                 icon: AppIcons.edit,
                 iconColor: context.colorScheme.primary,
+                visualDensity: VisualDensity.compact,
                 tooltip: 'Editar Venda',
                 onPressed: () => EditSaleBottomSheet.show(
                   context,
@@ -82,9 +83,10 @@ class SaleCardHeader extends StatelessWidget {
             ],
             if (sale.status != SaleStatus.inProgress) ...[
               AppIconButton(
-                size: AppIconButtonSize.medium,
+                size: AppIconButtonSize.large,
                 icon: Icons.receipt_long_rounded,
                 iconColor: context.colorScheme.primary,
+                visualDensity: VisualDensity.compact,
                 tooltip: 'Comprovante de Venda',
                 onPressed: () => DigitalInvoiceSheet.show(context, sale),
               ),

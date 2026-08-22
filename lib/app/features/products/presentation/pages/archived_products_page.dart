@@ -121,7 +121,12 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                           ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.space12),
+                          padding: const EdgeInsets.only(
+                            left: AppSpacing.space12,
+                            top: AppSpacing.space8,
+                            bottom: AppSpacing.space12,
+                            right: AppSpacing.space4,
+                          ),
                           child: Row(
                             children: [
                               AppNetworkImage(imageUrl: product.imgUrl),
@@ -132,6 +137,8 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                                   children: [
                                     Text(
                                       product.name,
+                                      overflow: .ellipsis,
+                                      maxLines: 1,
                                       style: context.textTheme.titleMedium?.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -158,16 +165,17 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   AppIconButton(
-                                    size: AppIconButtonSize.medium,
+                                    size: AppIconButtonSize.large,
                                     icon: Icons.unarchive_outlined,
+                                    visualDensity: VisualDensity.compact,
                                     iconColor: context.colorScheme.primary,
                                     tooltip: 'Restaurar produto',
                                     onPressed: () => _unarchive(product.id, product.name),
                                   ),
-                                  const Gap(AppSpacing.space4),
                                   AppIconButton(
-                                    size: AppIconButtonSize.medium,
+                                    size: AppIconButtonSize.large,
                                     icon: Icons.delete_forever_outlined,
+                                    visualDensity: VisualDensity.compact,
                                     iconColor: context.colorScheme.error,
                                     tooltip: 'Excluir permanentemente',
                                     onPressed: () => _deletePermanently(product.id, product.name),
