@@ -7,6 +7,9 @@ abstract class ProductsRepository {
   Future<void> save(ProductEntity product);
   Future<void> update(ProductEntity product);
   Future<void> delete(String id);
+  Future<void> archive(String id);
+  Future<void> unarchive(String id);
+  Future<void> deletePermanently(String id);
   Future<void> adjustStock(String productId, int quantityDiff, ProductHistoryEntity history);
   Stream<List<ProductHistoryEntity>> watchHistory(String productId, {int limit});
   Future<bool> checkBarcodeExists(String barcode, {String? ignoreId});
