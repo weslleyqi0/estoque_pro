@@ -1,8 +1,10 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 class ArchivedProductsPage extends StatefulWidget {
   final ProductsViewModel viewModel;
@@ -120,69 +122,73 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                             color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: AppSpacing.space12,
-                            top: AppSpacing.space8,
-                            bottom: AppSpacing.space12,
-                            right: AppSpacing.space4,
-                          ),
-                          child: Row(
-                            children: [
-                              AppNetworkImage(imageUrl: product.imgUrl),
-                              const Gap(AppSpacing.space12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                        child: InkWell(
+                          onTap: () => context.push(AppRoutes.productDetails, extra: product),
+                          borderRadius: AppSpacing.borderRadius16,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: AppSpacing.space12,
+                              top: AppSpacing.space8,
+                              bottom: AppSpacing.space12,
+                              right: AppSpacing.space4,
+                            ),
+                            child: Row(
+                              children: [
+                                AppNetworkImage(imageUrl: product.imgUrl),
+                                const Gap(AppSpacing.space12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product.name,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: context.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Gap(2),
+                                      Text(
+                                        CurrencyInputFormatter.formatCurrency(product.price),
+                                        style: context.textTheme.bodyMedium?.copyWith(
+                                          color: context.colorScheme.primary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Gap(2),
+                                      Text(
+                                        'Estoque: ${product.stock} un.',
+                                        style: context.textTheme.bodySmall?.copyWith(
+                                          color: context.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      product.name,
-                                      overflow: .ellipsis,
-                                      maxLines: 1,
-                                      style: context.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    AppIconButton(
+                                      size: AppIconButtonSize.large,
+                                      icon: Icons.unarchive_outlined,
+                                      visualDensity: VisualDensity.compact,
+                                      iconColor: context.colorScheme.primary,
+                                      tooltip: 'Restaurar produto',
+                                      onPressed: () => _unarchive(product.id, product.name),
                                     ),
-                                    const Gap(2),
-                                    Text(
-                                      CurrencyInputFormatter.formatCurrency(product.price),
-                                      style: context.textTheme.bodyMedium?.copyWith(
-                                        color: context.colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const Gap(2),
-                                    Text(
-                                      'Estoque: ${product.stock} un.',
-                                      style: context.textTheme.bodySmall?.copyWith(
-                                        color: context.colorScheme.onSurfaceVariant,
-                                      ),
+                                    AppIconButton(
+                                      size: AppIconButtonSize.large,
+                                      icon: Icons.delete_forever_outlined,
+                                      visualDensity: VisualDensity.compact,
+                                      iconColor: context.colorScheme.error,
+                                      tooltip: 'Excluir permanentemente',
+                                      onPressed: () => _deletePermanently(product.id, product.name),
                                     ),
                                   ],
                                 ),
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AppIconButton(
-                                    size: AppIconButtonSize.large,
-                                    icon: Icons.unarchive_outlined,
-                                    visualDensity: VisualDensity.compact,
-                                    iconColor: context.colorScheme.primary,
-                                    tooltip: 'Restaurar produto',
-                                    onPressed: () => _unarchive(product.id, product.name),
-                                  ),
-                                  AppIconButton(
-                                    size: AppIconButtonSize.large,
-                                    icon: Icons.delete_forever_outlined,
-                                    visualDensity: VisualDensity.compact,
-                                    iconColor: context.colorScheme.error,
-                                    tooltip: 'Excluir permanentemente',
-                                    onPressed: () => _deletePermanently(product.id, product.name),
-                                  ),
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       );

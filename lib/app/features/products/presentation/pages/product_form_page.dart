@@ -117,7 +117,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     }
   }
 
-  Future<void> _delete() async {
+  Future<void> _archive() async {
     final confirm = await AppDialog.showConfirmation(
       context: context,
       title: 'Arquivar Produto',
@@ -132,6 +132,24 @@ class _ProductFormPageState extends State<ProductFormPage> {
       if (success && mounted) {
         context.pop(true);
         AppSnackbar.success(context, 'Produto arquivado com sucesso!');
+      }
+    }
+  }
+
+  Future<void> _unarchive() async {
+    final confirm = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Restaurar Produto',
+      content:
+          'Deseja restaurar este produto? Ele retornará para a lista de produtos ativos.',
+      confirmLabel: 'Restaurar',
+    );
+
+    if (confirm == true) {
+      final success = await _viewModel.unarchiveCurrentProduct();
+      if (success && mounted) {
+        context.pop(true);
+        AppSnackbar.success(context, 'Produto restaurado com sucesso!');
       }
     }
   }
@@ -156,10 +174,15 @@ class _ProductFormPageState extends State<ProductFormPage> {
             onPressed: () => _save(),
           ),
           if (_viewModel.isEditing)
-            AppIconButton(
-              icon: AppIcons.inventory2,
-              tooltip: 'Arquivar produto',
-              onPressed: () => _delete(),
+            ListenableBuilder(
+              listenable: _viewModel,
+              builder: (context, _) {
+                return AppIconButton(
+                  icon: _viewModel.isActive ? AppIcons.inventory2 : Icons.unarchive_outlined,
+                  tooltip: _viewModel.isActive ? 'Arquivar produto' : 'Restaurar produto',
+                  onPressed: () => _viewModel.isActive ? _archive() : _unarchive(),
+                );
+              },
             ),
           const Gap(AppSpacing.space8),
         ],
@@ -369,12 +392,16 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
             ListenableBuilder(
               listenable: Listenable.merge([
+                _viewModel,
                 _viewModel.saveProductCommand,
                 _viewModel.updateProductCommand,
                 _viewModel.archiveProductCommand,
+                _viewModel.unarchiveProductCommand,
               ]),
               builder: (context, _) {
                 final isLoading = _viewModel.saveProductCommand.isRunning || _viewModel.updateProductCommand.isRunning;
+                final isArchiveLoading =
+                    _viewModel.archiveProductCommand.isRunning || _viewModel.unarchiveProductCommand.isRunning;
                 return Column(
                   children: [
                     AppButton.primary(
@@ -386,10 +413,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     if (_viewModel.isEditing) ...[
                       const Gap(AppSpacing.space16),
                       AppButton.outlined(
-                        label: 'Arquivar Produto',
+                        label: _viewModel.isActive ? 'Arquivar Produto' : 'Restaurar Produto',
                         isFullWidth: true,
-                        isLoading: _viewModel.archiveProductCommand.isRunning,
-                        onPressed: _delete,
+                        isLoading: isArchiveLoading,
+                        onPressed: _viewModel.isActive ? _archive : _unarchive,
                       ),
                     ],
                   ],
