@@ -79,12 +79,11 @@ class EditSaleItemCard extends StatelessWidget {
                   child: AppButton.text(
                     onPressed: onSwap,
                     icon: Icons.refresh,
-                    child: Text(
-                      'Trocar Item',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: context.colorScheme.primary,
-                      ),
+                    label: 'Trocar Item',
+                    padding: const .symmetric(horizontal: AppSpacing.space8),
+                    textStyle: context.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: context.colorScheme.primary,
                     ),
                   ),
                 ),

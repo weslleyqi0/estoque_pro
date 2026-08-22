@@ -49,7 +49,7 @@ class AppInfoBanner extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radius24),
+      borderRadius: BorderRadius.circular(AppSpacing.radius16),
       child: Container(
         padding: .only(
           left: AppSpacing.space12,
