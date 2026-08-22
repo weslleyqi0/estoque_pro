@@ -78,8 +78,9 @@ class _ProductsPageState extends State<ProductsPage> {
                         subtitle: 'Exibindo apenas produtos em baixa no estoque',
                         icon: AppIcons.package2,
                         type: AppInfoBannerType.error,
-                        trailing: IconButton(
-                          icon: const Icon(AppIcons.close),
+                        trailing: AppIconButton(
+                          icon: AppIcons.close,
+                          iconColor: AppColors.errorDark,
                           tooltip: 'Exibir todos os produtos',
                           onPressed: widget.viewModel.clearLowStockFilter,
                         ),

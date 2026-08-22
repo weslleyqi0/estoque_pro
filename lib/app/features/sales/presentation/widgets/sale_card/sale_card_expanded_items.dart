@@ -58,13 +58,13 @@ class SaleCardExpandedItems extends StatelessWidget {
             Text(CurrencyInputFormatter.formatCurrency(sale.subtotal), style: context.textTheme.bodySmall),
           ],
         ),
-        if (sale.discountValue > 0)
+        if (sale.calculatedDiscount > 0)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Desconto', style: context.textTheme.bodySmall?.copyWith(color: AppColors.error)),
+              Text(sale.discountLabel, style: context.textTheme.bodySmall?.copyWith(color: AppColors.error)),
               Text(
-                '- ${CurrencyInputFormatter.formatCurrency(sale.discountValue)}',
+                '- ${CurrencyInputFormatter.formatCurrency(sale.calculatedDiscount)}',
                 style: context.textTheme.bodySmall?.copyWith(color: AppColors.error),
               ),
             ],

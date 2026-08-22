@@ -28,6 +28,29 @@ class SaleEntity extends Equatable {
 
   int get totalItems => items.fold(0, (sum, item) => sum + item.quantity);
 
+  bool get isEdited =>
+      editHistory.isNotEmpty ||
+      status == SaleStatus.edited ||
+      status == SaleStatus.corrected ||
+      status == SaleStatus.exchanged ||
+      status == SaleStatus.returned;
+
+  double get calculatedDiscount {
+    if (discountValue <= 0 || subtotal <= 0) return 0.0;
+    if (discountType == DiscountType.percent) {
+      final calculated = subtotal * (discountValue / 100);
+      return calculated > subtotal ? subtotal : calculated;
+    }
+    return discountValue > subtotal ? subtotal : discountValue;
+  }
+
+  String get discountLabel {
+    if (discountValue <= 0 || subtotal <= 0) return 'Desconto';
+    final double pct = discountType == DiscountType.percent ? discountValue : (calculatedDiscount / subtotal) * 100;
+    final pctStr = pct % 1 == 0 ? pct.toInt().toString() : pct.toStringAsFixed(1);
+    return 'Desconto ($pctStr%)';
+  }
+
   const SaleEntity({
     required this.id,
     required this.saleNumber,

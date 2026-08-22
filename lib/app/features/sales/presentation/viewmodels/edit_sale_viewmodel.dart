@@ -1,6 +1,7 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_reason.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
@@ -105,19 +106,30 @@ class EditSaleViewModel extends ChangeNotifier {
   }
 
   void swapItem(SaleItemEntity oldItem, ProductEntity newProduct, int newQuantity) {
-    final index = _draftItems.indexWhere((i) => i.productId == oldItem.productId);
-    final newItem = SaleItemEntity(
-      productId: newProduct.id,
-      productName: newProduct.name,
-      productImgUrl: newProduct.imgUrl,
-      unitPrice: newProduct.price,
-      quantity: newQuantity,
-    );
+    final oldIndex = _draftItems.indexWhere((i) => i.productId == oldItem.productId);
+    final existingIndex = _draftItems.indexWhere((i) => i.productId == newProduct.id);
 
-    if (index >= 0) {
-      _draftItems[index] = newItem;
+    if (existingIndex >= 0 && existingIndex != oldIndex) {
+      final existingItem = _draftItems[existingIndex];
+      _draftItems[existingIndex] = existingItem.copyWith(
+        quantity: existingItem.quantity + newQuantity,
+      );
+      if (oldIndex >= 0) {
+        _draftItems.removeAt(oldIndex);
+      }
     } else {
-      _draftItems.add(newItem);
+      final newItem = SaleItemEntity(
+        productId: newProduct.id,
+        productName: newProduct.name,
+        productImgUrl: newProduct.imgUrl,
+        unitPrice: newProduct.price,
+        quantity: newQuantity,
+      );
+      if (oldIndex >= 0) {
+        _draftItems[oldIndex] = newItem;
+      } else {
+        _draftItems.add(newItem);
+      }
     }
     notifyListeners();
   }
@@ -149,7 +161,10 @@ class EditSaleViewModel extends ChangeNotifier {
 
   double get newTotal {
     if (_originalSale.discountValue > 0) {
-      return (newSubtotal - _originalSale.discountValue).clamp(0.0, double.infinity);
+      final calculatedDiscount = _originalSale.discountType == DiscountType.percent
+          ? newSubtotal * (_originalSale.discountValue / 100)
+          : _originalSale.discountValue;
+      return (newSubtotal - calculatedDiscount).clamp(0.0, double.infinity);
     }
     return newSubtotal;
   }

@@ -24,10 +24,10 @@ class InvoiceFinancialSummary extends StatelessWidget {
           label: 'Subtotal:',
           value: CurrencyInputFormatter.formatCurrency(sale.subtotal),
         ),
-        if (sale.discountValue > 0)
+        if (sale.calculatedDiscount > 0)
           InvoiceInfoRow(
-            label: 'Desconto:',
-            value: '- ${CurrencyInputFormatter.formatCurrency(sale.discountValue)}',
+            label: '${sale.discountLabel}:',
+            value: '- ${CurrencyInputFormatter.formatCurrency(sale.calculatedDiscount)}',
             valueColor: AppColors.error,
             isBold: true,
           ),

@@ -168,8 +168,8 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                     title: const Text('Selecionar cor'),
                     subtitle: Text(_selectedColor == Colors.transparent ? 'Padrão do sistema' : 'Cor personalizada'),
                     trailing: _selectedColor != Colors.transparent
-                        ? IconButton(
-                            icon: const Icon(AppIcons.close),
+                        ? AppIconButton(
+                            icon: AppIcons.close,
                             onPressed: () => setState(() => _selectedColor = Colors.transparent),
                           )
                         : null,

@@ -173,14 +173,8 @@ class SaleCardActions extends StatelessWidget {
                       sale,
                       authViewModel: authViewModel,
                     ),
-                    icon: Icons.edit,
-                    child: Text(
-                      'Editar',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: context.colorScheme.primary,
-                      ),
-                    ),
+                    icon: AppIcons.edit,
+                    label: 'Editar',
                   ),
                 ),
               ],

@@ -18,6 +18,7 @@ import 'package:estoque_pro/app/features/products/presentation/pages/product_det
 import 'package:estoque_pro/app/features/products/presentation/pages/product_form_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/product_history_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/products_page.dart';
+import 'package:estoque_pro/app/features/products/presentation/pages/select_product_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/new_sale_page.dart';
@@ -172,6 +173,29 @@ class AppRouter {
         builder: (context, state) {
           final product = state.extra as ProductEntity;
           return ProductHistoryPage(product: product);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.productSelect,
+        pageBuilder: (context, state) {
+          final title = state.extra as String?;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: SelectProductPage(
+              viewModel: getIt<ProductsViewModel>(),
+              title: title,
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.easeOutCubic;
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+          );
         },
       ),
       GoRoute(

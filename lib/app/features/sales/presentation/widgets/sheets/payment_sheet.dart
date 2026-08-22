@@ -56,7 +56,12 @@ class _PaymentSheetState extends State<PaymentSheet> {
   void initState() {
     super.initState();
     if (widget.cartViewModel.discountValue > 0) {
-      _discountController.text = widget.cartViewModel.discountValue.toStringAsFixed(2);
+      if (widget.cartViewModel.discountType == DiscountType.percent) {
+        final val = widget.cartViewModel.discountValue;
+        _discountController.text = val % 1 == 0 ? val.toInt().toString() : val.toStringAsFixed(1);
+      } else {
+        _discountController.text = CurrencyInputFormatter.formatCurrency(widget.cartViewModel.discountValue);
+      }
     }
   }
 
