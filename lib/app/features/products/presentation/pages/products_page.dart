@@ -3,6 +3,7 @@ import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/products_list_sliver.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 class ProductsPage extends StatefulWidget {
@@ -45,6 +46,29 @@ class _ProductsPageState extends State<ProductsPage> {
       appBar: AppBar(
         title: const Text('Produtos'),
         centerTitle: true,
+        actions: [
+          ListenableBuilder(
+            listenable: widget.viewModel,
+            builder: (context, _) {
+              if (widget.viewModel.archivedProducts.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppIconButton(
+                    size: AppIconButtonSize.medium,
+                    icon: Icons.inventory_2_outlined,
+                    iconColor: context.colorScheme.primary,
+                    tooltip: 'Produtos Arquivados',
+                    onPressed: () => context.push(AppRoutes.archivedProducts),
+                  ),
+                  const Gap(AppSpacing.space8),
+                ],
+              );
+            },
+          ),
+        ],
       ),
       floatingActionButton: AppFloatingActionButton(
         tooltip: 'Adicionar novo produto',

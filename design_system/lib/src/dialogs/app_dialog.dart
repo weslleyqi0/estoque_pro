@@ -33,8 +33,8 @@ class AppDialog {
     Color? confirmColor,
     Color? cancelColor,
     bool isDestructive = false,
-  }) {
-    return show<bool>(
+  }) async {
+    final result = await show<bool>(
       context: context,
       builder: (context) {
         final effectiveConfirmColor = confirmColor ?? (isDestructive ? context.colorScheme.error : null);
@@ -69,5 +69,11 @@ class AppDialog {
         );
       },
     );
+
+    if (result != null) {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+
+    return result;
   }
 }

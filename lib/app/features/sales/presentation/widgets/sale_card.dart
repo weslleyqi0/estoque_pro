@@ -43,7 +43,7 @@ class SaleCard extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const .only(left: AppSpacing.space16, right: AppSpacing.space4, top: AppSpacing.space16),
+              padding: const .only(left: AppSpacing.space16, right: AppSpacing.space8, top: AppSpacing.space16),
               child: SaleCardHeader(sale: sale, authViewModel: authViewModel),
             ),
             Padding(

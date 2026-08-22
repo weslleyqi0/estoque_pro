@@ -13,7 +13,8 @@ class ProductsFormViewModel extends ChangeNotifier {
 
   late final Command1<bool, ProductEntity> saveProductCommand;
   late final Command1<bool, ProductEntity> updateProductCommand;
-  late final Command1<bool, String> deleteProductCommand;
+  late final Command1<bool, String> archiveProductCommand;
+  late final Command1<bool, String> unarchiveProductCommand;
   late final Command1<bool, ({String productId, int quantityDiff, ProductHistoryEntity history})> adjustStockCommand;
 
   ProductEntity? _currentProduct;
@@ -50,7 +51,8 @@ class ProductsFormViewModel extends ChangeNotifier {
   ProductsFormViewModel(this._repository) {
     saveProductCommand = Command1(_saveProduct);
     updateProductCommand = Command1(_updateProduct);
-    deleteProductCommand = Command1(_deleteProduct);
+    archiveProductCommand = Command1(_archiveProduct);
+    unarchiveProductCommand = Command1(_unarchiveProduct);
     adjustStockCommand = Command1(_adjustStock);
   }
 
@@ -97,10 +99,16 @@ class ProductsFormViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteCurrentProduct() async {
+  Future<bool> archiveCurrentProduct() async {
     if (_currentProduct == null) return false;
-    await deleteProductCommand.execute(_currentProduct!.id);
-    return deleteProductCommand.isSuccess;
+    await archiveProductCommand.execute(_currentProduct!.id);
+    return archiveProductCommand.isSuccess;
+  }
+
+  Future<bool> unarchiveCurrentProduct() async {
+    if (_currentProduct == null) return false;
+    await unarchiveProductCommand.execute(_currentProduct!.id);
+    return unarchiveProductCommand.isSuccess;
   }
 
   Future<Result<bool>> _saveProduct(ProductEntity product) async {
@@ -133,9 +141,18 @@ class ProductsFormViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<bool>> _deleteProduct(String id) async {
+  Future<Result<bool>> _archiveProduct(String id) async {
     try {
-      await _repository.delete(id);
+      await _repository.archive(id);
+      return const Success(true);
+    } catch (e) {
+      return Failure(Exception(e.toString()));
+    }
+  }
+
+  Future<Result<bool>> _unarchiveProduct(String id) async {
+    try {
+      await _repository.unarchive(id);
       return const Success(true);
     } catch (e) {
       return Failure(Exception(e.toString()));

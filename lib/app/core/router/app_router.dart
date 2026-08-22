@@ -14,11 +14,13 @@ import 'package:estoque_pro/app/features/categories/presentation/viewmodels/cate
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/presentation/pages/archived_products_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/product_details_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/product_form_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/product_history_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/products_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/select_product_page.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/archived_products_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/new_sale_page.dart';
@@ -197,6 +199,12 @@ class AppRouter {
             },
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.archivedProducts,
+        builder: (context, state) => ArchivedProductsPage(
+          viewModel: getIt<ArchivedProductsViewModel>(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.sales,

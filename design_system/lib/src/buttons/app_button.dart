@@ -140,8 +140,7 @@ class AppButton extends StatelessWidget {
     }
 
     final effectiveTextStyle = textStyle ?? AppTypography.titleMedium;
-    final labelText =
-        child ?? Text(label!, style: effectiveTextStyle, overflow: TextOverflow.clip, softWrap: false);
+    final labelText = child ?? Text(label!, style: effectiveTextStyle, overflow: TextOverflow.clip, softWrap: false);
 
     if (icon == null && suffixIcon == null) {
       return labelText;
@@ -266,6 +265,8 @@ class AppIconButton extends StatelessWidget {
   final Color? backgroundColor;
   final Color? borderColor;
   final String? tooltip;
+  final MaterialTapTargetSize? tapTargetSize;
+  final VisualDensity? visualDensity;
 
   const AppIconButton({
     super.key,
@@ -277,6 +278,8 @@ class AppIconButton extends StatelessWidget {
     this.backgroundColor,
     this.borderColor,
     this.tooltip,
+    this.tapTargetSize,
+    this.visualDensity,
   }) : assert(
          variant != AppButtonVariant.text,
          'AppIconButton does not support text variant',
@@ -291,6 +294,8 @@ class AppIconButton extends StatelessWidget {
     this.backgroundColor,
     this.borderColor,
     this.tooltip,
+    this.tapTargetSize,
+    this.visualDensity,
   }) : variant = AppButtonVariant.primary;
 
   const AppIconButton.secondary({
@@ -302,6 +307,8 @@ class AppIconButton extends StatelessWidget {
     this.backgroundColor,
     this.borderColor,
     this.tooltip,
+    this.tapTargetSize,
+    this.visualDensity,
   }) : variant = AppButtonVariant.secondary;
 
   const AppIconButton.outlined({
@@ -313,6 +320,8 @@ class AppIconButton extends StatelessWidget {
     this.backgroundColor,
     this.borderColor,
     this.tooltip,
+    this.tapTargetSize,
+    this.visualDensity,
   }) : variant = AppButtonVariant.outlined;
 
   double get _iconSize => switch (size) {
@@ -359,6 +368,8 @@ class AppIconButton extends StatelessWidget {
       icon: Icon(icon, size: _iconSize),
       onPressed: onPressed,
       style: IconButton.styleFrom(
+        tapTargetSize: tapTargetSize,
+        visualDensity: visualDensity,
         backgroundColor: effectiveBgColor,
         foregroundColor: effectiveIconColor,
         disabledBackgroundColor: effectiveBgColor != Colors.transparent
