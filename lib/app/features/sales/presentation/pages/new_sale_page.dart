@@ -197,7 +197,7 @@ class _NewSalePageState extends State<NewSalePage> {
             children: [
               Scaffold(
                 appBar: AppBar(
-                  title: const Text('Nova Venda'),
+                  title: Text(widget.initialSale != null ? 'Editar Venda ${widget.initialSale!.saleNumber}' : 'Nova Venda'),
                   centerTitle: true,
                 ),
                 body: CustomScrollView(
@@ -242,7 +242,10 @@ class _NewSalePageState extends State<NewSalePage> {
                 availableProducts: widget.productsViewModel.products,
                 controller: _sheetController,
                 onSaleSuccess: () {
-                  AppSnackbar.success(context, 'Venda realizada com sucesso!');
+                  AppSnackbar.success(
+                    context,
+                    widget.initialSale != null ? 'Venda atualizada com sucesso!' : 'Venda realizada com sucesso!',
+                  );
                   context.pop();
                 },
               ),

@@ -106,19 +106,30 @@ class EditSaleViewModel extends ChangeNotifier {
   }
 
   void swapItem(SaleItemEntity oldItem, ProductEntity newProduct, int newQuantity) {
-    final index = _draftItems.indexWhere((i) => i.productId == oldItem.productId);
-    final newItem = SaleItemEntity(
-      productId: newProduct.id,
-      productName: newProduct.name,
-      productImgUrl: newProduct.imgUrl,
-      unitPrice: newProduct.price,
-      quantity: newQuantity,
-    );
+    final oldIndex = _draftItems.indexWhere((i) => i.productId == oldItem.productId);
+    final existingIndex = _draftItems.indexWhere((i) => i.productId == newProduct.id);
 
-    if (index >= 0) {
-      _draftItems[index] = newItem;
+    if (existingIndex >= 0 && existingIndex != oldIndex) {
+      final existingItem = _draftItems[existingIndex];
+      _draftItems[existingIndex] = existingItem.copyWith(
+        quantity: existingItem.quantity + newQuantity,
+      );
+      if (oldIndex >= 0) {
+        _draftItems.removeAt(oldIndex);
+      }
     } else {
-      _draftItems.add(newItem);
+      final newItem = SaleItemEntity(
+        productId: newProduct.id,
+        productName: newProduct.name,
+        productImgUrl: newProduct.imgUrl,
+        unitPrice: newProduct.price,
+        quantity: newQuantity,
+      );
+      if (oldIndex >= 0) {
+        _draftItems[oldIndex] = newItem;
+      } else {
+        _draftItems.add(newItem);
+      }
     }
     notifyListeners();
   }

@@ -1,17 +1,17 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:go_router/go_router.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_reason.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
-import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/edit_sale_add_product_dialog.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/edit_sale_footer.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/edit_sale_header.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/edit_sale_item_card.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/edit_sale_reason_selector.dart';
-import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/edit_sale_swap_product_dialog.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -175,82 +175,107 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
   }
 
   void _showAddProductDialog(BuildContext context) async {
-    final products = _viewModel.products.isNotEmpty ? _viewModel.products : await _viewModel.loadProducts();
-
-    if (!context.mounted) return;
-
-    EditSaleAddProductDialog.show(
-      context: context,
-      products: products,
-      onSelectProduct: (product) {
-        final currentStock = product.stock;
-        final existingDraftItem = _viewModel.draftItems.firstWhere(
-          (i) => i.productId == product.id,
-          orElse: () => const SaleItemEntity(
-            productId: '',
-            productName: '',
-            productImgUrl: '',
-            unitPrice: 0,
-            quantity: 0,
-          ),
-        );
-        final targetQty = existingDraftItem.quantity + 1;
-        final origItem = widget.sale.items.firstWhere(
-          (i) => i.productId == product.id,
-          orElse: () => const SaleItemEntity(
-            productId: '',
-            productName: '',
-            productImgUrl: '',
-            unitPrice: 0,
-            quantity: 0,
-          ),
-        );
-        final delta = targetQty - origItem.quantity;
-
-        if (delta > currentStock) {
-          _showInsufficientStockToast(product.name, currentStock);
-          return;
-        }
-
-        _viewModel.addItem(product, 1);
-        Navigator.pop(context);
-      },
+    final selectedProduct = await context.push<ProductEntity>(
+      AppRoutes.productSelect,
+      extra: 'Adicionar Produto na Venda',
     );
+
+    if (selectedProduct != null && mounted) {
+      final isAlreadyInDraft = _viewModel.draftItems.any(
+        (i) => i.productId == selectedProduct.id,
+      );
+
+      final currentStock = selectedProduct.stock;
+      final existingDraftItem = _viewModel.draftItems.firstWhere(
+        (i) => i.productId == selectedProduct.id,
+        orElse: () => const SaleItemEntity(
+          productId: '',
+          productName: '',
+          productImgUrl: '',
+          unitPrice: 0,
+          quantity: 0,
+        ),
+      );
+      final targetQty = existingDraftItem.quantity + 1;
+      final origItem = widget.sale.items.firstWhere(
+        (i) => i.productId == selectedProduct.id,
+        orElse: () => const SaleItemEntity(
+          productId: '',
+          productName: '',
+          productImgUrl: '',
+          unitPrice: 0,
+          quantity: 0,
+        ),
+      );
+      final delta = targetQty - origItem.quantity;
+
+      if (delta > currentStock) {
+        _showInsufficientStockToast(selectedProduct.name, currentStock);
+        return;
+      }
+
+      _viewModel.addItem(selectedProduct, 1);
+
+      if (isAlreadyInDraft) {
+        AppToast.info(
+          'O produto "${selectedProduct.name}" já estava na lista. A quantidade foi incrementada.',
+        );
+      }
+    }
   }
 
   void _showSwapProductDialog(BuildContext context, SaleItemEntity item) async {
-    final products = _viewModel.products.isNotEmpty ? _viewModel.products : await _viewModel.loadProducts();
-
-    if (!context.mounted) return;
-
-    EditSaleSwapProductDialog.show(
-      context: context,
-      targetItem: item,
-      products: products,
-      onSwapWithProduct: (product) {
-        final currentStock = product.stock;
-        final targetQty = item.quantity;
-        final origItem = widget.sale.items.firstWhere(
-          (i) => i.productId == product.id,
-          orElse: () => const SaleItemEntity(
-            productId: '',
-            productName: '',
-            productImgUrl: '',
-            unitPrice: 0,
-            quantity: 0,
-          ),
-        );
-        final delta = targetQty - origItem.quantity;
-
-        if (delta > currentStock) {
-          _showInsufficientStockToast(product.name, currentStock);
-          return;
-        }
-
-        _viewModel.swapItem(item, product, item.quantity);
-        Navigator.pop(context);
-      },
+    final selectedProduct = await context.push<ProductEntity>(
+      AppRoutes.productSelect,
+      extra: 'Substituir "${item.productName}"',
     );
+
+    if (selectedProduct != null && mounted) {
+      final isAlreadyInDraft = _viewModel.draftItems.any(
+        (i) => i.productId == selectedProduct.id && i.productId != item.productId,
+      );
+
+      final existingDraftItem = _viewModel.draftItems.firstWhere(
+        (i) => i.productId == selectedProduct.id,
+        orElse: () => const SaleItemEntity(
+          productId: '',
+          productName: '',
+          productImgUrl: '',
+          unitPrice: 0,
+          quantity: 0,
+        ),
+      );
+
+      final targetQty = isAlreadyInDraft
+          ? existingDraftItem.quantity + item.quantity
+          : item.quantity;
+
+      final currentStock = selectedProduct.stock;
+      final origItem = widget.sale.items.firstWhere(
+        (i) => i.productId == selectedProduct.id,
+        orElse: () => const SaleItemEntity(
+          productId: '',
+          productName: '',
+          productImgUrl: '',
+          unitPrice: 0,
+          quantity: 0,
+        ),
+      );
+      final delta = targetQty - origItem.quantity;
+
+      if (delta > currentStock) {
+        _showInsufficientStockToast(selectedProduct.name, currentStock);
+        return;
+      }
+
+      _viewModel.swapItem(item, selectedProduct, item.quantity);
+
+      if (isAlreadyInDraft) {
+        AppToast.info(
+          'O produto "${selectedProduct.name}" já estava na lista. As quantidades foram somadas.',
+        );
+      }
+    }
   }
 
   @override
@@ -311,10 +336,10 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
                             ),
                           ),
                         const Gap(AppSpacing.space8),
-                        OutlinedButton.icon(
+                        AppButton.outlined(
                           onPressed: () => _showAddProductDialog(context),
-                          icon: const Icon(AppIcons.add),
-                          label: const Text('Adicionar Novo Produto'),
+                          icon: AppIcons.add,
+                          label: 'Adicionar Novo Produto',
                         ),
                         const Divider(height: AppSpacing.space24),
                         EditSaleReasonSelector(
