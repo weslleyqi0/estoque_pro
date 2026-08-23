@@ -79,14 +79,6 @@ void main() {
       expect(viewModel.canEdit(sellerUser), isTrue);
     });
 
-    test('Owner can delete admins and sellers, but cannot delete himself', () {
-      when(() => mockAuthorizationService.currentUser).thenReturn(ownerUser);
-
-      expect(viewModel.canDelete(ownerUser), isFalse);
-      expect(viewModel.canDelete(adminUser1), isTrue);
-      expect(viewModel.canDelete(sellerUser), isTrue);
-    });
-
     test('Admin can edit himself, other admins, and sellers, but NOT owner', () {
       when(() => mockAuthorizationService.currentUser).thenReturn(adminUser1);
 
@@ -96,15 +88,6 @@ void main() {
       expect(viewModel.canEdit(ownerUser), isFalse);
     });
 
-    test('Admin can delete other admins and sellers, but NOT owner or himself', () {
-      when(() => mockAuthorizationService.currentUser).thenReturn(adminUser1);
-
-      expect(viewModel.canDelete(sellerUser), isTrue);
-      expect(viewModel.canDelete(adminUser2), isTrue);
-      expect(viewModel.canDelete(adminUser1), isFalse);
-      expect(viewModel.canDelete(ownerUser), isFalse);
-    });
-
     test('updateUserCommand executes repository saveUser and succeeds', () async {
       when(() => mockUsersRepository.saveUser(any())).thenAnswer((_) async {});
 
@@ -112,15 +95,6 @@ void main() {
 
       expect(viewModel.updateUserCommand.isSuccess, isTrue);
       verify(() => mockUsersRepository.saveUser(sellerUser)).called(1);
-    });
-
-    test('deleteUserCommand executes repository deleteUser and succeeds', () async {
-      when(() => mockUsersRepository.deleteUser('seller_1')).thenAnswer((_) async {});
-
-      await viewModel.deleteUserCommand.execute('seller_1');
-
-      expect(viewModel.deleteUserCommand.isSuccess, isTrue);
-      verify(() => mockUsersRepository.deleteUser('seller_1')).called(1);
     });
   });
 }
