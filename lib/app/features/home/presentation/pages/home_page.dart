@@ -39,6 +39,22 @@ class _HomePageState extends State<HomePage> {
     _productsVM.listenAll();
   }
 
+  String get _greetingPeriod {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) {
+      return 'Bom dia';
+    } else if (hour >= 12 && hour < 18) {
+      return 'Boa tarde';
+    } else {
+      return 'Boa noite';
+    }
+  }
+
+  String _userFirstName(String? name) {
+    if (name == null || name.trim().isEmpty) return 'Usuário';
+    return name.trim().split(' ').first;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -54,27 +70,59 @@ class _HomePageState extends State<HomePage> {
           SystemNavigator.pop();
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Home'),
-          actions: [
-            AppIconButton(
-              icon: AppIcons.logout,
-              tooltip: 'Sair',
-              onPressed: () => _authVM.logoutCommand.execute(),
-            ),
-          ],
-        ),
-        body: ListenableBuilder(
-          listenable: Listenable.merge([_authVM, _salesVM, _productsVM]),
-          builder: (context, _) {
-            final currentUser = _authVM.currentUser;
-            final isManager = currentUser?.role == UserRole.owner || currentUser?.role == UserRole.admin;
-            final allInProgressSales = _salesVM.inProgressSales;
-            final lowStockProducts = _productsVM.lowStockProducts;
+      child: ListenableBuilder(
+        listenable: Listenable.merge([_authVM, _salesVM, _productsVM]),
+        builder: (context, _) {
+          final currentUser = _authVM.currentUser;
+          final isManager = currentUser?.role == UserRole.owner || currentUser?.role == UserRole.admin;
+          final allInProgressSales = _salesVM.inProgressSales;
+          final lowStockProducts = _productsVM.lowStockProducts;
 
-            return Column(
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Home'),
+              actions: [
+                AppIconButton(
+                  icon: AppIcons.settings,
+                  tooltip: 'Configurações',
+                  onPressed: () {},
+                ),
+                AppIconButton(
+                  icon: AppIcons.logout,
+                  tooltip: 'Sair',
+                  onPressed: () => _authVM.logoutCommand.execute(),
+                ),
+              ],
+            ),
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.space16,
+                    vertical: AppSpacing.space4,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _greetingPeriod,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colorScheme.onSurface.withValues(alpha: 0.6),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        'Olá, ${_userFirstName(currentUser?.name)} 👋',
+                        style: context.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Gap(AppSpacing.space4),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
                   child: InkWell(
@@ -128,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                const Gap(AppSpacing.space16),
+                const Gap(AppSpacing.space8),
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
@@ -141,7 +189,7 @@ class _HomePageState extends State<HomePage> {
                                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
                                 child: Text('Avisos', style: context.textTheme.titleMedium),
                               ),
-                              const Gap(AppSpacing.space8),
+                              const Gap(AppSpacing.space4),
                               if (allInProgressSales.isNotEmpty) ...[
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
@@ -271,9 +319,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ],
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
