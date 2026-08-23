@@ -40,9 +40,7 @@ class ProductStatusCard extends StatelessWidget {
                   ),
                   child: Icon(
                     AppIcons.powerSettings,
-                    color: product.isActive
-                        ? AppColors.success
-                        : context.colorScheme.onSurface.withValues(alpha: 0.5),
+                    color: product.isActive ? AppColors.success : context.colorScheme.onSurface.withValues(alpha: 0.5),
                     size: AppSpacing.icon32,
                     weight: 900,
                   ),
@@ -51,7 +49,11 @@ class ProductStatusCard extends StatelessWidget {
                 Flexible(
                   child: AppSwitchTitle(
                     title: product.isActive ? 'Produto Ativo' : 'Produto Desativado',
-                    subtitle: product.isActive ? 'Disponível para venda' : 'Indisponível para venda',
+                    subtitle: product.isActive
+                        ? 'Disponível para venda'
+                        : product.isArchived
+                        ? 'Arquivado (indisponível para venda)'
+                        : 'Indisponível para venda',
                     value: product.isActive,
                     onChanged: onStatusChanged,
                   ),

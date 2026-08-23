@@ -16,7 +16,7 @@ class ArchivedProductsViewModel extends ChangeNotifier {
   ArchivedProductsLoadState get state => _state;
 
   List<ProductEntity> _products = [];
-  List<ProductEntity> get archivedProducts => _products.where((p) => !p.isActive).toList();
+  List<ProductEntity> get archivedProducts => _products.where((p) => p.isArchived).toList();
 
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
@@ -75,7 +75,7 @@ class ArchivedProductsViewModel extends ChangeNotifier {
     try {
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: true);
+        _products[index] = _products[index].copyWith(isActive: true, isArchived: false);
         notifyListeners();
       }
       await _repository.unarchive(id);

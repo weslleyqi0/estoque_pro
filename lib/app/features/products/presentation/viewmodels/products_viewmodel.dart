@@ -19,9 +19,9 @@ class ProductsViewModel extends ChangeNotifier {
   List<ProductEntity> _products = [];
   List<ProductEntity> get products => _products;
 
-  List<ProductEntity> get activeProducts => _products.where((p) => p.isActive).toList();
+  List<ProductEntity> get activeProducts => _products.where((p) => !p.isArchived).toList();
 
-  List<ProductEntity> get archivedProducts => _products.where((p) => !p.isActive).toList();
+  List<ProductEntity> get archivedProducts => _products.where((p) => p.isArchived).toList();
 
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
@@ -55,8 +55,7 @@ class ProductsViewModel extends ChangeNotifier {
     final normalized = barcode.normalizedBarcode;
     if (normalized.isEmpty) return null;
     for (final product in _products) {
-      if (product.isActive &&
-          (product.barcode.trim() == barcode.trim() || product.barcode.normalizedBarcode == normalized)) {
+      if (product.barcode.trim() == barcode.trim() || product.barcode.normalizedBarcode == normalized) {
         return product;
       }
     }
@@ -129,7 +128,7 @@ class ProductsViewModel extends ChangeNotifier {
     try {
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: false);
+        _products[index] = _products[index].copyWith(isActive: false, isArchived: true);
         notifyListeners();
       }
       await _repository.archive(id);
@@ -144,7 +143,7 @@ class ProductsViewModel extends ChangeNotifier {
     try {
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: true);
+        _products[index] = _products[index].copyWith(isActive: true, isArchived: false);
         notifyListeners();
       }
       await _repository.unarchive(id);

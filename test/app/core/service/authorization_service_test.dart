@@ -40,6 +40,7 @@ void main() {
     when(() => mockUserRepository.listenUser(any())).thenAnswer((_) => listenUserController.stream);
 
     service = AuthorizationService(mockFirebaseAuth, mockUserRepository);
+    service.init();
   });
 
   tearDown(() {

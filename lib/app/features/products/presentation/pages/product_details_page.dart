@@ -84,6 +84,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
     final updatedProduct = product.copyWith(
       isActive: isActive,
+      isArchived: isActive ? false : product.isArchived,
       updatedAt: DateTime.now(),
     );
 
@@ -106,7 +107,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         await _viewModel.archiveProduct(product.id);
         if (mounted) {
           AppSnackbar.success(context, 'Produto arquivado com sucesso!');
-          context.pop();
         }
       } catch (e) {
         if (mounted) {
@@ -181,9 +181,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 onPressed: () => context.push(AppRoutes.productForm, extra: product),
               ),
               AppIconButton(
-                icon: product.isActive ? AppIcons.inventory2 : Icons.unarchive_outlined,
-                tooltip: product.isActive ? 'Arquivar produto' : 'Restaurar produto',
-                onPressed: () => product.isActive ? _archive() : _unarchive(),
+                icon: product.isArchived ? Icons.unarchive_outlined : AppIcons.inventory2,
+                tooltip: product.isArchived ? 'Restaurar produto' : 'Arquivar produto',
+                onPressed: () => product.isArchived ? _unarchive() : _archive(),
               ),
               const Gap(AppSpacing.space8),
             ],

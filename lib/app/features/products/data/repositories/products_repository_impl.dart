@@ -88,7 +88,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
   @override
   Future<void> archive(String id) async {
     try {
-      await _firebaseDb.update(id, {'isActive': false});
+      await _firebaseDb.update(id, {'isActive': false, 'isArchived': true});
     } catch (e) {
       debugPrint('---> Products: Erro ao arquivar no Firebase: $e');
       rethrow;
@@ -98,7 +98,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
   @override
   Future<void> unarchive(String id) async {
     try {
-      await _firebaseDb.update(id, {'isActive': true});
+      await _firebaseDb.update(id, {'isActive': true, 'isArchived': false});
     } catch (e) {
       debugPrint('---> Products: Erro ao desarquivar no Firebase: $e');
       rethrow;

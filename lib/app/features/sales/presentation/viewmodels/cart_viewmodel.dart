@@ -70,6 +70,7 @@ class CartViewModel extends ChangeNotifier {
   }
 
   bool addProduct(ProductEntity product) {
+    if (!product.isActive) return false;
     final index = _items.indexWhere((item) => item.product.id == product.id);
     if (index >= 0) {
       final current = _items[index];
@@ -87,7 +88,7 @@ class CartViewModel extends ChangeNotifier {
     final index = _items.indexWhere((item) => item.product.id == productId);
     if (index >= 0) {
       final current = _items[index];
-      if (current.quantity >= current.product.stock) return false;
+      if (!current.product.isActive || current.quantity >= current.product.stock) return false;
       _items[index] = current.copyWith(quantity: current.quantity + 1);
       notifyListeners();
       return true;

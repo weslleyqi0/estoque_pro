@@ -14,7 +14,7 @@ class MockDataSnapshot extends Mock implements DataSnapshot {}
 
 void main() {
   late MockFirebaseDatabase mockDb;
-  late MockDatabaseReference mockRef;
+  late MockDatabaseReference mockRoot;
   late MockDatabaseReference mockUsersRef;
   late MockDatabaseReference mockUserUidRef;
   late MockDataSnapshot mockUserSnapshot;
@@ -23,15 +23,17 @@ void main() {
 
   setUp(() {
     mockDb = MockFirebaseDatabase();
-    mockRef = MockDatabaseReference();
+    mockRoot = MockDatabaseReference();
     mockUsersRef = MockDatabaseReference();
     mockUserUidRef = MockDatabaseReference();
     mockUserSnapshot = MockDataSnapshot();
     mockUsersSnapshot = MockDataSnapshot();
 
-    when(() => mockDb.ref()).thenReturn(mockRef);
-    when(() => mockDb.ref(any())).thenReturn(mockUsersRef);
-    when(() => mockRef.child('users')).thenReturn(mockUsersRef);
+    when(() => mockDb.ref()).thenReturn(mockRoot);
+    when(() => mockDb.ref('users')).thenReturn(mockUsersRef);
+    when(() => mockUsersRef.root).thenReturn(mockRoot);
+    when(() => mockRoot.update(any())).thenAnswer((_) async {});
+
     when(() => mockUsersRef.onValue).thenAnswer((_) => const Stream<DatabaseEvent>.empty());
     when(() => mockUsersRef.child(any())).thenReturn(mockUserUidRef);
     when(() => mockUserUidRef.onValue).thenAnswer((_) => const Stream<DatabaseEvent>.empty());
@@ -66,6 +68,7 @@ void main() {
     test('getUser returns null when user does not exist in DB', () async {
       when(() => mockUserUidRef.get()).thenAnswer((_) async => mockUserSnapshot);
       when(() => mockUserSnapshot.exists).thenReturn(false);
+      when(() => mockUserSnapshot.value).thenReturn(null);
 
       final user = await repository.getUser('non_existing_uid');
 
@@ -73,8 +76,6 @@ void main() {
     });
 
     test('saveUser updates user node in DB', () async {
-      when(() => mockUserUidRef.set(any())).thenAnswer((_) async {});
-
       const userToSave = UserEntity(
         uid: 'uid_123',
         name: 'Saved User',
@@ -86,15 +87,21 @@ void main() {
 
       await repository.saveUser(userToSave);
 
-      verify(() => mockUserUidRef.set(any())).called(1);
+      final captured = verify(() => mockRoot.update(captureAny())).captured;
+      final written = captured.first as Map<String, dynamic>;
+      expect(written.containsKey('users/uid_123'), isTrue);
+      expect(written.containsKey('user_roles/uid_123'), isTrue);
+      expect(written.containsKey('user_permissions/uid_123'), isTrue);
     });
 
     test('deleteUser removes user node from DB', () async {
-      when(() => mockUserUidRef.remove()).thenAnswer((_) async {});
-
       await repository.deleteUser('uid_123');
 
-      verify(() => mockUserUidRef.remove()).called(1);
+      final captured = verify(() => mockRoot.update(captureAny())).captured;
+      final written = captured.first as Map<String, dynamic>;
+      expect(written['users/uid_123'], isNull);
+      expect(written['user_roles/uid_123'], isNull);
+      expect(written['user_permissions/uid_123'], isNull);
     });
 
     test('getAllUsers returns list of UserEntity when database contains users', () async {
