@@ -22,7 +22,6 @@ class UserFormViewModel extends ChangeNotifier {
 
   late final Command1<bool, CreateUserData> createUserCommand;
   late final Command1<bool, UserEntity> updateUserCommand;
-  late final Command1<bool, String> deleteUserCommand;
 
   UserEntity? get currentUser => _authorizationService.currentUser;
 
@@ -32,7 +31,6 @@ class UserFormViewModel extends ChangeNotifier {
   ) {
     createUserCommand = Command1(_createUser);
     updateUserCommand = Command1(_updateUser);
-    deleteUserCommand = Command1(_deleteUser);
   }
 
   Future<Result<bool>> _createUser(CreateUserData data) async {
@@ -90,32 +88,12 @@ class UserFormViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Result<bool>> _deleteUser(String uid) async {
-    try {
-      await _usersRepository.deleteUser(uid);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
-  }
-
   bool canEdit(UserEntity targetUser) {
     final current = currentUser;
     if (current == null) return false;
     if (current.role == UserRole.owner) return true;
     if (current.role == UserRole.admin) {
       return targetUser.role != UserRole.owner;
-    }
-    return false;
-  }
-
-  bool canDelete(UserEntity targetUser) {
-    final current = currentUser;
-    if (current == null) return false;
-    if (targetUser.uid == current.uid) return false;
-    if (targetUser.role == UserRole.owner) return false;
-    if (current.role == UserRole.owner || current.role == UserRole.admin) {
-      return true;
     }
     return false;
   }

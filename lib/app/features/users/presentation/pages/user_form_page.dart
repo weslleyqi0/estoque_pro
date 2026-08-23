@@ -84,50 +84,12 @@ class _UserFormPageState extends State<UserFormPage> {
     }
   }
 
-  Future<void> _delete() async {
-    if (_currentUser == null) return;
-
-    final confirmed = await AppDialog.showConfirmation(
-      context: context,
-      title: 'Excluir Funcionário',
-      content:
-          'Tem certeza que deseja remover o usuário "${_currentUser!.name}" do sistema?\nEsta ação não poderá ser desfeita.',
-      confirmLabel: 'Sim, Excluir',
-      cancelLabel: 'Cancelar',
-      isDestructive: true,
-    );
-
-    if (confirmed == true) {
-      await widget.viewModel.deleteUserCommand.execute(_currentUser!.uid);
-
-      if (widget.viewModel.deleteUserCommand.isSuccess && mounted) {
-        AppSnackbar.success(context, 'Funcionário excluído com sucesso.');
-        Navigator.pop(context);
-      } else if (widget.viewModel.deleteUserCommand.isFailure && mounted) {
-        final error = widget.viewModel.deleteUserCommand.error.toString().replaceAll('Exception: ', '');
-        AppSnackbar.error(context, error);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final canDelete = _isEditing && widget.viewModel.canDelete(_currentUser!);
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(_isEditing ? 'Editar Funcionário' : 'Novo Funcionário'),
-        actions: [
-          if (canDelete)
-            AppIconButton(
-              icon: AppIcons.delete,
-              iconColor: context.colorScheme.error,
-              tooltip: 'Excluir funcionário',
-              onPressed: _delete,
-            ),
-          const Gap(AppSpacing.space4),
-        ],
       ),
       body: SafeArea(
         child: Form(
