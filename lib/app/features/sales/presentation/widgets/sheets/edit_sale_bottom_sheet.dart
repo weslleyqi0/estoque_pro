@@ -19,18 +19,22 @@ import 'package:gap/gap.dart';
 class EditSaleBottomSheet extends StatefulWidget {
   final SaleEntity sale;
   final AuthViewModel authViewModel;
+  final EditSaleViewModel Function() viewModelFactory;
 
   const EditSaleBottomSheet({
     super.key,
     required this.sale,
     required this.authViewModel,
+    required this.viewModelFactory,
   });
 
   static Future<void> show(
     BuildContext context,
     SaleEntity sale, {
     required AuthViewModel authViewModel,
+    EditSaleViewModel Function()? viewModelFactory,
   }) {
+    final factory = viewModelFactory ?? () => getIt<EditSaleViewModel>();
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -39,6 +43,7 @@ class EditSaleBottomSheet extends StatefulWidget {
       builder: (_) => EditSaleBottomSheet(
         sale: sale,
         authViewModel: authViewModel,
+        viewModelFactory: factory,
       ),
     );
   }
@@ -55,7 +60,7 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _viewModel = getIt<EditSaleViewModel>()..initWithSale(widget.sale);
+    _viewModel = widget.viewModelFactory()..initWithSale(widget.sale);
     _commentController = TextEditingController(text: _viewModel.comment);
     _loadProducts();
   }

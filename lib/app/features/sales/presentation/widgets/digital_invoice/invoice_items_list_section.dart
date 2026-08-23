@@ -1,5 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -14,6 +15,8 @@ class InvoiceItemsListSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sortedItems = sale.items.sortedByName((item) => item.productName);
+
     return Column(
       crossAxisAlignment: .start,
       children: [
@@ -35,8 +38,8 @@ class InvoiceItemsListSection extends StatelessWidget {
           ],
         ),
         const Gap(AppSpacing.space8),
-        ...List.generate(sale.items.length, (index) {
-          final item = sale.items[index];
+        ...List.generate(sortedItems.length, (index) {
+          final item = sortedItems[index];
           return Padding(
             padding: const .symmetric(vertical: 2),
             child: Row(

@@ -14,6 +14,7 @@ class ProductEntity extends Equatable {
   final int stock;
   final int minStock;
   final bool isActive;
+  final bool isArchived;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -29,6 +30,7 @@ class ProductEntity extends Equatable {
     required this.stock,
     required this.minStock,
     this.isActive = true,
+    this.isArchived = false,
     this.createdAt,
     this.updatedAt,
   });
@@ -45,6 +47,7 @@ class ProductEntity extends Equatable {
     int? stock,
     int? minStock,
     bool? isActive,
+    bool? isArchived,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -60,6 +63,7 @@ class ProductEntity extends Equatable {
       stock: stock ?? this.stock,
       minStock: minStock ?? this.minStock,
       isActive: isActive ?? this.isActive,
+      isArchived: isArchived ?? this.isArchived,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -78,6 +82,7 @@ class ProductEntity extends Equatable {
     stock,
     minStock,
     isActive,
+    isArchived,
     createdAt,
     updatedAt,
   ];

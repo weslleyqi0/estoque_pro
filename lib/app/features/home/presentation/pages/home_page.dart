@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/widgets/home_button.dart';
@@ -12,16 +11,25 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final AuthViewModel authViewModel;
+  final SalesViewModel salesViewModel;
+  final ProductsViewModel productsViewModel;
+
+  const HomePage({
+    super.key,
+    required this.authViewModel,
+    required this.salesViewModel,
+    required this.productsViewModel,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final _authVM = getIt<AuthViewModel>();
-  final _salesVM = getIt<SalesViewModel>();
-  final _productsVM = getIt<ProductsViewModel>();
+  AuthViewModel get _authVM => widget.authViewModel;
+  SalesViewModel get _salesVM => widget.salesViewModel;
+  ProductsViewModel get _productsVM => widget.productsViewModel;
   DateTime? _lastBackPressTime;
 
   @override
@@ -79,10 +87,10 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(AppSpacing.radius24),
                       ),
                       child: Padding(
-                        padding: const .all(AppSpacing.space24),
+                        padding: const EdgeInsets.all(AppSpacing.space24),
                         child: Row(
-                          mainAxisAlignment: .start,
-                          crossAxisAlignment: .center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(
                               padding: const EdgeInsets.all(AppSpacing.space16),
@@ -99,8 +107,8 @@ class _HomePageState extends State<HomePage> {
                             ),
                             const Gap(AppSpacing.space12),
                             Column(
-                              mainAxisAlignment: .center,
-                              crossAxisAlignment: .start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'Nova Venda',
@@ -108,7 +116,9 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 Text(
                                   'Iniciar uma nova venda',
-                                  style: context.textTheme.bodyMedium?.copyWith(color: AppColors.white),
+                                  style: context.textTheme.labelMedium?.copyWith(
+                                    color: AppColors.white.withValues(alpha: 0.7),
+                                  ),
                                 ),
                               ],
                             ),
@@ -118,17 +128,21 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-
-                // Scrollable Banners and Grid
+                const Gap(AppSpacing.space16),
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
                       if (allInProgressSales.isNotEmpty || lowStockProducts.isNotEmpty)
                         SliverToBoxAdapter(
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
+                                child: Text('Avisos', style: context.textTheme.titleMedium),
+                              ),
+                              const Gap(AppSpacing.space8),
                               if (allInProgressSales.isNotEmpty) ...[
-                                const Gap(AppSpacing.space12),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
                                   child: AppInfoBanner(
@@ -144,9 +158,9 @@ class _HomePageState extends State<HomePage> {
                                     },
                                   ),
                                 ),
+                                const Gap(AppSpacing.space12),
                               ],
                               if (lowStockProducts.isNotEmpty) ...[
-                                const Gap(AppSpacing.space12),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
                                   child: AppInfoBanner(
@@ -175,7 +189,7 @@ class _HomePageState extends State<HomePage> {
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             crossAxisSpacing: AppSpacing.space12,
-                            mainAxisSpacing: AppSpacing.space4,
+                            mainAxisSpacing: AppSpacing.space12,
                             childAspectRatio: 1.35,
                           ),
                           delegate: SliverChildListDelegate([
@@ -212,7 +226,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             HomeButton(
                               title: 'Fornecedores',
-                              subTitle: 'Gerenciar paceiros',
+                              subTitle: 'Gerenciar parceiros',
                               color: Colors.cyan,
                               icon: AppIcons.localShipping,
                               onPressed: () => context.push(AppRoutes.suppliers),

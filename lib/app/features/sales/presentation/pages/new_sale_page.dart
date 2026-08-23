@@ -140,6 +140,24 @@ class _NewSalePageState extends State<NewSalePage> {
         return;
       }
 
+      if (matchedProduct.isArchived) {
+        AppSnackbar.warning(
+          context,
+          margin: _snackbarMargin,
+          'O produto "${matchedProduct.name}" está arquivado e não pode ser adicionado à venda.',
+        );
+        return;
+      }
+
+      if (!matchedProduct.isActive) {
+        AppSnackbar.warning(
+          context,
+          margin: _snackbarMargin,
+          'O produto "${matchedProduct.name}" está desativado e não pode ser adicionado à venda.',
+        );
+        return;
+      }
+
       final previousQty = cartViewModel.getQuantityInCart(matchedProduct.id);
       final added = cartViewModel.addProduct(matchedProduct);
       if (added) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
@@ -16,7 +17,7 @@ class ArchivedProductsViewModel extends ChangeNotifier {
   ArchivedProductsLoadState get state => _state;
 
   List<ProductEntity> _products = [];
-  List<ProductEntity> get archivedProducts => _products.where((p) => !p.isActive).toList();
+  List<ProductEntity> get archivedProducts => _products.where((p) => p.isArchived).toList();
 
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
@@ -59,7 +60,7 @@ class ArchivedProductsViewModel extends ChangeNotifier {
     _subscription?.cancel();
     _subscription = _repository.watchAll().listen(
       (list) {
-        _products = list..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        _products = list.sortByName((a) => a.name);
         _state = ArchivedProductsLoadState.success;
         notifyListeners();
       },
@@ -75,7 +76,7 @@ class ArchivedProductsViewModel extends ChangeNotifier {
     try {
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: true);
+        _products[index] = _products[index].copyWith(isActive: false, isArchived: false);
         notifyListeners();
       }
       await _repository.unarchive(id);

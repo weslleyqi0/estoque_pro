@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -21,7 +22,7 @@ class CartViewModel extends ChangeNotifier {
   final DateTime _createdAt = DateTime.now();
 
   final List<CartItem> _items = [];
-  List<CartItem> get items => _items;
+  List<CartItem> get items => _items.sortedByName((item) => item.product.name);
 
   String _saleNumber = '';
   String get saleNumber => _saleNumber;
@@ -70,6 +71,7 @@ class CartViewModel extends ChangeNotifier {
   }
 
   bool addProduct(ProductEntity product) {
+    if (!product.isActive) return false;
     final index = _items.indexWhere((item) => item.product.id == product.id);
     if (index >= 0) {
       final current = _items[index];
@@ -87,7 +89,7 @@ class CartViewModel extends ChangeNotifier {
     final index = _items.indexWhere((item) => item.product.id == productId);
     if (index >= 0) {
       final current = _items[index];
-      if (current.quantity >= current.product.stock) return false;
+      if (!current.product.isActive || current.quantity >= current.product.stock) return false;
       _items[index] = current.copyWith(quantity: current.quantity + 1);
       notifyListeners();
       return true;

@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:flutter/foundation.dart';
 
@@ -19,9 +21,9 @@ class ProductsViewModel extends ChangeNotifier {
   List<ProductEntity> _products = [];
   List<ProductEntity> get products => _products;
 
-  List<ProductEntity> get activeProducts => _products.where((p) => p.isActive).toList();
+  List<ProductEntity> get activeProducts => _products.where((p) => !p.isArchived).toList();
 
-  List<ProductEntity> get archivedProducts => _products.where((p) => !p.isActive).toList();
+  List<ProductEntity> get archivedProducts => _products.where((p) => p.isArchived).toList();
 
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
@@ -55,8 +57,7 @@ class ProductsViewModel extends ChangeNotifier {
     final normalized = barcode.normalizedBarcode;
     if (normalized.isEmpty) return null;
     for (final product in _products) {
-      if (product.isActive &&
-          (product.barcode.trim() == barcode.trim() || product.barcode.normalizedBarcode == normalized)) {
+      if (product.barcode.trim() == barcode.trim() || product.barcode.normalizedBarcode == normalized) {
         return product;
       }
     }
@@ -113,7 +114,7 @@ class ProductsViewModel extends ChangeNotifier {
     _subscription?.cancel();
     _subscription = _repository.watchAll().listen(
       (list) {
-        _products = list..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        _products = list.sortByName((a) => a.name);
         _state = ProductsLoadState.success;
         notifyListeners();
       },
@@ -129,7 +130,7 @@ class ProductsViewModel extends ChangeNotifier {
     try {
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: false);
+        _products[index] = _products[index].copyWith(isActive: false, isArchived: true);
         notifyListeners();
       }
       await _repository.archive(id);
@@ -144,7 +145,7 @@ class ProductsViewModel extends ChangeNotifier {
     try {
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: true);
+        _products[index] = _products[index].copyWith(isActive: false, isArchived: false);
         notifyListeners();
       }
       await _repository.unarchive(id);
@@ -165,6 +166,10 @@ class ProductsViewModel extends ChangeNotifier {
       notifyListeners();
       rethrow;
     }
+  }
+
+  Stream<List<ProductHistoryEntity>> watchProductHistory(String productId, {int limit = 100}) {
+    return _repository.watchHistory(productId, limit: limit);
   }
 
   @override

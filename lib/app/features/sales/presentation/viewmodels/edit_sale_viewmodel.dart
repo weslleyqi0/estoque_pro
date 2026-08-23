@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
@@ -28,7 +29,7 @@ class EditSaleViewModel extends ChangeNotifier {
   List<ProductEntity> get products => List.unmodifiable(_products);
 
   final List<SaleItemEntity> _draftItems = [];
-  List<SaleItemEntity> get draftItems => List.unmodifiable(_draftItems);
+  List<SaleItemEntity> get draftItems => _draftItems.sortedByName((item) => item.productName);
 
   SaleEditReason _selectedReason = SaleEditReason.addition;
   SaleEditReason get selectedReason => _selectedReason;

@@ -21,6 +21,8 @@ import 'package:estoque_pro/app/features/products/presentation/pages/product_his
 import 'package:estoque_pro/app/features/products/presentation/pages/products_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/select_product_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/archived_products_viewmodel.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/product_history_viewmodel.dart';
+import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/new_sale_page.dart';
@@ -48,9 +50,7 @@ class AppRouter {
   static final _routeGuard = RouteGuard(
     routePermissions: {
       AppRoutes.productHistory: UserPermission.viewHistory,
-      AppRoutes.suppliers: UserPermission.manageSuppliers,
       AppRoutes.supplierForm: UserPermission.manageSuppliers,
-      AppRoutes.categories: UserPermission.manageCategories,
       AppRoutes.categoryForm: UserPermission.manageCategories,
     },
   );
@@ -79,11 +79,19 @@ class AppRouter {
         return isInactivePage ? null : AppRoutes.inactive;
       }
 
-      if (!isBiometricAuth) {
-        return isBiometricPage ? null : AppRoutes.biometric;
+      if (isLoginPage) {
+        return isBiometricAuth ? AppRoutes.home : AppRoutes.biometric;
       }
 
-      if (isLoginPage || isBiometricPage || (isInactivePage && currentUser?.isActive == true)) {
+      if (isInactivePage) {
+        return AppRoutes.home;
+      }
+
+      if (!isBiometricAuth && !isBiometricPage) {
+        return AppRoutes.biometric;
+      }
+
+      if (isBiometricAuth && isBiometricPage) {
         return AppRoutes.home;
       }
 
@@ -104,7 +112,11 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const HomePage(),
+        builder: (context, state) => HomePage(
+          authViewModel: getIt<AuthViewModel>(),
+          salesViewModel: getIt<SalesViewModel>(),
+          productsViewModel: getIt<ProductsViewModel>(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.users,
@@ -114,6 +126,7 @@ class AppRouter {
         path: AppRoutes.suppliers,
         builder: (context, state) => SuppliersPage(
           viewModelFactory: () => getIt<SuppliersViewModel>(),
+          authViewModel: getIt<AuthViewModel>(),
         ),
       ),
       GoRoute(
@@ -130,6 +143,7 @@ class AppRouter {
         path: AppRoutes.categories,
         builder: (context, state) => CategoriesPage(
           viewModelFactory: () => getIt<CategoriesViewModel>(),
+          authViewModel: getIt<AuthViewModel>(),
         ),
       ),
       GoRoute(
@@ -156,7 +170,13 @@ class AppRouter {
         path: AppRoutes.productForm,
         builder: (context, state) {
           final product = state.extra as ProductEntity?;
-          return ProductFormPage(product: product);
+          return ProductFormPage(
+            product: product,
+            viewModel: getIt<ProductsFormViewModel>(),
+            categoriesVM: getIt<CategoriesViewModel>(),
+            suppliersVM: getIt<SuppliersViewModel>(),
+            authViewModel: getIt<AuthViewModel>(),
+          );
         },
       ),
       GoRoute(
@@ -165,7 +185,12 @@ class AppRouter {
           final product = (state.extra as ProductEntity?) ?? _lastSelectedProduct;
           if (product != null) {
             _lastSelectedProduct = product;
-            return ProductDetailsPage(product: product);
+            return ProductDetailsPage(
+              product: product,
+              viewModel: getIt<ProductsViewModel>(),
+              formViewModel: getIt<ProductsFormViewModel>(),
+              authViewModel: getIt<AuthViewModel>(),
+            );
           }
           return ProductsPage(viewModel: getIt<ProductsViewModel>());
         },
@@ -174,7 +199,10 @@ class AppRouter {
         path: AppRoutes.productHistory,
         builder: (context, state) {
           final product = state.extra as ProductEntity;
-          return ProductHistoryPage(product: product);
+          return ProductHistoryPage(
+            product: product,
+            viewModelFactory: () => getIt<ProductHistoryViewModel>(),
+          );
         },
       ),
       GoRoute(
@@ -203,7 +231,8 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.archivedProducts,
         builder: (context, state) => ArchivedProductsPage(
-          viewModel: getIt<ArchivedProductsViewModel>(),
+          viewModelFactory: () => getIt<ArchivedProductsViewModel>(),
+          authViewModel: getIt<AuthViewModel>(),
         ),
       ),
       GoRoute(

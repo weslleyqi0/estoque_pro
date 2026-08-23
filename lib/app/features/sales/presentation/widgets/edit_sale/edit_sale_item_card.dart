@@ -38,13 +38,13 @@ class EditSaleItemCard extends StatelessWidget {
                     children: [
                       Text(
                         item.productName,
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          fontWeight: .bold,
                         ),
                       ),
                       Text(
                         'Unitário: ${CurrencyInputFormatter.formatCurrency(item.unitPrice)}',
-                        style: context.textTheme.bodySmall?.copyWith(
+                        style: context.textTheme.labelLarge?.copyWith(
                           color: context.colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -81,7 +81,7 @@ class EditSaleItemCard extends StatelessWidget {
                     icon: Icons.refresh,
                     label: 'Trocar Item',
                     padding: const .symmetric(horizontal: AppSpacing.space8),
-                    textStyle: context.textTheme.titleSmall?.copyWith(
+                    textStyle: context.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: context.colorScheme.primary,
                     ),

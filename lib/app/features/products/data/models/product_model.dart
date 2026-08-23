@@ -16,6 +16,7 @@ class ProductModel {
   final int stock;
   final int minStock;
   final bool isActive;
+  final bool isArchived;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -31,6 +32,7 @@ class ProductModel {
     required this.stock,
     required this.minStock,
     this.isActive = true,
+    this.isArchived = false,
     this.createdAt,
     this.updatedAt,
   });
@@ -42,18 +44,18 @@ class ProductModel {
       imgUrl: map['imgUrl'] as String? ?? '',
       description: map['description'] as String? ?? '',
       barcode: map['barcode'] as String? ?? '',
-      categories:
-          (map['categories'] as List<dynamic>?)
-              ?.map((e) => ProductCategoryModel.fromMap(Map<dynamic, dynamic>.from(e as Map)))
-              .toList() ??
-          [],
+      categories: (map['categories'] as List<dynamic>? ?? [])
+          .where((e) => e != null)
+          .map((e) => ProductCategoryModel.fromMap(Map<dynamic, dynamic>.from(e as Map)))
+          .toList(),
       supplier: map['supplier'] != null
           ? ProductSupplierModel.fromMap(Map<dynamic, dynamic>.from(map['supplier'] as Map))
           : null,
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
-      stock: map['stock'] as int? ?? 0,
-      minStock: map['minStock'] as int? ?? 0,
+      stock: (map['stock'] as num?)?.toInt() ?? 0,
+      minStock: (map['minStock'] as num?)?.toInt() ?? 0,
       isActive: map['isActive'] as bool? ?? true,
+      isArchived: map['isArchived'] as bool? ?? false,
       createdAt: DateParser.parse(map['createdAt']),
       updatedAt: DateParser.parse(map['updatedAt']),
     );
@@ -71,6 +73,7 @@ class ProductModel {
       'stock': stock,
       'minStock': minStock,
       'isActive': isActive,
+      'isArchived': isArchived,
       if (updatedAt != null) 'updatedAt': ServerValue.timestamp,
     };
   }
@@ -88,6 +91,7 @@ class ProductModel {
       stock: stock,
       minStock: minStock,
       isActive: isActive,
+      isArchived: isArchived,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -106,6 +110,7 @@ class ProductModel {
       stock: entity.stock,
       minStock: entity.minStock,
       isActive: entity.isActive,
+      isArchived: entity.isArchived,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );

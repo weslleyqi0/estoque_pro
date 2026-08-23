@@ -36,12 +36,22 @@ class UsersRepositoryImpl implements UsersRepository {
   @override
   Future<void> saveUser(UserEntity user) async {
     final model = UserModel.fromEntity(user);
-    await _usersDatabase.update(user.uid, model.toMap()).timeout(const Duration(seconds: 4));
+    final updates = <String, dynamic>{
+      'users/${user.uid}': model.toMap(),
+      'user_roles/${user.uid}': user.role.value,
+      'user_permissions/${user.uid}': model.permissions,
+    };
+    await _usersDatabase.updateMultiple(updates).timeout(const Duration(seconds: 4));
   }
 
   @override
   Future<void> deleteUser(String uid) async {
-    await _usersDatabase.delete(uid).timeout(const Duration(seconds: 4));
+    final updates = <String, dynamic>{
+      'users/$uid': null,
+      'user_roles/$uid': null,
+      'user_permissions/$uid': null,
+    };
+    await _usersDatabase.updateMultiple(updates).timeout(const Duration(seconds: 4));
   }
 
   @override

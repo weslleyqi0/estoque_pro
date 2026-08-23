@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/categories/data/models/category_model.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
@@ -30,7 +31,7 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
               }
             }
           }
-          return entities..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          return entities.sortByName((a) => a.name);
         })
         .handleError((e) {
           debugPrint('---> Categories: Erro no listener Firebase: $e');

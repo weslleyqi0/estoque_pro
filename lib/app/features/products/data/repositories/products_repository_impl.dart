@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_history_model.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_model.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -33,7 +34,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
               }
             }
           }
-          return entities..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          return entities.sortByName((a) => a.name);
         })
         .handleError((e) {
           debugPrint('---> Products: Erro no listener Firebase: $e');
@@ -88,11 +89,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
   @override
   Future<void> archive(String id) async {
     try {
-      unawaited(
-        _firebaseDb.update(id, {'isActive': false}).catchError((e) {
-          debugPrint('---> Products: Erro ao arquivar no Firebase em background: $e');
-        }),
-      );
+      await _firebaseDb.update(id, {'isActive': false, 'isArchived': true});
     } catch (e) {
       debugPrint('---> Products: Erro ao arquivar no Firebase: $e');
       rethrow;
@@ -102,11 +99,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
   @override
   Future<void> unarchive(String id) async {
     try {
-      unawaited(
-        _firebaseDb.update(id, {'isActive': true}).catchError((e) {
-          debugPrint('---> Products: Erro ao desarquivar no Firebase em background: $e');
-        }),
-      );
+      await _firebaseDb.update(id, {'isActive': false, 'isArchived': false});
     } catch (e) {
       debugPrint('---> Products: Erro ao desarquivar no Firebase: $e');
       rethrow;
@@ -120,11 +113,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
         'products/$id': null,
         'stock_movements/$id': null,
       };
-      unawaited(
-        _firebaseDb.updateMultiple(updates).catchError((e) {
-          debugPrint('---> Products: Erro ao deletar permanentemente no Firebase em background: $e');
-        }),
-      );
+      await _firebaseDb.updateMultiple(updates);
     } catch (e) {
       debugPrint('---> Products: Erro ao deletar permanentemente no Firebase: $e');
       rethrow;
@@ -187,9 +176,14 @@ class ProductsRepositoryImpl implements ProductsRepository {
 
   @override
   Future<bool> checkBarcodeExists(String barcode, {String? ignoreId}) async {
-    if (barcode.isEmpty) return false;
+    final trimmed = barcode.trim();
+    if (trimmed.isEmpty) return false;
     try {
-      final snapshot = await _firebaseDb.ref.orderByChild('barcode').equalTo(barcode).get();
+      final snapshot = await _firebaseDb.ref
+          .orderByChild('barcode')
+          .equalTo(trimmed)
+          .get()
+          .timeout(const Duration(milliseconds: 800));
       if (!snapshot.exists) return false;
 
       final data = snapshot.value as Map;

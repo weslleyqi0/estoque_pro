@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
@@ -89,7 +90,7 @@ class SuppliersViewModel extends ChangeNotifier {
     _suppliersSubscription?.cancel();
     _suppliersSubscription = _repository.watchAll().listen(
       (list) {
-        _suppliers = list..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        _suppliers = list.sortByName((a) => a.name);
         _state = SuppliersLoadState.success;
         _loadProductCounts();
         notifyListeners();

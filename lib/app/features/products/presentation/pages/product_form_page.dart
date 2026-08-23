@@ -1,25 +1,34 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/categories_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/supplier_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_viewmodel.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 class ProductFormPage extends StatefulWidget {
   final ProductEntity? product;
+  final ProductsFormViewModel viewModel;
+  final CategoriesViewModel categoriesVM;
+  final SuppliersViewModel suppliersVM;
+  final AuthViewModel authViewModel;
 
   const ProductFormPage({
     super.key,
     this.product,
+    required this.viewModel,
+    required this.categoriesVM,
+    required this.suppliersVM,
+    required this.authViewModel,
   });
 
   @override
@@ -27,9 +36,10 @@ class ProductFormPage extends StatefulWidget {
 }
 
 class _ProductFormPageState extends State<ProductFormPage> {
-  final _viewModel = getIt<ProductsFormViewModel>();
-  final _categoriesVM = getIt<CategoriesViewModel>();
-  final _suppliersVM = getIt<SuppliersViewModel>();
+  ProductsFormViewModel get _viewModel => widget.viewModel;
+  CategoriesViewModel get _categoriesVM => widget.categoriesVM;
+  SuppliersViewModel get _suppliersVM => widget.suppliersVM;
+  AuthViewModel get _authViewModel => widget.authViewModel;
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
@@ -52,15 +62,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
   }
 
   void _loadDependencies() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_categoriesVM.state == CategoriesLoadState.idle) {
-        _categoriesVM.listenAll();
-      }
-
-      if (_suppliersVM.state == SuppliersLoadState.idle) {
-        _suppliersVM.listenAll();
-      }
-    });
+    _categoriesVM.listenAll();
+    _suppliersVM.listenAll();
   }
 
   void _setToForm() {
@@ -117,38 +120,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
     }
   }
 
-  Future<void> _archive() async {
-    final confirm = await AppDialog.showConfirmation(
-      context: context,
-      title: 'Arquivar Produto',
-      content:
-          'Deseja arquivar este produto? Ele será movido para a lista de Arquivados e o seu histórico continuará salvo.',
-      confirmLabel: 'Arquivar',
-      isDestructive: true,
-    );
-
-    if (confirm == true && mounted) {
-      context.pop(true);
-      _viewModel.archiveCurrentProduct();
-      AppSnackbar.success(context, 'Produto arquivado com sucesso!');
-    }
-  }
-
-  Future<void> _unarchive() async {
-    final confirm = await AppDialog.showConfirmation(
-      context: context,
-      title: 'Restaurar Produto',
-      content:
-          'Deseja restaurar este produto? Ele retornará para a lista de produtos ativos.',
-      confirmLabel: 'Restaurar',
-    );
-
-    if (confirm == true && mounted) {
-      context.pop(true);
-      _viewModel.unarchiveCurrentProduct();
-      AppSnackbar.success(context, 'Produto restaurado com sucesso!');
-    }
-  }
 
   Future<void> _scanBarcode() async {
     final scannedCode = await context.push<String>(AppRoutes.saleScanner);
@@ -169,17 +140,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
             tooltip: 'Salvar',
             onPressed: () => _save(),
           ),
-          if (_viewModel.isEditing)
-            ListenableBuilder(
-              listenable: _viewModel,
-              builder: (context, _) {
-                return AppIconButton(
-                  icon: _viewModel.isActive ? AppIcons.inventory2 : Icons.unarchive_outlined,
-                  tooltip: _viewModel.isActive ? 'Arquivar produto' : 'Restaurar produto',
-                  onPressed: () => _viewModel.isActive ? _archive() : _unarchive(),
-                );
-              },
-            ),
           const Gap(AppSpacing.space8),
         ],
       ),
@@ -350,10 +310,13 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   ),
                   trailing: const Icon(AppIcons.chevronRight),
                   onTap: () {
+                    final canManageCategories =
+                        _authViewModel.currentUser?.hasPermission(UserPermission.manageCategories) ?? false;
                     CategoriesBottomSheet.show(
                       context: context,
                       categoriesVM: _categoriesVM,
                       initialSelectedCategories: categories,
+                      canManageCategories: canManageCategories,
                       onCategoriesChanged: (newCategories) {
                         _viewModel.setCategories(newCategories);
                       },
@@ -373,9 +336,12 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   subtitle: Text(supplier?.name ?? 'Nenhum selecionado'),
                   trailing: const Icon(AppIcons.chevronRight),
                   onTap: () {
+                    final canManageSuppliers =
+                        _authViewModel.currentUser?.hasPermission(UserPermission.manageSuppliers) ?? false;
                     SupplierBottomSheet.show(
                       context: context,
                       suppliersVM: _suppliersVM,
+                      canManageSuppliers: canManageSuppliers,
                       onSupplierSelected: (sup) {
                         _viewModel.setSupplier(sup);
                       },
@@ -391,31 +357,14 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 _viewModel,
                 _viewModel.saveProductCommand,
                 _viewModel.updateProductCommand,
-                _viewModel.archiveProductCommand,
-                _viewModel.unarchiveProductCommand,
               ]),
               builder: (context, _) {
                 final isLoading = _viewModel.saveProductCommand.isRunning || _viewModel.updateProductCommand.isRunning;
-                final isArchiveLoading =
-                    _viewModel.archiveProductCommand.isRunning || _viewModel.unarchiveProductCommand.isRunning;
-                return Column(
-                  children: [
-                    AppButton.primary(
-                      label: _viewModel.isEditing ? 'Salvar Alterações' : 'Salvar Produto',
-                      isFullWidth: true,
-                      isLoading: isLoading,
-                      onPressed: _save,
-                    ),
-                    if (_viewModel.isEditing) ...[
-                      const Gap(AppSpacing.space16),
-                      AppButton.outlined(
-                        label: _viewModel.isActive ? 'Arquivar Produto' : 'Restaurar Produto',
-                        isFullWidth: true,
-                        isLoading: isArchiveLoading,
-                        onPressed: _viewModel.isActive ? _archive : _unarchive,
-                      ),
-                    ],
-                  ],
+                return AppButton.primary(
+                  label: _viewModel.isEditing ? 'Salvar Alterações' : 'Salvar Produto',
+                  isFullWidth: true,
+                  isLoading: isLoading,
+                  onPressed: _save,
                 );
               },
             ),

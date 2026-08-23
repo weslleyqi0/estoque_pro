@@ -1,10 +1,8 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/products/presentation/extensions/product_stock_ui_extension.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
@@ -21,10 +19,16 @@ import 'package:go_router/go_router.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
+  final ProductsViewModel viewModel;
+  final ProductsFormViewModel formViewModel;
+  final AuthViewModel authViewModel;
 
   const ProductDetailsPage({
     super.key,
     required this.product,
+    required this.viewModel,
+    required this.formViewModel,
+    required this.authViewModel,
   });
 
   @override
@@ -32,9 +36,9 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  final _viewModel = getIt<ProductsViewModel>();
-  final _formViewModel = getIt<ProductsFormViewModel>();
-  final _authViewModel = getIt<AuthViewModel>();
+  ProductsViewModel get _viewModel => widget.viewModel;
+  ProductsFormViewModel get _formViewModel => widget.formViewModel;
+  AuthViewModel get _authViewModel => widget.authViewModel;
 
   @override
   void initState() {
@@ -77,6 +81,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   Future<void> _adjustStatus(bool isActive) async {
     final product = _currentProduct;
+    if (product.isArchived && isActive) {
+      AppSnackbar.warning(context, 'Não é possível ativar um produto arquivado. Restaure-o primeiro.');
+      return;
+    }
+
     if (product.stock == 0 && isActive) {
       AppSnackbar.warning(context, 'Não é possível ativar um produto sem estoque.');
       return;
@@ -84,10 +93,59 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
     final updatedProduct = product.copyWith(
       isActive: isActive,
+      isArchived: product.isArchived,
       updatedAt: DateTime.now(),
     );
 
     await _formViewModel.updateProductCommand.execute(updatedProduct);
+  }
+
+  Future<void> _archive() async {
+    final product = _currentProduct;
+    final confirm = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Arquivar Produto',
+      content:
+          'Deseja arquivar este produto? Ele será movido para a lista de Arquivados e o seu histórico continuará salvo.',
+      confirmLabel: 'Arquivar',
+      isDestructive: true,
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        await _viewModel.archiveProduct(product.id);
+        if (mounted) {
+          AppSnackbar.success(context, 'Produto arquivado com sucesso!');
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackbar.error(context, 'Erro ao arquivar produto: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> _unarchive() async {
+    final product = _currentProduct;
+    final confirm = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Restaurar Produto',
+      content: 'Deseja restaurar este produto? Ele retornará para a lista de produtos como desativado.',
+      confirmLabel: 'Restaurar',
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        await _viewModel.unarchiveProduct(product.id);
+        if (mounted) {
+          AppSnackbar.success(context, 'Produto restaurado! Ele permanece desativado até ser ativado.');
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackbar.error(context, 'Erro ao restaurar produto: $e');
+        }
+      }
+    }
   }
 
   @override
@@ -99,6 +157,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         final rawProgress = product.rawStockProgress;
         final currentUser = _authViewModel.currentUser;
         final canViewHistory = currentUser?.hasPermission(UserPermission.viewHistory) ?? false;
+        final canEditProducts = currentUser?.hasPermission(UserPermission.editProducts) ?? false;
+        final canManageStock = currentUser?.hasPermission(UserPermission.manageStock) ?? false;
 
         final Color statusColor;
         final IconData statusIcon;
@@ -126,14 +186,16 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           appBar: AppBar(
             title: const Text('Detalhes do Produto'),
             actions: [
+              if (canEditProducts)
+                AppIconButton(
+                  icon: AppIcons.edit,
+                  tooltip: 'Editar produto',
+                  onPressed: () => context.push(AppRoutes.productForm, extra: product),
+                ),
               AppIconButton(
-                icon: AppIcons.edit,
-                onPressed: () async {
-                  final deleted = await context.push<bool>(AppRoutes.productForm, extra: product);
-                  if (deleted == true && context.mounted) {
-                    context.pop();
-                  }
-                },
+                icon: product.isArchived ? Icons.unarchive_outlined : AppIcons.inventory2,
+                tooltip: product.isArchived ? 'Restaurar produto' : 'Arquivar produto',
+                onPressed: () => product.isArchived ? _unarchive() : _archive(),
               ),
               const Gap(AppSpacing.space8),
             ],
@@ -154,7 +216,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 statusText: statusText,
                 statusColor: statusColor,
                 statusIcon: statusIcon,
-                onAdjustPressed: () => StockAdjustmentBottomSheet.show(context, product, _adjustStock),
+                onAdjustPressed: canManageStock
+                    ? () => StockAdjustmentBottomSheet.show(context, product, _adjustStock)
+                    : null,
               ),
               const Gap(AppSpacing.space16),
 
@@ -167,7 +231,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
               if (canViewHistory) ...[
                 StreamBuilder<List<ProductHistoryEntity>>(
-                  stream: getIt<ProductsRepository>().watchHistory(product.id, limit: 6),
+                  stream: _viewModel.watchProductHistory(product.id, limit: 6),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return const SizedBox.shrink();
