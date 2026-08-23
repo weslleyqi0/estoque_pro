@@ -90,6 +90,55 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     await _formViewModel.updateProductCommand.execute(updatedProduct);
   }
 
+  Future<void> _archive() async {
+    final product = _currentProduct;
+    final confirm = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Arquivar Produto',
+      content:
+          'Deseja arquivar este produto? Ele será movido para a lista de Arquivados e o seu histórico continuará salvo.',
+      confirmLabel: 'Arquivar',
+      isDestructive: true,
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        await _viewModel.archiveProduct(product.id);
+        if (mounted) {
+          AppSnackbar.success(context, 'Produto arquivado com sucesso!');
+          context.pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackbar.error(context, 'Erro ao arquivar produto: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> _unarchive() async {
+    final product = _currentProduct;
+    final confirm = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Restaurar Produto',
+      content: 'Deseja restaurar este produto? Ele retornará para a lista de produtos ativos.',
+      confirmLabel: 'Restaurar',
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        await _viewModel.unarchiveProduct(product.id);
+        if (mounted) {
+          AppSnackbar.success(context, 'Produto restaurado com sucesso!');
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackbar.error(context, 'Erro ao restaurar produto: $e');
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -128,12 +177,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             actions: [
               AppIconButton(
                 icon: AppIcons.edit,
-                onPressed: () async {
-                  final deleted = await context.push<bool>(AppRoutes.productForm, extra: product);
-                  if (deleted == true && context.mounted) {
-                    context.pop();
-                  }
-                },
+                tooltip: 'Editar produto',
+                onPressed: () => context.push(AppRoutes.productForm, extra: product),
+              ),
+              AppIconButton(
+                icon: product.isActive ? AppIcons.inventory2 : Icons.unarchive_outlined,
+                tooltip: product.isActive ? 'Arquivar produto' : 'Restaurar produto',
+                onPressed: () => product.isActive ? _archive() : _unarchive(),
               ),
               const Gap(AppSpacing.space8),
             ],

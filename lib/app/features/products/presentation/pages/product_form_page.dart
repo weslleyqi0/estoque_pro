@@ -117,38 +117,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
     }
   }
 
-  Future<void> _archive() async {
-    final confirm = await AppDialog.showConfirmation(
-      context: context,
-      title: 'Arquivar Produto',
-      content:
-          'Deseja arquivar este produto? Ele será movido para a lista de Arquivados e o seu histórico continuará salvo.',
-      confirmLabel: 'Arquivar',
-      isDestructive: true,
-    );
-
-    if (confirm == true && mounted) {
-      context.pop(true);
-      _viewModel.archiveCurrentProduct();
-      AppSnackbar.success(context, 'Produto arquivado com sucesso!');
-    }
-  }
-
-  Future<void> _unarchive() async {
-    final confirm = await AppDialog.showConfirmation(
-      context: context,
-      title: 'Restaurar Produto',
-      content:
-          'Deseja restaurar este produto? Ele retornará para a lista de produtos ativos.',
-      confirmLabel: 'Restaurar',
-    );
-
-    if (confirm == true && mounted) {
-      context.pop(true);
-      _viewModel.unarchiveCurrentProduct();
-      AppSnackbar.success(context, 'Produto restaurado com sucesso!');
-    }
-  }
 
   Future<void> _scanBarcode() async {
     final scannedCode = await context.push<String>(AppRoutes.saleScanner);
@@ -169,17 +137,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
             tooltip: 'Salvar',
             onPressed: () => _save(),
           ),
-          if (_viewModel.isEditing)
-            ListenableBuilder(
-              listenable: _viewModel,
-              builder: (context, _) {
-                return AppIconButton(
-                  icon: _viewModel.isActive ? AppIcons.inventory2 : Icons.unarchive_outlined,
-                  tooltip: _viewModel.isActive ? 'Arquivar produto' : 'Restaurar produto',
-                  onPressed: () => _viewModel.isActive ? _archive() : _unarchive(),
-                );
-              },
-            ),
           const Gap(AppSpacing.space8),
         ],
       ),
@@ -391,31 +348,14 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 _viewModel,
                 _viewModel.saveProductCommand,
                 _viewModel.updateProductCommand,
-                _viewModel.archiveProductCommand,
-                _viewModel.unarchiveProductCommand,
               ]),
               builder: (context, _) {
                 final isLoading = _viewModel.saveProductCommand.isRunning || _viewModel.updateProductCommand.isRunning;
-                final isArchiveLoading =
-                    _viewModel.archiveProductCommand.isRunning || _viewModel.unarchiveProductCommand.isRunning;
-                return Column(
-                  children: [
-                    AppButton.primary(
-                      label: _viewModel.isEditing ? 'Salvar Alterações' : 'Salvar Produto',
-                      isFullWidth: true,
-                      isLoading: isLoading,
-                      onPressed: _save,
-                    ),
-                    if (_viewModel.isEditing) ...[
-                      const Gap(AppSpacing.space16),
-                      AppButton.outlined(
-                        label: _viewModel.isActive ? 'Arquivar Produto' : 'Restaurar Produto',
-                        isFullWidth: true,
-                        isLoading: isArchiveLoading,
-                        onPressed: _viewModel.isActive ? _archive : _unarchive,
-                      ),
-                    ],
-                  ],
+                return AppButton.primary(
+                  label: _viewModel.isEditing ? 'Salvar Alterações' : 'Salvar Produto',
+                  isFullWidth: true,
+                  isLoading: isLoading,
+                  onPressed: _save,
                 );
               },
             ),
