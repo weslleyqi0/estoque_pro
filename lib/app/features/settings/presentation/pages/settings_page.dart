@@ -2,9 +2,11 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
+import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:estoque_pro/app/features/settings/presentation/widgets/settings_biometric_tile.dart';
 import 'package:estoque_pro/app/features/settings/presentation/widgets/settings_logout_button.dart';
 import 'package:estoque_pro/app/features/settings/presentation/widgets/settings_section.dart';
+import 'package:estoque_pro/app/features/settings/presentation/widgets/settings_theme_tile.dart';
 import 'package:estoque_pro/app/features/settings/presentation/widgets/settings_tile.dart';
 import 'package:estoque_pro/app/features/settings/presentation/widgets/settings_user_card.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
@@ -15,11 +17,13 @@ import 'package:go_router/go_router.dart';
 class SettingsPage extends StatelessWidget {
   final AuthViewModel authViewModel;
   final BiometricViewModel biometricViewModel;
+  final ThemeViewModel themeViewModel;
 
   const SettingsPage({
     super.key,
     required this.authViewModel,
     required this.biometricViewModel,
+    required this.themeViewModel,
   });
 
   @override
@@ -53,6 +57,13 @@ class SettingsPage extends StatelessWidget {
                       SettingsBiometricTile(
                         biometricViewModel: biometricViewModel,
                       ),
+                    ],
+                  ),
+                  const Gap(AppSpacing.space24),
+                  SettingsSection(
+                    title: 'Preferências',
+                    children: [
+                      SettingsThemeTile(themeViewModel: themeViewModel),
                     ],
                   ),
                   if (isManager) ...[

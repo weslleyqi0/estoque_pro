@@ -14,6 +14,7 @@ import 'package:estoque_pro/app/features/categories/presentation/viewmodels/cate
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
 import 'package:estoque_pro/app/features/settings/presentation/pages/settings_page.dart';
+import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/archived_products_page.dart';
 import 'package:estoque_pro/app/features/products/presentation/pages/product_details_page.dart';
@@ -127,6 +128,7 @@ class AppRouter {
         builder: (context, state) => SettingsPage(
           authViewModel: getIt<AuthViewModel>(),
           biometricViewModel: getIt<BiometricViewModel>(),
+          themeViewModel: getIt<ThemeViewModel>(),
         ),
       ),
       GoRoute(

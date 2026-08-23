@@ -2,6 +2,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_router.dart';
+import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:estoque_pro/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -21,21 +22,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Estoque Pro',
-      theme: AppTheme.dark,
-      darkTheme: AppTheme.light,
-      themeMode: ThemeMode.system,
-      routerConfig: AppRouter.router,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('pt', 'BR'),
-      ],
+    final themeViewModel = getIt<ThemeViewModel>();
+
+    return ListenableBuilder(
+      listenable: themeViewModel,
+      builder: (context, _) {
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: 'Estoque Pro',
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: themeViewModel.themeMode,
+          routerConfig: AppRouter.router,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('pt', 'BR'),
+          ],
+        );
+      },
     );
   }
 }

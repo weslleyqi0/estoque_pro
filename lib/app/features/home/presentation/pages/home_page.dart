@@ -284,7 +284,6 @@ class _PinnedNovaVendaDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: context.colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12, vertical: AppSpacing.space8),
       child: InkWell(
         onTap: onTap,

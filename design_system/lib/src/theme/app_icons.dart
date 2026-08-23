@@ -13,10 +13,12 @@ abstract class AppIcons {
   static const IconData arrowDown = Icons.keyboard_arrow_down_rounded;
   static const IconData arrowUp = Icons.keyboard_arrow_up_rounded;
   static const IconData bookmarkAdd = Symbols.bookmark_add_rounded;
+  static const IconData brightnessAuto = Symbols.brightness_auto_rounded;
   static const IconData check = Symbols.check_rounded;
   static const IconData checkCircle = Symbols.check_circle_rounded;
   static const IconData checkCircleOutline = Symbols.check_circle_outline_rounded;
   static const IconData close = Symbols.close_rounded;
+  static const IconData darkMode = Symbols.dark_mode_rounded;
   static const IconData delete = Symbols.delete_outline_rounded;
   static const IconData deleteFilled = Symbols.delete;
   static const IconData dropDown = Icons.arrow_drop_down;
@@ -24,6 +26,7 @@ abstract class AppIcons {
   static const IconData error = Symbols.error_rounded;
   static const IconData errorCircle = Symbols.error_circle_rounded;
   static const IconData info = Symbols.info_rounded;
+  static const IconData lightMode = Symbols.light_mode_rounded;
   static const IconData logout = Icons.logout;
   static const IconData package2 = Symbols.package_2_rounded;
   static const IconData play = Symbols.play_arrow_rounded;
