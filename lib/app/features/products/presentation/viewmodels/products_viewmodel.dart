@@ -4,6 +4,7 @@ import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:flutter/foundation.dart';
 
@@ -165,6 +166,10 @@ class ProductsViewModel extends ChangeNotifier {
       notifyListeners();
       rethrow;
     }
+  }
+
+  Stream<List<ProductHistoryEntity>> watchProductHistory(String productId, {int limit = 100}) {
+    return _repository.watchHistory(productId, limit: limit);
   }
 
   @override

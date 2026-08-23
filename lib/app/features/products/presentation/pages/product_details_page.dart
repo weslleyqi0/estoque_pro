@@ -3,7 +3,6 @@ import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/products/presentation/extensions/product_stock_ui_extension.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
@@ -23,7 +22,6 @@ class ProductDetailsPage extends StatefulWidget {
   final ProductsViewModel viewModel;
   final ProductsFormViewModel formViewModel;
   final AuthViewModel authViewModel;
-  final ProductsRepository productsRepository;
 
   const ProductDetailsPage({
     super.key,
@@ -31,7 +29,6 @@ class ProductDetailsPage extends StatefulWidget {
     required this.viewModel,
     required this.formViewModel,
     required this.authViewModel,
-    required this.productsRepository,
   });
 
   @override
@@ -42,7 +39,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   ProductsViewModel get _viewModel => widget.viewModel;
   ProductsFormViewModel get _formViewModel => widget.formViewModel;
   AuthViewModel get _authViewModel => widget.authViewModel;
-  ProductsRepository get _productsRepository => widget.productsRepository;
 
   @override
   void initState() {
@@ -235,7 +231,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
               if (canViewHistory) ...[
                 StreamBuilder<List<ProductHistoryEntity>>(
-                  stream: _productsRepository.watchHistory(product.id, limit: 6),
+                  stream: _viewModel.watchProductHistory(product.id, limit: 6),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return const SizedBox.shrink();
