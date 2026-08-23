@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -21,10 +20,18 @@ import 'package:go_router/go_router.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
+  final ProductsViewModel viewModel;
+  final ProductsFormViewModel formViewModel;
+  final AuthViewModel authViewModel;
+  final ProductsRepository productsRepository;
 
   const ProductDetailsPage({
     super.key,
     required this.product,
+    required this.viewModel,
+    required this.formViewModel,
+    required this.authViewModel,
+    required this.productsRepository,
   });
 
   @override
@@ -32,9 +39,10 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  final _viewModel = getIt<ProductsViewModel>();
-  final _formViewModel = getIt<ProductsFormViewModel>();
-  final _authViewModel = getIt<AuthViewModel>();
+  ProductsViewModel get _viewModel => widget.viewModel;
+  ProductsFormViewModel get _formViewModel => widget.formViewModel;
+  AuthViewModel get _authViewModel => widget.authViewModel;
+  ProductsRepository get _productsRepository => widget.productsRepository;
 
   @override
   void initState() {
@@ -227,7 +235,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
               if (canViewHistory) ...[
                 StreamBuilder<List<ProductHistoryEntity>>(
-                  stream: getIt<ProductsRepository>().watchHistory(product.id, limit: 6),
+                  stream: _productsRepository.watchHistory(product.id, limit: 6),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return const SizedBox.shrink();

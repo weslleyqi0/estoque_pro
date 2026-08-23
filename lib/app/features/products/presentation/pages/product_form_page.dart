@@ -1,25 +1,34 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/categories_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/supplier_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_viewmodel.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 class ProductFormPage extends StatefulWidget {
   final ProductEntity? product;
+  final ProductsFormViewModel viewModel;
+  final CategoriesViewModel categoriesVM;
+  final SuppliersViewModel suppliersVM;
+  final AuthViewModel authViewModel;
 
   const ProductFormPage({
     super.key,
     this.product,
+    required this.viewModel,
+    required this.categoriesVM,
+    required this.suppliersVM,
+    required this.authViewModel,
   });
 
   @override
@@ -27,9 +36,10 @@ class ProductFormPage extends StatefulWidget {
 }
 
 class _ProductFormPageState extends State<ProductFormPage> {
-  final _viewModel = getIt<ProductsFormViewModel>();
-  final _categoriesVM = getIt<CategoriesViewModel>();
-  final _suppliersVM = getIt<SuppliersViewModel>();
+  ProductsFormViewModel get _viewModel => widget.viewModel;
+  CategoriesViewModel get _categoriesVM => widget.categoriesVM;
+  SuppliersViewModel get _suppliersVM => widget.suppliersVM;
+  AuthViewModel get _authViewModel => widget.authViewModel;
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
@@ -52,15 +62,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
   }
 
   void _loadDependencies() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_categoriesVM.state == CategoriesLoadState.idle) {
-        _categoriesVM.listenAll();
-      }
-
-      if (_suppliersVM.state == SuppliersLoadState.idle) {
-        _suppliersVM.listenAll();
-      }
-    });
+    _categoriesVM.listenAll();
+    _suppliersVM.listenAll();
   }
 
   void _setToForm() {
@@ -307,10 +310,13 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   ),
                   trailing: const Icon(AppIcons.chevronRight),
                   onTap: () {
+                    final canManageCategories =
+                        _authViewModel.currentUser?.hasPermission(UserPermission.manageCategories) ?? false;
                     CategoriesBottomSheet.show(
                       context: context,
                       categoriesVM: _categoriesVM,
                       initialSelectedCategories: categories,
+                      canManageCategories: canManageCategories,
                       onCategoriesChanged: (newCategories) {
                         _viewModel.setCategories(newCategories);
                       },
@@ -330,9 +336,12 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   subtitle: Text(supplier?.name ?? 'Nenhum selecionado'),
                   trailing: const Icon(AppIcons.chevronRight),
                   onTap: () {
+                    final canManageSuppliers =
+                        _authViewModel.currentUser?.hasPermission(UserPermission.manageSuppliers) ?? false;
                     SupplierBottomSheet.show(
                       context: context,
                       suppliersVM: _suppliersVM,
+                      canManageSuppliers: canManageSuppliers,
                       onSupplierSelected: (sup) {
                         _viewModel.setSupplier(sup);
                       },

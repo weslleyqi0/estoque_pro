@@ -10,12 +10,14 @@ class CategoriesBottomSheet extends StatefulWidget {
   final CategoriesViewModel categoriesVM;
   final List<ProductCategoryEntity> initialSelectedCategories;
   final void Function(List<ProductCategoryEntity> newCategories) onCategoriesChanged;
+  final bool canManageCategories;
 
   const CategoriesBottomSheet({
     super.key,
     required this.categoriesVM,
     required this.initialSelectedCategories,
     required this.onCategoriesChanged,
+    this.canManageCategories = true,
   });
 
   static Future<void> show({
@@ -23,6 +25,7 @@ class CategoriesBottomSheet extends StatefulWidget {
     required CategoriesViewModel categoriesVM,
     required List<ProductCategoryEntity> initialSelectedCategories,
     required void Function(List<ProductCategoryEntity> newCategories) onCategoriesChanged,
+    bool canManageCategories = true,
   }) {
     return AppBottomSheet.show(
       context: context,
@@ -32,6 +35,7 @@ class CategoriesBottomSheet extends StatefulWidget {
           categoriesVM: categoriesVM,
           initialSelectedCategories: initialSelectedCategories,
           onCategoriesChanged: onCategoriesChanged,
+          canManageCategories: canManageCategories,
         );
       },
     );
@@ -48,6 +52,7 @@ class _CategoriesBottomSheetState extends State<CategoriesBottomSheet> {
   void initState() {
     super.initState();
     _selectedCategories = ValueNotifier(List.from(widget.initialSelectedCategories));
+    widget.categoriesVM.listenAll();
   }
 
   @override
@@ -91,14 +96,15 @@ class _CategoriesBottomSheetState extends State<CategoriesBottomSheet> {
                         'Categorias',
                         style: context.textTheme.titleMedium,
                       ),
-                      TextButton.icon(
-                        onPressed: () => context.push(AppRoutes.categoryForm),
-                        icon: const Icon(AppIcons.add, size: AppSpacing.icon24, weight: 600),
-                        label: Text(
-                          'Nova',
-                          style: context.textTheme.titleSmall?.copyWith(color: context.colorScheme.primary),
+                      if (widget.canManageCategories)
+                        TextButton.icon(
+                          onPressed: () => context.push(AppRoutes.categoryForm),
+                          icon: const Icon(AppIcons.add, size: AppSpacing.icon24, weight: 600),
+                          label: Text(
+                            'Nova',
+                            style: context.textTheme.titleSmall?.copyWith(color: context.colorScheme.primary),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),

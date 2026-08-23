@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 
 class SuppliersListSliver extends StatelessWidget {
   final SuppliersViewModel viewModel;
+  final bool canEdit;
 
   const SuppliersListSliver({
     super.key,
     required this.viewModel,
+    this.canEdit = true,
   });
 
   @override
@@ -61,6 +63,7 @@ class SuppliersListSliver extends StatelessWidget {
             return SuppliersItem(
               supplier: supplier,
               productCount: productCount,
+              canEdit: canEdit,
             );
           },
           childCount: viewModel.filteredSuppliers.length,

@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 
 class CategoriesListSliver extends StatelessWidget {
   final CategoriesViewModel viewModel;
+  final bool canEdit;
 
   const CategoriesListSliver({
     super.key,
     required this.viewModel,
+    this.canEdit = true,
   });
 
   @override
@@ -61,6 +63,7 @@ class CategoriesListSliver extends StatelessWidget {
             return CategoriesItem(
               category: category,
               productCount: productCount,
+              canEdit: canEdit,
             );
           },
           childCount: viewModel.filteredCategories.length,

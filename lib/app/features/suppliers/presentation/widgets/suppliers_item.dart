@@ -12,6 +12,7 @@ class SuppliersItem extends StatelessWidget {
   final int productCount;
   final VoidCallback? onTap;
   final bool showProductsTag;
+  final bool canEdit;
 
   const SuppliersItem({
     super.key,
@@ -19,6 +20,7 @@ class SuppliersItem extends StatelessWidget {
     this.productCount = 0,
     this.onTap,
     this.showProductsTag = true,
+    this.canEdit = true,
   });
 
   @override
@@ -32,7 +34,7 @@ class SuppliersItem extends StatelessWidget {
         side: BorderSide(color: context.colorScheme.outlineVariant),
       ),
       child: InkWell(
-        onTap: onTap ?? () => context.push(AppRoutes.supplierForm, extra: supplier),
+        onTap: onTap ?? (canEdit ? () => context.push(AppRoutes.supplierForm, extra: supplier) : null),
         borderRadius: AppSpacing.borderRadius16,
         child: Padding(
           padding: const .all(AppSpacing.space12),

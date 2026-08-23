@@ -9,11 +9,13 @@ import 'package:go_router/go_router.dart';
 class CategoriesItem extends StatelessWidget {
   final CategoryEntity category;
   final int productCount;
+  final bool canEdit;
 
   const CategoriesItem({
     super.key,
     required this.category,
     this.productCount = 0,
+    this.canEdit = true,
   });
 
   @override
@@ -29,7 +31,7 @@ class CategoriesItem extends StatelessWidget {
         side: BorderSide(color: context.colorScheme.outlineVariant),
       ),
       child: InkWell(
-        onTap: () => context.push(AppRoutes.categoryForm, extra: category),
+        onTap: canEdit ? () => context.push(AppRoutes.categoryForm, extra: category) : null,
         borderRadius: AppSpacing.borderRadius16,
         child: Padding(
           padding: const .all(AppSpacing.space12),
