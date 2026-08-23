@@ -85,13 +85,9 @@ class _HomePageState extends State<HomePage> {
                 AppIconButton(
                   icon: AppIcons.settings,
                   tooltip: 'Configurações',
-                  onPressed: () {},
+                  onPressed: () => context.push(AppRoutes.settings),
                 ),
-                AppIconButton(
-                  icon: AppIcons.logout,
-                  tooltip: 'Sair',
-                  onPressed: () => _authVM.logoutCommand.execute(),
-                ),
+                const Gap(AppSpacing.space8),
               ],
             ),
             body: CustomScrollView(
@@ -351,4 +347,3 @@ class _PinnedNovaVendaDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _PinnedNovaVendaDelegate oldDelegate) => false;
 }
-
