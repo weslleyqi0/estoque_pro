@@ -233,6 +233,7 @@ class AppRouter {
         path: AppRoutes.archivedProducts,
         builder: (context, state) => ArchivedProductsPage(
           viewModelFactory: () => getIt<ArchivedProductsViewModel>(),
+          authViewModel: getIt<AuthViewModel>(),
         ),
       ),
       GoRoute(

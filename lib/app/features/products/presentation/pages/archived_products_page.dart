@@ -1,17 +1,21 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/archived_products_viewmodel.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 class ArchivedProductsPage extends StatefulWidget {
   final ArchivedProductsViewModel Function() viewModelFactory;
+  final AuthViewModel authViewModel;
 
   const ArchivedProductsPage({
     super.key,
     required this.viewModelFactory,
+    required this.authViewModel,
   });
 
   @override
@@ -74,6 +78,8 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final canDeleteProducts = widget.authViewModel.currentUser?.hasPermission(UserPermission.deleteProducts) ?? false;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Produtos Arquivados'),
@@ -155,7 +161,6 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                                           color: context.colorScheme.onSurface.withValues(alpha: 0.4),
                                         ),
                                       ),
-                                      const Gap(2),
                                       Text(
                                         CurrencyInputFormatter.formatCurrency(product.price),
                                         style: context.textTheme.bodyMedium?.copyWith(
@@ -163,7 +168,6 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      const Gap(2),
                                       Text(
                                         'Estoque: ${product.stock} un.',
                                         style: context.textTheme.bodySmall?.copyWith(
@@ -173,6 +177,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                                     ],
                                   ),
                                 ),
+                                const Gap(AppSpacing.space4),
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -184,14 +189,15 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                                       tooltip: 'Restaurar produto',
                                       onPressed: () => _unarchive(product.id, product.name),
                                     ),
-                                    AppIconButton(
-                                      size: AppIconButtonSize.large,
-                                      icon: Icons.delete_forever_outlined,
-                                      visualDensity: VisualDensity.compact,
-                                      iconColor: context.colorScheme.error,
-                                      tooltip: 'Excluir permanentemente',
-                                      onPressed: () => _deletePermanently(product.id, product.name),
-                                    ),
+                                    if (canDeleteProducts)
+                                      AppIconButton(
+                                        size: AppIconButtonSize.large,
+                                        icon: Icons.delete_forever_outlined,
+                                        visualDensity: VisualDensity.compact,
+                                        iconColor: context.colorScheme.error,
+                                        tooltip: 'Excluir permanentemente',
+                                        onPressed: () => _deletePermanently(product.id, product.name),
+                                      ),
                                   ],
                                 ),
                               ],
