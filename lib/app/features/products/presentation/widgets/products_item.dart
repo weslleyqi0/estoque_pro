@@ -129,14 +129,14 @@ class ProductsItem extends StatelessWidget {
                         Text(
                           'Estoque: ${product.stock}',
                           style: context.textTheme.bodySmall?.copyWith(
-                            color: rawProgress < 0.50 ? statusColor : null,
+                            color: isInactive ? textColor : (rawProgress < 0.50 ? statusColor : null),
                             fontWeight: rawProgress < 0.50 ? FontWeight.bold : null,
                           ),
                         ),
                         Text(
                           'Min: ${product.minStock}',
                           style: context.textTheme.bodySmall?.copyWith(
-                            color: rawProgress < 0.50 ? statusColor : null,
+                            color: isInactive ? textColor : (rawProgress < 0.50 ? statusColor : null),
                             fontWeight: rawProgress < 0.50 ? FontWeight.bold : null,
                           ),
                         ),
@@ -146,7 +146,7 @@ class ProductsItem extends StatelessWidget {
                       value: progressValue,
                       borderRadius: AppSpacing.borderRadius4,
                       backgroundColor: context.colorScheme.outline.withValues(alpha: 0.5),
-                      color: statusColor,
+                      color: statusColor.withValues(alpha: isInactive ? 0.3 : 1.0),
                       minHeight: 10,
                     ),
                   ],
