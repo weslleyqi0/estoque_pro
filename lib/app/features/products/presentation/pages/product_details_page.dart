@@ -153,6 +153,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         final rawProgress = product.rawStockProgress;
         final currentUser = _authViewModel.currentUser;
         final canViewHistory = currentUser?.hasPermission(UserPermission.viewHistory) ?? false;
+        final canEditProducts = currentUser?.hasPermission(UserPermission.editProducts) ?? false;
 
         final Color statusColor;
         final IconData statusIcon;
@@ -180,11 +181,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           appBar: AppBar(
             title: const Text('Detalhes do Produto'),
             actions: [
-              AppIconButton(
-                icon: AppIcons.edit,
-                tooltip: 'Editar produto',
-                onPressed: () => context.push(AppRoutes.productForm, extra: product),
-              ),
+              if (canEditProducts)
+                AppIconButton(
+                  icon: AppIcons.edit,
+                  tooltip: 'Editar produto',
+                  onPressed: () => context.push(AppRoutes.productForm, extra: product),
+                ),
               AppIconButton(
                 icon: product.isArchived ? Icons.unarchive_outlined : AppIcons.inventory2,
                 tooltip: product.isArchived ? 'Restaurar produto' : 'Arquivar produto',
