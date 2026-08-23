@@ -7,11 +7,11 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 class ArchivedProductsPage extends StatefulWidget {
-  final ArchivedProductsViewModel viewModel;
+  final ArchivedProductsViewModel Function() viewModelFactory;
 
   const ArchivedProductsPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
   });
 
   @override
@@ -19,21 +19,24 @@ class ArchivedProductsPage extends StatefulWidget {
 }
 
 class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
+  late final ArchivedProductsViewModel viewModel;
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.listenAll();
+    viewModel = widget.viewModelFactory();
+    viewModel.listenAll();
   }
 
   @override
   void dispose() {
-    widget.viewModel.setSearchQuery('', notify: false);
+    viewModel.setSearchQuery('', notify: false);
     super.dispose();
   }
 
   Future<void> _unarchive(String id, String name) async {
     try {
-      await widget.viewModel.unarchiveProduct(id);
+      await viewModel.unarchiveProduct(id);
       if (mounted) {
         AppSnackbar.success(context, 'Produto "$name" restaurado para a lista ativa!');
       }
@@ -57,7 +60,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
 
     if (confirmed == true && mounted) {
       try {
-        await widget.viewModel.deletePermanently(id);
+        await viewModel.deletePermanently(id);
         if (mounted) {
           AppSnackbar.success(context, 'Produto e histórico de movimentações excluídos permanentemente.');
         }
@@ -77,23 +80,23 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
         centerTitle: true,
       ),
       body: ListenableBuilder(
-        listenable: widget.viewModel,
+        listenable: viewModel,
         builder: (context, _) {
-          final archivedList = widget.viewModel.filteredArchivedProducts;
+          final archivedList = viewModel.filteredArchivedProducts;
 
           return CustomScrollView(
             slivers: [
-              if (widget.viewModel.archivedProducts.isNotEmpty)
+              if (viewModel.archivedProducts.isNotEmpty)
                 AppFloatingSearch(
                   hint: 'Pesquisar produto arquivado...',
-                  initialValue: widget.viewModel.searchQuery,
-                  onChanged: widget.viewModel.setSearchQuery,
+                  initialValue: viewModel.searchQuery,
+                  onChanged: viewModel.setSearchQuery,
                 ),
-              if (widget.viewModel.state == ArchivedProductsLoadState.loading)
+              if (viewModel.state == ArchivedProductsLoadState.loading)
                 const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
                 )
-              else if (widget.viewModel.archivedProducts.isEmpty)
+              else if (viewModel.archivedProducts.isEmpty)
                 const SliverFillRemaining(
                   child: AppEmptyList(
                     message: 'Nenhum produto arquivado.',
@@ -103,7 +106,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
               else if (archivedList.isEmpty)
                 SliverFillRemaining(
                   child: AppEmptyList(
-                    message: 'Nenhum produto arquivado encontrado para "${widget.viewModel.searchQuery}".',
+                    message: 'Nenhum produto arquivado encontrado para "${viewModel.searchQuery}".',
                     icon: AppIcons.searchOff,
                   ),
                 )
