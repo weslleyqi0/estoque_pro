@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
@@ -40,6 +41,7 @@ import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/user_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
+import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:get_it/get_it.dart';
@@ -54,7 +56,7 @@ void registerDatabaseService<T>(String path) {
   );
 }
 
-void setupServiceLocator() {
+Future<void> setupServiceLocator() async {
   // Firebase
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseDatabase>(() => FirebaseDatabase.instance);
@@ -67,6 +69,10 @@ void setupServiceLocator() {
   registerDatabaseService<SaleEntity>('sales');
 
   // Services
+  final localStorageService = LocalStorageService();
+  await localStorageService.init();
+  getIt.registerSingleton<LocalStorageService>(localStorageService);
+
   getIt.registerLazySingleton<AuthService>(() => AuthService());
   getIt.registerLazySingleton<BiometricService>(() => BiometricService());
   getIt.registerLazySingleton<AuthorizationService>(
@@ -82,7 +88,11 @@ void setupServiceLocator() {
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(getIt<AuthService>(), getIt<BiometricService>()),
+    () => AuthRepositoryImpl(
+      getIt<AuthService>(),
+      getIt<BiometricService>(),
+      getIt<LocalStorageService>(),
+    ),
   );
 
   getIt.registerLazySingleton<UsersRepository>(
@@ -145,6 +155,9 @@ void setupServiceLocator() {
   );
 
   // ViewModels
+  getIt.registerLazySingleton<ThemeViewModel>(
+    () => ThemeViewModel(getIt<LocalStorageService>()),
+  );
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(
       getIt<AuthRepository>(),

@@ -124,6 +124,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                     itemBuilder: (context, index) {
                       final product = archivedList[index];
                       return Card(
+                        color: context.colorScheme.surfaceContainerLow,
                         margin: const EdgeInsets.only(bottom: AppSpacing.space12),
                         shape: RoundedRectangleBorder(
                           borderRadius: AppSpacing.borderRadius16,

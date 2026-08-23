@@ -10,25 +10,30 @@ class CurrencyInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    if (newValue.selection.baseOffset == 0) {
+    if (newValue.text.isEmpty) {
       return newValue;
     }
 
-    String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (newText.isEmpty) newText = '0';
-    double value = double.parse(newText) / 100;
+    final digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.isEmpty) {
+      return const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    }
 
-    String formatted = formatDouble(value);
-    String newString = includeSymbol ? 'R\$ $formatted' : formatted;
+    final value = double.parse(digitsOnly) / 100;
+    final formatted = formatDouble(value);
+    final newString = includeSymbol ? 'R\$ $formatted' : formatted;
 
-    return newValue.copyWith(
+    return TextEditingValue(
       text: newString,
       selection: TextSelection.collapsed(offset: newString.length),
     );
   }
 
   static String formatDouble(double value) {
-    String newString = value.toStringAsFixed(2).replaceAll('.', ',');
+    final newString = value.toStringAsFixed(2).replaceAll('.', ',');
     return formatString(newString);
   }
 
@@ -37,13 +42,13 @@ class CurrencyInputFormatter extends TextInputFormatter {
   }
 
   static String formatString(String value) {
-    List<String> parts = value.split(',');
-    String intPart = parts[0];
-    String decPart = parts.length > 1 ? parts[1] : '00';
+    final parts = value.split(',');
+    final intPart = parts[0];
+    final decPart = parts.length > 1 ? parts[1] : '00';
 
-    String newIntPart = '';
-    int count = 0;
-    for (int i = intPart.length - 1; i >= 0; i--) {
+    var newIntPart = '';
+    var count = 0;
+    for (var i = intPart.length - 1; i >= 0; i--) {
       newIntPart = intPart[i] + newIntPart;
       count++;
       if (count % 3 == 0 && i != 0) {

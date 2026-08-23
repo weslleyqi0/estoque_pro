@@ -1,19 +1,33 @@
 import 'dart:async';
+import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../service/auth_service.dart';
 import '../service/biometric_service.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
+  static const String _biometricEnabledKey = 'is_biometric_enabled';
+
   final AuthService _authService;
   final BiometricService _biometricService;
+  final LocalStorageService _localStorageService;
 
+  bool _isBiometricEnabled = false;
   bool _isBiometricAuthenticated = false;
   DateTime? _backgroundTimestamp;
   User? _previousUser;
 
-  AuthRepositoryImpl(this._authService, this._biometricService) {
+  AuthRepositoryImpl(
+    this._authService,
+    this._biometricService,
+    this._localStorageService,
+  ) {
+    _isBiometricEnabled = _localStorageService.getBool(_biometricEnabledKey, defaultValue: false);
     _previousUser = _authService.currentUser;
+
+    if (_authService.currentUser != null) {
+      _isBiometricAuthenticated = !_isBiometricEnabled;
+    }
 
     _authService.authStateChanges.listen((user) {
       if (user == null) {
@@ -24,10 +38,6 @@ class AuthRepositoryImpl extends AuthRepository {
       _previousUser = user;
       notifyListeners();
     });
-
-    if (_authService.currentUser != null) {
-      _isBiometricAuthenticated = false;
-    }
   }
 
   @override
@@ -37,7 +47,20 @@ class AuthRepositoryImpl extends AuthRepository {
   User? get currentUser => _authService.currentUser;
 
   @override
-  bool get isBiometricAuthenticated => _isBiometricAuthenticated;
+  bool get isBiometricEnabled => _isBiometricEnabled;
+
+  @override
+  Future<void> setBiometricEnabled(bool enabled) async {
+    _isBiometricEnabled = enabled;
+    await _localStorageService.setBool(_biometricEnabledKey, enabled);
+    if (!enabled) {
+      setBiometricAuthenticated(true);
+    }
+    notifyListeners();
+  }
+
+  @override
+  bool get isBiometricAuthenticated => !_isBiometricEnabled || _isBiometricAuthenticated;
 
   @override
   void setBiometricAuthenticated(bool isAuthenticated) {
@@ -82,18 +105,20 @@ class AuthRepositoryImpl extends AuthRepository {
 
   @override
   void appWentToBackground() {
-    if (isBiometricAuthenticated) {
+    if (_isBiometricEnabled && isBiometricAuthenticated) {
       _backgroundTimestamp ??= DateTime.now();
     }
   }
 
   @override
   void appReturnedToForeground() {
-    if (_backgroundTimestamp != null) {
+    if (_isBiometricEnabled && _backgroundTimestamp != null) {
       final difference = DateTime.now().difference(_backgroundTimestamp!);
       if (difference.inMinutes >= 2) {
         setBiometricAuthenticated(false);
       }
+      _backgroundTimestamp = null;
+    } else {
       _backgroundTimestamp = null;
     }
   }

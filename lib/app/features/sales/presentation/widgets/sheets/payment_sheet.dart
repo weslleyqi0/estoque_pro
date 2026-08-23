@@ -9,6 +9,7 @@ import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_summary
 import 'package:estoque_pro/app/features/sales/presentation/widgets/discount_option_card.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/payment_method_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 
 class PaymentSheet extends StatefulWidget {
@@ -252,7 +253,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
 
                         if (!isFiado) ...[
                           Row(
-                            crossAxisAlignment: .end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Expanded(
                                 child: AppTextfield(
@@ -263,7 +264,7 @@ class _PaymentSheetState extends State<PaymentSheet> {
                                   keyboardType: TextInputType.number,
                                   inputFormatters: vm.discountType == DiscountType.valueAmount
                                       ? [CurrencyInputFormatter()]
-                                      : null,
+                                      : [FilteringTextInputFormatter.allow(RegExp(r'^\d*[.,]?\d*'))],
                                   onChanged: (val) {
                                     if (vm.discountType == DiscountType.valueAmount) {
                                       final digits = val.replaceAll(RegExp(r'[^0-9]'), '');
@@ -283,7 +284,8 @@ class _PaymentSheetState extends State<PaymentSheet> {
                                 onTap: () {
                                   final digits = _discountController.text.replaceAll(RegExp(r'[^0-9]'), '');
                                   final parsed = digits.isEmpty ? 0.0 : (double.parse(digits) / 100);
-                                  _discountController.text = CurrencyInputFormatter.formatCurrency(parsed);
+                                  _discountController.text =
+                                      parsed > 0 ? CurrencyInputFormatter.formatCurrency(parsed) : '';
                                   vm.setDiscount(DiscountType.valueAmount, parsed);
                                 },
                               ),
@@ -294,7 +296,9 @@ class _PaymentSheetState extends State<PaymentSheet> {
                                 onTap: () {
                                   final digits = _discountController.text.replaceAll(RegExp(r'[^0-9]'), '');
                                   final parsed = digits.isEmpty ? 0.0 : (double.parse(digits) / 100);
-                                  _discountController.text = parsed > 0 ? parsed.toStringAsFixed(0) : '';
+                                  _discountController.text = parsed > 0
+                                      ? (parsed % 1 == 0 ? parsed.toInt().toString() : parsed.toStringAsFixed(1))
+                                      : '';
                                   vm.setDiscount(DiscountType.percent, parsed);
                                 },
                               ),
