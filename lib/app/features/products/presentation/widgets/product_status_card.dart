@@ -55,7 +55,7 @@ class ProductStatusCard extends StatelessWidget {
                         ? 'Arquivado (indisponível para venda)'
                         : 'Indisponível para venda',
                     value: product.isActive,
-                    onChanged: onStatusChanged,
+                    onChanged: product.isArchived ? null : onStatusChanged,
                   ),
                 ),
               ],

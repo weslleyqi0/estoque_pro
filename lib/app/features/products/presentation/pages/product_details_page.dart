@@ -77,6 +77,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   Future<void> _adjustStatus(bool isActive) async {
     final product = _currentProduct;
+    if (product.isArchived && isActive) {
+      AppSnackbar.warning(context, 'Não é possível ativar um produto arquivado. Restaure-o primeiro.');
+      return;
+    }
+
     if (product.stock == 0 && isActive) {
       AppSnackbar.warning(context, 'Não é possível ativar um produto sem estoque.');
       return;
@@ -84,7 +89,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
     final updatedProduct = product.copyWith(
       isActive: isActive,
-      isArchived: isActive ? false : product.isArchived,
+      isArchived: product.isArchived,
       updatedAt: DateTime.now(),
     );
 
@@ -121,7 +126,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     final confirm = await AppDialog.showConfirmation(
       context: context,
       title: 'Restaurar Produto',
-      content: 'Deseja restaurar este produto? Ele retornará para a lista de produtos ativos.',
+      content: 'Deseja restaurar este produto? Ele retornará para a lista de produtos como desativado.',
       confirmLabel: 'Restaurar',
     );
 
@@ -129,7 +134,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       try {
         await _viewModel.unarchiveProduct(product.id);
         if (mounted) {
-          AppSnackbar.success(context, 'Produto restaurado com sucesso!');
+          AppSnackbar.success(context, 'Produto restaurado! Ele permanece desativado até ser ativado.');
         }
       } catch (e) {
         if (mounted) {

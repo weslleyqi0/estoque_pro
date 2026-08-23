@@ -86,7 +86,10 @@ class ProductsFormViewModel extends ChangeNotifier {
       price: price,
       stock: finalStock,
       minStock: minStock,
-      isActive: finalStock == 0 ? false : (isEditing ? _isActive : true),
+      isActive: finalStock == 0
+          ? false
+          : (isEditing ? ((_currentProduct?.isArchived ?? false) ? false : _isActive) : true),
+      isArchived: _currentProduct?.isArchived ?? false,
       updatedAt: DateTime.now(),
     );
 

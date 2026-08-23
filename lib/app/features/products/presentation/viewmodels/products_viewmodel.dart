@@ -143,7 +143,7 @@ class ProductsViewModel extends ChangeNotifier {
     try {
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: true, isArchived: false);
+        _products[index] = _products[index].copyWith(isActive: false, isArchived: false);
         notifyListeners();
       }
       await _repository.unarchive(id);

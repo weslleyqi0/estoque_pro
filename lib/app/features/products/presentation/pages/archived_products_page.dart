@@ -38,7 +38,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
     try {
       await viewModel.unarchiveProduct(id);
       if (mounted) {
-        AppSnackbar.success(context, 'Produto "$name" restaurado para a lista ativa!');
+        AppSnackbar.success(context, 'Produto "$name" restaurado para a lista (desativado).');
       }
     } catch (e) {
       if (mounted) {
