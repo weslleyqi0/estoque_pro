@@ -35,9 +35,12 @@ import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_f
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/suppliers_page.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/viewmodels/suppliers_viewmodel.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
+import 'package:estoque_pro/app/features/users/presentation/pages/user_form_page.dart';
 import 'package:estoque_pro/app/features/users/presentation/pages/users_page.dart';
+import 'package:estoque_pro/app/features/users/presentation/viewmodels/user_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -120,7 +123,19 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.users,
-        builder: (context, state) => UsersPage(viewModel: getIt<UsersViewModel>()),
+        builder: (context, state) => UsersPage(
+          viewModelFactory: () => getIt<UsersViewModel>(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.userForm,
+        builder: (context, state) {
+          final user = state.extra as UserEntity?;
+          return UserFormPage(
+            viewModel: getIt<UserFormViewModel>(),
+            user: user,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.suppliers,

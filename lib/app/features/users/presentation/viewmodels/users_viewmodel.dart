@@ -16,6 +16,7 @@ class UsersViewModel extends ChangeNotifier {
 
   StreamSubscription<Result<List<UserEntity>>>? _usersSubscription;
   late final Command1<bool, UserEntity> updateUserProfileCommand;
+  late final Command1<bool, String> deleteUserCommand;
   bool _hasSortedInitially = false;
 
   final ValueNotifier<String?> expandedUserId = ValueNotifier(null);
@@ -36,6 +37,7 @@ class UsersViewModel extends ChangeNotifier {
     this._authorizationService,
   ) {
     updateUserProfileCommand = Command1(_updateUser);
+    deleteUserCommand = Command1(_deleteUser);
   }
 
   Future<Result<bool>> _updateUser(UserEntity userToUpdate) async {
@@ -46,6 +48,36 @@ class UsersViewModel extends ChangeNotifier {
     } catch (e) {
       return Failure(Exception(e.toString()));
     }
+  }
+
+  Future<Result<bool>> _deleteUser(String uid) async {
+    try {
+      await _usersRepository.deleteUser(uid);
+      return const Success(true);
+    } catch (e) {
+      return Failure(Exception(e.toString()));
+    }
+  }
+
+  bool canEditUser(UserEntity targetUser) {
+    final current = currentUser;
+    if (current == null) return false;
+    if (current.role == UserRole.owner) return true;
+    if (current.role == UserRole.admin) {
+      return targetUser.role != UserRole.owner;
+    }
+    return false;
+  }
+
+  bool canDeleteUser(UserEntity targetUser) {
+    final current = currentUser;
+    if (current == null) return false;
+    if (targetUser.uid == current.uid) return false;
+    if (targetUser.role == UserRole.owner) return false;
+    if (current.role == UserRole.owner || current.role == UserRole.admin) {
+      return true;
+    }
+    return false;
   }
 
   void listenAllUsers() {

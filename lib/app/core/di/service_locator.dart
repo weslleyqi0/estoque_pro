@@ -38,6 +38,7 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/produc
 import 'package:estoque_pro/app/features/users/data/repositories/users_repository_impl.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
+import 'package:estoque_pro/app/features/users/presentation/viewmodels/user_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -155,6 +156,12 @@ void setupServiceLocator() {
   );
   getIt.registerFactory<UsersViewModel>(
     () => UsersViewModel(
+      getIt<UsersRepository>(),
+      getIt<AuthorizationService>(),
+    ),
+  );
+  getIt.registerFactory<UserFormViewModel>(
+    () => UserFormViewModel(
       getIt<UsersRepository>(),
       getIt<AuthorizationService>(),
     ),
