@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
@@ -8,20 +9,26 @@ import 'package:mocktail/mocktail.dart';
 
 class MockAuthService extends Mock implements AuthService {}
 class MockBiometricService extends Mock implements BiometricService {}
+class MockLocalStorageService extends Mock implements LocalStorageService {}
 class MockUser extends Mock implements User {}
 
 void main() {
   late MockAuthService mockAuthService;
   late MockBiometricService mockBiometricService;
+  late MockLocalStorageService mockLocalStorageService;
   late StreamController<User?> authStateController;
 
   setUp(() {
     mockAuthService = MockAuthService();
     mockBiometricService = MockBiometricService();
+    mockLocalStorageService = MockLocalStorageService();
     authStateController = StreamController<User?>.broadcast();
-    
+
     when(() => mockAuthService.authStateChanges).thenAnswer((_) => authStateController.stream);
     when(() => mockAuthService.currentUser).thenReturn(null);
+    when(() => mockLocalStorageService.getBool(any(), defaultValue: any(named: 'defaultValue')))
+        .thenReturn(true);
+    when(() => mockLocalStorageService.setBool(any(), any())).thenAnswer((_) async {});
   });
 
   tearDown(() {
@@ -29,8 +36,8 @@ void main() {
   });
 
   group('AuthRepositoryImpl Background Timeout Tests', () {
-    test('appWentToBackground sets timestamp if biometric authenticated', () {
-      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService);
+    test('appWentToBackground sets timestamp if biometric authenticated and enabled', () {
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       authRepository.setBiometricAuthenticated(true);
       expect(authRepository.backgroundTimestamp, isNull);
 
@@ -40,7 +47,7 @@ void main() {
     });
 
     test('appWentToBackground does not set timestamp if not biometric authenticated', () {
-      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService);
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       authRepository.setBiometricAuthenticated(false);
       expect(authRepository.backgroundTimestamp, isNull);
 
@@ -50,7 +57,7 @@ void main() {
     });
 
     test('appReturnedToForeground locks session if 2 minutes or more passed in background', () {
-      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService);
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       authRepository.setBiometricAuthenticated(true);
       authRepository.backgroundTimestamp = DateTime.now().subtract(const Duration(minutes: 2));
 
@@ -61,7 +68,7 @@ void main() {
     });
 
     test('appReturnedToForeground keeps session unlocked if less than 2 minutes passed', () {
-      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService);
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       authRepository.setBiometricAuthenticated(true);
       authRepository.backgroundTimestamp = DateTime.now().subtract(const Duration(minutes: 1, seconds: 59));
 
@@ -73,19 +80,26 @@ void main() {
   });
 
   group('AuthRepositoryImpl Biometric Authentication State Transitions', () {
-    test('when constructed with no user, isBiometricAuthenticated starts as false', () {
-      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService);
+    test('when constructed with no user and biometric enabled, isBiometricAuthenticated starts as false', () {
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       expect(authRepository.isBiometricAuthenticated, isFalse);
     });
 
-    test('when constructed with existing user, isBiometricAuthenticated starts as false', () {
+    test('when constructed with no user and biometric disabled, isBiometricAuthenticated is true', () {
+      when(() => mockLocalStorageService.getBool(any(), defaultValue: any(named: 'defaultValue')))
+          .thenReturn(false);
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
+      expect(authRepository.isBiometricAuthenticated, isTrue);
+    });
+
+    test('when constructed with existing user, isBiometricAuthenticated starts as false when enabled', () {
       when(() => mockAuthService.currentUser).thenReturn(MockUser());
-      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService);
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       expect(authRepository.isBiometricAuthenticated, isFalse);
     });
 
     test('transition from logged out to logged in sets isBiometricAuthenticated to true', () async {
-      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService);
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       expect(authRepository.isBiometricAuthenticated, isFalse);
 
       // Trigger log in
@@ -97,7 +111,7 @@ void main() {
 
     test('transition from logged in to logged out sets isBiometricAuthenticated to false', () async {
       when(() => mockAuthService.currentUser).thenReturn(MockUser());
-      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService);
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       authRepository.setBiometricAuthenticated(true);
 
       // Trigger log out

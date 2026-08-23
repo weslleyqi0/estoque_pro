@@ -5,6 +5,9 @@ abstract class AuthRepository extends ChangeNotifier {
   Stream<User?> get authStateChanges;
   User? get currentUser;
 
+  bool get isBiometricEnabled;
+  Future<void> setBiometricEnabled(bool enabled);
+
   bool get isBiometricAuthenticated;
   void setBiometricAuthenticated(bool isAuthenticated);
 

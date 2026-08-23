@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
@@ -54,7 +55,7 @@ void registerDatabaseService<T>(String path) {
   );
 }
 
-void setupServiceLocator() {
+Future<void> setupServiceLocator() async {
   // Firebase
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseDatabase>(() => FirebaseDatabase.instance);
@@ -67,6 +68,10 @@ void setupServiceLocator() {
   registerDatabaseService<SaleEntity>('sales');
 
   // Services
+  final localStorageService = LocalStorageService();
+  await localStorageService.init();
+  getIt.registerSingleton<LocalStorageService>(localStorageService);
+
   getIt.registerLazySingleton<AuthService>(() => AuthService());
   getIt.registerLazySingleton<BiometricService>(() => BiometricService());
   getIt.registerLazySingleton<AuthorizationService>(
@@ -82,7 +87,11 @@ void setupServiceLocator() {
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(getIt<AuthService>(), getIt<BiometricService>()),
+    () => AuthRepositoryImpl(
+      getIt<AuthService>(),
+      getIt<BiometricService>(),
+      getIt<LocalStorageService>(),
+    ),
   );
 
   getIt.registerLazySingleton<UsersRepository>(

@@ -44,27 +44,77 @@ class _SettingsBiometricTileState extends State<SettingsBiometricTile> {
     }
   }
 
+  Future<void> _onToggleBiometrics(bool enable) async {
+    await widget.biometricViewModel.authenticateCommand.execute();
+    final authenticated = widget.biometricViewModel.authenticateCommand.isSuccess &&
+        widget.biometricViewModel.authenticateCommand.value == true;
+    if (!authenticated) {
+      if (mounted) {
+        AppSnackbar.warning(context, 'Não foi possível confirmar a biometria.');
+      }
+      return;
+    }
+
+    if (enable) {
+      await widget.biometricViewModel.setBiometricEnabled(true);
+      if (mounted) {
+        AppSnackbar.success(context, 'Autenticação biométrica ativada com sucesso!');
+      }
+    } else {
+      await widget.biometricViewModel.setBiometricEnabled(false);
+      if (mounted) {
+        AppSnackbar.info(context, 'Autenticação biométrica desativada.');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SettingsTile(
-      icon: AppIcons.fingerprint,
-      iconColor: AppColors.primary,
-      title: 'Autenticação Biométrica',
-      subtitle: _isLoadingBiometric
-          ? 'Verificando...'
-          : _isBiometricAvailable
-              ? 'Disponível neste dispositivo'
-              : 'Indisponível no dispositivo',
-      trailing: _isLoadingBiometric
-          ? const SizedBox(
+    return ListenableBuilder(
+      listenable: widget.biometricViewModel,
+      builder: (context, _) {
+        final isEnabled = widget.biometricViewModel.isBiometricEnabled;
+
+        if (_isLoadingBiometric) {
+          return const SettingsTile(
+            icon: AppIcons.fingerprint,
+            iconColor: AppColors.primary,
+            title: 'Autenticação Biométrica',
+            subtitle: 'Verificando compatibilidade...',
+            trailing: SizedBox(
               width: AppSpacing.space16,
               height: AppSpacing.space16,
               child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : AppTag(
-              title: _isBiometricAvailable ? 'Habilitada' : 'Não suportado',
-              color: _isBiometricAvailable ? AppColors.success : AppColors.warning,
             ),
+          );
+        }
+
+        if (!_isBiometricAvailable) {
+          return const SettingsTile(
+            icon: AppIcons.fingerprint,
+            iconColor: AppColors.primary,
+            title: 'Autenticação Biométrica',
+            subtitle: 'Não disponível neste dispositivo',
+            trailing: AppTag(
+              title: 'Não suportado',
+              color: AppColors.warning,
+            ),
+          );
+        }
+
+        return SettingsTile(
+          icon: AppIcons.fingerprint,
+          iconColor: isEnabled ? AppColors.primary : context.colorScheme.onSurface.withValues(alpha: 0.4),
+          title: 'Autenticação Biométrica',
+          subtitle: isEnabled
+              ? 'Exigir digital ao abrir o app'
+              : 'Desabilitada (acesso direto após login)',
+          trailing: Switch(
+            value: isEnabled,
+            onChanged: _onToggleBiometrics,
+          ),
+        );
+      },
     );
   }
 }

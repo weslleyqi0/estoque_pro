@@ -15,10 +15,11 @@ void main() {
 
   setUp(() async {
     mockAuthRepository = MockAuthRepository();
-    
-    // Stub ChangeNotifier methods to prevent Mocktail errors
+
+    // Stub ChangeNotifier and properties to prevent Mocktail errors
     when(() => mockAuthRepository.addListener(any())).thenAnswer((_) {});
     when(() => mockAuthRepository.removeListener(any())).thenAnswer((_) {});
+    when(() => mockAuthRepository.isBiometricEnabled).thenReturn(true);
 
     await getIt.reset();
     getIt.registerLazySingleton<AuthRepository>(() => mockAuthRepository);
@@ -27,6 +28,24 @@ void main() {
   });
 
   group('BiometricViewModel Tests', () {
+    test('isBiometricEnabled returns value from repository', () {
+      when(() => mockAuthRepository.isBiometricEnabled).thenReturn(true);
+      expect(viewModel.isBiometricEnabled, isTrue);
+
+      when(() => mockAuthRepository.isBiometricEnabled).thenReturn(false);
+      expect(viewModel.isBiometricEnabled, isFalse);
+    });
+
+    test('setBiometricEnabled delegates to repository', () async {
+      when(() => mockAuthRepository.setBiometricEnabled(any())).thenAnswer((_) async {});
+
+      await viewModel.setBiometricEnabled(true);
+      verify(() => mockAuthRepository.setBiometricEnabled(true)).called(1);
+
+      await viewModel.setBiometricEnabled(false);
+      verify(() => mockAuthRepository.setBiometricEnabled(false)).called(1);
+    });
+
     test('isAvailable returns correct state from repository', () async {
       when(() => mockAuthRepository.isBiometricAvailable()).thenAnswer((_) async => true);
       expect(await viewModel.isAvailable(), isTrue);
@@ -67,7 +86,7 @@ void main() {
 
     test('app lifecycle transition to paused calls appWentToBackground on repository', () {
       when(() => mockAuthRepository.appWentToBackground()).thenAnswer((_) {});
-      
+
       viewModel.didChangeAppLifecycleState(AppLifecycleState.paused);
 
       verify(() => mockAuthRepository.appWentToBackground()).called(1);
@@ -81,7 +100,19 @@ void main() {
       verify(() => mockAuthRepository.appReturnedToForeground()).called(1);
     });
 
+    test('checkAvailability when biometric is disabled sets isBiometricAuthenticated to true directly', () async {
+      when(() => mockAuthRepository.isBiometricEnabled).thenReturn(false);
+      when(() => mockAuthRepository.setBiometricAuthenticated(any())).thenAnswer((_) {});
+
+      await viewModel.checkAvailability();
+
+      verify(() => mockAuthRepository.setBiometricAuthenticated(true)).called(1);
+      verifyNever(() => mockAuthRepository.isBiometricAvailable());
+      verifyNever(() => mockAuthRepository.authenticateWithBiometrics());
+    });
+
     test('checkAvailability when biometric is unavailable sets isBiometricAuthenticated to true', () async {
+      when(() => mockAuthRepository.isBiometricEnabled).thenReturn(true);
       when(() => mockAuthRepository.isBiometricAvailable()).thenAnswer((_) async => false);
       when(() => mockAuthRepository.setBiometricAuthenticated(any())).thenAnswer((_) {});
 
@@ -92,6 +123,7 @@ void main() {
     });
 
     test('checkAvailability when biometric is available triggers authenticateWithBiometrics', () async {
+      when(() => mockAuthRepository.isBiometricEnabled).thenReturn(true);
       when(() => mockAuthRepository.isBiometricAvailable()).thenAnswer((_) async => true);
       when(() => mockAuthRepository.authenticateWithBiometrics()).thenAnswer((_) async => true);
 

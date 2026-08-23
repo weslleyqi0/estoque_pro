@@ -12,7 +12,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseDatabase.instance.setPersistenceEnabled(true);
 
-  setupServiceLocator();
+  await setupServiceLocator();
   runApp(const MyApp());
 }
 
