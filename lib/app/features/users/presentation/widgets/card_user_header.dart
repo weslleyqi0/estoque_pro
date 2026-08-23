@@ -9,6 +9,9 @@ class CardUserHeader extends StatelessWidget {
   final Color? color;
   final IconData? icon;
   final bool isExpanded;
+  final bool canEdit;
+  final bool canExpand;
+  final void Function()? onEdit;
   final void Function()? onExpanded;
 
   const CardUserHeader({
@@ -18,6 +21,9 @@ class CardUserHeader extends StatelessWidget {
     this.color,
     this.icon,
     this.onExpanded,
+    this.onEdit,
+    this.canEdit = false,
+    this.canExpand = true,
     this.isExpanded = false,
   });
 
@@ -26,7 +32,7 @@ class CardUserHeader extends StatelessWidget {
     final activeColor = user.isActive ? AppColors.successDark : AppColors.error;
 
     return GestureDetector(
-      onTap: onExpanded,
+      onTap: canExpand ? onExpanded : null,
       behavior: HitTestBehavior.opaque,
       child: Row(
         mainAxisAlignment: .spaceBetween,
@@ -86,10 +92,35 @@ class CardUserHeader extends StatelessWidget {
               ),
             ],
           ),
-          AppIconButton(
-            onPressed: onExpanded,
-            icon: isExpanded ? AppIcons.arrowUp : AppIcons.arrowDown,
-            iconColor: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+          Column(
+            mainAxisSize: .min,
+            children: [
+              Visibility(
+                visible: canEdit,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: AppIconButton(
+                  onPressed: onEdit,
+                  icon: AppIcons.edit,
+                  tooltip: 'Editar usuário',
+                  visualDensity: VisualDensity.compact,
+                  iconColor: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                ),
+              ),
+              Visibility(
+                visible: canExpand,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: AppIconButton(
+                  onPressed: canExpand ? onExpanded : null,
+                  icon: isExpanded ? AppIcons.arrowUp : AppIcons.arrowDown,
+                  visualDensity: VisualDensity.compact,
+                  iconColor: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
           ),
         ],
       ),
