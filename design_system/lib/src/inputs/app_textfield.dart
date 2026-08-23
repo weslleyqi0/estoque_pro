@@ -205,6 +205,7 @@ class _AppTextfieldState extends State<AppTextfield> {
           maxLength: widget.maxLength,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
+          inputFormatters: widget.inputFormatters,
           style: context.textTheme.bodyLarge?.copyWith(
             color: (widget.readOnly || !widget.enabled)
                 ? context.colorScheme.onSurface.withValues(alpha: 0.38)
