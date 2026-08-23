@@ -42,17 +42,16 @@ class ProductModel {
       imgUrl: map['imgUrl'] as String? ?? '',
       description: map['description'] as String? ?? '',
       barcode: map['barcode'] as String? ?? '',
-      categories:
-          (map['categories'] as List<dynamic>?)
-              ?.map((e) => ProductCategoryModel.fromMap(Map<dynamic, dynamic>.from(e as Map)))
-              .toList() ??
-          [],
+      categories: (map['categories'] as List<dynamic>? ?? [])
+          .where((e) => e != null)
+          .map((e) => ProductCategoryModel.fromMap(Map<dynamic, dynamic>.from(e as Map)))
+          .toList(),
       supplier: map['supplier'] != null
           ? ProductSupplierModel.fromMap(Map<dynamic, dynamic>.from(map['supplier'] as Map))
           : null,
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
-      stock: map['stock'] as int? ?? 0,
-      minStock: map['minStock'] as int? ?? 0,
+      stock: (map['stock'] as num?)?.toInt() ?? 0,
+      minStock: (map['minStock'] as num?)?.toInt() ?? 0,
       isActive: map['isActive'] as bool? ?? true,
       createdAt: DateParser.parse(map['createdAt']),
       updatedAt: DateParser.parse(map['updatedAt']),
