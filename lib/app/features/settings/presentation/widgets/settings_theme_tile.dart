@@ -80,24 +80,13 @@ class SettingsThemeTile extends StatelessWidget {
                   showSelectedIcon: false,
                   style: SegmentedButton.styleFrom(
                     visualDensity: VisualDensity.compact,
-                    selectedBackgroundColor: context.colorScheme.primary.withValues(alpha: 0.8),
+                    selectedBackgroundColor: context.colorScheme.primary,
                     selectedForegroundColor: AppColors.white,
                     shape: const RoundedRectangleBorder(
                       borderRadius: AppSpacing.borderRadius12,
                     ),
                   ),
                   segments: [
-                    ButtonSegment<ThemeMode>(
-                      value: ThemeMode.system,
-                      enabled: true,
-                      icon: const Icon(AppIcons.brightnessAuto, size: AppSpacing.icon16),
-                      label: Text(
-                        'Sistema',
-                        style: TextStyle(
-                          fontWeight: isSystem ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                    ),
                     ButtonSegment<ThemeMode>(
                       value: ThemeMode.light,
                       enabled: true,
@@ -106,6 +95,17 @@ class SettingsThemeTile extends StatelessWidget {
                         'Claro',
                         style: TextStyle(
                           fontWeight: isLight ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                    ButtonSegment<ThemeMode>(
+                      value: ThemeMode.system,
+                      enabled: true,
+                      icon: const Icon(AppIcons.brightnessAuto, size: AppSpacing.icon16),
+                      label: Text(
+                        'Sistema',
+                        style: TextStyle(
+                          fontWeight: isSystem ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                     ),
