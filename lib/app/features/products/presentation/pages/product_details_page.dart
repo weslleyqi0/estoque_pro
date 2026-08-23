@@ -154,6 +154,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         final currentUser = _authViewModel.currentUser;
         final canViewHistory = currentUser?.hasPermission(UserPermission.viewHistory) ?? false;
         final canEditProducts = currentUser?.hasPermission(UserPermission.editProducts) ?? false;
+        final canManageStock = currentUser?.hasPermission(UserPermission.manageStock) ?? false;
 
         final Color statusColor;
         final IconData statusIcon;
@@ -211,7 +212,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 statusText: statusText,
                 statusColor: statusColor,
                 statusIcon: statusIcon,
-                onAdjustPressed: () => StockAdjustmentBottomSheet.show(context, product, _adjustStock),
+                onAdjustPressed: canManageStock
+                    ? () => StockAdjustmentBottomSheet.show(context, product, _adjustStock)
+                    : null,
               ),
               const Gap(AppSpacing.space16),
 

@@ -8,7 +8,7 @@ class ProductStockStatusCard extends StatelessWidget {
   final String statusText;
   final Color statusColor;
   final IconData statusIcon;
-  final VoidCallback onAdjustPressed;
+  final VoidCallback? onAdjustPressed;
 
   const ProductStockStatusCard({
     super.key,
@@ -16,7 +16,7 @@ class ProductStockStatusCard extends StatelessWidget {
     required this.statusText,
     required this.statusColor,
     required this.statusIcon,
-    required this.onAdjustPressed,
+    this.onAdjustPressed,
   });
 
   @override
@@ -64,16 +64,18 @@ class ProductStockStatusCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Gap(AppSpacing.space8),
-                AppButton(
-                  onPressed: onAdjustPressed,
-                  backgroundColor: AppColors.surfaceLight,
-                  borderRadius: AppSpacing.borderRadius24,
-                  child: Text(
-                    'Ajustar',
-                    style: context.textTheme.titleMedium?.copyWith(color: AppColors.textPrimaryLight),
+                if (onAdjustPressed != null) ...[
+                  const Gap(AppSpacing.space8),
+                  AppButton(
+                    onPressed: onAdjustPressed,
+                    backgroundColor: AppColors.surfaceLight,
+                    borderRadius: AppSpacing.borderRadius24,
+                    child: Text(
+                      'Ajustar',
+                      style: context.textTheme.titleMedium?.copyWith(color: AppColors.textPrimaryLight),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
