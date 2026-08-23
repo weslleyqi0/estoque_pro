@@ -137,7 +137,10 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                             ),
                             child: Row(
                               children: [
-                                AppNetworkImage(imageUrl: product.imgUrl),
+                                AppNetworkImage(
+                                  imageUrl: product.imgUrl,
+                                  isGrayscale: true,
+                                ),
                                 const Gap(AppSpacing.space12),
                                 Expanded(
                                   child: Column(
@@ -149,13 +152,14 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                                         maxLines: 1,
                                         style: context.textTheme.titleMedium?.copyWith(
                                           fontWeight: FontWeight.bold,
+                                          color: context.colorScheme.onSurface.withValues(alpha: 0.4),
                                         ),
                                       ),
                                       const Gap(2),
                                       Text(
                                         CurrencyInputFormatter.formatCurrency(product.price),
                                         style: context.textTheme.bodyMedium?.copyWith(
-                                          color: context.colorScheme.primary,
+                                          color: context.colorScheme.onSurface.withValues(alpha: 0.4),
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),

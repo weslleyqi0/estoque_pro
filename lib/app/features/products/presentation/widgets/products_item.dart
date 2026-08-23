@@ -21,7 +21,8 @@ class ProductsItem extends StatelessWidget {
     final progressValue = product.stockProgressValue;
     final rawProgress = product.rawStockProgress;
 
-    final textColor = !product.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
+    final isInactive = !product.isActive || product.isArchived;
+    final textColor = isInactive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
 
     return Card(
       color: context.colorScheme.surfaceContainerLow,
@@ -44,7 +45,7 @@ class ProductsItem extends StatelessWidget {
                 children: [
                   AppNetworkImage(
                     imageUrl: product.imgUrl,
-                    isGrayscale: !product.isActive,
+                    isGrayscale: isInactive,
                   ),
                   const Gap(AppSpacing.space16),
                   Expanded(
