@@ -21,7 +21,11 @@ class CartViewModel extends ChangeNotifier {
   final DateTime _createdAt = DateTime.now();
 
   final List<CartItem> _items = [];
-  List<CartItem> get items => _items;
+  List<CartItem> get items {
+    final list = List<CartItem>.from(_items);
+    list.sort((a, b) => a.product.name.toLowerCase().compareTo(b.product.name.toLowerCase()));
+    return list;
+  }
 
   String _saleNumber = '';
   String get saleNumber => _saleNumber;
