@@ -28,6 +28,9 @@ class CardUserExpandedContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canEditTarget = viewModel.canEditUser(user);
+    final isSelf = user.uid == currentUserId;
+
     return Column(
       children: [
         Divider(
@@ -39,76 +42,77 @@ class CardUserExpandedContent extends StatelessWidget {
           CardUserInfo(
             user: user,
             title: 'Proprietário do Sistema',
-            mensage: 'O dono possui acesso total e não pode ser editado ou removido.',
+            mensage: isSelf
+                ? 'Você possui acesso total como Dono.'
+                : 'O dono possui acesso total e não pode ser editado ou removido por outros usuários.',
             icon: icon,
             color: color,
           ),
-        if (user.role != UserRole.owner)
+        if (user.role == UserRole.admin && isSelf)
+          CardUserInfo(
+            user: user,
+            title: 'Administrador',
+            mensage: 'Você possui acesso como Administrador. Para alterar seu nome, use o botão de edição.',
+            icon: icon,
+            color: color,
+          ),
+        if (user.role != UserRole.owner && !isSelf && canEditTarget)
           Column(
-            crossAxisAlignment: .start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (user.uid != currentUserId) ...[
-                AppSwitchTitle(
-                  title: 'Status da Conta',
-                  subtitle: 'Ativar ou desativar acesso do usuário',
-                  titleStyle: context.textTheme.titleLarge,
-                  value: user.isActive,
-                  onChanged: (value) => viewModel.toggleUserActive(user, value),
-                ),
-
-                Gap(AppSpacing.space24),
-                Column(
-                  crossAxisAlignment: .start,
-                  children: [
-                    Text(
-                      'Função',
-                      style: context.textTheme.titleLarge,
-                    ),
-                    Gap(AppSpacing.space8),
-                    Row(
-                      mainAxisAlignment: .spaceBetween,
-                      children: [
-                        AppButton(
-                          onPressed: () => viewModel.updateUserRole(user, UserRole.seller),
-                          icon: AppIcons.shoppingBag,
-                          variant: user.role == UserRole.admin ? AppButtonVariant.outlined : AppButtonVariant.primary,
-                          label: 'Vendedor',
-                        ),
-                        AppButton(
+              AppSwitchTitle(
+                title: 'Status da Conta',
+                subtitle: 'Ativar ou desativar acesso do usuário',
+                titleStyle: context.textTheme.titleLarge,
+                value: user.isActive,
+                onChanged: (value) => viewModel.toggleUserActive(user, value),
+              ),
+              const Gap(AppSpacing.space24),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Função',
+                    style: context.textTheme.titleLarge,
+                  ),
+                  const Gap(AppSpacing.space8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      AppButton(
+                        onPressed: () => viewModel.updateUserRole(user, UserRole.seller),
+                        icon: AppIcons.shoppingBag,
+                        variant: user.role == UserRole.admin ? AppButtonVariant.outlined : AppButtonVariant.primary,
+                        label: 'Vendedor',
+                      ),
+                      const Gap(AppSpacing.space8),
+                      Expanded(
+                        child: AppButton(
+                          label: 'Administrador',
                           onPressed: () => viewModel.updateUserRole(user, UserRole.admin),
                           icon: AppIcons.shieldPerson,
                           variant: user.role == UserRole.seller ? AppButtonVariant.outlined : AppButtonVariant.primary,
-                          label: 'Administrador',
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                Gap(AppSpacing.space16),
-              ],
-              if (user.role == UserRole.admin) ...[
-                CardUserInfo(
-                  user: user,
-                  title: 'Administrador',
-                  mensage: 'Administradores têm acesso total ao sistema, exceto gerenciar outros administradores.',
-                  icon: icon,
-                  color: color,
-                ),
-              ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const Gap(AppSpacing.space16),
               if (user.role == UserRole.seller && user.isActive) ...[
-                Gap(AppSpacing.space24),
+                const Gap(AppSpacing.space24),
                 Text(
                   'Permissões',
                   style: context.textTheme.titleLarge,
                 ),
-                Gap(AppSpacing.space8),
+                const Gap(AppSpacing.space8),
                 Text(
                   'Controle o que este vendedor pode acessar e modificar no sistema.',
                   style: context.textTheme.bodySmall?.copyWith(
                     color: context.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
-                Gap(AppSpacing.space16),
+                const Gap(AppSpacing.space16),
                 ...UserPermission.values.asMap().entries.map((entry) {
                   final index = entry.key;
                   final permission = entry.value;
@@ -123,7 +127,6 @@ class CardUserExpandedContent extends StatelessWidget {
                         value: user.permissions.contains(permission),
                         onChanged: (_) => viewModel.toggleUserPermission(user, permission),
                       ),
-
                       if (!isLast)
                         Divider(
                           thickness: 2,
