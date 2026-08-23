@@ -1,4 +1,5 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/presentation/extensions/user_role_ui_extension.dart';
@@ -6,6 +7,7 @@ import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_vie
 import 'package:estoque_pro/app/features/users/presentation/widgets/card_user_expanded_content.dart';
 import 'package:estoque_pro/app/features/users/presentation/widgets/card_user_header.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CardUser extends StatelessWidget {
   final UsersViewModel viewModel;
@@ -29,11 +31,17 @@ class CardUser extends StatelessWidget {
   Widget build(BuildContext context) {
     final roleColor = user.role.color(context);
     final roleIcon = user.role.icon;
+    final canExpand = currentUserRole == UserRole.owner || currentUserRole == UserRole.admin;
 
     return Padding(
       padding: .symmetric(vertical: AppSpacing.space4, horizontal: AppSpacing.space16),
       child: Container(
-        padding: .symmetric(vertical: AppSpacing.space16, horizontal: AppSpacing.space16),
+        padding: .only(
+          top: AppSpacing.space8,
+          bottom: AppSpacing.space8,
+          left: AppSpacing.space12,
+          right: AppSpacing.space8,
+        ),
         decoration: BoxDecoration(
           color: context.colorScheme.onSurface.withValues(alpha: 0.05),
           borderRadius: AppSpacing.borderRadius12,
@@ -49,9 +57,12 @@ class CardUser extends StatelessWidget {
               icon: roleIcon,
               color: roleColor,
               isExpanded: isExpanded,
-              onExpanded: onExpanded,
+              canEdit: viewModel.canEditUser(user),
+              canExpand: canExpand,
+              onEdit: () => context.push(AppRoutes.userForm, extra: user),
+              onExpanded: canExpand ? onExpanded : null,
             ),
-            if (isExpanded)
+            if (isExpanded && canExpand)
               CardUserExpandedContent(
                 viewModel: viewModel,
                 user: user,
