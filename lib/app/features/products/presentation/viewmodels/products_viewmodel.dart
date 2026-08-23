@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -112,7 +113,7 @@ class ProductsViewModel extends ChangeNotifier {
     _subscription?.cancel();
     _subscription = _repository.watchAll().listen(
       (list) {
-        _products = list..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        _products = list.sortByName((a) => a.name);
         _state = ProductsLoadState.success;
         notifyListeners();
       },

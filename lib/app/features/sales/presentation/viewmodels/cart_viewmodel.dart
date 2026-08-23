@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -21,11 +22,7 @@ class CartViewModel extends ChangeNotifier {
   final DateTime _createdAt = DateTime.now();
 
   final List<CartItem> _items = [];
-  List<CartItem> get items {
-    final list = List<CartItem>.from(_items);
-    list.sort((a, b) => a.product.name.toLowerCase().compareTo(b.product.name.toLowerCase()));
-    return list;
-  }
+  List<CartItem> get items => _items.sortedByName((item) => item.product.name);
 
   String _saleNumber = '';
   String get saleNumber => _saleNumber;

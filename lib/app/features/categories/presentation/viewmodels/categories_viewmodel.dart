@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
@@ -71,7 +72,7 @@ class CategoriesViewModel extends ChangeNotifier {
     _categoriesSubscription?.cancel();
     _categoriesSubscription = _repository.watchAll().listen(
       (list) {
-        _categories = list..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        _categories = list.sortByName((a) => a.name);
         _state = CategoriesLoadState.success;
         _loadProductCounts();
         notifyListeners();

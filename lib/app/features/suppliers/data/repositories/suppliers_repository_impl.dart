@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/suppliers/data/models/supplier_model.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
@@ -30,7 +31,7 @@ class SuppliersRepositoryImpl implements SuppliersRepository {
               }
             }
           }
-          return entities..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          return entities.sortByName((a) => a.name);
         })
         .handleError((e) {
           debugPrint('---> Suppliers: Erro no listener Firebase: $e');

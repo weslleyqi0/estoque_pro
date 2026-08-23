@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_history_model.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_model.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -33,7 +34,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
               }
             }
           }
-          return entities..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          return entities.sortByName((a) => a.name);
         })
         .handleError((e) {
           debugPrint('---> Products: Erro no listener Firebase: $e');
