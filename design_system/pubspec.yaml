@@ -16,6 +16,7 @@ dependencies:
   flutter_svg: 2.3.0
   fluttertoast: 10.0.0
   material_symbols_icons: 4.2951.0
+  omni_datetime_picker: 2.3.2
 
 dev_dependencies:
   flutter_test:

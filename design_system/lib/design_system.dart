@@ -31,6 +31,8 @@ export 'src/tags/app_tag.dart';
 // Dialog exports
 export 'src/dialogs/app_bottom_sheet.dart';
 export 'src/dialogs/app_dialog.dart';
+export 'src/dialogs/app_date_time_picker_dialog.dart';
+export 'package:omni_datetime_picker/omni_datetime_picker.dart' show OmniDateTimePickerType;
 
 // Component exports
 export 'src/empty/app_empty_list.dart';
