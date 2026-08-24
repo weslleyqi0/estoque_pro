@@ -42,6 +42,22 @@ class CartViewModel extends ChangeNotifier {
   String? _customerName;
   String? get customerName => _customerName;
 
+  String? _customerPhone;
+  String? get customerPhone => _customerPhone;
+
+  // Delivery properties
+  bool _isDelivery = false;
+  bool get isDelivery => _isDelivery;
+
+  DateTime? _scheduledDeliveryDate;
+  DateTime? get scheduledDeliveryDate => _scheduledDeliveryDate;
+
+  String _deliveryAddress = '';
+  String get deliveryAddress => _deliveryAddress;
+
+  String _deliveryNotes = '';
+  String get deliveryNotes => _deliveryNotes;
+
   double _amountPaid = 0.0;
   double get amountPaid => _amountPaid;
 
@@ -137,15 +153,44 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setCustomer(String? id, String? name) {
+  void setCustomer(String? id, String? name, {String? phone, String? address}) {
     _customerId = id;
     _customerName = name;
+    _customerPhone = phone;
+    if (address != null && address.trim().isNotEmpty) {
+      _deliveryAddress = address;
+    }
     notifyListeners();
   }
 
   void clearCustomer() {
     _customerId = null;
     _customerName = null;
+    _customerPhone = null;
+    _deliveryAddress = '';
+    notifyListeners();
+  }
+
+  void setIsDelivery(bool isDelivery) {
+    _isDelivery = isDelivery;
+    if (isDelivery && _scheduledDeliveryDate == null) {
+      _scheduledDeliveryDate = DateTime.now().add(const Duration(hours: 1));
+    }
+    notifyListeners();
+  }
+
+  void setScheduledDeliveryDate(DateTime date) {
+    _scheduledDeliveryDate = date;
+    notifyListeners();
+  }
+
+  void setDeliveryAddress(String address) {
+    _deliveryAddress = address;
+    notifyListeners();
+  }
+
+  void setDeliveryNotes(String notes) {
+    _deliveryNotes = notes;
     notifyListeners();
   }
 
@@ -162,6 +207,10 @@ class CartViewModel extends ChangeNotifier {
     _amountPaid = sale.amountPaid ?? 0.0;
     _customerId = sale.customerId;
     _customerName = sale.customerName;
+    _isDelivery = false;
+    _scheduledDeliveryDate = null;
+    _deliveryAddress = '';
+    _deliveryNotes = '';
 
     for (final item in sale.items) {
       final matchedProduct = availableProducts.firstWhere(
@@ -191,6 +240,11 @@ class CartViewModel extends ChangeNotifier {
     _amountPaid = 0.0;
     _customerId = null;
     _customerName = null;
+    _customerPhone = null;
+    _isDelivery = false;
+    _scheduledDeliveryDate = null;
+    _deliveryAddress = '';
+    _deliveryNotes = '';
     _initSaleNumber();
   }
 
@@ -231,9 +285,14 @@ class CartViewModel extends ChangeNotifier {
       change: change,
       customerId: _customerId,
       customerName: _customerName,
+      customerPhone: _customerPhone,
       userId: userId,
       userName: userName,
       availableProducts: availableProducts,
+      isDelivery: _isDelivery,
+      deliveryScheduledAt: _scheduledDeliveryDate,
+      deliveryAddress: _deliveryAddress,
+      deliveryNotes: _deliveryNotes,
     );
 
     clearCart();
