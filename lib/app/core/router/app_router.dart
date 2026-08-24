@@ -32,6 +32,11 @@ import 'package:estoque_pro/app/features/sales/presentation/pages/sale_scanner_p
 import 'package:estoque_pro/app/features/sales/presentation/pages/sales_page.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
+import 'package:estoque_pro/app/features/customers/presentation/pages/customer_form_page.dart';
+import 'package:estoque_pro/app/features/customers/presentation/pages/customers_page.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_form_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/supplier_form_page.dart';
 import 'package:estoque_pro/app/features/suppliers/presentation/pages/suppliers_page.dart';
@@ -56,6 +61,7 @@ class AppRouter {
     routePermissions: {
       AppRoutes.productHistory: UserPermission.viewHistory,
       AppRoutes.supplierForm: UserPermission.manageSuppliers,
+      AppRoutes.customerForm: UserPermission.managerCustomer,
       AppRoutes.categoryForm: UserPermission.manageCategories,
     },
   );
@@ -161,6 +167,23 @@ class AppRouter {
           return SupplierFormPage(
             viewModel: getIt<SuppliersFormViewmodel>(),
             supplier: supplier,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.customers,
+        builder: (context, state) => CustomersPage(
+          viewModelFactory: () => getIt<CustomersViewModel>(),
+          authViewModel: getIt<AuthViewModel>(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.customerForm,
+        builder: (context, state) {
+          final customer = state.extra as CustomerEntity?;
+          return CustomerFormPage(
+            viewModel: getIt<CustomersFormViewModel>(),
+            customer: customer,
           );
         },
       ),

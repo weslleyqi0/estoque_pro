@@ -36,6 +36,12 @@ class CartViewModel extends ChangeNotifier {
   PaymentMethod? _paymentMethod = PaymentMethod.dinheiro;
   PaymentMethod? get paymentMethod => _paymentMethod;
 
+  String? _customerId;
+  String? get customerId => _customerId;
+
+  String? _customerName;
+  String? get customerName => _customerName;
+
   double _amountPaid = 0.0;
   double get amountPaid => _amountPaid;
 
@@ -131,6 +137,18 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setCustomer(String? id, String? name) {
+    _customerId = id;
+    _customerName = name;
+    notifyListeners();
+  }
+
+  void clearCustomer() {
+    _customerId = null;
+    _customerName = null;
+    notifyListeners();
+  }
+
   String? _editingSaleId;
   String? get editingSaleId => _editingSaleId;
 
@@ -142,6 +160,8 @@ class CartViewModel extends ChangeNotifier {
     _discountValue = sale.discountValue;
     _paymentMethod = sale.paymentMethod;
     _amountPaid = sale.amountPaid ?? 0.0;
+    _customerId = sale.customerId;
+    _customerName = sale.customerName;
 
     for (final item in sale.items) {
       final matchedProduct = availableProducts.firstWhere(
@@ -169,6 +189,8 @@ class CartViewModel extends ChangeNotifier {
     _discountValue = 0.0;
     _paymentMethod = null;
     _amountPaid = 0.0;
+    _customerId = null;
+    _customerName = null;
     _initSaleNumber();
   }
 
@@ -207,6 +229,8 @@ class CartViewModel extends ChangeNotifier {
       paymentMethod: _paymentMethod!,
       amountPaid: _amountPaid,
       change: change,
+      customerId: _customerId,
+      customerName: _customerName,
       userId: userId,
       userName: userName,
       availableProducts: availableProducts,
@@ -232,6 +256,8 @@ class CartViewModel extends ChangeNotifier {
       paymentMethod: _paymentMethod ?? PaymentMethod.dinheiro,
       amountPaid: _amountPaid,
       change: change,
+      customerId: _customerId,
+      customerName: _customerName,
       userId: userId,
       userName: userName,
       availableProducts: availableProducts,

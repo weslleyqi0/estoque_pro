@@ -29,6 +29,8 @@ class FinalizeSaleUseCase {
     required PaymentMethod paymentMethod,
     required double amountPaid,
     required double change,
+    String? customerId,
+    String? customerName,
     required String userId,
     required String userName,
     required List<ProductEntity> availableProducts,
@@ -36,6 +38,10 @@ class FinalizeSaleUseCase {
   }) async {
     if (items.isEmpty) {
       throw Exception('O carrinho está vazio.');
+    }
+
+    if (paymentMethod == PaymentMethod.fiado && (customerName == null || customerName.trim().isEmpty)) {
+      throw Exception('Para vendas no fiado, é obrigatório selecionar um cliente.');
     }
 
     final outOfStock = _getOutOfStockProducts(items, availableProducts);
@@ -67,8 +73,8 @@ class FinalizeSaleUseCase {
       paymentMethod: paymentMethod,
       amountPaid: paymentMethod == PaymentMethod.dinheiro ? amountPaid : null,
       change: paymentMethod == PaymentMethod.dinheiro ? change : null,
-      customerId: '',
-      customerName: '',
+      customerId: customerId,
+      customerName: customerName,
       userId: userId,
       userName: userName,
       status: SaleStatus.completed,

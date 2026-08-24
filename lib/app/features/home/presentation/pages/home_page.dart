@@ -291,14 +291,14 @@ class _HomePageState extends State<HomePage> {
                               icon: AppIcons.localShipping,
                               onPressed: () => context.push(AppRoutes.suppliers),
                             ),
+                            HomeButton(
+                              title: 'Clientes',
+                              subTitle: 'Cadastros e fiados',
+                              color: Colors.pink,
+                              icon: AppIcons.group,
+                              onPressed: () => context.push(AppRoutes.customers),
+                            ),
                             if (isManager) ...[
-                              HomeButton(
-                                title: 'Clientes',
-                                subTitle: 'Cadastros e fiados',
-                                color: Colors.pink,
-                                icon: AppIcons.group,
-                                onPressed: () {},
-                              ),
                               HomeButton(
                                 title: 'Entregas',
                                 subTitle: 'Gerenciar entregas',
