@@ -152,6 +152,28 @@ void main() {
     expect(viewModel.filteredDeliveries.first.id, 'd3');
   });
 
+  test('deliveries in all tab are ordered: delayed -> pending -> inProgress -> others (descending)', () async {
+    final inProgress = deliveryPending.copyWith(
+      id: 'd4',
+      status: DeliveryStatus.inProgress,
+      scheduledAt: now.add(const Duration(hours: 3)),
+    );
+
+    viewModel.listenAll();
+    // Added in arbitrary order
+    controller.add([deliveryCompleted, inProgress, deliveryPending, deliveryDelayed]);
+    await Future.delayed(Duration.zero);
+
+    viewModel.setSelectedTab(DeliveryFilterTab.all);
+    final sorted = viewModel.filteredDeliveries;
+
+    expect(sorted.length, 4);
+    expect(sorted[0].id, 'd2'); // Atrasada
+    expect(sorted[1].id, 'd1'); // Pendente
+    expect(sorted[2].id, 'd4'); // Em andamento
+    expect(sorted[3].id, 'd3'); // Finalizada (outras)
+  });
+
   test('updateDeliveryStatus delegates to repository', () async {
     await viewModel.updateDeliveryStatus('d1', DeliveryStatus.inProgress);
     verify(() => mockRepository.updateStatus('d1', DeliveryStatus.inProgress, deliveredAt: null)).called(1);

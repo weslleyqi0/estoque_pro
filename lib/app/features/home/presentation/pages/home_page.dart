@@ -1,6 +1,8 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/widgets/home_button.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
@@ -15,12 +17,14 @@ class HomePage extends StatefulWidget {
   final AuthViewModel authViewModel;
   final SalesViewModel salesViewModel;
   final ProductsViewModel productsViewModel;
+  final DeliveriesViewModel? deliveriesViewModel;
 
   const HomePage({
     super.key,
     required this.authViewModel,
     required this.salesViewModel,
     required this.productsViewModel,
+    this.deliveriesViewModel,
   });
 
   @override
@@ -31,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   AuthViewModel get _authVM => widget.authViewModel;
   SalesViewModel get _salesVM => widget.salesViewModel;
   ProductsViewModel get _productsVM => widget.productsViewModel;
+  DeliveriesViewModel get _deliveriesVM => widget.deliveriesViewModel ?? getIt<DeliveriesViewModel>();
   DateTime? _lastBackPressTime;
 
   @override
@@ -38,6 +43,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _salesVM.listenAll();
     _productsVM.listenAll();
+    _deliveriesVM.listenAll();
   }
 
   String get _greetingPeriod {
@@ -80,12 +86,20 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: ListenableBuilder(
-        listenable: Listenable.merge([_authVM, _salesVM, _productsVM]),
+        listenable: Listenable.merge([_authVM, _salesVM, _productsVM, _deliveriesVM]),
         builder: (context, _) {
           final currentUser = _authVM.currentUser;
           final isManager = currentUser?.role == UserRole.owner || currentUser?.role == UserRole.admin;
           final allInProgressSales = _salesVM.inProgressSales;
           final lowStockProducts = _productsVM.lowStockProducts;
+          final delayedDeliveries = _deliveriesVM.delayedDeliveries;
+          final pendingDeliveries = _deliveriesVM.pendingDeliveries;
+          final totalPendingOrDelayed = delayedDeliveries.length + pendingDeliveries.length;
+          final hasNotifications =
+              allInProgressSales.isNotEmpty ||
+              lowStockProducts.isNotEmpty ||
+              delayedDeliveries.isNotEmpty ||
+              pendingDeliveries.isNotEmpty;
 
           return Scaffold(
             appBar: AppBar(
@@ -192,7 +206,7 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
-                      if (allInProgressSales.isNotEmpty || lowStockProducts.isNotEmpty)
+                      if (hasNotifications)
                         SliverToBoxAdapter(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,6 +217,42 @@ class _HomePageState extends State<HomePage> {
                                 child: Text('Avisos', style: context.textTheme.titleMedium),
                               ),
                               const Gap(AppSpacing.space4),
+                              if (delayedDeliveries.isNotEmpty) ...[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
+                                  child: AppInfoBanner(
+                                    title: delayedDeliveries.length == 1
+                                        ? '1 entrega atrasada'
+                                        : '${delayedDeliveries.length} entregas atrasadas',
+                                    subtitle: 'Toque para gerenciar as entregas atrasadas',
+                                    icon: AppIcons.deliveryTruck,
+                                    type: AppInfoBannerType.error,
+                                    onTap: () {
+                                      _deliveriesVM.setSelectedTab(DeliveryFilterTab.delayed);
+                                      context.push(AppRoutes.deliveries);
+                                    },
+                                  ),
+                                ),
+                                const Gap(AppSpacing.space12),
+                              ],
+                              if (pendingDeliveries.isNotEmpty) ...[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
+                                  child: AppInfoBanner(
+                                    title: pendingDeliveries.length == 1
+                                        ? '1 entrega pendente'
+                                        : '${pendingDeliveries.length} entregas pendentes',
+                                    subtitle: 'Toque para gerenciar as entregas pendentes',
+                                    icon: AppIcons.deliveryTruck,
+                                    type: AppInfoBannerType.warning,
+                                    onTap: () {
+                                      _deliveriesVM.setSelectedTab(DeliveryFilterTab.pending);
+                                      context.push(AppRoutes.deliveries);
+                                    },
+                                  ),
+                                ),
+                                const Gap(AppSpacing.space12),
+                              ],
                               if (allInProgressSales.isNotEmpty) ...[
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
@@ -230,7 +280,7 @@ class _HomePageState extends State<HomePage> {
                                         : '${lowStockProducts.length} produtos com estoque baixo',
                                     subtitle: 'Toque para gerenciar o estoque dos produtos',
                                     icon: AppIcons.package2,
-                                    type: AppInfoBannerType.error,
+                                    type: AppInfoBannerType.warning,
                                     onTap: () {
                                       _productsVM.setShowOnlyLowStock(true);
                                       context.push(AppRoutes.products);
@@ -257,7 +307,7 @@ class _HomePageState extends State<HomePage> {
                               title: 'Produtos',
                               subTitle: 'Gerenciar Catalogo',
                               badgerContent: lowStockProducts.isNotEmpty ? '${lowStockProducts.length}' : null,
-                              badgerColor: AppColors.error,
+                              badgerColor: AppColors.warning,
                               color: AppColors.primary,
                               icon: AppIcons.lists,
                               onPressed: () {
@@ -298,14 +348,16 @@ class _HomePageState extends State<HomePage> {
                               icon: AppIcons.group,
                               onPressed: () => context.push(AppRoutes.customers),
                             ),
+                            HomeButton(
+                              title: 'Entregas',
+                              subTitle: 'Gerenciar entregas',
+                              badgerContent: totalPendingOrDelayed > 0 ? '$totalPendingOrDelayed' : null,
+                              badgerColor: delayedDeliveries.isNotEmpty ? AppColors.error : AppColors.warning,
+                              color: Colors.orange,
+                              icon: AppIcons.deliveryTruck,
+                              onPressed: () => context.push(AppRoutes.deliveries),
+                            ),
                             if (isManager) ...[
-                              HomeButton(
-                                title: 'Entregas',
-                                subTitle: 'Gerenciar entregas',
-                                color: Colors.orange,
-                                icon: AppIcons.deliveryTruck,
-                                onPressed: () {},
-                              ),
                               HomeButton(
                                 title: 'Relatórios',
                                 subTitle: 'Análise completa',

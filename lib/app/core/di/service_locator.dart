@@ -3,6 +3,10 @@ import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
+import 'package:estoque_pro/app/features/deliveries/data/repositories/deliveries_repository_impl.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/data/repositories/sales_repository_impl.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
@@ -73,6 +77,7 @@ Future<void> setupServiceLocator() async {
   registerDatabaseService<CategoryEntity>('categories');
   registerDatabaseService<ProductEntity>('products');
   registerDatabaseService<SaleEntity>('sales');
+  registerDatabaseService<DeliveryEntity>('deliveries');
 
   // Services
   final localStorageService = LocalStorageService();
@@ -135,6 +140,12 @@ Future<void> setupServiceLocator() async {
     ),
   );
 
+  getIt.registerLazySingleton<DeliveriesRepository>(
+    () => DeliveriesRepositoryImpl(
+      getIt<FirebaseDatabaseService<DeliveryEntity>>(),
+    ),
+  );
+
   // UseCases
   getIt.registerFactory<CountProductsUseCase>(
     () => CountProductsUseCase(getIt<ProductsRepository>()),
@@ -148,7 +159,10 @@ Future<void> setupServiceLocator() async {
   );
 
   getIt.registerFactory<FinalizeSaleUseCase>(
-    () => FinalizeSaleUseCase(getIt<SaveSaleUseCase>()),
+    () => FinalizeSaleUseCase(
+      getIt<SaveSaleUseCase>(),
+      getIt<DeliveriesRepository>(),
+    ),
   );
 
   getIt.registerFactory<SaveDraftSaleUseCase>(
@@ -236,6 +250,10 @@ Future<void> setupServiceLocator() async {
     () => SalesViewModel(getIt<SalesRepository>()),
   );
 
+  getIt.registerFactory<DeliveriesViewModel>(
+    () => DeliveriesViewModel(getIt<DeliveriesRepository>()),
+  );
+
   getIt.registerFactory<CartViewModel>(
     () => CartViewModel(
       getIt<FinalizeSaleUseCase>(),
@@ -251,3 +269,4 @@ Future<void> setupServiceLocator() async {
     ),
   );
 }
+

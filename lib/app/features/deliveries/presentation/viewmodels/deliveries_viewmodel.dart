@@ -73,22 +73,85 @@ class DeliveriesViewModel extends ChangeNotifier {
     );
   }
 
-  List<DeliveryEntity> get delayedDeliveries =>
-      _deliveries.where((d) => d.isDelayed).toList();
+  int _getDeliveryPriority(DeliveryEntity d) {
+    if (d.isDelayed) return 0;
+    if (d.status == DeliveryStatus.pending) return 1;
+    if (d.status == DeliveryStatus.inProgress) return 2;
+    return 3;
+  }
 
-  List<DeliveryEntity> get pendingDeliveries => _deliveries
-      .where((d) => d.status == DeliveryStatus.pending && !d.isDelayed)
-      .toList();
+  List<DeliveryEntity> _sortDeliveriesForAllTab(List<DeliveryEntity> list) {
+    final sorted = List<DeliveryEntity>.from(list);
+    sorted.sort((a, b) {
+      final prioA = _getDeliveryPriority(a);
+      final prioB = _getDeliveryPriority(b);
 
-  List<DeliveryEntity> get inProgressDeliveries => _deliveries
-      .where((d) => d.status == DeliveryStatus.inProgress && !d.isDelayed)
-      .toList();
+      if (prioA != prioB) {
+        return prioA.compareTo(prioB);
+      }
 
-  List<DeliveryEntity> get completedDeliveries =>
-      _deliveries.where((d) => d.status == DeliveryStatus.completed).toList();
+      // Se ambas forem atrasadas, pendentes ou em andamento:
+      if (prioA < 3) {
+        final dateCompare = a.scheduledAt.compareTo(b.scheduledAt);
+        if (dateCompare != 0) return dateCompare;
+        return b.createdAt.compareTo(a.createdAt);
+      } else {
+        // Ordena as outras por data decrescente (da mais recente para a mais antiga)
+        final dateA = a.deliveredAt ?? a.scheduledAt;
+        final dateB = b.deliveredAt ?? b.scheduledAt;
+        final dateCompare = dateB.compareTo(dateA);
+        if (dateCompare != 0) return dateCompare;
+        return b.createdAt.compareTo(a.createdAt);
+      }
+    });
+    return sorted;
+  }
 
-  List<DeliveryEntity> get cancelledDeliveries =>
-      _deliveries.where((d) => d.status == DeliveryStatus.cancelled).toList();
+  List<DeliveryEntity> get delayedDeliveries {
+    final list = _deliveries.where((d) => d.isDelayed).toList();
+    list.sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    return list;
+  }
+
+  List<DeliveryEntity> get pendingDeliveries {
+    final list = _deliveries
+        .where((d) => d.status == DeliveryStatus.pending && !d.isDelayed)
+        .toList();
+    list.sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    return list;
+  }
+
+  List<DeliveryEntity> get inProgressDeliveries {
+    final list = _deliveries
+        .where((d) => d.status == DeliveryStatus.inProgress && !d.isDelayed)
+        .toList();
+    list.sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    return list;
+  }
+
+  List<DeliveryEntity> get completedDeliveries {
+    final list = _deliveries.where((d) => d.status == DeliveryStatus.completed).toList();
+    list.sort((a, b) {
+      final dateA = a.deliveredAt ?? a.scheduledAt;
+      final dateB = b.deliveredAt ?? b.scheduledAt;
+      final dateCompare = dateB.compareTo(dateA);
+      if (dateCompare != 0) return dateCompare;
+      return b.createdAt.compareTo(a.createdAt);
+    });
+    return list;
+  }
+
+  List<DeliveryEntity> get cancelledDeliveries {
+    final list = _deliveries.where((d) => d.status == DeliveryStatus.cancelled).toList();
+    list.sort((a, b) {
+      final dateA = a.scheduledAt;
+      final dateB = b.scheduledAt;
+      final dateCompare = dateB.compareTo(dateA);
+      if (dateCompare != 0) return dateCompare;
+      return b.createdAt.compareTo(a.createdAt);
+    });
+    return list;
+  }
 
   int getTabCount(DeliveryFilterTab tab) {
     switch (tab) {
@@ -111,7 +174,7 @@ class DeliveriesViewModel extends ChangeNotifier {
     List<DeliveryEntity> list;
     switch (_selectedTab) {
       case DeliveryFilterTab.all:
-        list = _deliveries;
+        list = _sortDeliveriesForAllTab(_deliveries);
         break;
       case DeliveryFilterTab.pending:
         list = pendingDeliveries;

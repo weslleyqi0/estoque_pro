@@ -26,6 +26,8 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/archiv
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/product_history_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/pages/deliveries_page.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/new_sale_page.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/sale_scanner_page.dart';
@@ -63,6 +65,7 @@ class AppRouter {
       AppRoutes.supplierForm: UserPermission.manageSuppliers,
       AppRoutes.customerForm: UserPermission.managerCustomer,
       AppRoutes.categoryForm: UserPermission.manageCategories,
+      AppRoutes.deliveries: UserPermission.deliveries,
     },
   );
 
@@ -305,6 +308,13 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.saleScanner,
         builder: (context, state) => const SaleScannerPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.deliveries,
+        builder: (context, state) => DeliveriesPage(
+          viewModelFactory: () => getIt<DeliveriesViewModel>(),
+          authViewModel: getIt<AuthViewModel>(),
+        ),
       ),
 
       GoRoute(
