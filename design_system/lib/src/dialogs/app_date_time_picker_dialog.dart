@@ -143,7 +143,7 @@ class AppDateTimePicker {
                             data: Theme.of(dialogContext).copyWith(
                               datePickerTheme: DatePickerThemeData(
                                 dayShape: WidgetStateProperty.all(
-                                  RoundedRectangleBorder(borderRadius: AppSpacing.borderRadius12),
+                                  const _AppDayBorder(radius: AppSpacing.radius8, margin: 2),
                                 ),
                                 todayBorder: BorderSide(
                                   color: dialogContext.colorScheme.primary,
@@ -268,4 +268,67 @@ class AppDateTimePicker {
       },
     );
   }
+}
+
+/// Borda customizada para os dias do calendário que aplica uma margem interna (margin/inset)
+/// e cantos arredondados, evitando que dias adjacentes fiquem colados uns nos outros.
+class _AppDayBorder extends OutlinedBorder {
+  final double radius;
+  final double margin;
+
+  const _AppDayBorder({
+    this.radius = 8.0,
+    this.margin = 3.0,
+    super.side,
+  });
+
+  @override
+  OutlinedBorder copyWith({BorderSide? side}) {
+    return _AppDayBorder(
+      radius: radius,
+      margin: margin,
+      side: side ?? this.side,
+    );
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    final insetRect = rect.deflate(margin);
+    return Path()..addRRect(RRect.fromRectAndRadius(insetRect, Radius.circular(radius)));
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    final insetRect = rect.deflate(margin);
+    return Path()..addRRect(RRect.fromRectAndRadius(insetRect, Radius.circular(radius)));
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    final insetRect = rect.deflate(margin);
+    if (side.style != BorderStyle.none && side.width > 0) {
+      final paint = side.toPaint();
+      final rrect = RRect.fromRectAndRadius(insetRect, Radius.circular(radius));
+      canvas.drawRRect(rrect, paint);
+    }
+  }
+
+  @override
+  ShapeBorder scale(double t) {
+    return _AppDayBorder(
+      radius: radius * t,
+      margin: margin * t,
+      side: side.scale(t),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is _AppDayBorder && other.radius == radius && other.margin == margin && other.side == side;
+  }
+
+  @override
+  int get hashCode => Object.hash(radius, margin, side);
 }
