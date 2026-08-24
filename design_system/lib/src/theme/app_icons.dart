@@ -3,10 +3,6 @@ import 'package:material_symbols_icons/symbols.dart';
 
 /// Centralized icons repository for the application and design system.
 abstract class AppIcons {
-  // --- ASSET PATHS & PACKAGES ---
-  static const String pixLogo = 'assets/icons/pix_logo.svg';
-  static const String package = 'design_system';
-
   // --- GENERAL ACTIONS & SYSTEM ICONS ---
   static const IconData add = Symbols.add_rounded;
   static const IconData add2 = Symbols.add_2_rounded;
@@ -89,6 +85,7 @@ abstract class AppIcons {
   static const IconData shoppingCart = Symbols.shopping_cart_rounded;
   static const IconData store = Symbols.store_rounded;
   static const IconData supervisorAccount = Symbols.supervisor_account_rounded;
+  static const IconData pix = Icons.pix;
   static const IconData trendingDown = Symbols.trending_down_rounded;
   static const IconData trendingUp = Symbols.trending_up_rounded;
   static const IconData truck = Symbols.local_shipping_rounded;

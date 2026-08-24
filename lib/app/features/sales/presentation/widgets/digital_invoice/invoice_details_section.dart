@@ -19,11 +19,11 @@ class InvoiceDetailsSection extends StatelessWidget {
 
   IconData _getPaymentIcon(PaymentMethod method) {
     return switch (method) {
-      PaymentMethod.dinheiro => Icons.payments_rounded,
-      PaymentMethod.pix => Icons.qr_code_rounded,
-      PaymentMethod.credito => Icons.credit_card_rounded,
-      PaymentMethod.debito => Icons.credit_card_rounded,
-      PaymentMethod.fiado => Icons.bookmark_add_rounded,
+      PaymentMethod.dinheiro => AppIcons.currency,
+      PaymentMethod.pix => AppIcons.pix,
+      PaymentMethod.credito => AppIcons.creditCard,
+      PaymentMethod.debito => AppIcons.creditScore,
+      PaymentMethod.fiado => AppIcons.receiptLong,
     };
   }
 
