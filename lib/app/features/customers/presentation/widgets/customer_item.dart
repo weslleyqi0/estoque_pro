@@ -1,9 +1,8 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
+import 'package:estoque_pro/app/features/customers/presentation/widgets/customer_detail_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 
 class CustomerItem extends StatelessWidget {
   final CustomerEntity customer;
@@ -20,6 +19,7 @@ class CustomerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = !customer.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
+    final hasAddress = customer.address != null && customer.address!.trim().isNotEmpty;
 
     return Card(
       color: context.colorScheme.surfaceContainerLow,
@@ -28,16 +28,22 @@ class CustomerItem extends StatelessWidget {
         side: BorderSide(color: context.colorScheme.outlineVariant),
       ),
       child: InkWell(
-        onTap: onTap ?? (canEdit ? () => context.push(AppRoutes.customerForm, extra: customer) : null),
+        onTap:
+            onTap ??
+            () => CustomerDetailBottomSheet.show(
+              context: context,
+              customer: customer,
+              canEdit: canEdit,
+            ),
         borderRadius: AppSpacing.borderRadius16,
         child: Padding(
-          padding: const .all(AppSpacing.space12),
+          padding: const EdgeInsets.all(AppSpacing.space12),
           child: Row(
-            mainAxisAlignment: .spaceBetween,
-            crossAxisAlignment: .start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: .all(AppSpacing.space8),
+                padding: const EdgeInsets.all(AppSpacing.space8),
                 decoration: BoxDecoration(
                   borderRadius: AppSpacing.borderRadius12,
                   color: context.colorScheme.outline,
@@ -50,13 +56,13 @@ class CustomerItem extends StatelessWidget {
                 ),
               ),
               const Gap(AppSpacing.space8),
-              Flexible(
+              Expanded(
                 child: Column(
-                  crossAxisAlignment: .start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: .spaceBetween,
-                      crossAxisAlignment: .start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Text(
@@ -77,6 +83,7 @@ class CustomerItem extends StatelessWidget {
                           ),
                       ],
                     ),
+
                     Row(
                       children: [
                         Icon(
@@ -88,7 +95,7 @@ class CustomerItem extends StatelessWidget {
                         const Gap(AppSpacing.space4),
                         Expanded(
                           child: Text(
-                            customer.address != null ? '${customer.address}' : '',
+                            customer.address ?? 'Endereço não informado',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: context.textTheme.labelLarge?.copyWith(color: color),
