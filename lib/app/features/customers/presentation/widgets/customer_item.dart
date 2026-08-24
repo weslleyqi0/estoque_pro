@@ -19,7 +19,6 @@ class CustomerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = !customer.isActive ? context.colorScheme.onSurface.withValues(alpha: 0.4) : null;
-    final hasAddress = customer.address != null && customer.address!.trim().isNotEmpty;
 
     return Card(
       color: context.colorScheme.surfaceContainerLow,
