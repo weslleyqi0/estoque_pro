@@ -13,6 +13,9 @@ class AppRoutes {
   static const suppliers = '/suppliers';
   static const supplierForm = '/suppliers/form';
 
+  static const customers = '/customers';
+  static const customerForm = '/customers/form';
+
   static const categories = '/categories';
   static const categoryForm = '/categories/form';
 

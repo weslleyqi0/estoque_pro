@@ -1,13 +1,18 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/widgets/customer_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_summary_widget.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/discount_option_card.dart';
+import 'package:estoque_pro/app/features/sales/presentation/widgets/payment_customer_selector.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/payment_method_card.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
@@ -100,6 +105,19 @@ class _PaymentSheetState extends State<PaymentSheet> {
     }
   }
 
+  void _selectCustomer(BuildContext context, CartViewModel vm) {
+    final canManageCustomers =
+        widget.authViewModel.currentUser?.hasPermission(UserPermission.managerCustomer) ?? false;
+    CustomerBottomSheet.show(
+      context: context,
+      customersVM: getIt<CustomersViewModel>(),
+      canManageCustomers: canManageCustomers,
+      onCustomerSelected: (customer) {
+        vm.setCustomer(customer.id, customer.name);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = widget.cartViewModel;
@@ -107,9 +125,10 @@ class _PaymentSheetState extends State<PaymentSheet> {
     return ListenableBuilder(
       listenable: vm,
       builder: (context, _) {
-        final isCash = vm.paymentMethod == .dinheiro;
-        final isFiado = vm.paymentMethod == .fiado;
-        final canConfirm = vm.paymentMethod != null && (!isCash || vm.change >= 0);
+        final isCash = vm.paymentMethod == PaymentMethod.dinheiro;
+        final isFiado = vm.paymentMethod == PaymentMethod.fiado;
+        final hasCustomerIfFiado = !isFiado || (vm.customerName != null && vm.customerName!.trim().isNotEmpty);
+        final canConfirm = vm.paymentMethod != null && (!isCash || vm.change >= 0) && hasCustomerIfFiado;
 
         return SafeArea(
           top: true,
@@ -118,15 +137,15 @@ class _PaymentSheetState extends State<PaymentSheet> {
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height - AppSpacing.space56,
             ),
-            padding: .only(
+            padding: EdgeInsets.only(
               left: AppSpacing.space16,
               right: AppSpacing.space16,
               top: AppSpacing.space16,
               bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.space24,
             ),
             child: Column(
-              mainAxisSize: .min,
-              crossAxisAlignment: .start,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(
                   child: Container(
@@ -139,16 +158,16 @@ class _PaymentSheetState extends State<PaymentSheet> {
                   ),
                 ),
                 Row(
-                  mainAxisAlignment: .spaceBetween,
-                  crossAxisAlignment: .start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Column(
-                      crossAxisAlignment: .start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Gap(AppSpacing.space16),
                         Text(
                           'Finalizar Venda ',
-                          style: context.textTheme.titleLarge?.copyWith(fontWeight: .bold),
+                          style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
                           vm.saleNumber,
@@ -169,11 +188,21 @@ class _PaymentSheetState extends State<PaymentSheet> {
                 Flexible(
                   child: SingleChildScrollView(
                     child: Column(
-                      crossAxisAlignment: .start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // --- CLIENTE SELECTION ---
+                        PaymentCustomerSelector(
+                          customerName: vm.customerName,
+                          isFiado: isFiado,
+                          onTap: () => _selectCustomer(context, vm),
+                          onClear: vm.clearCustomer,
+                        ),
+                        const Gap(AppSpacing.space16),
+
+                        // --- FORMA DE PAGAMENTO ---
                         Text(
                           'Forma de Pagamento',
-                          style: context.textTheme.titleMedium?.copyWith(fontWeight: .bold),
+                          style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const Gap(AppSpacing.space8),
                         Center(
@@ -284,8 +313,9 @@ class _PaymentSheetState extends State<PaymentSheet> {
                                 onTap: () {
                                   final digits = _discountController.text.replaceAll(RegExp(r'[^0-9]'), '');
                                   final parsed = digits.isEmpty ? 0.0 : (double.parse(digits) / 100);
-                                  _discountController.text =
-                                      parsed > 0 ? CurrencyInputFormatter.formatCurrency(parsed) : '';
+                                  _discountController.text = parsed > 0
+                                      ? CurrencyInputFormatter.formatCurrency(parsed)
+                                      : '';
                                   vm.setDiscount(DiscountType.valueAmount, parsed);
                                 },
                               ),

@@ -48,11 +48,10 @@ class SaleCardSummary extends StatelessWidget {
           ],
         ),
         if (sale.customerName?.isNotEmpty == true) ...[
-          const Gap(4),
           Text(
             'Cliente: ${sale.customerName}',
             style: context.textTheme.bodySmall?.copyWith(
-              color: context.colorScheme.outline,
+              color: context.colorScheme.onSurface.withValues(alpha: 0.6),
               fontStyle: FontStyle.italic,
             ),
           ),
