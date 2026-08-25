@@ -287,7 +287,7 @@ class _HomePageState extends State<HomePage> {
                                   pendingOrDelayedDeliveriesCount > 0 ? '$pendingOrDelayedDeliveriesCount' : null,
                               badgerColor: hasDelayedDeliveries ? AppColors.error : AppColors.warning,
                               color: Colors.orange,
-                              icon: AppIcons.deliveryTruck,
+                              icon: AppIcons.truck,
                               onPressed: () => context.push(
                                 AppRoutes.deliveries,
                                 extra: DeliveryFilterTab.all,

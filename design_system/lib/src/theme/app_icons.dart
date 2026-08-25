@@ -53,7 +53,6 @@ abstract class AppIcons {
   static const IconData creditScore = Symbols.credit_score_rounded;
   static const IconData crown = Symbols.crown;
   static const IconData currency = Symbols.universal_currency_alt_rounded;
-  static const IconData deliveryTruck = Symbols.delivery_truck_speed_rounded;
   static const IconData directions = Symbols.directions_rounded;
   static const IconData editNote = Symbols.edit_note_rounded;
   static const IconData event = Symbols.event_rounded;

@@ -45,7 +45,7 @@ class HomeAlertsSection extends StatelessWidget {
         _AlertData(
           title: delayedDeliveriesCount == 1 ? '1 entrega atrasada' : '$delayedDeliveriesCount entregas atrasadas',
           subtitle: 'Toque para gerenciar as entregas atrasadas',
-          icon: AppIcons.deliveryTruck,
+          icon: AppIcons.truck,
           type: AppInfoBannerType.error,
           onTap: () => context.push(
             AppRoutes.deliveries,
@@ -56,7 +56,7 @@ class HomeAlertsSection extends StatelessWidget {
         _AlertData(
           title: pendingDeliveriesCount == 1 ? '1 entrega pendente' : '$pendingDeliveriesCount entregas pendentes',
           subtitle: 'Toque para gerenciar as entregas pendentes',
-          icon: AppIcons.deliveryTruck,
+          icon: AppIcons.truck,
           type: AppInfoBannerType.warning,
           onTap: () => context.push(
             AppRoutes.deliveries,

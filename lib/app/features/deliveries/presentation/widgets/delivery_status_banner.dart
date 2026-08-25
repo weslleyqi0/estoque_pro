@@ -46,7 +46,7 @@ class DeliveryStatusBanner extends StatelessWidget {
       case DeliveryStatus.pending:
         return AppIcons.schedule;
       case DeliveryStatus.inProgress:
-        return AppIcons.deliveryTruck;
+        return AppIcons.truck;
       case DeliveryStatus.completed:
         return AppIcons.checkCircle;
       case DeliveryStatus.delayed:

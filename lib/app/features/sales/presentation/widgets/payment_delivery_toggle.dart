@@ -32,7 +32,7 @@ class PaymentDeliveryToggle extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            AppIcons.deliveryTruck,
+            AppIcons.truck,
             color: isDelivery ? context.colorScheme.primary : context.colorScheme.onSurfaceVariant,
           ),
           const Gap(AppSpacing.space12),

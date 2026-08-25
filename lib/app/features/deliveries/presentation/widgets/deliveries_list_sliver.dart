@@ -36,7 +36,7 @@ class DeliveriesListSliver extends StatelessWidget {
       return const SliverFillRemaining(
         child: AppEmptyList(
           message: 'Nenhuma entrega registrada.\nAo finalizar uma venda com opção de entrega, ela aparecerá aqui.',
-          icon: AppIcons.deliveryTruck,
+          icon: AppIcons.truck,
           iconColor: Colors.orange,
           iconSize: AppSpacing.icon48,
         ),
