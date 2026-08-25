@@ -307,7 +307,7 @@ class AppRouter {
         builder: (context, state) {
           final sale = state.extra as SaleEntity?;
           return NewSalePage(
-            productsViewModel: getIt<ProductsViewModel>(),
+            productsViewModelFactory: () => getIt<ProductsViewModel>(),
             cartViewModelFactory: () => getIt<CartViewModel>(),
             authViewModel: getIt<AuthViewModel>(),
             initialSale: sale,

@@ -43,9 +43,7 @@ class HomeAlertsSection extends StatelessWidget {
     final alerts = <_AlertData>[
       if (delayedDeliveriesCount > 0)
         _AlertData(
-          title: delayedDeliveriesCount == 1
-              ? '1 entrega atrasada'
-              : '$delayedDeliveriesCount entregas atrasadas',
+          title: delayedDeliveriesCount == 1 ? '1 entrega atrasada' : '$delayedDeliveriesCount entregas atrasadas',
           subtitle: 'Toque para gerenciar as entregas atrasadas',
           icon: AppIcons.deliveryTruck,
           type: AppInfoBannerType.error,
@@ -56,9 +54,7 @@ class HomeAlertsSection extends StatelessWidget {
         ),
       if (pendingDeliveriesCount > 0)
         _AlertData(
-          title: pendingDeliveriesCount == 1
-              ? '1 entrega pendente'
-              : '$pendingDeliveriesCount entregas pendentes',
+          title: pendingDeliveriesCount == 1 ? '1 entrega pendente' : '$pendingDeliveriesCount entregas pendentes',
           subtitle: 'Toque para gerenciar as entregas pendentes',
           icon: AppIcons.deliveryTruck,
           type: AppInfoBannerType.warning,
@@ -74,7 +70,7 @@ class HomeAlertsSection extends StatelessWidget {
               : '$inProgressSalesCount vendas aguardando finalização',
           subtitle: 'Toque para ver ou gerenciar as vendas em andamento',
           icon: AppIcons.shoppingCart,
-          type: AppInfoBannerType.warning,
+          type: AppInfoBannerType.info,
           onTap: () => context.push(
             AppRoutes.sales,
             extra: SalesFilterTab.inProgress,
