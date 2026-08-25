@@ -4,6 +4,7 @@ import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_sta
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/delivery_recipient_card.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/delivery_status_banner.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/widgets/edit_delivery_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/payment_delivery_schedule_card.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -32,6 +33,17 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
         viewModel: viewModel,
       ),
     );
+  }
+
+  void _editDelivery(BuildContext context) async {
+    final result = await EditDeliveryBottomSheet.show(
+      context: context,
+      delivery: delivery,
+      viewModel: viewModel,
+    );
+    if (result == true && context.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   void _reschedule(BuildContext context) async {
@@ -141,26 +153,37 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Entrega Venda ${delivery.saleNumber}',
-                          style: context.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Entrega Venda ${delivery.saleNumber}',
+                            style: context.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Agendada para $scheduledFormatted',
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: delivery.isDelayed ? AppColors.error : context.colorScheme.onSurfaceVariant,
-                            fontWeight: delivery.isDelayed ? FontWeight.bold : FontWeight.normal,
+                          Text(
+                            'Agendada para $scheduledFormatted',
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: delivery.isDelayed ? AppColors.error : context.colorScheme.onSurfaceVariant,
+                              fontWeight: delivery.isDelayed ? FontWeight.bold : FontWeight.normal,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
+                    if (effectiveStatus != DeliveryStatus.completed && effectiveStatus != DeliveryStatus.cancelled) ...[
+                      AppIconButton(
+                        size: AppIconButtonSize.large,
+                        icon: AppIcons.edit,
+                        iconColor: context.colorScheme.primary,
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Editar Entrega',
+                        onPressed: () => _editDelivery(context),
+                      ),
+                    ],
                     CloseButton(onPressed: () => Navigator.pop(context)),
                   ],
                 ),
@@ -278,12 +301,18 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
                         children: [
                           Expanded(
                             child: AppButton.outlined(
-                              label: 'Cancelar Entrega',
+                              label: 'Cancelar',
                               icon: AppIcons.close,
                               borderColor: context.colorScheme.error,
                               backgroundColor: context.colorScheme.error.withValues(alpha: 0.1),
                               onPressed: () => _cancelDelivery(context),
                             ),
+                          ),
+                          const Gap(AppSpacing.space8),
+                          AppButton.outlined(
+                            label: 'Editar',
+                            icon: AppIcons.edit,
+                            onPressed: () => _editDelivery(context),
                           ),
                           const Gap(AppSpacing.space8),
                           AppButton.outlined(

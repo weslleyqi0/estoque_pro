@@ -225,4 +225,14 @@ void main() {
         .having((d) => d.observations, 'observations', 'Entregar na portaria')
         .having((d) => d.status, 'status', DeliveryStatus.pending)))).called(1);
   });
+
+  test('updateDelivery delegates to repository updateDelivery', () async {
+    when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async {});
+    final updated = deliveryPending.copyWith(
+      customerAddress: 'Nova Rua, 999',
+      observations: 'Novo recado',
+    );
+    await viewModel.updateDelivery(updated);
+    verify(() => mockRepository.updateDelivery(updated)).called(1);
+  });
 }
