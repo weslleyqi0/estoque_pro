@@ -88,7 +88,7 @@ class HomeAlertsSection extends StatelessWidget {
           subtitle: 'Toque para gerenciar o estoque dos produtos',
           icon: AppIcons.package2,
           type: AppInfoBannerType.warning,
-          onTap: onLowStockTap ?? () => context.push(AppRoutes.products),
+          onTap: onLowStockTap ?? () => context.push(AppRoutes.products, extra: true),
         ),
     ];
 

@@ -220,10 +220,7 @@ class _HomePageState extends State<HomePage> {
                           pendingDeliveriesCount: pendingDeliveriesCount,
                           inProgressSalesCount: inProgressSalesCount,
                           lowStockProductsCount: lowStockCount,
-                          onLowStockTap: () {
-                            _productsVM.setShowOnlyLowStock(true);
-                            context.push(AppRoutes.products);
-                          },
+                          onLowStockTap: () => context.push(AppRoutes.products, extra: true),
                         ),
                       ),
                       const SliverToBoxAdapter(
