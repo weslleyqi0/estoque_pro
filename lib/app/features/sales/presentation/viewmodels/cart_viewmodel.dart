@@ -98,7 +98,10 @@ class CartViewModel extends ChangeNotifier {
     if (index >= 0) {
       final current = _items[index];
       if (current.quantity >= product.stock) return false;
-      _items[index] = current.copyWith(quantity: current.quantity + 1);
+      _items[index] = current.copyWith(
+        quantity: current.quantity + 1,
+        product: product,
+      );
     } else {
       if (product.stock <= 0) return false;
       _items.add(CartItem(product: product, quantity: 1));
@@ -135,6 +138,25 @@ class CartViewModel extends ChangeNotifier {
   void removeProduct(String productId) {
     _items.removeWhere((item) => item.product.id == productId);
     notifyListeners();
+  }
+
+  void updateAvailableProducts(List<ProductEntity> availableProducts) {
+    if (availableProducts.isEmpty || _items.isEmpty) return;
+    bool changed = false;
+    for (int i = 0; i < _items.length; i++) {
+      final current = _items[i];
+      final matchedIndex = availableProducts.indexWhere((p) => p.id == current.product.id);
+      if (matchedIndex >= 0) {
+        final matched = availableProducts[matchedIndex];
+        if (matched.stock != current.product.stock || matched != current.product) {
+          _items[i] = current.copyWith(product: matched);
+          changed = true;
+        }
+      }
+    }
+    if (changed) {
+      notifyListeners();
+    }
   }
 
   void setDiscount(DiscountType type, double value) {

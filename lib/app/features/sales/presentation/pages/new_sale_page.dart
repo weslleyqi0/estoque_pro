@@ -46,6 +46,7 @@ class _NewSalePageState extends State<NewSalePage> {
     super.initState();
     productsViewModel = widget.productsViewModelFactory();
     cartViewModel = widget.cartViewModelFactory();
+    productsViewModel.addListener(_onProductsUpdated);
     productsViewModel.listenAll();
     if (widget.initialSale != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -56,8 +57,15 @@ class _NewSalePageState extends State<NewSalePage> {
     }
   }
 
+  void _onProductsUpdated() {
+    if (productsViewModel.products.isNotEmpty) {
+      cartViewModel.updateAvailableProducts(productsViewModel.products);
+    }
+  }
+
   @override
   void dispose() {
+    productsViewModel.removeListener(_onProductsUpdated);
     cartViewModel.dispose();
     _sheetController.dispose();
     productsViewModel.setSearchQuery('', notify: false);
