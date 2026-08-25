@@ -3,6 +3,7 @@ import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repositor
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/sales_page.dart';
@@ -60,6 +61,7 @@ void main() {
             createdVm = SalesViewModel(mockSalesRepository, mockDeliveriesRepository);
             return createdVm;
           },
+          deliveriesViewModelFactory: () => DeliveriesViewModel(mockDeliveriesRepository),
           authViewModel: authViewModel,
           initialTab: SalesFilterTab.inProgress,
         ),
@@ -82,6 +84,7 @@ void main() {
             createdVm = SalesViewModel(mockSalesRepository, mockDeliveriesRepository);
             return createdVm;
           },
+          deliveriesViewModelFactory: () => DeliveriesViewModel(mockDeliveriesRepository),
           authViewModel: authViewModel,
         ),
       ),

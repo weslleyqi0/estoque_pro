@@ -1,6 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_card/sale_card_actions.dart';
@@ -17,6 +18,7 @@ class SaleCard extends StatelessWidget {
   final VoidCallback onToggleExpand;
   final AuthViewModel authViewModel;
   final SalesViewModel salesViewModel;
+  final DeliveriesViewModel deliveriesViewModel;
 
   const SaleCard({
     super.key,
@@ -26,6 +28,7 @@ class SaleCard extends StatelessWidget {
     required this.onToggleExpand,
     required this.authViewModel,
     required this.salesViewModel,
+    required this.deliveriesViewModel,
   });
 
   @override
@@ -53,6 +56,7 @@ class SaleCard extends StatelessWidget {
                 sale: sale,
                 delivery: effectiveDelivery,
                 authViewModel: authViewModel,
+                deliveriesViewModel: deliveriesViewModel,
               ),
             ),
             Padding(

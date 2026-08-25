@@ -1,9 +1,9 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/widgets/create_delivery_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/delivery_detail_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
@@ -19,12 +19,14 @@ class SaleCardHeader extends StatelessWidget {
   final SaleEntity sale;
   final DeliveryEntity? delivery;
   final AuthViewModel authViewModel;
+  final DeliveriesViewModel deliveriesViewModel;
 
   const SaleCardHeader({
     super.key,
     required this.sale,
     this.delivery,
     required this.authViewModel,
+    required this.deliveriesViewModel,
   });
 
   bool get _canEditSale {
@@ -57,17 +59,19 @@ class SaleCardHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final statusColor = _getStatusColor(sale.status);
+    final hasDeliveryAction = delivery != null ||
+        (sale.status != SaleStatus.cancelled && sale.status != SaleStatus.inProgress);
 
     return Row(
-      mainAxisAlignment: .spaceBetween,
-      crossAxisAlignment: .start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Column(
-          crossAxisAlignment: .start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Venda ${sale.saleNumber}',
-              style: context.textTheme.titleMedium?.copyWith(fontWeight: .bold),
+              style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
               dateFormat.format(sale.createdAt),
@@ -78,7 +82,7 @@ class SaleCardHeader extends StatelessWidget {
           ],
         ),
         Row(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             AppTag(title: sale.status.label, color: statusColor),
 
@@ -97,18 +101,33 @@ class SaleCardHeader extends StatelessWidget {
                 ),
               ),
             ],
-            if (delivery != null) ...[
+            if (hasDeliveryAction) ...[
               AppIconButton(
                 size: AppIconButtonSize.large,
                 icon: AppIcons.truck,
-                iconColor: _getDeliveryStatusColor(delivery!.effectiveStatus),
+                iconColor: delivery != null
+                    ? _getDeliveryStatusColor(delivery!.effectiveStatus)
+                    : context.colorScheme.primary,
                 visualDensity: VisualDensity.compact,
-                tooltip: 'Detalhes da Entrega (${delivery!.effectiveStatus.label})',
-                onPressed: () => DeliveryDetailBottomSheet.show(
-                  context: context,
-                  delivery: delivery!,
-                  viewModel: getIt<DeliveriesViewModel>(),
-                ),
+                tooltip: delivery != null
+                    ? 'Detalhes da Entrega (${delivery!.effectiveStatus.label})'
+                    : 'Adicionar Entrega',
+                onPressed: () {
+                  if (delivery != null) {
+                    DeliveryDetailBottomSheet.show(
+                      context: context,
+                      delivery: delivery!,
+                      viewModel: deliveriesViewModel,
+                    );
+                  } else {
+                    CreateDeliveryBottomSheet.show(
+                      context: context,
+                      deliveriesViewModel: deliveriesViewModel,
+                      authViewModel: authViewModel,
+                      initialSale: sale,
+                    );
+                  }
+                },
               ),
             ],
             if (sale.status != SaleStatus.inProgress) ...[

@@ -17,6 +17,7 @@ class CreateDeliveryBottomSheet extends StatefulWidget {
   final AuthViewModel authViewModel;
   final SalesRepository salesRepository;
   final CustomersRepository customersRepository;
+  final SaleEntity? initialSale;
 
   const CreateDeliveryBottomSheet({
     super.key,
@@ -24,6 +25,7 @@ class CreateDeliveryBottomSheet extends StatefulWidget {
     required this.authViewModel,
     required this.salesRepository,
     required this.customersRepository,
+    this.initialSale,
   });
 
   static Future<void> show({
@@ -32,6 +34,7 @@ class CreateDeliveryBottomSheet extends StatefulWidget {
     required AuthViewModel authViewModel,
     SalesRepository? salesRepository,
     CustomersRepository? customersRepository,
+    SaleEntity? initialSale,
   }) {
     return AppBottomSheet.show(
       context: context,
@@ -41,6 +44,7 @@ class CreateDeliveryBottomSheet extends StatefulWidget {
         authViewModel: authViewModel,
         salesRepository: salesRepository ?? getIt<SalesRepository>(),
         customersRepository: customersRepository ?? getIt<CustomersRepository>(),
+        initialSale: initialSale,
       ),
     );
   }
@@ -64,6 +68,13 @@ class _CreateDeliveryBottomSheetState extends State<CreateDeliveryBottomSheet> {
   void initState() {
     super.initState();
     _scheduledDate = DateTime.now().add(const Duration(hours: 1));
+    if (widget.initialSale != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _onSaleSelected(widget.initialSale!);
+        }
+      });
+    }
   }
 
   @override

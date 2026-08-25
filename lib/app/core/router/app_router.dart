@@ -297,6 +297,7 @@ class AppRouter {
           final initialTab = state.extra as SalesFilterTab?;
           return SalesPage(
             viewModelFactory: () => getIt<SalesViewModel>(),
+            deliveriesViewModelFactory: () => getIt<DeliveriesViewModel>(),
             authViewModel: getIt<AuthViewModel>(),
             initialTab: initialTab,
           );
