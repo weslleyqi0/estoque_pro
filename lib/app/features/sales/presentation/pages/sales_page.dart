@@ -10,11 +10,13 @@ import 'package:go_router/go_router.dart';
 class SalesPage extends StatefulWidget {
   final SalesViewModel viewModel;
   final AuthViewModel authViewModel;
+  final SalesFilterTab? initialTab;
 
   const SalesPage({
     super.key,
     required this.viewModel,
     required this.authViewModel,
+    this.initialTab,
   });
 
   @override
@@ -25,6 +27,9 @@ class _SalesPageState extends State<SalesPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialTab != null) {
+      widget.viewModel.setSelectedTab(widget.initialTab!);
+    }
     widget.viewModel.listenAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.viewModel.setSearchQuery('');

@@ -289,10 +289,14 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.sales,
-        builder: (context, state) => SalesPage(
-          viewModel: getIt<SalesViewModel>(),
-          authViewModel: getIt<AuthViewModel>(),
-        ),
+        builder: (context, state) {
+          final initialTab = state.extra as SalesFilterTab?;
+          return SalesPage(
+            viewModel: getIt<SalesViewModel>(),
+            authViewModel: getIt<AuthViewModel>(),
+            initialTab: initialTab,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.newSale,
@@ -312,10 +316,14 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.deliveries,
-        builder: (context, state) => DeliveriesPage(
-          viewModelFactory: () => getIt<DeliveriesViewModel>(),
-          authViewModel: getIt<AuthViewModel>(),
-        ),
+        builder: (context, state) {
+          final initialTab = state.extra as DeliveryFilterTab?;
+          return DeliveriesPage(
+            viewModelFactory: () => getIt<DeliveriesViewModel>(),
+            authViewModel: getIt<AuthViewModel>(),
+            initialTab: initialTab,
+          );
+        },
       ),
 
       GoRoute(

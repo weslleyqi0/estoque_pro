@@ -8,11 +8,13 @@ import 'package:flutter/material.dart';
 class DeliveriesPage extends StatefulWidget {
   final DeliveriesViewModel Function() viewModelFactory;
   final AuthViewModel authViewModel;
+  final DeliveryFilterTab? initialTab;
 
   const DeliveriesPage({
     super.key,
     required this.viewModelFactory,
     required this.authViewModel,
+    this.initialTab,
   });
 
   @override
@@ -26,6 +28,9 @@ class _DeliveriesPageState extends State<DeliveriesPage> {
   void initState() {
     super.initState();
     viewModel = widget.viewModelFactory();
+    if (widget.initialTab != null) {
+      viewModel.setSelectedTab(widget.initialTab!);
+    }
     viewModel.listenAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.setSearchQuery('');
