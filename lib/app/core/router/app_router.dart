@@ -211,10 +211,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.products,
         builder: (context, state) {
-          final initialSearchQuery = state.extra as String?;
+          final extra = state.extra;
+          final initialSearchQuery = extra is String ? extra : null;
+          final initialShowOnlyLowStock = extra is bool ? extra : false;
+
           return ProductsPage(
-            viewModel: getIt<ProductsViewModel>(),
+            viewModelFactory: () => getIt<ProductsViewModel>(),
             initialSearchQuery: initialSearchQuery,
+            initialShowOnlyLowStock: initialShowOnlyLowStock,
           );
         },
       ),
@@ -244,7 +248,7 @@ class AppRouter {
               authViewModel: getIt<AuthViewModel>(),
             );
           }
-          return ProductsPage(viewModel: getIt<ProductsViewModel>());
+          return ProductsPage(viewModelFactory: () => getIt<ProductsViewModel>());
         },
       ),
       GoRoute(
