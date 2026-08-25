@@ -235,4 +235,10 @@ void main() {
     await viewModel.updateDelivery(updated);
     verify(() => mockRepository.updateDelivery(updated)).called(1);
   });
+
+  test('deleteDelivery delegates to repository delete', () async {
+    when(() => mockRepository.delete(any())).thenAnswer((_) async {});
+    await viewModel.deleteDelivery('d1');
+    verify(() => mockRepository.delete('d1')).called(1);
+  });
 }

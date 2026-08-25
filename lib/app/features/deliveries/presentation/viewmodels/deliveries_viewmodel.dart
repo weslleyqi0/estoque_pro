@@ -229,6 +229,10 @@ class DeliveriesViewModel extends ChangeNotifier {
     await _repository.updateDelivery(delivery);
   }
 
+  Future<void> deleteDelivery(String deliveryId) async {
+    await _repository.delete(deliveryId);
+  }
+
   Future<void> createDelivery({
     required SaleEntity sale,
     required String customerAddress,

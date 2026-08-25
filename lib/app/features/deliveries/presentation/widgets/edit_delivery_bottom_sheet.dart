@@ -129,6 +129,33 @@ class _EditDeliveryBottomSheetState extends State<EditDeliveryBottomSheet> {
     }
   }
 
+  Future<void> _onDelete() async {
+    final confirmed = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Excluir Entrega',
+      content: 'Deseja realmente excluir permanentemente a entrega da venda ${widget.delivery.saleNumber}?',
+      confirmLabel: 'Excluir',
+      cancelLabel: 'Cancelar',
+      isDestructive: true,
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() => _isLoading = true);
+      try {
+        await widget.viewModel.deleteDelivery(widget.delivery.id);
+        if (mounted) {
+          Navigator.pop(context, true);
+          AppSnackbar.success(context, 'Entrega excluída com sucesso!');
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          AppSnackbar.error(context, 'Erro ao excluir entrega: ${e.toString()}');
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
@@ -171,15 +198,15 @@ class _EditDeliveryBottomSheetState extends State<EditDeliveryBottomSheet> {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(AppSpacing.space8),
+                          padding: const EdgeInsets.all(AppSpacing.space12),
                           decoration: BoxDecoration(
-                            color: context.colorScheme.primaryContainer,
-                            shape: BoxShape.circle,
+                            color: context.colorScheme.primary.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                           child: Icon(
-                            AppIcons.edit,
-                            color: context.colorScheme.onPrimaryContainer,
-                            size: AppSpacing.icon20,
+                            AppIcons.truck,
+                            size: AppSpacing.icon24,
+                            color: context.colorScheme.primary,
                           ),
                         ),
                         const Gap(AppSpacing.space12),
@@ -201,6 +228,11 @@ class _EditDeliveryBottomSheetState extends State<EditDeliveryBottomSheet> {
                               ),
                             ],
                           ),
+                        ),
+                        IconButton(
+                          icon: Icon(AppIcons.delete, color: context.colorScheme.error),
+                          tooltip: 'Excluir Entrega',
+                          onPressed: _isLoading ? null : _onDelete,
                         ),
                         IconButton(
                           icon: const Icon(AppIcons.close),

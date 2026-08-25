@@ -2,7 +2,7 @@ import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_ent
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
-import 'package:estoque_pro/app/features/deliveries/presentation/widgets/edit_delivery_bottom_sheet.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/widgets/delivery_detail_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,86 +17,67 @@ void main() {
 
   final now = DateTime(2026, 8, 25, 10, 0);
 
-  final delivery = DeliveryEntity(
+  final pendingDelivery = DeliveryEntity(
     id: 'd1',
     saleId: 's1',
     saleNumber: 'A1B2C3',
     customerId: 'c1',
     customerName: 'Maria Silva',
     customerPhone: '11999999999',
-    customerAddress: 'Rua Antiga, 100',
-    observations: 'Observação inicial',
+    customerAddress: 'Rua das Flores, 100',
+    observations: '',
     items: const [],
     subtotal: 100.0,
     totalAmount: 100.0,
     paymentMethod: PaymentMethod.pix,
     status: DeliveryStatus.pending,
-    scheduledAt: DateTime.now().add(const Duration(days: 2)),
+    scheduledAt: now.add(const Duration(days: 1)),
     userId: 'u1',
     userName: 'Vendedor',
     createdAt: now,
   );
 
+  final cancelledDelivery = pendingDelivery.copyWith(
+    status: DeliveryStatus.cancelled,
+  );
+
   setUpAll(() async {
     await initializeDateFormatting('pt_BR', null);
-    registerFallbackValue(delivery);
   });
 
   setUp(() {
     mockDeliveriesRepository = MockDeliveriesRepository();
-    when(() => mockDeliveriesRepository.watchAll()).thenAnswer((_) => Stream.value([delivery]));
+    when(() => mockDeliveriesRepository.watchAll()).thenAnswer((_) => Stream.value([]));
     deliveriesViewModel = DeliveriesViewModel(mockDeliveriesRepository);
   });
 
-  testWidgets('EditDeliveryBottomSheet pre-populates fields and saves updated delivery', (tester) async {
-    tester.view.physicalSize = const Size(800, 1200);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(() => tester.view.resetPhysicalSize());
-
-    when(() => mockDeliveriesRepository.updateDelivery(any())).thenAnswer((_) async {});
-
+  testWidgets('DeliveryDetailBottomSheet does NOT show delete button when delivery is pending', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Builder(
             builder: (context) => ElevatedButton(
-              onPressed: () => EditDeliveryBottomSheet.show(
+              onPressed: () => DeliveryDetailBottomSheet.show(
                 context: context,
-                delivery: delivery,
+                delivery: pendingDelivery,
                 viewModel: deliveriesViewModel,
               ),
-              child: const Text('Open Edit'),
+              child: const Text('Open Details'),
             ),
           ),
         ),
       ),
     );
 
-    await tester.tap(find.text('Open Edit'));
+    await tester.tap(find.text('Open Details'));
     await tester.pumpAndSettle();
 
-    // Valida dados pré-populados
-    expect(find.text('Editar Entrega'), findsOneWidget);
-    expect(find.text('Maria Silva'), findsOneWidget);
-    expect(find.text('Rua Antiga, 100'), findsOneWidget);
-
-    // Altera o endereço
-    await tester.enterText(find.widgetWithText(TextFormField, 'Rua Antiga, 100'), 'Rua Nova, 500');
-    await tester.pumpAndSettle();
-
-    // Clica no botão Salvar Alterações
-    await tester.ensureVisible(find.text('Salvar Alterações'));
-    expect(find.text('Observação inicial'), findsOneWidget);
-    await tester.tap(find.text('Salvar Alterações'));
-    await tester.pumpAndSettle();
-
-    // Verifica que chamou updateDelivery no repositório com os novos dados
-    verify(() => mockDeliveriesRepository.updateDelivery(any(that: isA<DeliveryEntity>()
-        .having((d) => d.id, 'id', 'd1')
-        .having((d) => d.customerAddress, 'customerAddress', 'Rua Nova, 500')))).called(1);
+    expect(find.byTooltip('Excluir Entrega'), findsNothing);
+    expect(find.text('Excluir Entrega'), findsNothing);
+    expect(find.byTooltip('Editar Entrega'), findsOneWidget);
   });
 
-  testWidgets('EditDeliveryBottomSheet allows deleting delivery with confirmation dialog', (tester) async {
+  testWidgets('DeliveryDetailBottomSheet shows delete button when delivery is cancelled and allows deletion', (tester) async {
     when(() => mockDeliveriesRepository.delete(any())).thenAnswer((_) async {});
 
     await tester.pumpWidget(
@@ -104,33 +85,65 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (context) => ElevatedButton(
-              onPressed: () => EditDeliveryBottomSheet.show(
+              onPressed: () => DeliveryDetailBottomSheet.show(
                 context: context,
-                delivery: delivery,
+                delivery: cancelledDelivery,
                 viewModel: deliveriesViewModel,
               ),
-              child: const Text('Open Edit'),
+              child: const Text('Open Details'),
             ),
           ),
         ),
       ),
     );
 
-    await tester.tap(find.text('Open Edit'));
+    await tester.tap(find.text('Open Details'));
     await tester.pumpAndSettle();
+
+    // Botão de excluir visível no cabeçalho e na barra inferior
+    expect(find.byTooltip('Excluir Entrega'), findsOneWidget);
+    expect(find.text('Excluir Entrega'), findsOneWidget);
+    expect(find.byTooltip('Editar Entrega'), findsNothing);
 
     // Clica no botão de excluir no cabeçalho
     await tester.tap(find.byTooltip('Excluir Entrega'));
     await tester.pumpAndSettle();
 
-    // Diálogo de confirmação deve aparecer
-    expect(find.text('Excluir Entrega'), findsOneWidget);
+    // Diálogo de confirmação
     expect(find.text('Excluir'), findsOneWidget);
-
-    // Confirma exclusão
     await tester.tap(find.text('Excluir'));
     await tester.pumpAndSettle();
 
     verify(() => mockDeliveriesRepository.delete('d1')).called(1);
+  });
+
+  testWidgets('DeliveryDetailBottomSheet shows delete button when delivery is completed', (tester) async {
+    final completedDelivery = pendingDelivery.copyWith(
+      status: DeliveryStatus.completed,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => DeliveryDetailBottomSheet.show(
+                context: context,
+                delivery: completedDelivery,
+                viewModel: deliveriesViewModel,
+              ),
+              child: const Text('Open Details'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Details'));
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Excluir Entrega'), findsOneWidget);
+    expect(find.text('Excluir Entrega'), findsOneWidget);
+    expect(find.byTooltip('Editar Entrega'), findsNothing);
   });
 }

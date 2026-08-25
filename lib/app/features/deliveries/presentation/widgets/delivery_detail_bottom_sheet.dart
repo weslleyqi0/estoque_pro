@@ -118,6 +118,31 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
     }
   }
 
+  void _deleteDelivery(BuildContext context) async {
+    final confirmed = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Excluir Entrega',
+      content: 'Deseja realmente excluir permanentemente a entrega da venda ${delivery.saleNumber}?',
+      confirmLabel: 'Excluir',
+      cancelLabel: 'Cancelar',
+      isDestructive: true,
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        await viewModel.deleteDelivery(delivery.id);
+        if (context.mounted) {
+          Navigator.pop(context);
+          AppSnackbar.success(context, 'Entrega excluída com sucesso!');
+        }
+      } catch (e) {
+        if (context.mounted) {
+          AppSnackbar.error(context, 'Erro ao excluir entrega: ${e.toString()}');
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final effectiveStatus = delivery.effectiveStatus;
@@ -182,6 +207,16 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
                         visualDensity: VisualDensity.compact,
                         tooltip: 'Editar Entrega',
                         onPressed: () => _editDelivery(context),
+                      ),
+                    ],
+                    if (effectiveStatus == DeliveryStatus.cancelled || effectiveStatus == DeliveryStatus.completed) ...[
+                      AppIconButton(
+                        size: AppIconButtonSize.large,
+                        icon: AppIcons.delete,
+                        iconColor: context.colorScheme.error,
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Excluir Entrega',
+                        onPressed: () => _deleteDelivery(context),
                       ),
                     ],
                     CloseButton(onPressed: () => Navigator.pop(context)),
@@ -321,6 +356,16 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
                             onPressed: () => _reschedule(context),
                           ),
                         ],
+                      ),
+                    ],
+                    if (effectiveStatus == DeliveryStatus.cancelled || effectiveStatus == DeliveryStatus.completed) ...[
+                      AppButton.outlined(
+                        label: 'Excluir Entrega',
+                        icon: AppIcons.delete,
+                        borderColor: context.colorScheme.error,
+                        backgroundColor: context.colorScheme.error.withValues(alpha: 0.1),
+                        isFullWidth: true,
+                        onPressed: () => _deleteDelivery(context),
                       ),
                     ],
                   ],
