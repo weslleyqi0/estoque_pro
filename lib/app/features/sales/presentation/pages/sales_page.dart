@@ -8,13 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class SalesPage extends StatefulWidget {
-  final SalesViewModel viewModel;
+  final SalesViewModel Function() viewModelFactory;
   final AuthViewModel authViewModel;
   final SalesFilterTab? initialTab;
 
   const SalesPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
     required this.authViewModel,
     this.initialTab,
   });
@@ -24,22 +24,31 @@ class SalesPage extends StatefulWidget {
 }
 
 class _SalesPageState extends State<SalesPage> {
+  late final SalesViewModel viewModel;
+
   @override
   void initState() {
     super.initState();
+    viewModel = widget.viewModelFactory();
     if (widget.initialTab != null) {
-      widget.viewModel.setSelectedTab(widget.initialTab!);
+      viewModel.setSelectedTab(widget.initialTab!);
     }
-    widget.viewModel.listenAll();
+    viewModel.listenAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.viewModel.setSearchQuery('');
+      viewModel.setSearchQuery('');
     });
+  }
+
+  @override
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: widget.viewModel,
+      listenable: viewModel,
       builder: (context, _) {
         return Scaffold(
           appBar: AppBar(
@@ -52,7 +61,7 @@ class _SalesPageState extends State<SalesPage> {
                 color: context.isDark
                     ? context.colorScheme.surfaceContainerLow
                     : context.colorScheme.surfaceContainerHighest,
-                child: SalesStatusTabs(viewModel: widget.viewModel),
+                child: SalesStatusTabs(viewModel: viewModel),
               ),
             ),
           ),
@@ -64,14 +73,14 @@ class _SalesPageState extends State<SalesPage> {
           body: CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              if (widget.viewModel.sales.isNotEmpty)
+              if (viewModel.sales.isNotEmpty)
                 AppFloatingSearch(
                   hint: 'Pesquisar por número, cliente, vendedor ou produto...',
-                  initialValue: widget.viewModel.searchQuery,
-                  onChanged: widget.viewModel.setSearchQuery,
+                  initialValue: viewModel.searchQuery,
+                  onChanged: viewModel.setSearchQuery,
                 ),
               SalesListSliver(
-                viewModel: widget.viewModel,
+                viewModel: viewModel,
                 authViewModel: widget.authViewModel,
               ),
             ],
