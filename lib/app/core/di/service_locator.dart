@@ -233,7 +233,7 @@ Future<void> setupServiceLocator() async {
     () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
   );
 
-  getIt.registerLazySingleton<ProductsViewModel>(
+  getIt.registerFactory<ProductsViewModel>(
     () => ProductsViewModel(getIt<ProductsRepository>()),
   );
   getIt.registerFactory<ArchivedProductsViewModel>(
@@ -246,7 +246,7 @@ Future<void> setupServiceLocator() async {
     () => ProductsFormViewModel(getIt<ProductsRepository>()),
   );
 
-  getIt.registerLazySingleton<SalesViewModel>(
+  getIt.registerFactory<SalesViewModel>(
     () => SalesViewModel(
       getIt<SalesRepository>(),
       getIt<DeliveriesRepository>(),

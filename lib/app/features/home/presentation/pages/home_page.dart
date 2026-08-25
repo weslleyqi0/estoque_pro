@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
@@ -15,16 +14,16 @@ import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   final AuthViewModel authViewModel;
-  final SalesViewModel salesViewModel;
-  final ProductsViewModel productsViewModel;
-  final DeliveriesViewModel? deliveriesViewModel;
+  final SalesViewModel Function() salesViewModelFactory;
+  final ProductsViewModel Function() productsViewModelFactory;
+  final DeliveriesViewModel Function() deliveriesViewModelFactory;
 
   const HomePage({
     super.key,
     required this.authViewModel,
-    required this.salesViewModel,
-    required this.productsViewModel,
-    this.deliveriesViewModel,
+    required this.salesViewModelFactory,
+    required this.productsViewModelFactory,
+    required this.deliveriesViewModelFactory,
   });
 
   @override
@@ -32,18 +31,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  AuthViewModel get _authVM => widget.authViewModel;
-  SalesViewModel get _salesVM => widget.salesViewModel;
-  ProductsViewModel get _productsVM => widget.productsViewModel;
-  DeliveriesViewModel get _deliveriesVM => widget.deliveriesViewModel ?? getIt<DeliveriesViewModel>();
+  late final AuthViewModel _authVM;
+  late final SalesViewModel _salesVM;
+  late final ProductsViewModel _productsVM;
+  late final DeliveriesViewModel _deliveriesVM;
   DateTime? _lastBackPressTime;
 
   @override
   void initState() {
     super.initState();
+    _authVM = widget.authViewModel;
+    _salesVM = widget.salesViewModelFactory();
+    _productsVM = widget.productsViewModelFactory();
+    _deliveriesVM = widget.deliveriesViewModelFactory();
     _salesVM.listenAll();
     _productsVM.listenAll();
     _deliveriesVM.listenAll();
+  }
+
+  @override
+  void dispose() {
+    _salesVM.dispose();
+    _productsVM.dispose();
+    _deliveriesVM.dispose();
+    super.dispose();
   }
 
   String get _greetingPeriod {

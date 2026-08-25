@@ -128,8 +128,9 @@ class AppRouter {
         path: AppRoutes.home,
         builder: (context, state) => HomePage(
           authViewModel: getIt<AuthViewModel>(),
-          salesViewModel: getIt<SalesViewModel>(),
-          productsViewModel: getIt<ProductsViewModel>(),
+          salesViewModelFactory: () => getIt<SalesViewModel>(),
+          productsViewModelFactory: () => getIt<ProductsViewModel>(),
+          deliveriesViewModelFactory: () => getIt<DeliveriesViewModel>(),
         ),
       ),
       GoRoute(
