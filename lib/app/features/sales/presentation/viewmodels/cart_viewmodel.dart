@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
+import 'package:estoque_pro/app/core/utils/sale_code_generator.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -83,8 +84,7 @@ class CartViewModel extends ChangeNotifier {
   }
 
   void _initSaleNumber() {
-    final now = DateTime.now();
-    _saleNumber = '#${now.millisecondsSinceEpoch.toString().substring(7)}';
+    _saleNumber = SaleCodeGenerator.generate();
   }
 
   int getQuantityInCart(String productId) {
