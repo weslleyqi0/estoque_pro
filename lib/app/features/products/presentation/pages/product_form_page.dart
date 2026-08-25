@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
@@ -152,28 +151,15 @@ class _ProductFormPageState extends State<ProductFormPage> {
               valueListenable: _imgUrlController,
               builder: (context, value, _) {
                 final url = value.text.trim();
-                return Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: context.colorScheme.surfaceContainerHighest,
+                return Center(
+                  child: AppNetworkImage(
+                    imageUrl: url,
+                    size: 200,
+                    fit: BoxFit.contain,
+                    placeholderIcon: url.isNotEmpty ? AppIcons.brokenImage : AppIcons.image,
+                    placeholderIconSize: 48,
                     borderRadius: BorderRadius.circular(AppSpacing.space16),
                   ),
-                  clipBehavior: Clip.hardEdge,
-                  child: url.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: url,
-                          fit: BoxFit.contain,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          errorWidget: (context, url, error) => const Center(
-                            child: Icon(AppIcons.brokenImage, size: 48),
-                          ),
-                        )
-                      : const Center(
-                          child: Icon(AppIcons.image, size: 48),
-                        ),
                 );
               },
             ),

@@ -99,9 +99,11 @@ class SalesListSliver extends StatelessWidget {
               (context, index) {
                 final sale = entry.value[index];
                 final isExpanded = viewModel.expandedSaleId == sale.id;
+                final delivery = viewModel.getDeliveryForSale(sale.id, sale.saleNumber);
 
                 return SaleCard(
                   sale: sale,
+                  delivery: delivery,
                   isExpanded: isExpanded,
                   onToggleExpand: () => viewModel.toggleExpand(sale.id),
                   authViewModel: authViewModel,

@@ -1,16 +1,19 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class SaleCardSummary extends StatelessWidget {
   final SaleEntity sale;
+  final DeliveryEntity? delivery;
   final bool isExpanded;
 
   const SaleCardSummary({
     super.key,
     required this.sale,
+    this.delivery,
     required this.isExpanded,
   });
 
@@ -47,15 +50,6 @@ class SaleCardSummary extends StatelessWidget {
             ),
           ],
         ),
-        if (sale.customerName?.isNotEmpty == true) ...[
-          Text(
-            'Cliente: ${sale.customerName}',
-            style: context.textTheme.bodySmall?.copyWith(
-              color: context.colorScheme.onSurface.withValues(alpha: 0.6),
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
       ],
     );
   }

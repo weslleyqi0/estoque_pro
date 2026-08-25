@@ -247,7 +247,10 @@ Future<void> setupServiceLocator() async {
   );
 
   getIt.registerLazySingleton<SalesViewModel>(
-    () => SalesViewModel(getIt<SalesRepository>()),
+    () => SalesViewModel(
+      getIt<SalesRepository>(),
+      getIt<DeliveriesRepository>(),
+    ),
   );
 
   getIt.registerFactory<DeliveriesViewModel>(

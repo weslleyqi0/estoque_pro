@@ -1,5 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_card/sale_card_actions.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 
 class SaleCard extends StatelessWidget {
   final SaleEntity sale;
+  final DeliveryEntity? delivery;
   final bool isExpanded;
   final VoidCallback onToggleExpand;
   final AuthViewModel authViewModel;
@@ -19,6 +21,7 @@ class SaleCard extends StatelessWidget {
   const SaleCard({
     super.key,
     required this.sale,
+    this.delivery,
     required this.isExpanded,
     required this.onToggleExpand,
     required this.authViewModel,
@@ -27,6 +30,8 @@ class SaleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveDelivery = delivery ?? salesViewModel.getDeliveryForSale(sale.id, sale.saleNumber);
+
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.space12),
       color: context.colorScheme.surfaceContainerLow,
@@ -44,7 +49,11 @@ class SaleCard extends StatelessWidget {
           children: [
             Padding(
               padding: const .only(left: AppSpacing.space16, right: AppSpacing.space8, top: AppSpacing.space16),
-              child: SaleCardHeader(sale: sale, authViewModel: authViewModel),
+              child: SaleCardHeader(
+                sale: sale,
+                delivery: effectiveDelivery,
+                authViewModel: authViewModel,
+              ),
             ),
             Padding(
               padding: const .only(
@@ -56,7 +65,11 @@ class SaleCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SaleCardSummary(sale: sale, isExpanded: isExpanded),
+                  SaleCardSummary(
+                    sale: sale,
+                    delivery: effectiveDelivery,
+                    isExpanded: isExpanded,
+                  ),
                   if (isExpanded) ...[
                     SaleCardExpandedItems(sale: sale),
                     SaleCardEditHistory(
