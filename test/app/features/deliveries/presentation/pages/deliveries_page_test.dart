@@ -1,3 +1,4 @@
+import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
@@ -83,5 +84,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(createdVm.selectedTab, DeliveryFilterTab.all);
+  });
+
+  testWidgets('DeliveriesPage displays FloatingActionButton for new delivery', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DeliveriesPage(
+          viewModelFactory: () => DeliveriesViewModel(mockDeliveriesRepository),
+          authViewModel: authViewModel,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppFloatingActionButton), findsOneWidget);
   });
 }

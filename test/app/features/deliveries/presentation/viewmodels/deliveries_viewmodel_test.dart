@@ -3,8 +3,11 @@ import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_ent
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -20,23 +23,22 @@ void main() {
   final deliveryPending = DeliveryEntity(
     id: 'd1',
     saleId: 's1',
-    saleNumber: '#101',
+    saleNumber: '001',
     customerId: 'c1',
-    customerName: 'Ana Silva',
-    customerPhone: '11911111111',
-    customerAddress: 'Rua A, 1',
+    customerName: 'João Silva',
+    customerAddress: 'Rua A, 123',
     items: const [
       SaleItemEntity(
         productId: 'p1',
-        productName: 'Blusa',
+        productName: 'Camisa',
         productImgUrl: '',
-        unitPrice: 80.0,
-        quantity: 1,
+        unitPrice: 50.0,
+        quantity: 2,
       ),
     ],
-    subtotal: 80.0,
-    totalAmount: 80.0,
-    paymentMethod: PaymentMethod.dinheiro,
+    subtotal: 100.0,
+    totalAmount: 100.0,
+    paymentMethod: PaymentMethod.pix,
     status: DeliveryStatus.pending,
     scheduledAt: now.add(const Duration(hours: 2)),
     userId: 'u1',
@@ -47,15 +49,14 @@ void main() {
   final deliveryDelayed = DeliveryEntity(
     id: 'd2',
     saleId: 's2',
-    saleNumber: '#102',
+    saleNumber: '002',
     customerId: 'c2',
-    customerName: 'Bruno Costa',
-    customerPhone: '11922222222',
-    customerAddress: 'Rua B, 2',
+    customerName: 'Maria Santos',
+    customerAddress: 'Rua B, 456',
     items: const [
       SaleItemEntity(
         productId: 'p2',
-        productName: 'Calça Jeans',
+        productName: 'Calça',
         productImgUrl: '',
         unitPrice: 120.0,
         quantity: 1,
@@ -63,35 +64,35 @@ void main() {
     ],
     subtotal: 120.0,
     totalAmount: 120.0,
-    paymentMethod: PaymentMethod.pix,
-    status: DeliveryStatus.pending,
-    scheduledAt: now.subtract(const Duration(hours: 3)),
+    paymentMethod: PaymentMethod.dinheiro,
+    status: DeliveryStatus.delayed,
+    scheduledAt: now.subtract(const Duration(hours: 1)),
     userId: 'u1',
     userName: 'Vendedor',
-    createdAt: now.subtract(const Duration(hours: 4)),
+    createdAt: now,
   );
 
   final deliveryCompleted = DeliveryEntity(
     id: 'd3',
     saleId: 's3',
-    saleNumber: '#103',
+    saleNumber: '003',
     customerId: 'c3',
-    customerName: 'Carlos Lima',
-    customerPhone: '11933333333',
-    customerAddress: 'Rua C, 3',
+    customerName: 'Carlos Souza',
+    customerAddress: 'Rua C, 789',
     items: const [],
-    subtotal: 50.0,
-    totalAmount: 50.0,
+    subtotal: 80.0,
+    totalAmount: 80.0,
     paymentMethod: PaymentMethod.credito,
     status: DeliveryStatus.completed,
     scheduledAt: now.subtract(const Duration(days: 1)),
-    deliveredAt: now.subtract(const Duration(days: 1)),
+    deliveredAt: now.subtract(const Duration(hours: 20)),
     userId: 'u1',
     userName: 'Vendedor',
-    createdAt: now.subtract(const Duration(days: 1)),
+    createdAt: now,
   );
 
   setUpAll(() {
+    registerFallbackValue(deliveryPending);
     registerFallbackValue(DeliveryStatus.pending);
   });
 
@@ -177,5 +178,51 @@ void main() {
   test('updateDeliveryStatus delegates to repository', () async {
     await viewModel.updateDeliveryStatus('d1', DeliveryStatus.inProgress);
     verify(() => mockRepository.updateStatus('d1', DeliveryStatus.inProgress, deliveredAt: null)).called(1);
+  });
+
+  test('rescheduleDelivery delegates to repository updateDelivery', () async {
+    when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async {});
+    final newDate = now.add(const Duration(days: 2));
+    await viewModel.rescheduleDelivery(deliveryPending, newDate);
+    verify(() => mockRepository.updateDelivery(any(that: isA<DeliveryEntity>().having((d) => d.scheduledAt, 'scheduledAt', newDate)))).called(1);
+  });
+
+  test('createDelivery creates and saves new DeliveryEntity in repository', () async {
+    when(() => mockRepository.save(any())).thenAnswer((_) async {});
+    final sale = SaleEntity(
+      id: 's1',
+      saleNumber: 'A1B2C3',
+      items: const [],
+      subtotal: 100.0,
+      discountType: DiscountType.valueAmount,
+      discountValue: 0.0,
+      total: 100.0,
+      paymentMethod: PaymentMethod.pix,
+      customerId: 'c1',
+      customerName: 'Cliente Teste',
+      userId: 'u1',
+      userName: 'Vendedor',
+      status: SaleStatus.completed,
+      createdAt: now,
+    );
+
+    final scheduled = now.add(const Duration(hours: 2));
+    await viewModel.createDelivery(
+      sale: sale,
+      customerAddress: 'Rua das Flores, 123',
+      customerPhone: '11999999999',
+      scheduledAt: scheduled,
+      observations: 'Entregar na portaria',
+      userId: 'u1',
+      userName: 'Vendedor',
+    );
+
+    verify(() => mockRepository.save(any(that: isA<DeliveryEntity>()
+        .having((d) => d.saleId, 'saleId', 's1')
+        .having((d) => d.saleNumber, 'saleNumber', 'A1B2C3')
+        .having((d) => d.customerAddress, 'customerAddress', 'Rua das Flores, 123')
+        .having((d) => d.customerPhone, 'customerPhone', '11999999999')
+        .having((d) => d.observations, 'observations', 'Entregar na portaria')
+        .having((d) => d.status, 'status', DeliveryStatus.pending)))).called(1);
   });
 }

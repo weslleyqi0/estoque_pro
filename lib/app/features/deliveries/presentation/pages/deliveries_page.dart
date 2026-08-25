@@ -1,6 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/widgets/create_delivery_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/deliveries_list_sliver.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/deliveries_status_tabs.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +62,15 @@ class _DeliveriesPageState extends State<DeliveriesPage> {
                     : context.colorScheme.surfaceContainerHighest,
                 child: DeliveriesStatusTabs(viewModel: viewModel),
               ),
+            ),
+          ),
+          floatingActionButton: AppFloatingActionButton(
+            tooltip: 'Nova Entrega',
+            icon: AppIcons.add,
+            onPressed: () => CreateDeliveryBottomSheet.show(
+              context: context,
+              deliveriesViewModel: viewModel,
+              authViewModel: widget.authViewModel,
             ),
           ),
           body: CustomScrollView(

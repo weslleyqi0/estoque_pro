@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:flutter/foundation.dart';
 
 enum DeliveryFilterTab {
@@ -222,6 +223,37 @@ class DeliveriesViewModel extends ChangeNotifier {
       status: delivery.status == DeliveryStatus.delayed ? DeliveryStatus.pending : delivery.status,
     );
     await _repository.updateDelivery(updated);
+  }
+
+  Future<void> createDelivery({
+    required SaleEntity sale,
+    required String customerAddress,
+    required DateTime scheduledAt,
+    String? customerPhone,
+    String? observations,
+    required String userId,
+    required String userName,
+  }) async {
+    final delivery = DeliveryEntity(
+      id: '',
+      saleId: sale.id,
+      saleNumber: sale.saleNumber,
+      customerId: sale.customerId ?? '',
+      customerName: sale.customerName ?? 'Cliente',
+      customerPhone: customerPhone,
+      customerAddress: customerAddress,
+      items: sale.items,
+      subtotal: sale.subtotal,
+      totalAmount: sale.total,
+      paymentMethod: sale.paymentMethod,
+      status: DeliveryStatus.pending,
+      scheduledAt: scheduledAt,
+      observations: observations ?? '',
+      userId: userId,
+      userName: userName,
+      createdAt: DateTime.now(),
+    );
+    await _repository.save(delivery);
   }
 
   @override
