@@ -344,16 +344,12 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
                             ),
                           ),
                           const Gap(AppSpacing.space8),
-                          AppButton.outlined(
-                            label: 'Editar',
-                            icon: AppIcons.edit,
-                            onPressed: () => _editDelivery(context),
-                          ),
-                          const Gap(AppSpacing.space8),
-                          AppButton.outlined(
-                            label: 'Reagendar',
-                            icon: AppIcons.calendarClock,
-                            onPressed: () => _reschedule(context),
+                          Expanded(
+                            child: AppButton.outlined(
+                              label: 'Reagendar',
+                              icon: AppIcons.calendarClock,
+                              onPressed: () => _reschedule(context),
+                            ),
                           ),
                         ],
                       ),
