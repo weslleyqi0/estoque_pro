@@ -2,6 +2,7 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
+import 'package:estoque_pro/app/features/home/presentation/widgets/home_alerts_section.dart';
 import 'package:estoque_pro/app/features/home/presentation/widgets/home_button.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
@@ -101,16 +102,12 @@ class _HomePageState extends State<HomePage> {
         builder: (context, _) {
           final currentUser = _authVM.currentUser;
           final isManager = currentUser?.role == UserRole.owner || currentUser?.role == UserRole.admin;
-          final allInProgressSales = _salesVM.inProgressSales;
-          final lowStockProducts = _productsVM.lowStockProducts;
-          final delayedDeliveries = _deliveriesVM.delayedDeliveries;
-          final pendingDeliveries = _deliveriesVM.pendingDeliveries;
-          final totalPendingOrDelayed = delayedDeliveries.length + pendingDeliveries.length;
-          final hasNotifications =
-              allInProgressSales.isNotEmpty ||
-              lowStockProducts.isNotEmpty ||
-              delayedDeliveries.isNotEmpty ||
-              pendingDeliveries.isNotEmpty;
+          final inProgressSalesCount = _salesVM.inProgressSales.length;
+          final lowStockCount = _productsVM.lowStockProducts.length;
+          final delayedDeliveriesCount = _deliveriesVM.delayedDeliveries.length;
+          final pendingDeliveriesCount = _deliveriesVM.pendingDeliveries.length;
+          final pendingOrDelayedDeliveriesCount = delayedDeliveriesCount + pendingDeliveriesCount;
+          final hasDelayedDeliveries = delayedDeliveriesCount > 0;
 
           return Scaffold(
             appBar: AppBar(
@@ -217,91 +214,18 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
-                      if (hasNotifications)
-                        SliverToBoxAdapter(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Gap(AppSpacing.space8),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
-                                child: Text('Avisos', style: context.textTheme.titleMedium),
-                              ),
-                              const Gap(AppSpacing.space4),
-                              if (delayedDeliveries.isNotEmpty) ...[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
-                                  child: AppInfoBanner(
-                                    title: delayedDeliveries.length == 1
-                                        ? '1 entrega atrasada'
-                                        : '${delayedDeliveries.length} entregas atrasadas',
-                                    subtitle: 'Toque para gerenciar as entregas atrasadas',
-                                    icon: AppIcons.deliveryTruck,
-                                    type: AppInfoBannerType.error,
-                                    onTap: () => context.push(
-                                      AppRoutes.deliveries,
-                                      extra: DeliveryFilterTab.delayed,
-                                    ),
-                                  ),
-                                ),
-                                const Gap(AppSpacing.space12),
-                              ],
-                              if (pendingDeliveries.isNotEmpty) ...[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
-                                  child: AppInfoBanner(
-                                    title: pendingDeliveries.length == 1
-                                        ? '1 entrega pendente'
-                                        : '${pendingDeliveries.length} entregas pendentes',
-                                    subtitle: 'Toque para gerenciar as entregas pendentes',
-                                    icon: AppIcons.deliveryTruck,
-                                    type: AppInfoBannerType.warning,
-                                    onTap: () => context.push(
-                                      AppRoutes.deliveries,
-                                      extra: DeliveryFilterTab.pending,
-                                    ),
-                                  ),
-                                ),
-                                const Gap(AppSpacing.space12),
-                              ],
-                              if (allInProgressSales.isNotEmpty) ...[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
-                                  child: AppInfoBanner(
-                                    title: allInProgressSales.length == 1
-                                        ? '1 venda aguardando finalização'
-                                        : '${allInProgressSales.length} vendas aguardando finalização',
-                                    subtitle: 'Toque para ver ou gerenciar as vendas em andamento',
-                                    icon: AppIcons.shoppingCart,
-                                    type: AppInfoBannerType.warning,
-                                    onTap: () => context.push(
-                                      AppRoutes.sales,
-                                      extra: SalesFilterTab.inProgress,
-                                    ),
-                                  ),
-                                ),
-                                const Gap(AppSpacing.space12),
-                              ],
-                              if (lowStockProducts.isNotEmpty) ...[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
-                                  child: AppInfoBanner(
-                                    title: lowStockProducts.length == 1
-                                        ? '1 produto com estoque baixo'
-                                        : '${lowStockProducts.length} produtos com estoque baixo',
-                                    subtitle: 'Toque para gerenciar o estoque dos produtos',
-                                    icon: AppIcons.package2,
-                                    type: AppInfoBannerType.warning,
-                                    onTap: () {
-                                      _productsVM.setShowOnlyLowStock(true);
-                                      context.push(AppRoutes.products);
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
+                      SliverToBoxAdapter(
+                        child: HomeAlertsSection(
+                          delayedDeliveriesCount: delayedDeliveriesCount,
+                          pendingDeliveriesCount: pendingDeliveriesCount,
+                          inProgressSalesCount: inProgressSalesCount,
+                          lowStockProductsCount: lowStockCount,
+                          onLowStockTap: () {
+                            _productsVM.setShowOnlyLowStock(true);
+                            context.push(AppRoutes.products);
+                          },
                         ),
+                      ),
                       const SliverToBoxAdapter(
                         child: Gap(AppSpacing.space16),
                       ),
@@ -317,7 +241,7 @@ class _HomePageState extends State<HomePage> {
                             HomeButton(
                               title: 'Produtos',
                               subTitle: 'Gerenciar Catalogo',
-                              badgerContent: lowStockProducts.isNotEmpty ? '${lowStockProducts.length}' : null,
+                              badgerContent: lowStockCount > 0 ? '$lowStockCount' : null,
                               badgerColor: AppColors.warning,
                               color: AppColors.primary,
                               icon: AppIcons.lists,
@@ -329,7 +253,7 @@ class _HomePageState extends State<HomePage> {
                             HomeButton(
                               title: 'Vendas',
                               subTitle: 'Histórico e andamento',
-                              badgerContent: allInProgressSales.isNotEmpty ? '${allInProgressSales.length}' : null,
+                              badgerContent: inProgressSalesCount > 0 ? '$inProgressSalesCount' : null,
                               badgerColor: AppColors.warning,
                               color: Colors.green,
                               icon: AppIcons.orderApprove,
@@ -362,8 +286,9 @@ class _HomePageState extends State<HomePage> {
                             HomeButton(
                               title: 'Entregas',
                               subTitle: 'Gerenciar entregas',
-                              badgerContent: totalPendingOrDelayed > 0 ? '$totalPendingOrDelayed' : null,
-                              badgerColor: delayedDeliveries.isNotEmpty ? AppColors.error : AppColors.warning,
+                              badgerContent:
+                                  pendingOrDelayedDeliveriesCount > 0 ? '$pendingOrDelayedDeliveriesCount' : null,
+                              badgerColor: hasDelayedDeliveries ? AppColors.error : AppColors.warning,
                               color: Colors.orange,
                               icon: AppIcons.deliveryTruck,
                               onPressed: () => context.push(
