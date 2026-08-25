@@ -30,6 +30,8 @@ class DeliveriesStatusTabs extends StatelessWidget {
             badgeColor = AppColors.error;
           } else if (tab == DeliveryFilterTab.pending) {
             badgeColor = AppColors.warning;
+          } else if (tab == DeliveryFilterTab.inProgress) {
+            badgeColor = Colors.blue;
           } else if (tab == DeliveryFilterTab.completed) {
             badgeColor = Colors.green;
           } else {

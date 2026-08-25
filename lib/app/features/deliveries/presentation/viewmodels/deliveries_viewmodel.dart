@@ -7,10 +7,10 @@ import 'package:flutter/foundation.dart';
 
 enum DeliveryFilterTab {
   all('Todas'),
+  delayed('Atrasadas'),
   pending('Pendentes'),
   inProgress('Em andamento'),
   completed('Finalizadas'),
-  delayed('Atrasadas'),
   cancelled('Canceladas');
 
   final String label;
@@ -158,14 +158,14 @@ class DeliveriesViewModel extends ChangeNotifier {
     switch (tab) {
       case DeliveryFilterTab.all:
         return _deliveries.length;
+      case DeliveryFilterTab.delayed:
+        return delayedDeliveries.length;
       case DeliveryFilterTab.pending:
         return pendingDeliveries.length;
       case DeliveryFilterTab.inProgress:
         return inProgressDeliveries.length;
       case DeliveryFilterTab.completed:
         return completedDeliveries.length;
-      case DeliveryFilterTab.delayed:
-        return delayedDeliveries.length;
       case DeliveryFilterTab.cancelled:
         return cancelledDeliveries.length;
     }
@@ -177,6 +177,9 @@ class DeliveriesViewModel extends ChangeNotifier {
       case DeliveryFilterTab.all:
         list = _sortDeliveriesForAllTab(_deliveries);
         break;
+      case DeliveryFilterTab.delayed:
+        list = delayedDeliveries;
+        break;
       case DeliveryFilterTab.pending:
         list = pendingDeliveries;
         break;
@@ -185,9 +188,6 @@ class DeliveriesViewModel extends ChangeNotifier {
         break;
       case DeliveryFilterTab.completed:
         list = completedDeliveries;
-        break;
-      case DeliveryFilterTab.delayed:
-        list = delayedDeliveries;
         break;
       case DeliveryFilterTab.cancelled:
         list = cancelledDeliveries;
