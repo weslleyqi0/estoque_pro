@@ -99,13 +99,13 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
         title: const Text('Cancelar entrega?'),
         content: const Text('Tem certeza que deseja cancelar esta entrega?'),
         actions: [
-          TextButton(
+          AppButton.text(
+            label: 'Não',
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Não'),
           ),
-          AppButton(
+          AppButton.text(
             label: 'Sim, cancelar',
-            backgroundColor: AppColors.error,
+            textStyle: context.textTheme.bodyLarge?.copyWith(color: context.colorScheme.error, fontWeight: .bold),
             onPressed: () => Navigator.pop(ctx, true),
           ),
         ],
