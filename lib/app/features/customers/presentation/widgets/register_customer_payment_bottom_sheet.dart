@@ -369,6 +369,7 @@ class _RegisterCustomerPaymentBottomSheetState extends State<RegisterCustomerPay
                             icon: AppIcons.check,
                             isLoading: _isLoading,
                             onPressed: _submit,
+                            isFullWidth: true,
                           ),
                         ],
                       ),

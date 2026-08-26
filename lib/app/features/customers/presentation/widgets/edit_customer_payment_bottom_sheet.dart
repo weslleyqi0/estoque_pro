@@ -246,7 +246,9 @@ class _EditCustomerPaymentBottomSheetState extends State<EditCustomerPaymentBott
                                     Container(
                                       padding: const EdgeInsets.all(AppSpacing.space8),
                                       decoration: BoxDecoration(
-                                        color: (isCancelled ? AppColors.error : AppColors.success).withValues(alpha: 0.15),
+                                        color: (isCancelled ? AppColors.error : AppColors.success).withValues(
+                                          alpha: 0.15,
+                                        ),
                                         borderRadius: BorderRadius.circular(AppSpacing.radius8),
                                       ),
                                       child: Icon(
@@ -261,7 +263,9 @@ class _EditCustomerPaymentBottomSheetState extends State<EditCustomerPaymentBott
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            widget.customerName.isNotEmpty ? widget.customerName : widget.payment.customerName,
+                                            widget.customerName.isNotEmpty
+                                                ? widget.customerName
+                                                : widget.payment.customerName,
                                             style: context.textTheme.titleSmall?.copyWith(
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -439,6 +443,7 @@ class _EditCustomerPaymentBottomSheetState extends State<EditCustomerPaymentBott
                               label: 'Salvar Alterações',
                               icon: AppIcons.check,
                               isLoading: _isLoading,
+                              isFullWidth: true,
                               onPressed: _saveChanges,
                             ),
 
