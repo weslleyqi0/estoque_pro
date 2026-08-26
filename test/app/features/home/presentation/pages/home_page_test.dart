@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
+import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
@@ -7,6 +8,7 @@ import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_sta
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
+import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
@@ -125,6 +127,9 @@ void main() {
       createdAt: now,
     );
 
+    final localStorageService = LocalStorageService();
+    final shortcutsViewModel = HomeShortcutsViewModel(localStorageService);
+
     await tester.pumpWidget(
       MaterialApp(
         home: HomePage(
@@ -132,6 +137,7 @@ void main() {
           salesViewModelFactory: () => salesViewModel,
           productsViewModelFactory: () => productsViewModel,
           deliveriesViewModelFactory: () => deliveriesViewModel,
+          homeShortcutsViewModelFactory: () => shortcutsViewModel,
         ),
       ),
     );

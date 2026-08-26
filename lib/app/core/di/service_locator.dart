@@ -50,6 +50,7 @@ import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/user_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
+import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
 import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -183,6 +184,9 @@ Future<void> setupServiceLocator() async {
   // ViewModels
   getIt.registerLazySingleton<ThemeViewModel>(
     () => ThemeViewModel(getIt<LocalStorageService>()),
+  );
+  getIt.registerLazySingleton<HomeShortcutsViewModel>(
+    () => HomeShortcutsViewModel(getIt<LocalStorageService>()),
   );
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(

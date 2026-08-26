@@ -13,6 +13,8 @@ import 'package:estoque_pro/app/features/categories/presentation/pages/category_
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
+import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
+import 'package:estoque_pro/app/features/settings/presentation/pages/home_shortcuts_settings_page.dart';
 import 'package:estoque_pro/app/features/settings/presentation/pages/settings_page.dart';
 import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -131,6 +133,7 @@ class AppRouter {
           salesViewModelFactory: () => getIt<SalesViewModel>(),
           productsViewModelFactory: () => getIt<ProductsViewModel>(),
           deliveriesViewModelFactory: () => getIt<DeliveriesViewModel>(),
+          homeShortcutsViewModelFactory: () => getIt<HomeShortcutsViewModel>(),
         ),
       ),
       GoRoute(
@@ -139,6 +142,13 @@ class AppRouter {
           authViewModel: getIt<AuthViewModel>(),
           biometricViewModel: getIt<BiometricViewModel>(),
           themeViewModel: getIt<ThemeViewModel>(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.homeShortcutsSettings,
+        builder: (context, state) => HomeShortcutsSettingsPage(
+          viewModel: getIt<HomeShortcutsViewModel>(),
+          authViewModel: getIt<AuthViewModel>(),
         ),
       ),
       GoRoute(

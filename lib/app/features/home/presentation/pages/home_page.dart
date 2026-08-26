@@ -2,8 +2,9 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
+import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/widgets/home_alerts_section.dart';
-import 'package:estoque_pro/app/features/home/presentation/widgets/home_button.dart';
+import 'package:estoque_pro/app/features/home/presentation/widgets/home_shortcut_button.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
@@ -18,6 +19,7 @@ class HomePage extends StatefulWidget {
   final SalesViewModel Function() salesViewModelFactory;
   final ProductsViewModel Function() productsViewModelFactory;
   final DeliveriesViewModel Function() deliveriesViewModelFactory;
+  final HomeShortcutsViewModel Function() homeShortcutsViewModelFactory;
 
   const HomePage({
     super.key,
@@ -25,6 +27,7 @@ class HomePage extends StatefulWidget {
     required this.salesViewModelFactory,
     required this.productsViewModelFactory,
     required this.deliveriesViewModelFactory,
+    required this.homeShortcutsViewModelFactory,
   });
 
   @override
@@ -36,6 +39,7 @@ class _HomePageState extends State<HomePage> {
   late final SalesViewModel _salesVM;
   late final ProductsViewModel _productsVM;
   late final DeliveriesViewModel _deliveriesVM;
+  late final HomeShortcutsViewModel _shortcutsVM;
   DateTime? _lastBackPressTime;
 
   @override
@@ -45,6 +49,7 @@ class _HomePageState extends State<HomePage> {
     _salesVM = widget.salesViewModelFactory();
     _productsVM = widget.productsViewModelFactory();
     _deliveriesVM = widget.deliveriesViewModelFactory();
+    _shortcutsVM = widget.homeShortcutsViewModelFactory();
     _salesVM.listenAll();
     _productsVM.listenAll();
     _deliveriesVM.listenAll();
@@ -98,7 +103,7 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: ListenableBuilder(
-        listenable: Listenable.merge([_authVM, _salesVM, _productsVM, _deliveriesVM]),
+        listenable: Listenable.merge([_authVM, _salesVM, _productsVM, _deliveriesVM, _shortcutsVM]),
         builder: (context, _) {
           final currentUser = _authVM.currentUser;
           final isManager = currentUser?.role == UserRole.owner || currentUser?.role == UserRole.admin;
@@ -108,6 +113,7 @@ class _HomePageState extends State<HomePage> {
           final pendingDeliveriesCount = _deliveriesVM.pendingDeliveries.length;
           final pendingOrDelayedDeliveriesCount = delayedDeliveriesCount + pendingDeliveriesCount;
           final hasDelayedDeliveries = delayedDeliveriesCount > 0;
+          final shortcuts = _shortcutsVM.getShortcutsForRole(isManager: isManager);
 
           return Scaffold(
             appBar: AppBar(
@@ -209,8 +215,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-
-                // --- CONTEÚDO ROLÁVEL (Avisos e Botões) ---
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
@@ -220,7 +224,10 @@ class _HomePageState extends State<HomePage> {
                           pendingDeliveriesCount: pendingDeliveriesCount,
                           inProgressSalesCount: inProgressSalesCount,
                           lowStockProductsCount: lowStockCount,
-                          onLowStockTap: () => context.push(AppRoutes.products, extra: true),
+                          onLowStockTap: () {
+                            _productsVM.setShowOnlyLowStock(true);
+                            context.push(AppRoutes.products, extra: true);
+                          },
                         ),
                       ),
                       const SliverToBoxAdapter(
@@ -234,82 +241,21 @@ class _HomePageState extends State<HomePage> {
                             crossAxisSpacing: AppSpacing.space8,
                             childAspectRatio: 1.35,
                           ),
-                          delegate: SliverChildListDelegate([
-                            HomeButton(
-                              title: 'Produtos',
-                              subTitle: 'Gerenciar Catalogo',
-                              badgerContent: lowStockCount > 0 ? '$lowStockCount' : null,
-                              badgerColor: AppColors.warning,
-                              color: AppColors.primary,
-                              icon: AppIcons.lists,
-                              onPressed: () {
-                                _productsVM.setShowOnlyLowStock(false);
-                                context.push(AppRoutes.products);
-                              },
-                            ),
-                            HomeButton(
-                              title: 'Vendas',
-                              subTitle: 'Histórico e andamento',
-                              badgerContent: inProgressSalesCount > 0 ? '$inProgressSalesCount' : null,
-                              badgerColor: AppColors.warning,
-                              color: Colors.green,
-                              icon: AppIcons.orderApprove,
-                              onPressed: () => context.push(
-                                AppRoutes.sales,
-                                extra: SalesFilterTab.all,
-                              ),
-                            ),
-                            HomeButton(
-                              title: 'Categorias',
-                              subTitle: 'Organizar produtos',
-                              color: Colors.deepPurple,
-                              icon: AppIcons.stacks,
-                              onPressed: () => context.push(AppRoutes.categories),
-                            ),
-                            HomeButton(
-                              title: 'Fornecedores',
-                              subTitle: 'Gerenciar parceiros',
-                              color: Colors.cyan,
-                              icon: AppIcons.localShipping,
-                              onPressed: () => context.push(AppRoutes.suppliers),
-                            ),
-                            HomeButton(
-                              title: 'Clientes',
-                              subTitle: 'Cadastros e fiados',
-                              color: Colors.pink,
-                              icon: AppIcons.group,
-                              onPressed: () => context.push(AppRoutes.customers),
-                            ),
-                            HomeButton(
-                              title: 'Entregas',
-                              subTitle: 'Gerenciar entregas',
-                              badgerContent:
-                                  pendingOrDelayedDeliveriesCount > 0 ? '$pendingOrDelayedDeliveriesCount' : null,
-                              badgerColor: hasDelayedDeliveries ? AppColors.error : AppColors.warning,
-                              color: Colors.orange,
-                              icon: AppIcons.truck,
-                              onPressed: () => context.push(
-                                AppRoutes.deliveries,
-                                extra: DeliveryFilterTab.all,
-                              ),
-                            ),
-                            if (isManager) ...[
-                              HomeButton(
-                                title: 'Relatórios',
-                                subTitle: 'Análise completa',
-                                color: Colors.blue,
-                                icon: AppIcons.barChart,
-                                onPressed: () {},
-                              ),
-                              HomeButton(
-                                title: 'Usuários',
-                                subTitle: 'Gerenciar equipe',
-                                color: Colors.blueGrey,
-                                icon: AppIcons.supervisorAccount,
-                                onPressed: () => context.push(AppRoutes.users),
-                              ),
-                            ],
-                          ]),
+                          delegate: SliverChildListDelegate(
+                            shortcuts
+                                .map((shortcut) => HomeShortcutButton(
+                                      type: shortcut,
+                                      lowStockCount: lowStockCount,
+                                      inProgressSalesCount: inProgressSalesCount,
+                                      pendingOrDelayedDeliveriesCount: pendingOrDelayedDeliveriesCount,
+                                      hasDelayedDeliveries: hasDelayedDeliveries,
+                                      onProductsTap: () {
+                                        _productsVM.setShowOnlyLowStock(false);
+                                        context.push(AppRoutes.products);
+                                      },
+                                    ))
+                                .toList(),
+                          ),
                         ),
                       ),
                       const SliverToBoxAdapter(
