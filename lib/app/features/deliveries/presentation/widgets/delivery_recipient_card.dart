@@ -1,6 +1,5 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 
 class DeliveryRecipientCard extends StatelessWidget {
@@ -25,8 +24,11 @@ class DeliveryRecipientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasPhone = customerPhone != null && customerPhone!.trim().isNotEmpty;
-    final hasAddress = customerAddress.trim().isNotEmpty;
+    final cleanPhone = customerPhone?.replaceAll(RegExp(r'\D'), '');
+    final hasPhone = cleanPhone != null && cleanPhone.isNotEmpty;
+    final hasAddress = customerAddress.trim().isNotEmpty &&
+        customerAddress.trim().toLowerCase() != 'endereço não cadastrado' &&
+        customerAddress.trim().toLowerCase() != 'endereço não informado';
     final hasObservations = observations.trim().isNotEmpty;
 
     return Container(
@@ -75,19 +77,14 @@ class DeliveryRecipientCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (hasAddress) ...[
+              if (hasAddress && onOpenMap != null) ...[
                 AppIconButton(
                   icon: AppIcons.directions,
                   iconColor: context.colorScheme.primary,
                   visualDensity: VisualDensity.compact,
                   size: AppIconButtonSize.medium,
                   tooltip: 'Abrir no Maps',
-                  onPressed:
-                      onOpenMap ??
-                      () {
-                        Clipboard.setData(ClipboardData(text: customerAddress));
-                        AppSnackbar.info(context, 'Endereço copiado para buscar no mapa');
-                      },
+                  onPressed: onOpenMap,
                 ),
               ],
             ],
@@ -109,32 +106,26 @@ class DeliveryRecipientCard extends StatelessWidget {
                     style: context.textTheme.bodyMedium,
                   ),
                 ),
-                AppIconButton(
-                  icon: AppIcons.phone,
-                  iconColor: Colors.blue,
-                  visualDensity: VisualDensity.compact,
-                  size: AppIconButtonSize.medium,
-                  tooltip: 'Ligar',
-                  onPressed:
-                      onCall ??
-                      () {
-                        Clipboard.setData(ClipboardData(text: customerPhone!));
-                        AppSnackbar.info(context, 'Telefone copiado para discagem');
-                      },
-                ),
-                AppIconButton(
-                  icon: AppIcons.chat,
-                  iconColor: Colors.green,
-                  visualDensity: VisualDensity.compact,
-                  size: AppIconButtonSize.medium,
-                  tooltip: 'WhatsApp',
-                  onPressed:
-                      onWhatsApp ??
-                      () {
-                        Clipboard.setData(ClipboardData(text: customerPhone!));
-                        AppSnackbar.info(context, 'Telefone copiado para WhatsApp');
-                      },
-                ),
+                if (onCall != null) ...[
+                  AppIconButton(
+                    icon: AppIcons.phone,
+                    iconColor: Colors.blue,
+                    visualDensity: VisualDensity.compact,
+                    size: AppIconButtonSize.medium,
+                    tooltip: 'Ligar',
+                    onPressed: onCall,
+                  ),
+                ],
+                if (onWhatsApp != null) ...[
+                  AppIconButton(
+                    icon: AppIcons.chat,
+                    iconColor: Colors.green,
+                    visualDensity: VisualDensity.compact,
+                    size: AppIconButtonSize.medium,
+                    tooltip: 'WhatsApp',
+                    onPressed: onWhatsApp,
+                  ),
+                ],
               ],
             ),
           ],
