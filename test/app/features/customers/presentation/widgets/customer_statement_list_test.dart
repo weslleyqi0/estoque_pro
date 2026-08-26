@@ -189,16 +189,15 @@ void main() {
     );
 
     expect(find.text('Últimas Movimentações'), findsOneWidget);
-    expect(find.text('5 registros'), findsOneWidget);
+    expect(find.text('Ver todas (5)'), findsOneWidget);
     // Deve renderizar apenas os 3 primeiros itens
     expect(find.text('Compra Fiado #0'), findsOneWidget);
     expect(find.text('Compra Fiado #1'), findsOneWidget);
     expect(find.text('Compra Fiado #2'), findsOneWidget);
     expect(find.text('Compra Fiado #3'), findsNothing);
 
-    // Botão Ver todas
-    expect(find.text('Ver todas as movimentações (5)'), findsOneWidget);
-    await tester.tap(find.text('Ver todas as movimentações (5)'));
+    // Botão Ver todas no header
+    await tester.tap(find.text('Ver todas (5)'));
     expect(viewAllClicked, isTrue);
   });
 }

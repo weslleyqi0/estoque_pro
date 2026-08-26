@@ -84,12 +84,26 @@ class CustomerStatementList extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Text(
-              '${statementItems.length} ${statementItems.length == 1 ? "registro" : "registros"}',
-              style: context.textTheme.labelSmall?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
+            if (hasLimit && showViewAll && onViewAll != null)
+              SizedBox(
+                height: AppSpacing.space32,
+                child: AppButton.text(
+                  onPressed: onViewAll,
+                  label: 'Ver todas (${statementItems.length})',
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space8),
+                  textStyle: context.textTheme.labelMedium?.copyWith(
+                    color: context.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            else
+              Text(
+                '${statementItems.length} ${statementItems.length == 1 ? "registro" : "registros"}',
+                style: context.textTheme.labelSmall?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
           ],
         ),
         const Gap(AppSpacing.space8),
@@ -107,23 +121,6 @@ class CustomerStatementList extends StatelessWidget {
             );
           },
         ),
-        if (hasLimit && showViewAll && onViewAll != null) ...[
-          const Gap(AppSpacing.space12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: onViewAll,
-              icon: const Icon(AppIcons.receiptLong, size: AppSpacing.icon16),
-              label: Text('Ver todas as movimentações (${statementItems.length})'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.space12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radius12),
-                ),
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }
