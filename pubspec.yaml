@@ -49,9 +49,11 @@ dependencies:
   equatable: 2.1.0
   intl: 0.20.2
   local_auth: 3.0.2
+  map_launcher: 5.0.1
   mobile_scanner: 7.4.0
   path_provider: 2.1.5
   share_plus: 10.1.4
+  url_launcher: 6.3.2
 
 dev_dependencies:
   flutter_test:

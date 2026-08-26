@@ -9,6 +9,8 @@ import 'package:estoque_pro/app/features/sales/presentation/widgets/payment_deli
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
+import 'package:map_launcher/map_launcher.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DeliveryDetailBottomSheet extends StatelessWidget {
   final DeliveryEntity delivery;
@@ -68,7 +70,10 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
 
     if (context.mounted) {
       Navigator.pop(context);
-      AppSnackbar.success(context, 'Entrega reagendada com sucesso!');
+      AppSnackbar.success(
+        context,
+        'Entrega reagendada para ${DateFormat('dd/MM/yyyy HH:mm').format(pickedDateTime)}',
+      );
     }
   }
 
@@ -137,6 +142,111 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
         if (context.mounted) {
           AppSnackbar.error(context, 'Erro ao excluir entrega: ${e.toString()}');
         }
+      }
+    }
+  }
+
+  void _openMap(BuildContext context) async {
+    final address = delivery.customerAddress.trim();
+    if (address.isEmpty) {
+      AppSnackbar.warning(context, 'Endereço não informado.');
+      return;
+    }
+
+    try {
+      final marker = MapLauncher.marker(LocationSearch(address));
+      final supportedMaps = await marker.getSupportedMaps();
+      final installedMaps = supportedMaps.where((m) => m.isInstalled).toList();
+
+      if (installedMaps.length > 1 && context.mounted) {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext ctx) {
+            return SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    ListTile(
+                      title: Text(
+                        'Abrir no mapa',
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    for (final map in installedMaps)
+                      ListTile(
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          marker.show(map: map.mapType);
+                        },
+                        title: Text(map.displayName),
+                        leading: const Icon(AppIcons.locationOn),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      } else {
+        await marker.show();
+      }
+    } catch (_) {
+      final encodedAddress = Uri.encodeComponent(address);
+      final mapUri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$encodedAddress');
+      if (await canLaunchUrl(mapUri)) {
+        await launchUrl(mapUri, mode: LaunchMode.externalApplication);
+      } else if (context.mounted) {
+        AppSnackbar.warning(context, 'Não foi possível abrir o mapa.');
+      }
+    }
+  }
+
+  void _callPhone(BuildContext context) async {
+    final phone = delivery.customerPhone?.replaceAll(RegExp(r'\D'), '');
+    if (phone == null || phone.trim().isEmpty) {
+      AppSnackbar.warning(context, 'Telefone não informado.');
+      return;
+    }
+
+    final uri = Uri(scheme: 'tel', path: phone);
+    try {
+      final launched = await launchUrl(uri);
+      if (!launched && context.mounted) {
+        AppSnackbar.warning(context, 'Não foi possível iniciar a ligação.');
+      }
+    } catch (_) {
+      if (context.mounted) {
+        AppSnackbar.warning(context, 'Não foi possível iniciar a ligação.');
+      }
+    }
+  }
+
+  void _openWhatsApp(BuildContext context) async {
+    final phone = delivery.customerPhone?.replaceAll(RegExp(r'\D'), '');
+    if (phone == null || phone.trim().isEmpty) {
+      AppSnackbar.warning(context, 'WhatsApp/Telefone não informado.');
+      return;
+    }
+
+    final formattedPhone = phone.length <= 11 ? '55$phone' : phone;
+
+    final message = '';
+    final whatsappUri = Uri.parse('https://wa.me/$formattedPhone?text=$message');
+
+    try {
+      final launched = await launchUrl(
+        whatsappUri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && context.mounted) {
+        AppSnackbar.warning(context, 'Não foi possível abrir o WhatsApp.');
+      }
+    } catch (_) {
+      if (context.mounted) {
+        AppSnackbar.warning(context, 'Não foi possível abrir o WhatsApp.');
       }
     }
   }
@@ -265,6 +375,9 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
                       customerPhone: delivery.customerPhone,
                       customerAddress: delivery.customerAddress,
                       observations: delivery.observations,
+                      onOpenMap: () => _openMap(context),
+                      onCall: () => _callPhone(context),
+                      onWhatsApp: () => _openWhatsApp(context),
                     ),
 
                     const Gap(AppSpacing.space16),
