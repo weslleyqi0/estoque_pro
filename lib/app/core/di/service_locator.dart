@@ -19,9 +19,13 @@ import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_cas
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/data/repositories/customer_payments_repository_impl.dart';
 import 'package:estoque_pro/app/features/customers/data/repositories/customers_repository_impl.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
+import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
+import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/data/repositories/suppliers_repository_impl.dart';
@@ -75,6 +79,7 @@ Future<void> setupServiceLocator() async {
   registerDatabaseService<UserEntity>('users');
   registerDatabaseService<SupplierEntity>('suppliers');
   registerDatabaseService<CustomerEntity>('customers');
+  registerDatabaseService<CustomerPaymentEntity>('customer_payments');
   registerDatabaseService<CategoryEntity>('categories');
   registerDatabaseService<ProductEntity>('products');
   registerDatabaseService<SaleEntity>('sales');
@@ -120,6 +125,12 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<CustomersRepository>(
     () => CustomersRepositoryImpl(
       getIt<FirebaseDatabaseService<CustomerEntity>>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<CustomerPaymentsRepository>(
+    () => CustomerPaymentsRepositoryImpl(
+      getIt<FirebaseDatabaseService<CustomerPaymentEntity>>(),
     ),
   );
 
@@ -187,6 +198,12 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<HomeShortcutsViewModel>(
     () => HomeShortcutsViewModel(getIt<LocalStorageService>()),
+  );
+  getIt.registerFactory<CustomerDebtsViewModel>(
+    () => CustomerDebtsViewModel(
+      getIt<SalesRepository>(),
+      getIt<CustomerPaymentsRepository>(),
+    ),
   );
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(
