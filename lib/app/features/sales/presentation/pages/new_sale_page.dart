@@ -10,14 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class NewSalePage extends StatefulWidget {
-  final ProductsViewModel productsViewModel;
+  final ProductsViewModel Function() productsViewModelFactory;
   final CartViewModel Function() cartViewModelFactory;
   final AuthViewModel authViewModel;
   final SaleEntity? initialSale;
 
   const NewSalePage({
     super.key,
-    required this.productsViewModel,
+    required this.productsViewModelFactory,
     required this.cartViewModelFactory,
     required this.authViewModel,
     this.initialSale,
@@ -28,6 +28,7 @@ class NewSalePage extends StatefulWidget {
 }
 
 class _NewSalePageState extends State<NewSalePage> {
+  late final ProductsViewModel productsViewModel;
   late final CartViewModel cartViewModel;
   final _sheetController = DraggableScrollableController();
 
@@ -43,23 +44,33 @@ class _NewSalePageState extends State<NewSalePage> {
   @override
   void initState() {
     super.initState();
+    productsViewModel = widget.productsViewModelFactory();
     cartViewModel = widget.cartViewModelFactory();
-    widget.productsViewModel.listenAll();
+    productsViewModel.addListener(_onProductsUpdated);
+    productsViewModel.listenAll();
     if (widget.initialSale != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        cartViewModel.loadSale(widget.initialSale!, widget.productsViewModel.products);
-        widget.productsViewModel.clearLowStockFilter();
-        widget.productsViewModel.setSearchQuery('', notify: false);
+        cartViewModel.loadSale(widget.initialSale!, productsViewModel.products);
+        productsViewModel.clearLowStockFilter();
+        productsViewModel.setSearchQuery('', notify: false);
       });
+    }
+  }
+
+  void _onProductsUpdated() {
+    if (productsViewModel.products.isNotEmpty) {
+      cartViewModel.updateAvailableProducts(productsViewModel.products);
     }
   }
 
   @override
   void dispose() {
+    productsViewModel.removeListener(_onProductsUpdated);
     cartViewModel.dispose();
     _sheetController.dispose();
-    widget.productsViewModel.setSearchQuery('', notify: false);
-    widget.productsViewModel.clearLowStockFilter(notify: false);
+    productsViewModel.setSearchQuery('', notify: false);
+    productsViewModel.clearLowStockFilter(notify: false);
+    productsViewModel.dispose();
     super.dispose();
   }
 
@@ -98,7 +109,7 @@ class _NewSalePageState extends State<NewSalePage> {
         await cartViewModel.saveInProgressToFirebase(
           userId: userId,
           userName: userName,
-          availableProducts: widget.productsViewModel.products,
+          availableProducts: productsViewModel.products,
         );
 
         if (context.mounted) {
@@ -130,7 +141,7 @@ class _NewSalePageState extends State<NewSalePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      final matchedProduct = widget.productsViewModel.findProductByBarcode(scannedCode);
+      final matchedProduct = productsViewModel.findProductByBarcode(scannedCode);
       if (matchedProduct == null) {
         AppSnackbar.error(
           context,
@@ -187,7 +198,7 @@ class _NewSalePageState extends State<NewSalePage> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([widget.productsViewModel, cartViewModel]),
+      listenable: Listenable.merge([productsViewModel, cartViewModel]),
       builder: (context, _) {
         return PopScope(
           canPop: false,
@@ -222,8 +233,8 @@ class _NewSalePageState extends State<NewSalePage> {
                   slivers: [
                     AppFloatingSearch(
                       hint: 'Buscar por nome, categoria, fornecedor ou código...',
-                      initialValue: widget.productsViewModel.searchQuery,
-                      onChanged: widget.productsViewModel.setSearchQuery,
+                      initialValue: productsViewModel.searchQuery,
+                      onChanged: productsViewModel.setSearchQuery,
                       trailing: Tooltip(
                         message: 'Abrir leitor de código de barras',
                         child: InkWell(
@@ -247,7 +258,7 @@ class _NewSalePageState extends State<NewSalePage> {
                     ),
 
                     SaleProductsListSliver(
-                      productsViewModel: widget.productsViewModel,
+                      productsViewModel: productsViewModel,
                       cartViewModel: cartViewModel,
                     ),
                   ],
@@ -257,7 +268,7 @@ class _NewSalePageState extends State<NewSalePage> {
               CartBottomSheet(
                 cartViewModel: cartViewModel,
                 authViewModel: widget.authViewModel,
-                availableProducts: widget.productsViewModel.products,
+                availableProducts: productsViewModel.products,
                 controller: _sheetController,
                 onSaleSuccess: () {
                   AppSnackbar.success(

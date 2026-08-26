@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
@@ -23,10 +25,18 @@ enum SalesFilterTab {
 
 class SalesViewModel extends ChangeNotifier {
   final SalesRepository _repository;
+  final DeliveriesRepository? _deliveriesRepository;
 
-  SalesViewModel(this._repository);
+  SalesViewModel(this._repository, [this._deliveriesRepository]);
 
   StreamSubscription<List<SaleEntity>>? _salesSubscription;
+  StreamSubscription<List<DeliveryEntity>>? _deliveriesSubscription;
+
+  Map<String, DeliveryEntity> _deliveriesBySaleId = {};
+
+  DeliveryEntity? getDeliveryForSale(String saleId, [String? saleNumber]) {
+    return _deliveriesBySaleId[saleId] ?? (saleNumber != null ? _deliveriesBySaleId[saleNumber] : null);
+  }
 
   SalesLoadState _state = SalesLoadState.idle;
   SalesLoadState get state => _state;
@@ -130,6 +140,22 @@ class SalesViewModel extends ChangeNotifier {
         notifyListeners();
       },
     );
+
+    if (_deliveriesRepository != null && _deliveriesSubscription == null) {
+      _deliveriesSubscription = _deliveriesRepository.watchAll().listen((deliveries) {
+        final map = <String, DeliveryEntity>{};
+        for (final d in deliveries) {
+          if (d.saleId.isNotEmpty) {
+            map[d.saleId] = d;
+          }
+          if (d.saleNumber.isNotEmpty) {
+            map[d.saleNumber] = d;
+          }
+        }
+        _deliveriesBySaleId = map;
+        notifyListeners();
+      });
+    }
   }
 
   Future<void> deleteSale(String saleId) async {
@@ -146,6 +172,7 @@ class SalesViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _salesSubscription?.cancel();
+    _deliveriesSubscription?.cancel();
     super.dispose();
   }
 }

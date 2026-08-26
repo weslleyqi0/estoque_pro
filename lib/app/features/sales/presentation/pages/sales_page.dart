@@ -1,6 +1,8 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sales_list_sliver.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sales_status_tabs.dart';
@@ -8,13 +10,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class SalesPage extends StatefulWidget {
-  final SalesViewModel viewModel;
+  final SalesViewModel Function() viewModelFactory;
+  final DeliveriesViewModel Function()? deliveriesViewModelFactory;
   final AuthViewModel authViewModel;
+  final SalesFilterTab? initialTab;
 
   const SalesPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
+    this.deliveriesViewModelFactory,
     required this.authViewModel,
+    this.initialTab,
   });
 
   @override
@@ -22,19 +28,35 @@ class SalesPage extends StatefulWidget {
 }
 
 class _SalesPageState extends State<SalesPage> {
+  late final SalesViewModel viewModel;
+  late final DeliveriesViewModel deliveriesViewModel;
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.listenAll();
+    viewModel = widget.viewModelFactory();
+    deliveriesViewModel = widget.deliveriesViewModelFactory?.call() ?? getIt<DeliveriesViewModel>();
+    if (widget.initialTab != null) {
+      viewModel.setSelectedTab(widget.initialTab!);
+    }
+    viewModel.listenAll();
+    deliveriesViewModel.listenAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.viewModel.setSearchQuery('');
+      viewModel.setSearchQuery('');
     });
+  }
+
+  @override
+  void dispose() {
+    viewModel.dispose();
+    deliveriesViewModel.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: widget.viewModel,
+      listenable: viewModel,
       builder: (context, _) {
         return Scaffold(
           appBar: AppBar(
@@ -47,7 +69,7 @@ class _SalesPageState extends State<SalesPage> {
                 color: context.isDark
                     ? context.colorScheme.surfaceContainerLow
                     : context.colorScheme.surfaceContainerHighest,
-                child: SalesStatusTabs(viewModel: widget.viewModel),
+                child: SalesStatusTabs(viewModel: viewModel),
               ),
             ),
           ),
@@ -59,15 +81,16 @@ class _SalesPageState extends State<SalesPage> {
           body: CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              if (widget.viewModel.sales.isNotEmpty)
+              if (viewModel.sales.isNotEmpty)
                 AppFloatingSearch(
                   hint: 'Pesquisar por número, cliente, vendedor ou produto...',
-                  initialValue: widget.viewModel.searchQuery,
-                  onChanged: widget.viewModel.setSearchQuery,
+                  initialValue: viewModel.searchQuery,
+                  onChanged: viewModel.setSearchQuery,
                 ),
               SalesListSliver(
-                viewModel: widget.viewModel,
+                viewModel: viewModel,
                 authViewModel: widget.authViewModel,
+                deliveriesViewModel: deliveriesViewModel,
               ),
             ],
           ),

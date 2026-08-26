@@ -3,6 +3,7 @@ class AppRoutes {
   static const biometric = '/biometric';
   static const home = '/home';
   static const settings = '/settings';
+  static const homeShortcutsSettings = '/settings/home-shortcuts';
 
   static const users = '/users';
   static const userForm = '/users/form';
@@ -29,4 +30,6 @@ class AppRoutes {
   static const sales = '/sales';
   static const newSale = '/sales/new';
   static const saleScanner = '/sales/new/scan';
+
+  static const deliveries = '/deliveries';
 }

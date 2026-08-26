@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
+import 'package:estoque_pro/app/core/utils/sale_code_generator.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -42,6 +43,22 @@ class CartViewModel extends ChangeNotifier {
   String? _customerName;
   String? get customerName => _customerName;
 
+  String? _customerPhone;
+  String? get customerPhone => _customerPhone;
+
+  // Delivery properties
+  bool _isDelivery = false;
+  bool get isDelivery => _isDelivery;
+
+  DateTime? _scheduledDeliveryDate;
+  DateTime? get scheduledDeliveryDate => _scheduledDeliveryDate;
+
+  String _deliveryAddress = '';
+  String get deliveryAddress => _deliveryAddress;
+
+  String _deliveryNotes = '';
+  String get deliveryNotes => _deliveryNotes;
+
   double _amountPaid = 0.0;
   double get amountPaid => _amountPaid;
 
@@ -67,8 +84,7 @@ class CartViewModel extends ChangeNotifier {
   }
 
   void _initSaleNumber() {
-    final now = DateTime.now();
-    _saleNumber = '#${now.millisecondsSinceEpoch.toString().substring(7)}';
+    _saleNumber = SaleCodeGenerator.generate();
   }
 
   int getQuantityInCart(String productId) {
@@ -82,7 +98,10 @@ class CartViewModel extends ChangeNotifier {
     if (index >= 0) {
       final current = _items[index];
       if (current.quantity >= product.stock) return false;
-      _items[index] = current.copyWith(quantity: current.quantity + 1);
+      _items[index] = current.copyWith(
+        quantity: current.quantity + 1,
+        product: product,
+      );
     } else {
       if (product.stock <= 0) return false;
       _items.add(CartItem(product: product, quantity: 1));
@@ -121,6 +140,25 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateAvailableProducts(List<ProductEntity> availableProducts) {
+    if (availableProducts.isEmpty || _items.isEmpty) return;
+    bool changed = false;
+    for (int i = 0; i < _items.length; i++) {
+      final current = _items[i];
+      final matchedIndex = availableProducts.indexWhere((p) => p.id == current.product.id);
+      if (matchedIndex >= 0) {
+        final matched = availableProducts[matchedIndex];
+        if (matched.stock != current.product.stock || matched != current.product) {
+          _items[i] = current.copyWith(product: matched);
+          changed = true;
+        }
+      }
+    }
+    if (changed) {
+      notifyListeners();
+    }
+  }
+
   void setDiscount(DiscountType type, double value) {
     _discountType = type;
     _discountValue = value;
@@ -137,15 +175,44 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setCustomer(String? id, String? name) {
+  void setCustomer(String? id, String? name, {String? phone, String? address}) {
     _customerId = id;
     _customerName = name;
+    _customerPhone = phone;
+    if (address != null && address.trim().isNotEmpty) {
+      _deliveryAddress = address;
+    }
     notifyListeners();
   }
 
   void clearCustomer() {
     _customerId = null;
     _customerName = null;
+    _customerPhone = null;
+    _deliveryAddress = '';
+    notifyListeners();
+  }
+
+  void setIsDelivery(bool isDelivery) {
+    _isDelivery = isDelivery;
+    if (isDelivery && _scheduledDeliveryDate == null) {
+      _scheduledDeliveryDate = DateTime.now().add(const Duration(hours: 1));
+    }
+    notifyListeners();
+  }
+
+  void setScheduledDeliveryDate(DateTime date) {
+    _scheduledDeliveryDate = date;
+    notifyListeners();
+  }
+
+  void setDeliveryAddress(String address) {
+    _deliveryAddress = address;
+    notifyListeners();
+  }
+
+  void setDeliveryNotes(String notes) {
+    _deliveryNotes = notes;
     notifyListeners();
   }
 
@@ -162,6 +229,10 @@ class CartViewModel extends ChangeNotifier {
     _amountPaid = sale.amountPaid ?? 0.0;
     _customerId = sale.customerId;
     _customerName = sale.customerName;
+    _isDelivery = false;
+    _scheduledDeliveryDate = null;
+    _deliveryAddress = '';
+    _deliveryNotes = '';
 
     for (final item in sale.items) {
       final matchedProduct = availableProducts.firstWhere(
@@ -191,6 +262,11 @@ class CartViewModel extends ChangeNotifier {
     _amountPaid = 0.0;
     _customerId = null;
     _customerName = null;
+    _customerPhone = null;
+    _isDelivery = false;
+    _scheduledDeliveryDate = null;
+    _deliveryAddress = '';
+    _deliveryNotes = '';
     _initSaleNumber();
   }
 
@@ -231,9 +307,14 @@ class CartViewModel extends ChangeNotifier {
       change: change,
       customerId: _customerId,
       customerName: _customerName,
+      customerPhone: _customerPhone,
       userId: userId,
       userName: userName,
       availableProducts: availableProducts,
+      isDelivery: _isDelivery,
+      deliveryScheduledAt: _scheduledDeliveryDate,
+      deliveryAddress: _deliveryAddress,
+      deliveryNotes: _deliveryNotes,
     );
 
     clearCart();

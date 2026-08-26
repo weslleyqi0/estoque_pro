@@ -17,7 +17,7 @@ class PaymentMethodCard extends StatelessWidget {
 
   IconData get _icon => switch (method) {
     PaymentMethod.dinheiro => AppIcons.currency,
-    PaymentMethod.pix => AppIcons.qrCode,
+    PaymentMethod.pix => AppIcons.pix,
     PaymentMethod.credito => AppIcons.creditCard,
     PaymentMethod.debito => AppIcons.creditScore,
     PaymentMethod.fiado => AppIcons.receiptLong,
@@ -49,15 +49,7 @@ class PaymentMethodCard extends StatelessWidget {
           mainAxisAlignment: .center,
           mainAxisSize: .min,
           children: [
-            if (method == PaymentMethod.pix)
-              AppSvg(
-                assetName: AppIcons.pixLogo,
-                color: iconColor,
-                width: AppSpacing.icon28,
-                height: AppSpacing.icon28,
-              )
-            else
-              Icon(_icon, color: iconColor, size: AppSpacing.icon28),
+            Icon(_icon, color: iconColor, size: AppSpacing.icon28),
             const Gap(AppSpacing.space8),
             Text(
               method.label,

@@ -7,13 +7,15 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 class ProductsPage extends StatefulWidget {
-  final ProductsViewModel viewModel;
+  final ProductsViewModel Function() viewModelFactory;
   final String? initialSearchQuery;
+  final bool initialShowOnlyLowStock;
 
   const ProductsPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
     this.initialSearchQuery,
+    this.initialShowOnlyLowStock = false,
   });
 
   @override
@@ -21,22 +23,29 @@ class ProductsPage extends StatefulWidget {
 }
 
 class _ProductsPageState extends State<ProductsPage> {
+  late final ProductsViewModel viewModel;
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.listenAll();
+    viewModel = widget.viewModelFactory();
+    if (widget.initialShowOnlyLowStock) {
+      viewModel.setShowOnlyLowStock(true);
+    }
+    viewModel.listenAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.initialSearchQuery != null) {
-        widget.viewModel.clearLowStockFilter();
-        widget.viewModel.setSearchQuery(widget.initialSearchQuery ?? '');
+      if (widget.initialSearchQuery != null && widget.initialSearchQuery!.isNotEmpty) {
+        viewModel.clearLowStockFilter();
+        viewModel.setSearchQuery(widget.initialSearchQuery!);
       }
     });
   }
 
   @override
   void dispose() {
-    widget.viewModel.setSearchQuery('', notify: false);
-    widget.viewModel.clearLowStockFilter(notify: false);
+    viewModel.setSearchQuery('', notify: false);
+    viewModel.clearLowStockFilter(notify: false);
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -48,9 +57,9 @@ class _ProductsPageState extends State<ProductsPage> {
         centerTitle: true,
         actions: [
           ListenableBuilder(
-            listenable: widget.viewModel,
+            listenable: viewModel,
             builder: (context, _) {
-              if (widget.viewModel.archivedProducts.isEmpty) {
+              if (viewModel.archivedProducts.isEmpty) {
                 return const SizedBox.shrink();
               }
               return Row(
@@ -76,18 +85,18 @@ class _ProductsPageState extends State<ProductsPage> {
         onPressed: () => context.push(AppRoutes.productForm),
       ),
       body: ListenableBuilder(
-        listenable: widget.viewModel,
+        listenable: viewModel,
         builder: (context, _) {
           return CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              if (widget.viewModel.products.isNotEmpty) ...[
+              if (viewModel.products.isNotEmpty) ...[
                 AppFloatingSearch(
                   hint: 'Pesquisar produto...',
-                  initialValue: widget.viewModel.searchQuery,
-                  onChanged: widget.viewModel.setSearchQuery,
+                  initialValue: viewModel.searchQuery,
+                  onChanged: viewModel.setSearchQuery,
                 ),
-                if (widget.viewModel.showOnlyLowStock)
+                if (viewModel.showOnlyLowStock)
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.only(
@@ -96,23 +105,23 @@ class _ProductsPageState extends State<ProductsPage> {
                         bottom: AppSpacing.space12,
                       ),
                       child: AppInfoBanner(
-                        title: widget.viewModel.lowStockProducts.length == 1
+                        title: viewModel.lowStockProducts.length == 1
                             ? '1 produto com estoque baixo'
-                            : '${widget.viewModel.lowStockProducts.length} produtos com estoque baixo',
+                            : '${viewModel.lowStockProducts.length} produtos com estoque baixo',
                         subtitle: 'Exibindo apenas produtos em baixa no estoque',
                         icon: AppIcons.package2,
-                        type: AppInfoBannerType.error,
+                        type: AppInfoBannerType.warning,
                         trailing: AppIconButton(
                           icon: AppIcons.close,
-                          iconColor: AppColors.errorDark,
+                          iconColor: AppColors.warningDark,
                           tooltip: 'Exibir todos os produtos',
-                          onPressed: widget.viewModel.clearLowStockFilter,
+                          onPressed: viewModel.clearLowStockFilter,
                         ),
                       ),
                     ),
                   ),
               ],
-              ProductsListSliver(viewModel: widget.viewModel),
+              ProductsListSliver(viewModel: viewModel),
             ],
           );
         },

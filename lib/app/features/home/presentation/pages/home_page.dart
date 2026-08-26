@@ -1,7 +1,10 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
-import 'package:estoque_pro/app/features/home/presentation/widgets/home_button.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
+import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
+import 'package:estoque_pro/app/features/home/presentation/widgets/home_alerts_section.dart';
+import 'package:estoque_pro/app/features/home/presentation/widgets/home_shortcut_button.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
@@ -13,14 +16,18 @@ import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   final AuthViewModel authViewModel;
-  final SalesViewModel salesViewModel;
-  final ProductsViewModel productsViewModel;
+  final SalesViewModel Function() salesViewModelFactory;
+  final ProductsViewModel Function() productsViewModelFactory;
+  final DeliveriesViewModel Function() deliveriesViewModelFactory;
+  final HomeShortcutsViewModel Function() homeShortcutsViewModelFactory;
 
   const HomePage({
     super.key,
     required this.authViewModel,
-    required this.salesViewModel,
-    required this.productsViewModel,
+    required this.salesViewModelFactory,
+    required this.productsViewModelFactory,
+    required this.deliveriesViewModelFactory,
+    required this.homeShortcutsViewModelFactory,
   });
 
   @override
@@ -28,16 +35,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  AuthViewModel get _authVM => widget.authViewModel;
-  SalesViewModel get _salesVM => widget.salesViewModel;
-  ProductsViewModel get _productsVM => widget.productsViewModel;
+  late final AuthViewModel _authVM;
+  late final SalesViewModel _salesVM;
+  late final ProductsViewModel _productsVM;
+  late final DeliveriesViewModel _deliveriesVM;
+  late final HomeShortcutsViewModel _shortcutsVM;
   DateTime? _lastBackPressTime;
 
   @override
   void initState() {
     super.initState();
+    _authVM = widget.authViewModel;
+    _salesVM = widget.salesViewModelFactory();
+    _productsVM = widget.productsViewModelFactory();
+    _deliveriesVM = widget.deliveriesViewModelFactory();
+    _shortcutsVM = widget.homeShortcutsViewModelFactory();
     _salesVM.listenAll();
     _productsVM.listenAll();
+    _deliveriesVM.listenAll();
+  }
+
+  @override
+  void dispose() {
+    _salesVM.dispose();
+    _productsVM.dispose();
+    _deliveriesVM.dispose();
+    super.dispose();
   }
 
   String get _greetingPeriod {
@@ -80,12 +103,17 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: ListenableBuilder(
-        listenable: Listenable.merge([_authVM, _salesVM, _productsVM]),
+        listenable: Listenable.merge([_authVM, _salesVM, _productsVM, _deliveriesVM, _shortcutsVM]),
         builder: (context, _) {
           final currentUser = _authVM.currentUser;
           final isManager = currentUser?.role == UserRole.owner || currentUser?.role == UserRole.admin;
-          final allInProgressSales = _salesVM.inProgressSales;
-          final lowStockProducts = _productsVM.lowStockProducts;
+          final inProgressSalesCount = _salesVM.inProgressSales.length;
+          final lowStockCount = _productsVM.lowStockProducts.length;
+          final delayedDeliveriesCount = _deliveriesVM.delayedDeliveries.length;
+          final pendingDeliveriesCount = _deliveriesVM.pendingDeliveries.length;
+          final pendingOrDelayedDeliveriesCount = delayedDeliveriesCount + pendingDeliveriesCount;
+          final hasDelayedDeliveries = delayedDeliveriesCount > 0;
+          final shortcuts = _shortcutsVM.getShortcutsForRole(isManager: isManager);
 
           return Scaffold(
             appBar: AppBar(
@@ -187,60 +215,21 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-
-                // --- CONTEÚDO ROLÁVEL (Avisos e Botões) ---
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
-                      if (allInProgressSales.isNotEmpty || lowStockProducts.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Gap(AppSpacing.space8),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
-                                child: Text('Avisos', style: context.textTheme.titleMedium),
-                              ),
-                              const Gap(AppSpacing.space4),
-                              if (allInProgressSales.isNotEmpty) ...[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
-                                  child: AppInfoBanner(
-                                    title: allInProgressSales.length == 1
-                                        ? '1 venda aguardando finalização'
-                                        : '${allInProgressSales.length} vendas aguardando finalização',
-                                    subtitle: 'Toque para ver ou gerenciar as vendas em andamento',
-                                    icon: AppIcons.shoppingCart,
-                                    type: AppInfoBannerType.warning,
-                                    onTap: () {
-                                      _salesVM.setSelectedTab(SalesFilterTab.inProgress);
-                                      context.push(AppRoutes.sales);
-                                    },
-                                  ),
-                                ),
-                                const Gap(AppSpacing.space12),
-                              ],
-                              if (lowStockProducts.isNotEmpty) ...[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space12),
-                                  child: AppInfoBanner(
-                                    title: lowStockProducts.length == 1
-                                        ? '1 produto com estoque baixo'
-                                        : '${lowStockProducts.length} produtos com estoque baixo',
-                                    subtitle: 'Toque para gerenciar o estoque dos produtos',
-                                    icon: AppIcons.package2,
-                                    type: AppInfoBannerType.error,
-                                    onTap: () {
-                                      _productsVM.setShowOnlyLowStock(true);
-                                      context.push(AppRoutes.products);
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
+                      SliverToBoxAdapter(
+                        child: HomeAlertsSection(
+                          delayedDeliveriesCount: delayedDeliveriesCount,
+                          pendingDeliveriesCount: pendingDeliveriesCount,
+                          inProgressSalesCount: inProgressSalesCount,
+                          lowStockProductsCount: lowStockCount,
+                          onLowStockTap: () {
+                            _productsVM.setShowOnlyLowStock(true);
+                            context.push(AppRoutes.products, extra: true);
+                          },
                         ),
+                      ),
                       const SliverToBoxAdapter(
                         child: Gap(AppSpacing.space16),
                       ),
@@ -252,76 +241,21 @@ class _HomePageState extends State<HomePage> {
                             crossAxisSpacing: AppSpacing.space8,
                             childAspectRatio: 1.35,
                           ),
-                          delegate: SliverChildListDelegate([
-                            HomeButton(
-                              title: 'Produtos',
-                              subTitle: 'Gerenciar Catalogo',
-                              badgerContent: lowStockProducts.isNotEmpty ? '${lowStockProducts.length}' : null,
-                              badgerColor: AppColors.error,
-                              color: AppColors.primary,
-                              icon: AppIcons.lists,
-                              onPressed: () {
-                                _productsVM.setShowOnlyLowStock(false);
-                                context.push(AppRoutes.products);
-                              },
-                            ),
-                            HomeButton(
-                              title: 'Vendas',
-                              subTitle: 'Histórico e andamento',
-                              badgerContent: allInProgressSales.isNotEmpty ? '${allInProgressSales.length}' : null,
-                              badgerColor: AppColors.warning,
-                              color: Colors.green,
-                              icon: AppIcons.orderApprove,
-                              onPressed: () {
-                                _salesVM.setSelectedTab(SalesFilterTab.all);
-                                context.push(AppRoutes.sales);
-                              },
-                            ),
-                            HomeButton(
-                              title: 'Categorias',
-                              subTitle: 'Organizar produtos',
-                              color: Colors.deepPurple,
-                              icon: AppIcons.stacks,
-                              onPressed: () => context.push(AppRoutes.categories),
-                            ),
-                            HomeButton(
-                              title: 'Fornecedores',
-                              subTitle: 'Gerenciar parceiros',
-                              color: Colors.cyan,
-                              icon: AppIcons.localShipping,
-                              onPressed: () => context.push(AppRoutes.suppliers),
-                            ),
-                            HomeButton(
-                              title: 'Clientes',
-                              subTitle: 'Cadastros e fiados',
-                              color: Colors.pink,
-                              icon: AppIcons.group,
-                              onPressed: () => context.push(AppRoutes.customers),
-                            ),
-                            if (isManager) ...[
-                              HomeButton(
-                                title: 'Entregas',
-                                subTitle: 'Gerenciar entregas',
-                                color: Colors.orange,
-                                icon: AppIcons.deliveryTruck,
-                                onPressed: () {},
-                              ),
-                              HomeButton(
-                                title: 'Relatórios',
-                                subTitle: 'Análise completa',
-                                color: Colors.blue,
-                                icon: AppIcons.barChart,
-                                onPressed: () {},
-                              ),
-                              HomeButton(
-                                title: 'Usuários',
-                                subTitle: 'Gerenciar equipe',
-                                color: Colors.blueGrey,
-                                icon: AppIcons.supervisorAccount,
-                                onPressed: () => context.push(AppRoutes.users),
-                              ),
-                            ],
-                          ]),
+                          delegate: SliverChildListDelegate(
+                            shortcuts
+                                .map((shortcut) => HomeShortcutButton(
+                                      type: shortcut,
+                                      lowStockCount: lowStockCount,
+                                      inProgressSalesCount: inProgressSalesCount,
+                                      pendingOrDelayedDeliveriesCount: pendingOrDelayedDeliveriesCount,
+                                      hasDelayedDeliveries: hasDelayedDeliveries,
+                                      onProductsTap: () {
+                                        _productsVM.setShowOnlyLowStock(false);
+                                        context.push(AppRoutes.products);
+                                      },
+                                    ))
+                                .toList(),
+                          ),
                         ),
                       ),
                       const SliverToBoxAdapter(

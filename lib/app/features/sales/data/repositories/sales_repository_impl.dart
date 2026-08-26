@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/utils/sale_code_generator.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_history_model.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/sales/data/models/sale_model.dart';
@@ -85,7 +86,7 @@ class SalesRepositoryImpl implements SalesRepository {
       // Auto-generate saleNumber if empty
       final saleNumber = sale.saleNumber.isNotEmpty
           ? sale.saleNumber
-          : '#${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+          : SaleCodeGenerator.generate();
 
       final finalSale = sale.copyWith(id: saleId, saleNumber: saleNumber);
       final saleModel = SaleModel.fromEntity(finalSale);

@@ -3,6 +3,10 @@ import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
+import 'package:estoque_pro/app/features/deliveries/data/repositories/deliveries_repository_impl.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/data/repositories/sales_repository_impl.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
@@ -46,6 +50,7 @@ import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/user_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
+import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
 import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -73,6 +78,7 @@ Future<void> setupServiceLocator() async {
   registerDatabaseService<CategoryEntity>('categories');
   registerDatabaseService<ProductEntity>('products');
   registerDatabaseService<SaleEntity>('sales');
+  registerDatabaseService<DeliveryEntity>('deliveries');
 
   // Services
   final localStorageService = LocalStorageService();
@@ -135,6 +141,12 @@ Future<void> setupServiceLocator() async {
     ),
   );
 
+  getIt.registerLazySingleton<DeliveriesRepository>(
+    () => DeliveriesRepositoryImpl(
+      getIt<FirebaseDatabaseService<DeliveryEntity>>(),
+    ),
+  );
+
   // UseCases
   getIt.registerFactory<CountProductsUseCase>(
     () => CountProductsUseCase(getIt<ProductsRepository>()),
@@ -148,7 +160,10 @@ Future<void> setupServiceLocator() async {
   );
 
   getIt.registerFactory<FinalizeSaleUseCase>(
-    () => FinalizeSaleUseCase(getIt<SaveSaleUseCase>()),
+    () => FinalizeSaleUseCase(
+      getIt<SaveSaleUseCase>(),
+      getIt<DeliveriesRepository>(),
+    ),
   );
 
   getIt.registerFactory<SaveDraftSaleUseCase>(
@@ -169,6 +184,9 @@ Future<void> setupServiceLocator() async {
   // ViewModels
   getIt.registerLazySingleton<ThemeViewModel>(
     () => ThemeViewModel(getIt<LocalStorageService>()),
+  );
+  getIt.registerLazySingleton<HomeShortcutsViewModel>(
+    () => HomeShortcutsViewModel(getIt<LocalStorageService>()),
   );
   getIt.registerLazySingleton<AuthViewModel>(
     () => AuthViewModel(
@@ -219,7 +237,7 @@ Future<void> setupServiceLocator() async {
     () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
   );
 
-  getIt.registerLazySingleton<ProductsViewModel>(
+  getIt.registerFactory<ProductsViewModel>(
     () => ProductsViewModel(getIt<ProductsRepository>()),
   );
   getIt.registerFactory<ArchivedProductsViewModel>(
@@ -232,8 +250,15 @@ Future<void> setupServiceLocator() async {
     () => ProductsFormViewModel(getIt<ProductsRepository>()),
   );
 
-  getIt.registerLazySingleton<SalesViewModel>(
-    () => SalesViewModel(getIt<SalesRepository>()),
+  getIt.registerFactory<SalesViewModel>(
+    () => SalesViewModel(
+      getIt<SalesRepository>(),
+      getIt<DeliveriesRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<DeliveriesViewModel>(
+    () => DeliveriesViewModel(getIt<DeliveriesRepository>()),
   );
 
   getIt.registerFactory<CartViewModel>(
@@ -251,3 +276,4 @@ Future<void> setupServiceLocator() async {
     ),
   );
 }
+

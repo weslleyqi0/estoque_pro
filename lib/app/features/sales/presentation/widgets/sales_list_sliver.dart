@@ -1,5 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_card.dart';
 import 'package:flutter/material.dart';
@@ -8,11 +9,13 @@ import 'package:intl/intl.dart';
 class SalesListSliver extends StatelessWidget {
   final SalesViewModel viewModel;
   final AuthViewModel authViewModel;
+  final DeliveriesViewModel deliveriesViewModel;
 
   const SalesListSliver({
     super.key,
     required this.viewModel,
     required this.authViewModel,
+    required this.deliveriesViewModel,
   });
 
   String _formatDateHeader(DateTime date) {
@@ -99,13 +102,16 @@ class SalesListSliver extends StatelessWidget {
               (context, index) {
                 final sale = entry.value[index];
                 final isExpanded = viewModel.expandedSaleId == sale.id;
+                final delivery = viewModel.getDeliveryForSale(sale.id, sale.saleNumber);
 
                 return SaleCard(
                   sale: sale,
+                  delivery: delivery,
                   isExpanded: isExpanded,
                   onToggleExpand: () => viewModel.toggleExpand(sale.id),
                   authViewModel: authViewModel,
                   salesViewModel: viewModel,
+                  deliveriesViewModel: deliveriesViewModel,
                 );
               },
               childCount: entry.value.length,

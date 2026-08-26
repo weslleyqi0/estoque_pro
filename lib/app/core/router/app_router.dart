@@ -13,6 +13,8 @@ import 'package:estoque_pro/app/features/categories/presentation/pages/category_
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
+import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
+import 'package:estoque_pro/app/features/settings/presentation/pages/home_shortcuts_settings_page.dart';
 import 'package:estoque_pro/app/features/settings/presentation/pages/settings_page.dart';
 import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -26,6 +28,8 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/archiv
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/product_history_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/pages/deliveries_page.dart';
+import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/new_sale_page.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/sale_scanner_page.dart';
@@ -63,6 +67,7 @@ class AppRouter {
       AppRoutes.supplierForm: UserPermission.manageSuppliers,
       AppRoutes.customerForm: UserPermission.managerCustomer,
       AppRoutes.categoryForm: UserPermission.manageCategories,
+      AppRoutes.deliveries: UserPermission.deliveries,
     },
   );
 
@@ -125,8 +130,10 @@ class AppRouter {
         path: AppRoutes.home,
         builder: (context, state) => HomePage(
           authViewModel: getIt<AuthViewModel>(),
-          salesViewModel: getIt<SalesViewModel>(),
-          productsViewModel: getIt<ProductsViewModel>(),
+          salesViewModelFactory: () => getIt<SalesViewModel>(),
+          productsViewModelFactory: () => getIt<ProductsViewModel>(),
+          deliveriesViewModelFactory: () => getIt<DeliveriesViewModel>(),
+          homeShortcutsViewModelFactory: () => getIt<HomeShortcutsViewModel>(),
         ),
       ),
       GoRoute(
@@ -135,6 +142,13 @@ class AppRouter {
           authViewModel: getIt<AuthViewModel>(),
           biometricViewModel: getIt<BiometricViewModel>(),
           themeViewModel: getIt<ThemeViewModel>(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.homeShortcutsSettings,
+        builder: (context, state) => HomeShortcutsSettingsPage(
+          viewModel: getIt<HomeShortcutsViewModel>(),
+          authViewModel: getIt<AuthViewModel>(),
         ),
       ),
       GoRoute(
@@ -207,10 +221,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.products,
         builder: (context, state) {
-          final initialSearchQuery = state.extra as String?;
+          final extra = state.extra;
+          final initialSearchQuery = extra is String ? extra : null;
+          final initialShowOnlyLowStock = extra is bool ? extra : false;
+
           return ProductsPage(
-            viewModel: getIt<ProductsViewModel>(),
+            viewModelFactory: () => getIt<ProductsViewModel>(),
             initialSearchQuery: initialSearchQuery,
+            initialShowOnlyLowStock: initialShowOnlyLowStock,
           );
         },
       ),
@@ -240,7 +258,7 @@ class AppRouter {
               authViewModel: getIt<AuthViewModel>(),
             );
           }
-          return ProductsPage(viewModel: getIt<ProductsViewModel>());
+          return ProductsPage(viewModelFactory: () => getIt<ProductsViewModel>());
         },
       ),
       GoRoute(
@@ -285,17 +303,22 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.sales,
-        builder: (context, state) => SalesPage(
-          viewModel: getIt<SalesViewModel>(),
-          authViewModel: getIt<AuthViewModel>(),
-        ),
+        builder: (context, state) {
+          final initialTab = state.extra as SalesFilterTab?;
+          return SalesPage(
+            viewModelFactory: () => getIt<SalesViewModel>(),
+            deliveriesViewModelFactory: () => getIt<DeliveriesViewModel>(),
+            authViewModel: getIt<AuthViewModel>(),
+            initialTab: initialTab,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.newSale,
         builder: (context, state) {
           final sale = state.extra as SaleEntity?;
           return NewSalePage(
-            productsViewModel: getIt<ProductsViewModel>(),
+            productsViewModelFactory: () => getIt<ProductsViewModel>(),
             cartViewModelFactory: () => getIt<CartViewModel>(),
             authViewModel: getIt<AuthViewModel>(),
             initialSale: sale,
@@ -305,6 +328,17 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.saleScanner,
         builder: (context, state) => const SaleScannerPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.deliveries,
+        builder: (context, state) {
+          final initialTab = state.extra as DeliveryFilterTab?;
+          return DeliveriesPage(
+            viewModelFactory: () => getIt<DeliveriesViewModel>(),
+            authViewModel: getIt<AuthViewModel>(),
+            initialTab: initialTab,
+          );
+        },
       ),
 
       GoRoute(

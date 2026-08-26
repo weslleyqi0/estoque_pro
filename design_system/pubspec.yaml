@@ -16,6 +16,7 @@ dependencies:
   flutter_svg: 2.3.0
   fluttertoast: 10.0.0
   material_symbols_icons: 4.2951.0
+  omni_datetime_picker: 2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -27,8 +28,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  assets:
-    - assets/icons/
+  #assets:
+  #  - assets/icons/
 
   # To add assets to your package, add an assets section, like this:
   # assets:

@@ -1,7 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 
 class CartSummaryWidget extends StatelessWidget {
   final double? subtotal;
@@ -26,15 +25,14 @@ class CartSummaryWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: .spaceBetween,
             children: [
-              Text('Subtotal', style: context.textTheme.bodyLarge),
+              Text('Subtotal', style: context.textTheme.bodyMedium),
               Text(
                 CurrencyInputFormatter.formatCurrency(subtotal!),
-                style: context.textTheme.bodyLarge?.copyWith(fontWeight: .w700),
+                style: context.textTheme.bodyMedium?.copyWith(fontWeight: .w700),
               ),
             ],
           ),
         if (hasDiscount) ...[
-          if (hasSubtotal) const Gap(4),
           Builder(
             builder: (context) {
               String discountLabel = 'Desconto';
@@ -49,7 +47,7 @@ class CartSummaryWidget extends StatelessWidget {
                   Text(discountLabel, style: context.textTheme.bodySmall?.copyWith(color: AppColors.error)),
                   Text(
                     '- ${CurrencyInputFormatter.formatCurrency(discount!)}',
-                    style: context.textTheme.bodySmall?.copyWith(color: AppColors.error, fontWeight: .w600),
+                    style: context.textTheme.labelLarge?.copyWith(color: AppColors.error, fontWeight: .w600),
                   ),
                 ],
               );
@@ -57,8 +55,8 @@ class CartSummaryWidget extends StatelessWidget {
           ),
         ],
         if (hasSubtotal || hasDiscount)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.space4),
             child: Divider(),
           ),
         Row(
@@ -67,7 +65,7 @@ class CartSummaryWidget extends StatelessWidget {
             Text('Total', style: context.textTheme.titleMedium?.copyWith(fontWeight: .bold)),
             Text(
               CurrencyInputFormatter.formatCurrency(total),
-              style: context.textTheme.headlineSmall?.copyWith(
+              style: context.textTheme.titleLarge?.copyWith(
                 color: context.colorScheme.primary,
                 fontWeight: .w800,
               ),

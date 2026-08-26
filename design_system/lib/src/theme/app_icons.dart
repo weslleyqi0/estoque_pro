@@ -3,10 +3,6 @@ import 'package:material_symbols_icons/symbols.dart';
 
 /// Centralized icons repository for the application and design system.
 abstract class AppIcons {
-  // --- ASSET PATHS & PACKAGES ---
-  static const String pixLogo = 'assets/icons/pix_logo.svg';
-  static const String package = 'design_system';
-
   // --- GENERAL ACTIONS & SYSTEM ICONS ---
   static const IconData add = Symbols.add_rounded;
   static const IconData add2 = Symbols.add_2_rounded;
@@ -21,15 +17,18 @@ abstract class AppIcons {
   static const IconData darkMode = Symbols.dark_mode_rounded;
   static const IconData delete = Symbols.delete_outline_rounded;
   static const IconData deleteFilled = Symbols.delete;
+  static const IconData dragHandle = Symbols.drag_handle_rounded;
   static const IconData dropDown = Icons.arrow_drop_down;
   static const IconData edit = Symbols.edit_rounded;
   static const IconData error = Symbols.error_rounded;
   static const IconData errorCircle = Symbols.error_circle_rounded;
+  static const IconData grid = Symbols.grid_view_rounded;
   static const IconData info = Symbols.info_rounded;
   static const IconData lightMode = Symbols.light_mode_rounded;
   static const IconData logout = Icons.logout;
   static const IconData package2 = Symbols.package_2_rounded;
   static const IconData play = Symbols.play_arrow_rounded;
+  static const IconData refresh = Symbols.refresh_rounded;
   static const IconData remove = Symbols.remove_rounded;
   static const IconData save = Symbols.save_rounded;
   static const IconData search = Symbols.search_rounded;
@@ -49,24 +48,30 @@ abstract class AppIcons {
   static const IconData block = Symbols.block_rounded;
   static const IconData brokenImage = Symbols.broken_image_rounded;
   static const IconData cancel = Symbols.cancel_rounded;
+  static const IconData calendarClock = Symbols.calendar_clock_rounded;
+  static const IconData calendarMonth = Symbols.calendar_month_rounded;
+  static const IconData chat = Symbols.chat_bubble_outline_rounded;
   static const IconData chevronRight = Symbols.chevron_right_rounded;
   static const IconData creditCard = Symbols.credit_card_rounded;
   static const IconData creditScore = Symbols.credit_score_rounded;
   static const IconData crown = Symbols.crown;
   static const IconData currency = Symbols.universal_currency_alt_rounded;
-  static const IconData deliveryTruck = Symbols.delivery_truck_speed_rounded;
+  static const IconData directions = Symbols.directions_rounded;
   static const IconData editNote = Symbols.edit_note_rounded;
+  static const IconData event = Symbols.event_rounded;
   static const IconData fingerprint = Symbols.fingerprint;
   static const IconData flashOn = Symbols.flash_on_rounded;
   static const IconData flashOff = Symbols.flash_off_rounded;
   static const IconData group = Symbols.group_rounded;
   static const IconData history = Symbols.history_rounded;
   static const IconData homeWork = Symbols.home_work_rounded;
+  static const IconData homePin = Symbols.home_pin_rounded;
   static const IconData image = Symbols.image_rounded;
   static const IconData inventory2 = Symbols.inventory_2_rounded;
   static const IconData keyboard = Symbols.keyboard;
   static const IconData lists = Symbols.lists_rounded;
   static const IconData localShipping = Symbols.local_shipping_rounded;
+  static const IconData locationOn = Symbols.location_on_rounded;
   static const IconData lockPerson = Symbols.lock_person;
   static const IconData mail = Symbols.mail_rounded;
   static const IconData orderApprove = Symbols.order_approve_sharp;
@@ -76,13 +81,16 @@ abstract class AppIcons {
   static const IconData qrCode = Symbols.qr_code_2_rounded;
   static const IconData receipt = Symbols.receipt_long_rounded;
   static const IconData receiptLong = Symbols.receipt_long_rounded;
+  static const IconData schedule = Symbols.schedule_rounded;
   static const IconData shieldPerson = Symbols.shield_person;
   static const IconData shoppingBag = Symbols.shopping_bag_rounded;
   static const IconData shoppingCart = Symbols.shopping_cart_rounded;
   static const IconData store = Symbols.store_rounded;
   static const IconData supervisorAccount = Symbols.supervisor_account_rounded;
+  static const IconData pix = Icons.pix;
   static const IconData trendingDown = Symbols.trending_down_rounded;
   static const IconData trendingUp = Symbols.trending_up_rounded;
+  static const IconData truck = Symbols.local_shipping_rounded;
   static const IconData tune = Symbols.tune_rounded;
   static const IconData work = Symbols.work_rounded;
 

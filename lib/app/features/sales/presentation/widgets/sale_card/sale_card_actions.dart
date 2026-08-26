@@ -152,7 +152,7 @@ class SaleCardActions extends StatelessWidget {
                   height: AppSpacing.space48,
                   child: AppButton.outlined(
                     onPressed: () => DigitalInvoiceSheet.show(context, sale),
-                    icon: Icons.receipt_long_rounded,
+                    icon: AppIcons.receipt,
                     child: Text(
                       'Comprovante',
                       style: context.textTheme.bodyMedium?.copyWith(
@@ -185,7 +185,7 @@ class SaleCardActions extends StatelessWidget {
                   width: AppSpacing.space48,
                   child: IconButton.outlined(
                     onPressed: () => _deleteSaleWithoutStock(context),
-                    icon: Icon(Icons.delete_outline_rounded, color: context.colorScheme.error),
+                    icon: Icon(AppIcons.delete, color: context.colorScheme.error),
                     style: IconButton.styleFrom(
                       side: BorderSide(color: context.colorScheme.error.withValues(alpha: 0.5)),
                       shape: RoundedRectangleBorder(

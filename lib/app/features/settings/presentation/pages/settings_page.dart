@@ -63,6 +63,14 @@ class SettingsPage extends StatelessWidget {
                   SettingsSection(
                     title: 'Preferências',
                     children: [
+                      SettingsTile(
+                        icon: AppIcons.grid,
+                        iconColor: AppColors.primary,
+                        title: 'Atalhos da Tela Inicial',
+                        subtitle: 'Personalizar a ordem dos botões na Home',
+                        onTap: () => context.push(AppRoutes.homeShortcutsSettings),
+                      ),
+                      const Gap(AppSpacing.space8),
                       SettingsThemeTile(themeViewModel: themeViewModel),
                     ],
                   ),

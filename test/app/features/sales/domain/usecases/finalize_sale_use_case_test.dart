@@ -1,3 +1,5 @@
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -9,9 +11,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSaveSaleUseCase extends Mock implements SaveSaleUseCase {}
+class MockDeliveriesRepository extends Mock implements DeliveriesRepository {}
 
 void main() {
   late MockSaveSaleUseCase mockSaveSaleUseCase;
+  late MockDeliveriesRepository mockDeliveriesRepository;
   late FinalizeSaleUseCase finalizeSaleUseCase;
 
   const testProduct = ProductEntity(
@@ -43,13 +47,33 @@ void main() {
         createdAt: DateTime.now(),
       ),
     );
+    registerFallbackValue(
+      DeliveryEntity(
+        id: '',
+        saleId: 'sale_1',
+        saleNumber: '#123',
+        customerId: 'cust_1',
+        customerName: 'Cliente',
+        customerAddress: 'Rua 1',
+        items: const [],
+        subtotal: 100.0,
+        totalAmount: 100.0,
+        paymentMethod: PaymentMethod.dinheiro,
+        scheduledAt: DateTime.now(),
+        userId: 'user_1',
+        userName: 'Vendedor',
+        createdAt: DateTime.now(),
+      ),
+    );
   });
 
   setUp(() {
     mockSaveSaleUseCase = MockSaveSaleUseCase();
-    finalizeSaleUseCase = FinalizeSaleUseCase(mockSaveSaleUseCase);
+    mockDeliveriesRepository = MockDeliveriesRepository();
+    finalizeSaleUseCase = FinalizeSaleUseCase(mockSaveSaleUseCase, mockDeliveriesRepository);
     when(() => mockSaveSaleUseCase.execute(sale: any(named: 'sale'), isUpdate: any(named: 'isUpdate')))
         .thenAnswer((_) async {});
+    when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async {});
   });
 
   test('finalize sale with cash succeeds without customer', () async {
@@ -70,6 +94,7 @@ void main() {
     );
 
     verify(() => mockSaveSaleUseCase.execute(sale: any(named: 'sale'), isUpdate: false)).called(1);
+    verifyNever(() => mockDeliveriesRepository.save(any()));
   });
 
   test('finalize sale with fiado throws exception if customer is missing', () async {
@@ -131,4 +156,105 @@ void main() {
       ),
     ).called(1);
   });
+
+  test('finalize sale with delivery throws exception if customer is missing', () async {
+    expect(
+      () => finalizeSaleUseCase.execute(
+        items: cartItems,
+        saleNumber: '#1004',
+        editingSaleId: null,
+        discountType: DiscountType.valueAmount,
+        discountValue: 0.0,
+        subtotal: 100.0,
+        total: 100.0,
+        paymentMethod: PaymentMethod.dinheiro,
+        amountPaid: 100.0,
+        change: 0.0,
+        customerId: null,
+        customerName: null,
+        userId: 'u1',
+        userName: 'Vendedor 1',
+        availableProducts: [testProduct],
+        isDelivery: true,
+        deliveryAddress: 'Rua das Flores, 123',
+      ),
+      throwsA(isA<Exception>().having(
+        (e) => e.toString(),
+        'message',
+        contains('Para entregas, é obrigatório selecionar um cliente'),
+      )),
+    );
+  });
+
+  test('finalize sale with delivery throws exception if address is missing', () async {
+    expect(
+      () => finalizeSaleUseCase.execute(
+        items: cartItems,
+        saleNumber: '#1005',
+        editingSaleId: null,
+        discountType: DiscountType.valueAmount,
+        discountValue: 0.0,
+        subtotal: 100.0,
+        total: 100.0,
+        paymentMethod: PaymentMethod.dinheiro,
+        amountPaid: 100.0,
+        change: 0.0,
+        customerId: 'c1',
+        customerName: 'Cliente 1',
+        userId: 'u1',
+        userName: 'Vendedor 1',
+        availableProducts: [testProduct],
+        isDelivery: true,
+        deliveryAddress: '',
+      ),
+      throwsA(isA<Exception>().having(
+        (e) => e.toString(),
+        'message',
+        contains('Para entregas, é obrigatório informar o endereço de entrega'),
+      )),
+    );
+  });
+
+  test('finalize sale with delivery creates sale and saves delivery', () async {
+    final scheduledDate = DateTime.now().add(const Duration(hours: 2));
+
+    await finalizeSaleUseCase.execute(
+      items: cartItems,
+      saleNumber: '#1006',
+      editingSaleId: null,
+      discountType: DiscountType.valueAmount,
+      discountValue: 0.0,
+      subtotal: 100.0,
+      total: 100.0,
+      paymentMethod: PaymentMethod.dinheiro,
+      amountPaid: 100.0,
+      change: 0.0,
+      customerId: 'cust_1',
+      customerName: 'Cliente Entregas',
+      customerPhone: '11999999999',
+      userId: 'u1',
+      userName: 'Vendedor 1',
+      availableProducts: [testProduct],
+      isDelivery: true,
+      deliveryScheduledAt: scheduledDate,
+      deliveryAddress: 'Av. Paulista, 1000',
+      deliveryNotes: 'Apto 101',
+    );
+
+    verify(() => mockSaveSaleUseCase.execute(sale: any(named: 'sale'), isUpdate: false)).called(1);
+    verify(
+      () => mockDeliveriesRepository.save(
+        any(
+          that: isA<DeliveryEntity>()
+              .having((d) => d.saleNumber, 'saleNumber', '#1006')
+              .having((d) => d.customerId, 'customerId', 'cust_1')
+              .having((d) => d.customerName, 'customerName', 'Cliente Entregas')
+              .having((d) => d.customerPhone, 'customerPhone', '11999999999')
+              .having((d) => d.customerAddress, 'customerAddress', 'Av. Paulista, 1000')
+              .having((d) => d.observations, 'observations', 'Apto 101'),
+        ),
+      ),
+    ).called(1);
+  });
 }
+
