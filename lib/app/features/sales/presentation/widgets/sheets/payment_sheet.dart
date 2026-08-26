@@ -161,8 +161,6 @@ class _PaymentSheetState extends State<PaymentSheet> {
       initialDate: currentScheduled,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      minTime: const TimeOfDay(hour: 6, minute: 0),
-      maxTime: const TimeOfDay(hour: 19, minute: 0),
       invalidTimeMessage: 'Fora do nosso horário de entrega',
       is24HourMode: true,
       isShowSeconds: false,

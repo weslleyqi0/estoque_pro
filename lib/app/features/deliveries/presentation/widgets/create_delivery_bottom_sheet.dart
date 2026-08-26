@@ -117,8 +117,6 @@ class _CreateDeliveryBottomSheetState extends State<CreateDeliveryBottomSheet> {
       initialDate: _scheduledDate.isAfter(now) ? _scheduledDate : now.add(const Duration(hours: 1)),
       firstDate: now,
       lastDate: now.add(const Duration(days: 365)),
-      minTime: const TimeOfDay(hour: 6, minute: 0),
-      maxTime: const TimeOfDay(hour: 19, minute: 0),
       invalidTimeMessage: 'Fora do nosso horário de entrega',
       is24HourMode: true,
       isShowSeconds: false,

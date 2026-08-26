@@ -56,8 +56,6 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
       initialDate: initialDate,
       firstDate: now.subtract(const Duration(days: 1)),
       lastDate: now.add(const Duration(days: 365)),
-      minTime: const TimeOfDay(hour: 6, minute: 0),
-      maxTime: const TimeOfDay(hour: 19, minute: 0),
       invalidTimeMessage: 'Fora do nosso horário de entrega',
       is24HourMode: true,
       isShowSeconds: false,
