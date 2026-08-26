@@ -1,6 +1,8 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
@@ -12,6 +14,8 @@ import 'package:go_router/go_router.dart';
 class NewSalePage extends StatefulWidget {
   final ProductsViewModel Function() productsViewModelFactory;
   final CartViewModel Function() cartViewModelFactory;
+  final CustomersViewModel Function() customersViewModelFactory;
+  final CustomerDebtsViewModel Function() debtsViewModelFactory;
   final AuthViewModel authViewModel;
   final SaleEntity? initialSale;
 
@@ -19,6 +23,8 @@ class NewSalePage extends StatefulWidget {
     super.key,
     required this.productsViewModelFactory,
     required this.cartViewModelFactory,
+    required this.customersViewModelFactory,
+    required this.debtsViewModelFactory,
     required this.authViewModel,
     this.initialSale,
   });
@@ -268,6 +274,8 @@ class _NewSalePageState extends State<NewSalePage> {
               CartBottomSheet(
                 cartViewModel: cartViewModel,
                 authViewModel: widget.authViewModel,
+                customersViewModelFactory: widget.customersViewModelFactory,
+                debtsViewModelFactory: widget.debtsViewModelFactory,
                 availableProducts: productsViewModel.products,
                 controller: _sheetController,
                 onSaleSuccess: () {

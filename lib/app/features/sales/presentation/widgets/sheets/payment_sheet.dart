@@ -1,7 +1,7 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/widgets/customer_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -22,6 +22,8 @@ import 'package:gap/gap.dart';
 class PaymentSheet extends StatefulWidget {
   final CartViewModel cartViewModel;
   final AuthViewModel authViewModel;
+  final CustomersViewModel Function() customersViewModelFactory;
+  final CustomerDebtsViewModel Function() debtsViewModelFactory;
   final List<ProductEntity> availableProducts;
   final VoidCallback onSaleSuccess;
 
@@ -29,6 +31,8 @@ class PaymentSheet extends StatefulWidget {
     super.key,
     required this.cartViewModel,
     required this.authViewModel,
+    required this.customersViewModelFactory,
+    required this.debtsViewModelFactory,
     required this.availableProducts,
     required this.onSaleSuccess,
   });
@@ -37,6 +41,8 @@ class PaymentSheet extends StatefulWidget {
     required BuildContext context,
     required CartViewModel cartViewModel,
     required AuthViewModel authViewModel,
+    required CustomersViewModel Function() customersViewModelFactory,
+    required CustomerDebtsViewModel Function() debtsViewModelFactory,
     required List<ProductEntity> availableProducts,
     required VoidCallback onSaleSuccess,
   }) {
@@ -45,6 +51,8 @@ class PaymentSheet extends StatefulWidget {
       builder: (_) => PaymentSheet(
         cartViewModel: cartViewModel,
         authViewModel: authViewModel,
+        customersViewModelFactory: customersViewModelFactory,
+        debtsViewModelFactory: debtsViewModelFactory,
         availableProducts: availableProducts,
         onSaleSuccess: onSaleSuccess,
       ),
@@ -138,7 +146,9 @@ class _PaymentSheetState extends State<PaymentSheet> {
     final canManageCustomers = widget.authViewModel.currentUser?.hasPermission(UserPermission.managerCustomer) ?? false;
     CustomerBottomSheet.show(
       context: context,
-      customersVM: getIt<CustomersViewModel>(),
+      customersVM: widget.customersViewModelFactory(),
+      debtsViewModel: widget.debtsViewModelFactory(),
+      authViewModel: widget.authViewModel,
       canManageCustomers: canManageCustomers,
       onCustomerSelected: (customer) {
         vm.setCustomer(

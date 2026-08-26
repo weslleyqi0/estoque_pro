@@ -1,6 +1,8 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/cart_item_tile.dart';
@@ -12,6 +14,8 @@ import 'package:gap/gap.dart';
 class CartBottomSheet extends StatefulWidget {
   final CartViewModel cartViewModel;
   final AuthViewModel authViewModel;
+  final CustomersViewModel Function() customersViewModelFactory;
+  final CustomerDebtsViewModel Function() debtsViewModelFactory;
   final List<ProductEntity> availableProducts;
   final VoidCallback onSaleSuccess;
   final DraggableScrollableController? controller;
@@ -20,6 +24,8 @@ class CartBottomSheet extends StatefulWidget {
     super.key,
     required this.cartViewModel,
     required this.authViewModel,
+    required this.customersViewModelFactory,
+    required this.debtsViewModelFactory,
     required this.availableProducts,
     required this.onSaleSuccess,
     this.controller,
@@ -336,6 +342,8 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                         context: context,
                                         cartViewModel: vm,
                                         authViewModel: widget.authViewModel,
+                                        customersViewModelFactory: widget.customersViewModelFactory,
+                                        debtsViewModelFactory: widget.debtsViewModelFactory,
                                         availableProducts: widget.availableProducts,
                                         onSaleSuccess: widget.onSaleSuccess,
                                       );
