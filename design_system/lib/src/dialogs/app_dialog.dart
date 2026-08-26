@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:design_system/design_system.dart';
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 class AppDialog {
   AppDialog._();
@@ -36,36 +37,75 @@ class AppDialog {
   }) async {
     final result = await show<bool>(
       context: context,
-      builder: (context) {
-        final effectiveConfirmColor = confirmColor ?? (isDestructive ? context.colorScheme.error : null);
+      builder: (dialogContext) {
+        final effectiveConfirmColor = confirmColor ?? (isDestructive ? dialogContext.colorScheme.error : null);
 
-        return AlertDialog(
-          title: Text(title),
-          content: Text(content),
-          actions: [
-            SizedBox(
-              height: AppSpacing.space40,
-              child: AppButton.text(
-                onPressed: () => Navigator.pop(context, false),
-                label: cancelLabel,
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.space8),
-                textStyle: cancelColor != null
-                    ? context.textTheme.bodyLarge?.copyWith(color: cancelColor, fontWeight: FontWeight.bold)
-                    : context.textTheme.bodyLarge,
+        return Dialog(
+          backgroundColor: dialogContext.colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppSpacing.borderRadius24,
+            side: BorderSide(
+              color: dialogContext.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.space20,
+            vertical: AppSpacing.space48,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: MediaQuery.widthOf(context)),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.space20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    title,
+                    style: dialogContext.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Gap(AppSpacing.space12),
+                  Text(
+                    content,
+                    style: dialogContext.textTheme.bodyMedium?.copyWith(
+                      color: dialogContext.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const Gap(AppSpacing.space20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        height: AppSpacing.space40,
+                        child: AppButton.text(
+                          onPressed: () => Navigator.pop(dialogContext, false),
+                          label: cancelLabel,
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space8),
+                          textStyle: cancelColor != null
+                              ? dialogContext.textTheme.bodyLarge?.copyWith(color: cancelColor, fontWeight: FontWeight.bold)
+                              : dialogContext.textTheme.bodyLarge,
+                        ),
+                      ),
+                      const Gap(AppSpacing.space8),
+                      SizedBox(
+                        height: AppSpacing.space40,
+                        child: AppButton.text(
+                          onPressed: () => Navigator.pop(dialogContext, true),
+                          label: confirmLabel,
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space8),
+                          textStyle: effectiveConfirmColor != null
+                              ? dialogContext.textTheme.bodyLarge?.copyWith(color: effectiveConfirmColor, fontWeight: FontWeight.bold)
+                              : dialogContext.textTheme.bodyLarge?.copyWith(color: dialogContext.colorScheme.primary, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            SizedBox(
-              height: AppSpacing.space40,
-              child: AppButton.text(
-                onPressed: () => Navigator.pop(context, true),
-                label: confirmLabel,
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.space8),
-                textStyle: effectiveConfirmColor != null
-                    ? context.textTheme.bodyLarge?.copyWith(color: effectiveConfirmColor, fontWeight: .bold)
-                    : context.textTheme.bodyLarge?.copyWith(color: context.colorScheme.primary, fontWeight: .bold),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );
