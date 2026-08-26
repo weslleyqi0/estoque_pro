@@ -117,14 +117,18 @@ class CustomerDebtSummaryCard extends StatelessWidget {
                   ),
                   if (hasDebt)
                     AppButton(
-                      label: 'Abater Dívida',
-                      icon: AppIcons.check,
+                      backgroundColor: AppColors.surfaceLight,
+                      borderRadius: AppSpacing.borderRadius24,
                       onPressed: () => RegisterCustomerPaymentBottomSheet.show(
                         context: context,
                         customer: customer,
                         currentDebt: summary.currentDebt,
                         debtsViewModel: debtsViewModel,
                         authViewModel: authViewModel,
+                      ),
+                      child: Text(
+                        'Abater Dívida',
+                        style: context.textTheme.titleMedium?.copyWith(color: AppColors.textPrimaryLight),
                       ),
                     ),
                 ],
