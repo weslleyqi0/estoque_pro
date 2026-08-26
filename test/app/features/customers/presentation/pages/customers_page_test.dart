@@ -3,9 +3,12 @@ import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repositor
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
+import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
 import 'package:estoque_pro/app/features/customers/presentation/pages/customers_page.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
@@ -16,18 +19,26 @@ import 'package:mocktail/mocktail.dart';
 class MockAuthRepository extends Mock implements AuthRepository {}
 class MockAuthorizationService extends Mock implements AuthorizationService {}
 class MockCustomersRepository extends Mock implements CustomersRepository {}
+class MockSalesRepository extends Mock implements SalesRepository {}
+class MockCustomerPaymentsRepository extends Mock implements CustomerPaymentsRepository {}
 
 void main() {
   late MockAuthRepository mockAuthRepo;
   late MockAuthorizationService mockAuthService;
   late MockCustomersRepository mockCustomersRepo;
+  late MockSalesRepository mockSalesRepo;
+  late MockCustomerPaymentsRepository mockPaymentsRepo;
 
   setUp(() {
     mockAuthRepo = MockAuthRepository();
     mockAuthService = MockAuthorizationService();
     mockCustomersRepo = MockCustomersRepository();
+    mockSalesRepo = MockSalesRepository();
+    mockPaymentsRepo = MockCustomerPaymentsRepository();
 
     when(() => mockCustomersRepo.watchAll()).thenAnswer((_) => Stream.value(<CustomerEntity>[]));
+    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthRepo.authStateChanges).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthRepo.currentUser).thenReturn(null);
   });
@@ -36,6 +47,7 @@ void main() {
     return MaterialApp(
       home: CustomersPage(
         viewModelFactory: () => CustomersViewModel(mockCustomersRepo),
+        debtsViewModelFactory: () => CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo),
         authViewModel: authViewModel,
       ),
     );

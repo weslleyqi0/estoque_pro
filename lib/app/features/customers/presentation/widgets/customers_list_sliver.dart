@@ -1,15 +1,21 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/widgets/customer_item.dart';
 import 'package:flutter/material.dart';
 
 class CustomersListSliver extends StatelessWidget {
   final CustomersViewModel viewModel;
+  final CustomerDebtsViewModel debtsViewModel;
+  final AuthViewModel authViewModel;
   final bool canEdit;
 
   const CustomersListSliver({
     super.key,
     required this.viewModel,
+    required this.debtsViewModel,
+    required this.authViewModel,
     this.canEdit = true,
   });
 
@@ -55,8 +61,13 @@ class CustomersListSliver extends StatelessWidget {
         itemCount: customers.length,
         itemBuilder: (context, index) {
           final customer = customers[index];
+          final summary = debtsViewModel.getCustomerSummary(customer.id);
+
           return CustomerItem(
             customer: customer,
+            summary: summary,
+            debtsViewModel: debtsViewModel,
+            authViewModel: authViewModel,
             canEdit: canEdit,
           );
         },

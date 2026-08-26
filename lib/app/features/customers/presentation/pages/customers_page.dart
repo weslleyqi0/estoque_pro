@@ -1,6 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/widgets/customers_list_sliver.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
@@ -9,11 +10,13 @@ import 'package:go_router/go_router.dart';
 
 class CustomersPage extends StatefulWidget {
   final CustomersViewModel Function() viewModelFactory;
+  final CustomerDebtsViewModel Function() debtsViewModelFactory;
   final AuthViewModel authViewModel;
 
   const CustomersPage({
     super.key,
     required this.viewModelFactory,
+    required this.debtsViewModelFactory,
     required this.authViewModel,
   });
 
@@ -23,12 +26,17 @@ class CustomersPage extends StatefulWidget {
 
 class _CustomersPageState extends State<CustomersPage> {
   late final CustomersViewModel viewModel;
+  late final CustomerDebtsViewModel debtsViewModel;
 
   @override
   void initState() {
     super.initState();
     viewModel = widget.viewModelFactory();
     viewModel.listenAll();
+
+    debtsViewModel = widget.debtsViewModelFactory();
+    debtsViewModel.listenAll();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.setSearchQuery('');
     });
@@ -37,6 +45,7 @@ class _CustomersPageState extends State<CustomersPage> {
   @override
   void dispose() {
     viewModel.dispose();
+    debtsViewModel.dispose();
     super.dispose();
   }
 
@@ -57,7 +66,7 @@ class _CustomersPageState extends State<CustomersPage> {
             )
           : null,
       body: ListenableBuilder(
-        listenable: viewModel,
+        listenable: Listenable.merge([viewModel, debtsViewModel]),
         builder: (context, _) {
           return CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -70,6 +79,8 @@ class _CustomersPageState extends State<CustomersPage> {
                 ),
               CustomersListSliver(
                 viewModel: viewModel,
+                debtsViewModel: debtsViewModel,
+                authViewModel: widget.authViewModel,
                 canEdit: canManageCustomers,
               ),
             ],
