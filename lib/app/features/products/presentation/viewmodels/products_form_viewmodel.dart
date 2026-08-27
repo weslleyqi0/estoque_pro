@@ -71,6 +71,7 @@ class ProductsFormViewModel extends ChangeNotifier {
     required String description,
     required String barcode,
     required double price,
+    double costPrice = 0.0,
     required int minStock,
     int initialStock = 0,
   }) async {
@@ -84,6 +85,7 @@ class ProductsFormViewModel extends ChangeNotifier {
       categories: _selectedCategories,
       supplier: _selectedSupplier,
       price: price,
+      costPrice: costPrice,
       stock: finalStock,
       minStock: minStock,
       isActive: finalStock == 0

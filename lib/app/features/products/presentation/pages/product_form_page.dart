@@ -46,8 +46,11 @@ class _ProductFormPageState extends State<ProductFormPage> {
   final _descriptionController = TextEditingController();
   final _barcodeController = TextEditingController();
   final _priceController = TextEditingController();
+  final _costPriceController = TextEditingController();
   final _minStockController = TextEditingController();
   final _initialStockController = TextEditingController(text: '0');
+
+  bool get _canViewCostPrice => _authViewModel.currentUser?.hasPermission(UserPermission.editProducts) ?? false;
 
   @override
   void initState() {
@@ -77,6 +80,9 @@ class _ProductFormPageState extends State<ProductFormPage> {
     String initialPrice = CurrencyInputFormatter.formatCurrency(currentProduct.price);
     _priceController.text = initialPrice;
 
+    String initialCostPrice = CurrencyInputFormatter.formatCurrency(currentProduct.costPrice);
+    _costPriceController.text = initialCostPrice;
+
     _minStockController.text = currentProduct.minStock.toString();
   }
 
@@ -87,6 +93,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     _descriptionController.dispose();
     _barcodeController.dispose();
     _priceController.dispose();
+    _costPriceController.dispose();
     _minStockController.dispose();
     _initialStockController.dispose();
     super.dispose();
@@ -96,6 +103,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final price = _priceController.text.toDoubleOr();
+    final costPrice = _costPriceController.text.toDoubleOr();
     final minStock = _minStockController.text.toIntOr();
 
     final success = await _viewModel.saveForm(
@@ -104,6 +112,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
       description: _descriptionController.text,
       barcode: _barcodeController.text,
       price: price,
+      costPrice: costPrice,
       minStock: minStock,
       initialStock: _initialStockController.text.toIntOr(),
     );
@@ -118,7 +127,6 @@ class _ProductFormPageState extends State<ProductFormPage> {
       }
     }
   }
-
 
   Future<void> _scanBarcode() async {
     final scannedCode = await context.push<String>(AppRoutes.saleScanner);
@@ -158,66 +166,143 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     fit: BoxFit.contain,
                     placeholderIcon: url.isNotEmpty ? AppIcons.brokenImage : AppIcons.image,
                     placeholderIconSize: 48,
-                    borderRadius: BorderRadius.circular(AppSpacing.space16),
                   ),
                 );
               },
             ),
             const Gap(AppSpacing.space16),
-            AppTextfield(
-              label: 'URL da Imagem',
-              hint: 'https://...',
-              controller: _imgUrlController,
-              keyboardType: TextInputType.url,
-            ),
-            const Gap(AppSpacing.space24),
 
+            Text('Identificação', style: context.textTheme.labelLarge),
+            const Gap(AppSpacing.space8),
             AppTextfield(
               label: 'Nome do Produto',
-              hint: 'Nome',
+              hint: 'Ex: Camiseta Básica',
               required: true,
               controller: _nameController,
-              keyboardType: TextInputType.name,
               validator: (value) {
-                if (value == null || value.trim().isEmpty) return 'Nome é obrigatório';
+                if (value == null || value.trim().isEmpty) {
+                  return 'Nome é obrigatório';
+                }
                 return null;
               },
             ),
             const Gap(AppSpacing.space16),
 
             AppTextfield(
+              label: 'URL da Imagem',
+              hint: 'https://exemplo.com/imagem.png',
+              controller: _imgUrlController,
+              suffixIcon: Icons.link,
+            ),
+            const Gap(AppSpacing.space16),
+
+            AppTextfield(
               label: 'Código de Barras',
-              hint: '1234567890123',
+              hint: '7891234567890',
               controller: _barcodeController,
-              keyboardType: TextInputType.number,
               suffixIcon: AppIcons.barcodeScanner,
               onSuffixIconPressed: _scanBarcode,
             ),
             const Gap(AppSpacing.space16),
 
-            AppTextArea(
+            AppTextfield(
               label: 'Descrição',
               hint: 'Detalhes do produto...',
               controller: _descriptionController,
             ),
             const Gap(AppSpacing.space16),
 
-            AppTextfield(
-              label: 'Preço',
-              hint: 'R\$ 0,00',
-              required: true,
-              textAlign: TextAlign.center,
-              controller: _priceController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [CurrencyInputFormatter()],
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) return 'Obrigatório';
-                if (value.toDoubleOr() <= 0) return 'Inválido';
-                return null;
-              },
+            Text('Preços & Valores', style: context.textTheme.labelLarge),
+            const Gap(AppSpacing.space8),
+            Row(
+              children: [
+                if (_canViewCostPrice) ...[
+                  Expanded(
+                    child: AppTextfield(
+                      label: 'Preço de Custo',
+                      hint: 'R\$ 0,00',
+                      textAlign: TextAlign.center,
+                      controller: _costPriceController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [CurrencyInputFormatter()],
+                    ),
+                  ),
+                ],
+                const Gap(AppSpacing.space16),
+                Expanded(
+                  child: AppTextfield(
+                    label: 'Preço de Venda',
+                    hint: 'R\$ 0,00',
+                    required: true,
+                    textAlign: TextAlign.center,
+                    controller: _priceController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [CurrencyInputFormatter()],
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return 'Obrigatório';
+                      if (value.toDoubleOr() <= 0) return 'Inválido';
+                      return null;
+                    },
+                  ),
+                ),
+              ],
             ),
-            const Gap(AppSpacing.space16),
+            const Gap(AppSpacing.space8),
 
+            if (_canViewCostPrice) ...[
+              ListenableBuilder(
+                listenable: Listenable.merge([_priceController, _costPriceController]),
+                builder: (context, _) {
+                  final salePrice = _priceController.text.toDoubleOr();
+                  final costPrice = _costPriceController.text.toDoubleOr();
+                  final profit = salePrice - costPrice;
+                  final margin = salePrice > 0 ? (profit / salePrice) * 100 : 0.0;
+                  final isPositive = profit >= 0;
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.space12,
+                      vertical: AppSpacing.space8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (isPositive ? context.colorScheme.primary : context.colorScheme.error).withValues(
+                        alpha: 0.08,
+                      ),
+                      borderRadius: BorderRadius.circular(AppSpacing.radius8),
+                      border: Border.all(
+                        color: (isPositive ? context.colorScheme.primary : context.colorScheme.error).withValues(
+                          alpha: 0.2,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Lucro Unitário Estimado:',
+                          style: context.textTheme.labelMedium?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          '${CurrencyInputFormatter.formatCurrency(profit)} (${margin.toStringAsFixed(1)}%)',
+                          style: context.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: isPositive ? context.colorScheme.primary : context.colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const Gap(AppSpacing.space16),
+            ] else ...[
+              const Gap(AppSpacing.space8),
+            ],
+
+            Text('Estoque', style: context.textTheme.labelLarge),
+            const Gap(AppSpacing.space8),
             Row(
               children: [
                 if (!_viewModel.isEditing) ...[

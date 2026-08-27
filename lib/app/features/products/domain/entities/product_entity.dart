@@ -11,6 +11,7 @@ class ProductEntity extends Equatable {
   final List<ProductCategoryEntity> categories;
   final ProductSupplierEntity? supplier;
   final double price;
+  final double costPrice;
   final int stock;
   final int minStock;
   final bool isActive;
@@ -27,6 +28,7 @@ class ProductEntity extends Equatable {
     required this.categories,
     this.supplier,
     required this.price,
+    this.costPrice = 0.0,
     required this.stock,
     required this.minStock,
     this.isActive = true,
@@ -34,6 +36,24 @@ class ProductEntity extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+
+  /// Unit gross profit (Selling price - Cost price)
+  double get unitProfit => price - costPrice;
+
+  /// Profit margin percentage based on selling price
+  double get marginPercent => price > 0 ? (unitProfit / price) * 100 : 0.0;
+
+  /// Markup percentage over cost price
+  double get markupPercent => costPrice > 0 ? (unitProfit / costPrice) * 100 : 0.0;
+
+  /// Total value invested in current stock based on cost price
+  double get totalCostStock => costPrice * stock;
+
+  /// Total projected sales revenue with current stock
+  double get totalSellingStock => price * stock;
+
+  /// Total projected profit with current stock
+  double get totalProjectedProfit => unitProfit * stock;
 
   ProductEntity copyWith({
     String? id,
@@ -44,6 +64,7 @@ class ProductEntity extends Equatable {
     List<ProductCategoryEntity>? categories,
     ProductSupplierEntity? supplier,
     double? price,
+    double? costPrice,
     int? stock,
     int? minStock,
     bool? isActive,
@@ -60,6 +81,7 @@ class ProductEntity extends Equatable {
       categories: categories ?? this.categories,
       supplier: supplier ?? this.supplier,
       price: price ?? this.price,
+      costPrice: costPrice ?? this.costPrice,
       stock: stock ?? this.stock,
       minStock: minStock ?? this.minStock,
       isActive: isActive ?? this.isActive,
@@ -79,6 +101,7 @@ class ProductEntity extends Equatable {
     categories,
     supplier,
     price,
+    costPrice,
     stock,
     minStock,
     isActive,
