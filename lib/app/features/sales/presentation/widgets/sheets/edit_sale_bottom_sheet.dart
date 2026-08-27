@@ -2,7 +2,9 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
-import 'package:go_router/go_router.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/widgets/customer_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_reason.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
@@ -15,17 +17,22 @@ import 'package:estoque_pro/app/features/sales/presentation/widgets/edit_sale/ed
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 class EditSaleBottomSheet extends StatefulWidget {
   final SaleEntity sale;
   final AuthViewModel authViewModel;
   final EditSaleViewModel Function() viewModelFactory;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
 
   const EditSaleBottomSheet({
     super.key,
     required this.sale,
     required this.authViewModel,
     required this.viewModelFactory,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
   });
 
   static Future<void> show(
@@ -33,6 +40,8 @@ class EditSaleBottomSheet extends StatefulWidget {
     SaleEntity sale, {
     required AuthViewModel authViewModel,
     EditSaleViewModel Function()? viewModelFactory,
+    CustomersViewModel Function()? customersViewModelFactory,
+    CustomerDebtsViewModel Function()? debtsViewModelFactory,
   }) {
     final factory = viewModelFactory ?? () => getIt<EditSaleViewModel>();
     return showModalBottomSheet<void>(
@@ -44,6 +53,8 @@ class EditSaleBottomSheet extends StatefulWidget {
         sale: sale,
         authViewModel: authViewModel,
         viewModelFactory: factory,
+        customersViewModelFactory: customersViewModelFactory,
+        debtsViewModelFactory: debtsViewModelFactory,
       ),
     );
   }
@@ -116,6 +127,28 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
     final currentUser = widget.authViewModel.currentUser;
     if (currentUser == null || !currentUser.isActive) return false;
     return currentUser.hasPermission(UserPermission.cancelCompletedSales);
+  }
+
+  void _selectCustomer(BuildContext context) {
+    final customersVM = widget.customersViewModelFactory != null
+        ? widget.customersViewModelFactory!()
+        : getIt<CustomersViewModel>();
+    final debtsVM = widget.debtsViewModelFactory != null
+        ? widget.debtsViewModelFactory!()
+        : getIt<CustomerDebtsViewModel>();
+    final canManageCustomers =
+        widget.authViewModel.currentUser?.hasPermission(UserPermission.managerCustomer) ?? false;
+
+    CustomerBottomSheet.show(
+      context: context,
+      customersVM: customersVM,
+      debtsViewModel: debtsVM,
+      authViewModel: widget.authViewModel,
+      canManageCustomers: canManageCustomers,
+      onCustomerSelected: (customer) {
+        _viewModel.setCustomer(id: customer.id, name: customer.name);
+      },
+    );
   }
 
   void _onSave(BuildContext context) async {
@@ -273,6 +306,7 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
           listenable: _viewModel,
           builder: (context, _) {
             final items = _viewModel.draftItems;
+            final hasCustomer = _viewModel.selectedCustomerName?.isNotEmpty == true;
 
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -287,6 +321,70 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Card do Cliente
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.space12),
+                          decoration: BoxDecoration(
+                            color: context.colorScheme.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(AppSpacing.radius12),
+                            border: Border.all(
+                              color: context.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(AppSpacing.space8),
+                                decoration: BoxDecoration(
+                                  color: context.colorScheme.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(AppSpacing.radius8),
+                                ),
+                                child: Icon(
+                                  AppIcons.person,
+                                  color: context.colorScheme.primary,
+                                  size: AppSpacing.icon20,
+                                ),
+                              ),
+                              const Gap(AppSpacing.space12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Cliente da Venda',
+                                      style: context.textTheme.labelSmall?.copyWith(
+                                        color: context.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    Text(
+                                      hasCustomer
+                                          ? _viewModel.selectedCustomerName!
+                                          : 'Cliente não vinculado (Venda Balcão)',
+                                      style: context.textTheme.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: hasCustomer
+                                            ? null
+                                            : context.colorScheme.onSurfaceVariant,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: AppSpacing.space32,
+                                child: AppButton.text(
+                                  onPressed: () => _selectCustomer(context),
+                                  label: hasCustomer ? 'Trocar' : 'Vincular',
+                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Gap(AppSpacing.space16),
+
                         Text(
                           'Itens da Venda em Rascunho',
                           style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),

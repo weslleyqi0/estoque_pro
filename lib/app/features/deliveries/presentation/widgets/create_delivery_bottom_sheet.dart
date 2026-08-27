@@ -439,13 +439,15 @@ class _CreateDeliveryBottomSheetState extends State<CreateDeliveryBottomSheet> {
           children: [
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    setState(() => _selectedSale = null);
-                  },
-                ),
-                const Gap(AppSpacing.space8),
+                if (widget.initialSale == null) ...[
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      setState(() => _selectedSale = null);
+                    },
+                  ),
+                  const Gap(AppSpacing.space8),
+                ],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,10 +507,11 @@ class _CreateDeliveryBottomSheetState extends State<CreateDeliveryBottomSheet> {
                       ],
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => setState(() => _selectedSale = null),
-                    child: const Text('Trocar'),
-                  ),
+                  if (widget.initialSale == null)
+                    TextButton(
+                      onPressed: () => setState(() => _selectedSale = null),
+                      child: const Text('Trocar'),
+                    ),
                 ],
               ),
             ),

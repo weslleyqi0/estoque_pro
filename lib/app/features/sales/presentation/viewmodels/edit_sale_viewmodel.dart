@@ -31,6 +31,12 @@ class EditSaleViewModel extends ChangeNotifier {
   final List<SaleItemEntity> _draftItems = [];
   List<SaleItemEntity> get draftItems => _draftItems.sortedByName((item) => item.productName);
 
+  String? _selectedCustomerId;
+  String? get selectedCustomerId => _selectedCustomerId;
+
+  String? _selectedCustomerName;
+  String? get selectedCustomerName => _selectedCustomerName;
+
   SaleEditReason _selectedReason = SaleEditReason.addition;
   SaleEditReason get selectedReason => _selectedReason;
 
@@ -47,10 +53,18 @@ class EditSaleViewModel extends ChangeNotifier {
     _originalSale = sale;
     _draftItems.clear();
     _draftItems.addAll(sale.items);
+    _selectedCustomerId = sale.customerId;
+    _selectedCustomerName = sale.customerName;
     _selectedReason = SaleEditReason.addition;
     _comment = '';
     _errorMessage = null;
     _isSaving = false;
+    notifyListeners();
+  }
+
+  void setCustomer({String? id, String? name}) {
+    _selectedCustomerId = id;
+    _selectedCustomerName = name;
     notifyListeners();
   }
 
@@ -136,6 +150,10 @@ class EditSaleViewModel extends ChangeNotifier {
   }
 
   bool get hasChanges {
+    if (_selectedCustomerId != _originalSale.customerId ||
+        _selectedCustomerName != _originalSale.customerName) {
+      return true;
+    }
     if (_draftItems.length != _originalSale.items.length) return true;
     for (int i = 0; i < _draftItems.length; i++) {
       final orig = _originalSale.items.firstWhere(
@@ -182,6 +200,8 @@ class EditSaleViewModel extends ChangeNotifier {
       updatedItems: _draftItems,
       reason: _selectedReason.label,
       comment: _comment.isNotEmpty ? _comment : null,
+      customerId: _selectedCustomerId,
+      customerName: _selectedCustomerName,
       currentUser: currentUser,
     );
 
