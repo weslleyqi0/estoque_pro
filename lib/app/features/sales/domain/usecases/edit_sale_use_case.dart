@@ -23,6 +23,8 @@ class EditSaleUseCase {
     required List<SaleItemEntity> updatedItems,
     required String reason,
     String? comment,
+    String? customerId,
+    String? customerName,
     required UserEntity currentUser,
   }) async {
     return Result.guard(() async {
@@ -102,6 +104,20 @@ class EditSaleUseCase {
         newTotal = (newSubtotal - calculatedDiscount).clamp(0.0, double.infinity);
       }
 
+      final hasItemChanges = addedItems.isNotEmpty || removedItems.isNotEmpty;
+
+      if (!hasItemChanges) {
+        // Se apenas o cliente ou dados cadastrais mudaram, não adiciona histórico de edição
+        final updatedSale = originalSale.copyWith(
+          customerId: customerId ?? originalSale.customerId,
+          customerName: customerName ?? originalSale.customerName,
+          updatedAt: DateTime.now(),
+        );
+
+        await _salesRepository.updateSale(updatedSale);
+        return updatedSale;
+      }
+
       final nextSequence = originalSale.editHistory.length + 1;
       final newHistoryEntry = SaleEditHistoryEntity(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -125,6 +141,8 @@ class EditSaleUseCase {
         subtotal: newSubtotal,
         total: newTotal,
         status: SaleStatus.edited,
+        customerId: customerId ?? originalSale.customerId,
+        customerName: customerName ?? originalSale.customerName,
         editHistory: updatedHistory,
         updatedAt: DateTime.now(),
       );

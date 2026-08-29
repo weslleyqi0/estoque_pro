@@ -1,25 +1,40 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/widgets/customer_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/payment_delivery_schedule_card.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class EditDeliveryBottomSheet extends StatefulWidget {
   final DeliveryEntity delivery;
   final DeliveriesViewModel viewModel;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
+  final AuthViewModel? authViewModel;
 
   const EditDeliveryBottomSheet({
     super.key,
     required this.delivery,
     required this.viewModel,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
+    this.authViewModel,
   });
 
   static Future<bool?> show({
     required BuildContext context,
     required DeliveryEntity delivery,
     required DeliveriesViewModel viewModel,
+    CustomersViewModel Function()? customersViewModelFactory,
+    CustomerDebtsViewModel Function()? debtsViewModelFactory,
+    AuthViewModel? authViewModel,
   }) {
     return AppBottomSheet.show<bool>(
       context: context,
@@ -27,6 +42,9 @@ class EditDeliveryBottomSheet extends StatefulWidget {
       builder: (_) => EditDeliveryBottomSheet(
         delivery: delivery,
         viewModel: viewModel,
+        customersViewModelFactory: customersViewModelFactory,
+        debtsViewModelFactory: debtsViewModelFactory,
+        authViewModel: authViewModel,
       ),
     );
   }
@@ -42,12 +60,14 @@ class _EditDeliveryBottomSheetState extends State<EditDeliveryBottomSheet> {
   late final TextEditingController _phoneController;
   late final TextEditingController _notesController;
 
+  String? _selectedCustomerId;
   late DateTime _scheduledDate;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _selectedCustomerId = widget.delivery.customerId;
     _customerNameController = TextEditingController(text: widget.delivery.customerName);
     _addressController = TextEditingController(text: widget.delivery.customerAddress);
     _phoneController = TextEditingController(text: widget.delivery.customerPhone ?? '');
@@ -62,6 +82,38 @@ class _EditDeliveryBottomSheetState extends State<EditDeliveryBottomSheet> {
     _phoneController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  void _selectCustomer(BuildContext context) {
+    final customersVM = widget.customersViewModelFactory != null
+        ? widget.customersViewModelFactory!()
+        : getIt<CustomersViewModel>();
+    final debtsVM = widget.debtsViewModelFactory != null
+        ? widget.debtsViewModelFactory!()
+        : getIt<CustomerDebtsViewModel>();
+    final authVM = widget.authViewModel ?? getIt<AuthViewModel>();
+    final canManageCustomers =
+        authVM.currentUser?.hasPermission(UserPermission.managerCustomer) ?? false;
+
+    CustomerBottomSheet.show(
+      context: context,
+      customersVM: customersVM,
+      debtsViewModel: debtsVM,
+      authViewModel: authVM,
+      canManageCustomers: canManageCustomers,
+      onCustomerSelected: (customer) {
+        setState(() {
+          _selectedCustomerId = customer.id;
+          _customerNameController.text = customer.name;
+          if (customer.phone != null && customer.phone!.isNotEmpty) {
+            _phoneController.text = customer.phone!;
+          }
+          if (customer.address != null && customer.address!.isNotEmpty) {
+            _addressController.text = customer.address!;
+          }
+        });
+      },
+    );
   }
 
   Future<void> _pickDateTime() async {
@@ -103,6 +155,7 @@ class _EditDeliveryBottomSheetState extends State<EditDeliveryBottomSheet> {
           : widget.delivery.status;
 
       final updatedDelivery = widget.delivery.copyWith(
+        customerId: _selectedCustomerId ?? widget.delivery.customerId,
         customerName: _customerNameController.text.trim().isNotEmpty
             ? _customerNameController.text.trim()
             : widget.delivery.customerName,
@@ -245,11 +298,27 @@ class _EditDeliveryBottomSheetState extends State<EditDeliveryBottomSheet> {
                       controller: scrollController,
                       padding: const EdgeInsets.all(AppSpacing.space16),
                       children: [
-                        Text(
-                          'Destinatário & Contato',
-                          style: context.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Destinatário & Contato',
+                                style: context.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const Gap(AppSpacing.space8),
+                            SizedBox(
+                              height: AppSpacing.space32,
+                              child: AppButton.text(
+                                onPressed: () => _selectCustomer(context),
+                                label: 'Trocar Cliente',
+                                icon: AppIcons.person,
+                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space8),
+                              ),
+                            ),
+                          ],
                         ),
                         const Gap(AppSpacing.space8),
                         AppTextfield(

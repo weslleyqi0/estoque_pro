@@ -6,6 +6,7 @@ import 'package:estoque_pro/app/features/products/domain/entities/product_histor
 import 'package:estoque_pro/app/features/products/presentation/extensions/product_stock_ui_extension.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
+import 'package:estoque_pro/app/features/products/presentation/widgets/product_financial_card.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_header_card.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_history_card.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_info_card.dart';
@@ -13,6 +14,7 @@ import 'package:estoque_pro/app/features/products/presentation/widgets/product_s
 import 'package:estoque_pro/app/features/products/presentation/widgets/product_stock_status_card.dart';
 import 'package:estoque_pro/app/features/products/presentation/widgets/stock_adjustment_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -105,8 +107,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     final confirm = await AppDialog.showConfirmation(
       context: context,
       title: 'Arquivar Produto',
-      content:
-          'Deseja arquivar este produto? Ele será movido para a lista de Arquivados e o seu histórico continuará salvo.',
+      content: 'Deseja arquivar este produto? Ele deixará de ser exibido na lista principal e nas vendas.',
       confirmLabel: 'Arquivar',
       isDestructive: true,
     );
@@ -159,6 +160,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         final canViewHistory = currentUser?.hasPermission(UserPermission.viewHistory) ?? false;
         final canEditProducts = currentUser?.hasPermission(UserPermission.editProducts) ?? false;
         final canManageStock = currentUser?.hasPermission(UserPermission.manageStock) ?? false;
+        final canViewFinancialCard = currentUser?.role == UserRole.admin || currentUser?.role == UserRole.owner;
 
         final Color statusColor;
         final IconData statusIcon;
@@ -201,7 +203,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             ],
           ),
           body: ListView(
-            padding: const .all(AppSpacing.space16),
+            padding: const EdgeInsets.all(AppSpacing.space16),
             children: [
               ProductHeaderCard(product: product),
 
@@ -221,13 +223,17 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     : null,
               ),
               const Gap(AppSpacing.space16),
-
               ProductInfoCard(
                 product: product,
                 rawProgress: rawProgress,
                 statusColor: statusColor,
               ),
+
               const Gap(AppSpacing.space16),
+              if (canViewFinancialCard) ...[
+                ProductFinancialCard(product: product),
+                const Gap(AppSpacing.space16),
+              ],
 
               if (canViewHistory) ...[
                 StreamBuilder<List<ProductHistoryEntity>>(

@@ -133,4 +133,34 @@ void main() {
 
     verify(() => mockDeliveriesRepository.delete('d1')).called(1);
   });
+
+  testWidgets('EditDeliveryBottomSheet allows selecting and switching customer', (tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    when(() => mockDeliveriesRepository.updateDelivery(any())).thenAnswer((_) async {});
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => EditDeliveryBottomSheet.show(
+                context: context,
+                delivery: delivery,
+                viewModel: deliveriesViewModel,
+              ),
+              child: const Text('Open Edit'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Edit'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Trocar Cliente'), findsOneWidget);
+  });
 }

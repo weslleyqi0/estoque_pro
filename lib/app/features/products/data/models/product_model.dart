@@ -13,6 +13,7 @@ class ProductModel {
   final List<ProductCategoryModel> categories;
   final ProductSupplierModel? supplier;
   final double price;
+  final double costPrice;
   final int stock;
   final int minStock;
   final bool isActive;
@@ -29,6 +30,7 @@ class ProductModel {
     required this.categories,
     this.supplier,
     required this.price,
+    this.costPrice = 0.0,
     required this.stock,
     required this.minStock,
     this.isActive = true,
@@ -52,6 +54,7 @@ class ProductModel {
           ? ProductSupplierModel.fromMap(Map<dynamic, dynamic>.from(map['supplier'] as Map))
           : null,
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
+      costPrice: (map['costPrice'] as num?)?.toDouble() ?? 0.0,
       stock: (map['stock'] as num?)?.toInt() ?? 0,
       minStock: (map['minStock'] as num?)?.toInt() ?? 0,
       isActive: map['isActive'] as bool? ?? true,
@@ -70,6 +73,7 @@ class ProductModel {
       'categories': categories.map((e) => e.toMap()).toList(),
       'supplier': supplier?.toMap(),
       'price': price,
+      'costPrice': costPrice,
       'stock': stock,
       'minStock': minStock,
       'isActive': isActive,
@@ -88,6 +92,7 @@ class ProductModel {
       categories: categories.map((e) => e.toEntity()).toList(),
       supplier: supplier?.toEntity(),
       price: price,
+      costPrice: costPrice,
       stock: stock,
       minStock: minStock,
       isActive: isActive,
@@ -107,6 +112,7 @@ class ProductModel {
       categories: entity.categories.map((e) => ProductCategoryModel.fromEntity(e)).toList(),
       supplier: entity.supplier != null ? ProductSupplierModel.fromEntity(entity.supplier!) : null,
       price: entity.price,
+      costPrice: entity.costPrice,
       stock: entity.stock,
       minStock: entity.minStock,
       isActive: entity.isActive,

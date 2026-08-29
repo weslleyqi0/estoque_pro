@@ -1,6 +1,8 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/widgets/customer_item.dart';
 import 'package:flutter/material.dart';
@@ -9,12 +11,16 @@ import 'package:go_router/go_router.dart';
 
 class CustomerBottomSheet extends StatefulWidget {
   final CustomersViewModel customersVM;
+  final CustomerDebtsViewModel debtsViewModel;
+  final AuthViewModel authViewModel;
   final void Function(CustomerEntity customer) onCustomerSelected;
   final bool canManageCustomers;
 
   const CustomerBottomSheet({
     super.key,
     required this.customersVM,
+    required this.debtsViewModel,
+    required this.authViewModel,
     required this.onCustomerSelected,
     this.canManageCustomers = true,
   });
@@ -22,6 +28,8 @@ class CustomerBottomSheet extends StatefulWidget {
   static Future<void> show({
     required BuildContext context,
     required CustomersViewModel customersVM,
+    required CustomerDebtsViewModel debtsViewModel,
+    required AuthViewModel authViewModel,
     required void Function(CustomerEntity customer) onCustomerSelected,
     bool canManageCustomers = true,
   }) {
@@ -31,6 +39,8 @@ class CustomerBottomSheet extends StatefulWidget {
       builder: (context) {
         return CustomerBottomSheet(
           customersVM: customersVM,
+          debtsViewModel: debtsViewModel,
+          authViewModel: authViewModel,
           onCustomerSelected: onCustomerSelected,
           canManageCustomers: canManageCustomers,
         );
@@ -50,6 +60,7 @@ class _CustomerBottomSheetState extends State<CustomerBottomSheet> {
     super.initState();
     widget.customersVM.listenAll();
     widget.customersVM.setSearchQuery('');
+    widget.debtsViewModel.listenAll();
   }
 
   @override
@@ -98,21 +109,16 @@ class _CustomerBottomSheetState extends State<CustomerBottomSheet> {
                     children: [
                       Text(
                         'Selecionar Cliente',
-                        style: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       if (widget.canManageCustomers)
-                        TextButton.icon(
-                          onPressed: () => context.push(AppRoutes.customerForm),
-                          icon: const Icon(AppIcons.add, size: AppSpacing.icon20, weight: 600),
-                          label: Text(
-                            'Novo',
-                            style: context.textTheme.titleSmall?.copyWith(
-                              color: context.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        IconButton(
+                          icon: const Icon(AppIcons.add),
+                          tooltip: 'Adicionar Cliente',
+                          onPressed: () {
+                            Navigator.pop(context);
+                            context.push(AppRoutes.customerForm);
+                          },
                         ),
                     ],
                   ),
@@ -134,15 +140,8 @@ class _CustomerBottomSheetState extends State<CustomerBottomSheet> {
                 const Gap(AppSpacing.space8),
                 Expanded(
                   child: ListenableBuilder(
-                    listenable: widget.customersVM,
+                    listenable: Listenable.merge([widget.customersVM, widget.debtsViewModel]),
                     builder: (context, _) {
-                      if (widget.customersVM.state == CustomersLoadState.loading) {
-                        return const Padding(
-                          padding: EdgeInsets.all(AppSpacing.space24),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-
                       final activeList = widget.customersVM.activeCustomers;
 
                       if (activeList.isEmpty) {
@@ -164,10 +163,14 @@ class _CustomerBottomSheetState extends State<CustomerBottomSheet> {
                         itemCount: activeList.length,
                         itemBuilder: (context, index) {
                           final customer = activeList[index];
+                          final summary = widget.debtsViewModel.getCustomerSummary(customer.id);
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
                             child: CustomerItem(
                               customer: customer,
+                              summary: summary,
+                              debtsViewModel: widget.debtsViewModel,
+                              authViewModel: widget.authViewModel,
                               canEdit: false,
                               onTap: () {
                                 widget.onCustomerSelected(customer);

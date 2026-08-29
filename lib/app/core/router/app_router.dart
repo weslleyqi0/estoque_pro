@@ -39,6 +39,7 @@ import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_vie
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/customers/presentation/pages/customer_form_page.dart';
 import 'package:estoque_pro/app/features/customers/presentation/pages/customers_page.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
@@ -188,6 +189,7 @@ class AppRouter {
         path: AppRoutes.customers,
         builder: (context, state) => CustomersPage(
           viewModelFactory: () => getIt<CustomersViewModel>(),
+          debtsViewModelFactory: () => getIt<CustomerDebtsViewModel>(),
           authViewModel: getIt<AuthViewModel>(),
         ),
       ),
@@ -320,6 +322,8 @@ class AppRouter {
           return NewSalePage(
             productsViewModelFactory: () => getIt<ProductsViewModel>(),
             cartViewModelFactory: () => getIt<CartViewModel>(),
+            customersViewModelFactory: () => getIt<CustomersViewModel>(),
+            debtsViewModelFactory: () => getIt<CustomerDebtsViewModel>(),
             authViewModel: getIt<AuthViewModel>(),
             initialSale: sale,
           );

@@ -87,7 +87,7 @@ class DeliveryCard extends StatelessWidget {
               ],
             ),
 
-            const Gap(AppSpacing.space24),
+            const Gap(AppSpacing.space8),
 
             // --- Cliente & Endereço ---
             Row(
