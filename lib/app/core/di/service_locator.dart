@@ -6,7 +6,11 @@ import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dar
 import 'package:estoque_pro/app/features/deliveries/data/repositories/deliveries_repository_impl.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/delete_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/data/repositories/sales_repository_impl.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
@@ -254,6 +258,18 @@ Future<void> setupServiceLocator() async {
   getIt.registerFactory<GetDeliveriesUseCase>(
     () => GetDeliveriesUseCase(getIt<DeliveriesRepository>()),
   );
+  getIt.registerFactory<SaveDeliveryUseCase>(
+    () => SaveDeliveryUseCase(getIt<DeliveriesRepository>()),
+  );
+  getIt.registerFactory<UpdateDeliveryUseCase>(
+    () => UpdateDeliveryUseCase(getIt<DeliveriesRepository>()),
+  );
+  getIt.registerFactory<UpdateDeliveryStatusUseCase>(
+    () => UpdateDeliveryStatusUseCase(getIt<DeliveriesRepository>()),
+  );
+  getIt.registerFactory<DeleteDeliveryUseCase>(
+    () => DeleteDeliveryUseCase(getIt<DeliveriesRepository>()),
+  );
 
   getIt.registerFactory<GetCustomersUseCase>(
     () => GetCustomersUseCase(getIt<CustomersRepository>()),
@@ -429,7 +445,13 @@ Future<void> setupServiceLocator() async {
   );
 
   getIt.registerFactory<DeliveriesViewModel>(
-    () => DeliveriesViewModel(getIt<DeliveriesRepository>()),
+    () => DeliveriesViewModel(
+      getIt<GetDeliveriesUseCase>(),
+      getIt<SaveDeliveryUseCase>(),
+      getIt<UpdateDeliveryUseCase>(),
+      getIt<UpdateDeliveryStatusUseCase>(),
+      getIt<DeleteDeliveryUseCase>(),
+    ),
   );
 
   getIt.registerFactory<CartViewModel>(

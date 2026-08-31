@@ -6,7 +6,11 @@ import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewm
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/delete_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
 import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
@@ -97,7 +101,13 @@ void main() {
       DeleteProductPermanentlyUseCase(mockProductsRepository),
       WatchProductHistoryUseCase(mockProductsRepository),
     );
-    deliveriesViewModel = DeliveriesViewModel(mockDeliveriesRepository);
+    deliveriesViewModel = DeliveriesViewModel(
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+      SaveDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryStatusUseCase(mockDeliveriesRepository),
+      DeleteDeliveryUseCase(mockDeliveriesRepository),
+    );
   });
 
   tearDown(() {

@@ -6,6 +6,11 @@ import 'package:estoque_pro/app/features/customers/domain/repositories/customers
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/delete_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/create_delivery_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -145,7 +150,13 @@ void main() {
     ]);
 
     authViewModel = AuthViewModel(mockAuthRepository, mockAuthService);
-    deliveriesViewModel = DeliveriesViewModel(mockDeliveriesRepository)..listenAll();
+    deliveriesViewModel = DeliveriesViewModel(
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+      SaveDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryStatusUseCase(mockDeliveriesRepository),
+      DeleteDeliveryUseCase(mockDeliveriesRepository),
+    )..listenAll();
   });
 
   testWidgets('CreateDeliveryBottomSheet shows only sales that do not have a delivery yet', (tester) async {

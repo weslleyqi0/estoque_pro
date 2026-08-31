@@ -1,7 +1,13 @@
 import 'dart:async';
+
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/delete_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
@@ -101,9 +107,16 @@ void main() {
     controller = StreamController<List<DeliveryEntity>>.broadcast();
     when(() => mockRepository.watchAll(limit: any(named: 'limit')))
         .thenAnswer((_) => controller.stream);
-    when(() => mockRepository.updateStatus(any(), any(), deliveredAt: any(named: 'deliveredAt')))
-        .thenAnswer((_) async {});
-    viewModel = DeliveriesViewModel(mockRepository);
+    when(() => mockRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async {});
+    when(() => mockRepository.delete(any())).thenAnswer((_) async {});
+    viewModel = DeliveriesViewModel(
+      GetDeliveriesUseCase(mockRepository),
+      SaveDeliveryUseCase(mockRepository),
+      UpdateDeliveryUseCase(mockRepository),
+      UpdateDeliveryStatusUseCase(mockRepository),
+      DeleteDeliveryUseCase(mockRepository),
+    );
   });
 
   tearDown(() {

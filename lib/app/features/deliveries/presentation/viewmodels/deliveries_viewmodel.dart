@@ -1,9 +1,14 @@
 import 'dart:async';
+
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
-import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/delete_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
-import 'package:flutter/foundation.dart';
 
 enum DeliveryFilterTab {
   all('Todas'),
@@ -19,10 +24,20 @@ enum DeliveryFilterTab {
 
 enum DeliveriesState { initial, loading, loaded, error }
 
-class DeliveriesViewModel extends ChangeNotifier {
-  final DeliveriesRepository _repository;
+class DeliveriesViewModel extends BaseViewModel {
+  final GetDeliveriesUseCase _getDeliveriesUseCase;
+  final SaveDeliveryUseCase _saveDeliveryUseCase;
+  final UpdateDeliveryUseCase _updateDeliveryUseCase;
+  final UpdateDeliveryStatusUseCase _updateDeliveryStatusUseCase;
+  final DeleteDeliveryUseCase _deleteDeliveryUseCase;
 
-  DeliveriesViewModel(this._repository);
+  DeliveriesViewModel(
+    this._getDeliveriesUseCase,
+    this._saveDeliveryUseCase,
+    this._updateDeliveryUseCase,
+    this._updateDeliveryStatusUseCase,
+    this._deleteDeliveryUseCase,
+  );
 
   StreamSubscription<List<DeliveryEntity>>? _subscription;
 
@@ -31,6 +46,7 @@ class DeliveriesViewModel extends ChangeNotifier {
 
   DeliveriesState _state = DeliveriesState.initial;
   DeliveriesState get state => _state;
+  bool get isLoading => _state == DeliveriesState.loading;
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
@@ -59,7 +75,7 @@ class DeliveriesViewModel extends ChangeNotifier {
     _state = DeliveriesState.loading;
     notifyListeners();
 
-    _subscription = _repository.watchAll().listen(
+    _subscription = _getDeliveriesUseCase.watchAll().listen(
       (data) {
         _deliveries = data;
         _state = DeliveriesState.loaded;
@@ -91,16 +107,12 @@ class DeliveriesViewModel extends ChangeNotifier {
         return prioA.compareTo(prioB);
       }
 
-      // Se ambas forem atrasadas, pendentes ou em andamento:
       if (prioA < 3) {
         final dateCompare = a.scheduledAt.compareTo(b.scheduledAt);
         if (dateCompare != 0) return dateCompare;
         return b.createdAt.compareTo(a.createdAt);
       } else {
-        // Ordena as outras por data decrescente (da mais recente para a mais antiga)
-        final dateA = a.deliveredAt ?? a.scheduledAt;
-        final dateB = b.deliveredAt ?? b.scheduledAt;
-        final dateCompare = dateB.compareTo(dateA);
+        final dateCompare = b.scheduledAt.compareTo(a.scheduledAt);
         if (dateCompare != 0) return dateCompare;
         return b.createdAt.compareTo(a.createdAt);
       }
@@ -108,89 +120,67 @@ class DeliveriesViewModel extends ChangeNotifier {
     return sorted;
   }
 
-  List<DeliveryEntity> get delayedDeliveries {
-    final list = _deliveries.where((d) => d.isDelayed).toList();
-    list.sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-    return list;
-  }
+  List<DeliveryEntity> get delayedDeliveries => _deliveries.where((d) => d.isDelayed).toList();
+  List<DeliveryEntity> get pendingDeliveries =>
+      _deliveries.where((d) => d.status == DeliveryStatus.pending && !d.isDelayed).toList();
+  List<DeliveryEntity> get inProgressDeliveries =>
+      _deliveries.where((d) => d.status == DeliveryStatus.inProgress && !d.isDelayed).toList();
+  List<DeliveryEntity> get completedDeliveries =>
+      _deliveries.where((d) => d.status == DeliveryStatus.completed).toList();
+  List<DeliveryEntity> get cancelledDeliveries =>
+      _deliveries.where((d) => d.status == DeliveryStatus.cancelled).toList();
 
-  List<DeliveryEntity> get pendingDeliveries {
-    final list = _deliveries
-        .where((d) => d.status == DeliveryStatus.pending && !d.isDelayed)
-        .toList();
-    list.sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-    return list;
-  }
+  int get delayedCount => _deliveries.where((d) => d.isDelayed).length;
+  int get pendingCount => _deliveries.where((d) => d.status == DeliveryStatus.pending && !d.isDelayed).length;
+  int get inProgressCount => _deliveries.where((d) => d.status == DeliveryStatus.inProgress && !d.isDelayed).length;
+  int get completedCount => _deliveries.where((d) => d.status == DeliveryStatus.completed).length;
+  int get cancelledCount => _deliveries.where((d) => d.status == DeliveryStatus.cancelled).length;
 
-  List<DeliveryEntity> get inProgressDeliveries {
-    final list = _deliveries
-        .where((d) => d.status == DeliveryStatus.inProgress && !d.isDelayed)
-        .toList();
-    list.sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-    return list;
-  }
-
-  List<DeliveryEntity> get completedDeliveries {
-    final list = _deliveries.where((d) => d.status == DeliveryStatus.completed).toList();
-    list.sort((a, b) {
-      final dateA = a.deliveredAt ?? a.scheduledAt;
-      final dateB = b.deliveredAt ?? b.scheduledAt;
-      final dateCompare = dateB.compareTo(dateA);
-      if (dateCompare != 0) return dateCompare;
-      return b.createdAt.compareTo(a.createdAt);
-    });
-    return list;
-  }
-
-  List<DeliveryEntity> get cancelledDeliveries {
-    final list = _deliveries.where((d) => d.status == DeliveryStatus.cancelled).toList();
-    list.sort((a, b) {
-      final dateA = a.scheduledAt;
-      final dateB = b.scheduledAt;
-      final dateCompare = dateB.compareTo(dateA);
-      if (dateCompare != 0) return dateCompare;
-      return b.createdAt.compareTo(a.createdAt);
-    });
-    return list;
-  }
-
-  int getTabCount(DeliveryFilterTab tab) {
+  int countForTab(DeliveryFilterTab tab) {
     switch (tab) {
       case DeliveryFilterTab.all:
         return _deliveries.length;
       case DeliveryFilterTab.delayed:
-        return delayedDeliveries.length;
+        return delayedCount;
       case DeliveryFilterTab.pending:
-        return pendingDeliveries.length;
+        return pendingCount;
       case DeliveryFilterTab.inProgress:
-        return inProgressDeliveries.length;
+        return inProgressCount;
       case DeliveryFilterTab.completed:
-        return completedDeliveries.length;
+        return completedCount;
       case DeliveryFilterTab.cancelled:
-        return cancelledDeliveries.length;
+        return cancelledCount;
     }
   }
 
+  int getTabCount(DeliveryFilterTab tab) => countForTab(tab);
+
   List<DeliveryEntity> get filteredDeliveries {
     List<DeliveryEntity> list;
+
     switch (_selectedTab) {
       case DeliveryFilterTab.all:
         list = _sortDeliveriesForAllTab(_deliveries);
         break;
       case DeliveryFilterTab.delayed:
-        list = delayedDeliveries;
+        list = _deliveries.where((d) => d.isDelayed).toList()
+          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
         break;
       case DeliveryFilterTab.pending:
-        list = pendingDeliveries;
+        list = _deliveries.where((d) => d.status == DeliveryStatus.pending && !d.isDelayed).toList()
+          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
         break;
       case DeliveryFilterTab.inProgress:
-        list = inProgressDeliveries;
+        list = _deliveries.where((d) => d.status == DeliveryStatus.inProgress && !d.isDelayed).toList()
+          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
         break;
       case DeliveryFilterTab.completed:
-        list = completedDeliveries;
+        list = _deliveries.where((d) => d.status == DeliveryStatus.completed).toList()
+          ..sort((a, b) => (b.deliveredAt ?? b.scheduledAt).compareTo(a.deliveredAt ?? a.scheduledAt));
         break;
       case DeliveryFilterTab.cancelled:
-        list = cancelledDeliveries;
+        list = _deliveries.where((d) => d.status == DeliveryStatus.cancelled).toList()
+          ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
         break;
     }
 
@@ -211,7 +201,7 @@ class DeliveriesViewModel extends ChangeNotifier {
     DeliveryStatus status, {
     DateTime? deliveredAt,
   }) async {
-    await _repository.updateStatus(deliveryId, status, deliveredAt: deliveredAt);
+    await _updateDeliveryStatusUseCase(deliveryId, status, deliveredAt: deliveredAt);
   }
 
   Future<void> rescheduleDelivery(
@@ -222,15 +212,15 @@ class DeliveriesViewModel extends ChangeNotifier {
       scheduledAt: newScheduledAt,
       status: delivery.status == DeliveryStatus.delayed ? DeliveryStatus.pending : delivery.status,
     );
-    await _repository.updateDelivery(updated);
+    await _updateDeliveryUseCase(updated);
   }
 
   Future<void> updateDelivery(DeliveryEntity delivery) async {
-    await _repository.updateDelivery(delivery);
+    await _updateDeliveryUseCase(delivery);
   }
 
   Future<void> deleteDelivery(String deliveryId) async {
-    await _repository.delete(deliveryId);
+    await _deleteDeliveryUseCase(deliveryId);
   }
 
   Future<void> createDelivery({
@@ -261,7 +251,7 @@ class DeliveriesViewModel extends ChangeNotifier {
       userName: userName,
       createdAt: DateTime.now(),
     );
-    await _repository.save(delivery);
+    await _saveDeliveryUseCase(delivery);
   }
 
   @override

@@ -4,6 +4,11 @@ import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repositor
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/delete_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/pages/deliveries_page.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
@@ -23,18 +28,29 @@ void main() {
 
   late AuthViewModel authViewModel;
 
+  DeliveriesViewModel createDeliveriesViewModel() {
+    return DeliveriesViewModel(
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+      SaveDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryStatusUseCase(mockDeliveriesRepository),
+      DeleteDeliveryUseCase(mockDeliveriesRepository),
+    );
+  }
+
   setUp(() {
     mockAuthRepository = MockAuthRepository();
     mockAuthService = MockAuthorizationService();
     mockDeliveriesRepository = MockDeliveriesRepository();
 
-    when(() => mockDeliveriesRepository.watchAll()).thenAnswer((_) => Stream.value(<DeliveryEntity>[]));
+    when(() => mockDeliveriesRepository.watchAll(limit: any(named: 'limit')))
+        .thenAnswer((_) => Stream.value(<DeliveryEntity>[]));
 
     const currentUser = UserEntity(
-      uid: '1',
-      name: 'João Silva',
-      email: 'joao@test.com',
-      role: UserRole.owner,
+      uid: 'u1',
+      name: 'Admin',
+      email: 'admin@test.com',
+      role: UserRole.admin,
       isActive: true,
       permissions: {},
     );
@@ -52,7 +68,7 @@ void main() {
       MaterialApp(
         home: DeliveriesPage(
           viewModelFactory: () {
-            createdVm = DeliveriesViewModel(mockDeliveriesRepository);
+            createdVm = createDeliveriesViewModel();
             return createdVm;
           },
           authViewModel: authViewModel,
@@ -73,7 +89,7 @@ void main() {
       MaterialApp(
         home: DeliveriesPage(
           viewModelFactory: () {
-            createdVm = DeliveriesViewModel(mockDeliveriesRepository);
+            createdVm = createDeliveriesViewModel();
             return createdVm;
           },
           authViewModel: authViewModel,
@@ -90,7 +106,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: DeliveriesPage(
-          viewModelFactory: () => DeliveriesViewModel(mockDeliveriesRepository),
+          viewModelFactory: () => createDeliveriesViewModel(),
           authViewModel: authViewModel,
         ),
       ),

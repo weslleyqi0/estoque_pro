@@ -3,7 +3,11 @@ import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repositor
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/delete_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
@@ -30,6 +34,24 @@ void main() {
 
   late AuthViewModel authViewModel;
 
+  DeliveriesViewModel createDeliveriesViewModel() {
+    return DeliveriesViewModel(
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+      SaveDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryStatusUseCase(mockDeliveriesRepository),
+      DeleteDeliveryUseCase(mockDeliveriesRepository),
+    );
+  }
+
+  SalesViewModel createSalesViewModel() {
+    return SalesViewModel(
+      GetSalesUseCase(mockSalesRepository),
+      DeleteSaleUseCase(mockSalesRepository),
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+    );
+  }
+
   setUp(() {
     mockAuthRepository = MockAuthRepository();
     mockAuthService = MockAuthorizationService();
@@ -37,7 +59,8 @@ void main() {
     mockDeliveriesRepository = MockDeliveriesRepository();
 
     when(() => mockSalesRepository.watchAll()).thenAnswer((_) => Stream.value(<SaleEntity>[]));
-    when(() => mockDeliveriesRepository.watchAll()).thenAnswer((_) => Stream.value(<DeliveryEntity>[]));
+    when(() => mockDeliveriesRepository.watchAll(limit: any(named: 'limit')))
+        .thenAnswer((_) => Stream.value(<DeliveryEntity>[]));
 
     const currentUser = UserEntity(
       uid: '1',
@@ -54,14 +77,6 @@ void main() {
     authViewModel = AuthViewModel(mockAuthRepository, mockAuthService);
   });
 
-  SalesViewModel createSalesViewModel() {
-    return SalesViewModel(
-      GetSalesUseCase(mockSalesRepository),
-      DeleteSaleUseCase(mockSalesRepository),
-      GetDeliveriesUseCase(mockDeliveriesRepository),
-    );
-  }
-
   testWidgets('SalesPage initializes viewModel via factory and sets initialTab when provided', (tester) async {
     late SalesViewModel createdVm;
 
@@ -72,7 +87,7 @@ void main() {
             createdVm = createSalesViewModel();
             return createdVm;
           },
-          deliveriesViewModelFactory: () => DeliveriesViewModel(mockDeliveriesRepository),
+          deliveriesViewModelFactory: () => createDeliveriesViewModel(),
           authViewModel: authViewModel,
           initialTab: SalesFilterTab.inProgress,
         ),
@@ -95,7 +110,7 @@ void main() {
             createdVm = createSalesViewModel();
             return createdVm;
           },
-          deliveriesViewModelFactory: () => DeliveriesViewModel(mockDeliveriesRepository),
+          deliveriesViewModelFactory: () => createDeliveriesViewModel(),
           authViewModel: authViewModel,
         ),
       ),
