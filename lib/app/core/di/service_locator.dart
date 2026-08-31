@@ -59,11 +59,12 @@ import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:get_it/get_it.dart';
+import '../services/database_service.dart';
 
 final getIt = GetIt.instance;
 
 void registerDatabaseService<T>(String path) {
-  getIt.registerLazySingleton<FirebaseDatabaseService<T>>(
+  getIt.registerLazySingleton<DatabaseService<T>>(
     () => FirebaseDatabaseService<T>(
       getIt<FirebaseDatabase>().ref(path),
     ),
@@ -113,48 +114,48 @@ Future<void> setupServiceLocator() async {
   );
 
   getIt.registerLazySingleton<UsersRepository>(
-    () => UsersRepositoryImpl(getIt<FirebaseDatabaseService<UserEntity>>()),
+    () => UsersRepositoryImpl(getIt<DatabaseService<UserEntity>>()),
   );
 
   getIt.registerLazySingleton<SuppliersRepository>(
     () => SuppliersRepositoryImpl(
-      getIt<FirebaseDatabaseService<SupplierEntity>>(),
+      getIt<DatabaseService<SupplierEntity>>(),
     ),
   );
 
   getIt.registerLazySingleton<CustomersRepository>(
     () => CustomersRepositoryImpl(
-      getIt<FirebaseDatabaseService<CustomerEntity>>(),
+      getIt<DatabaseService<CustomerEntity>>(),
     ),
   );
 
   getIt.registerLazySingleton<CustomerPaymentsRepository>(
     () => CustomerPaymentsRepositoryImpl(
-      getIt<FirebaseDatabaseService<CustomerPaymentEntity>>(),
+      getIt<DatabaseService<CustomerPaymentEntity>>(),
     ),
   );
 
   getIt.registerLazySingleton<CategoriesRepository>(
     () => CategoriesRepositoryImpl(
-      getIt<FirebaseDatabaseService<CategoryEntity>>(),
+      getIt<DatabaseService<CategoryEntity>>(),
     ),
   );
 
   getIt.registerLazySingleton<ProductsRepository>(
     () => ProductsRepositoryImpl(
-      getIt<FirebaseDatabaseService<ProductEntity>>(),
+      getIt<DatabaseService<ProductEntity>>(),
     ),
   );
 
   getIt.registerLazySingleton<SalesRepository>(
     () => SalesRepositoryImpl(
-      getIt<FirebaseDatabaseService<SaleEntity>>(),
+      getIt<DatabaseService<SaleEntity>>(),
     ),
   );
 
   getIt.registerLazySingleton<DeliveriesRepository>(
     () => DeliveriesRepositoryImpl(
-      getIt<FirebaseDatabaseService<DeliveryEntity>>(),
+      getIt<DatabaseService<DeliveryEntity>>(),
     ),
   );
 

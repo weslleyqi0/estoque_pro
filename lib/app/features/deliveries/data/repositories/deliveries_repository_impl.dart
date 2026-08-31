@@ -1,4 +1,4 @@
-import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/features/deliveries/data/models/delivery_model.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
@@ -7,13 +7,13 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 
 class DeliveriesRepositoryImpl implements DeliveriesRepository {
-  final FirebaseDatabaseService<DeliveryEntity> _firebaseDb;
+  final DatabaseService<DeliveryEntity> _databaseService;
 
-  DeliveriesRepositoryImpl(this._firebaseDb);
+  DeliveriesRepositoryImpl(this._databaseService);
 
   @override
   Stream<List<DeliveryEntity>> watchAll({int limit = 100}) {
-    return _firebaseDb.ref
+    return _databaseService.ref
         .orderByChild('created_at')
         .limitToLast(limit)
         .onValue
@@ -39,14 +39,14 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
           return deliveries..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
         })
         .handleError((e) {
-          debugPrint('---> Deliveries: Erro no listener Firebase: $e');
+          debugPrint('---> Deliveries: Erro no listener: $e');
         });
   }
 
   @override
   Future<void> save(DeliveryEntity delivery) async {
     try {
-      final pushRef = _firebaseDb.ref.push();
+      final pushRef = _databaseService.ref.push();
       final deliveryId = delivery.id.isNotEmpty ? delivery.id : pushRef.key!;
 
       final finalDelivery = delivery.copyWith(id: deliveryId);
@@ -55,7 +55,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       final Map<String, dynamic> updates = {};
       updates['deliveries/$deliveryId'] = deliveryModel.toMap();
 
-      await _firebaseDb.updateMultiple(updates);
+      await _databaseService.updateMultiple(updates);
     } catch (e) {
       debugPrint('---> Deliveries: Erro ao salvar entrega: $e');
       rethrow;
@@ -72,7 +72,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       final Map<String, dynamic> updates = {};
       updates['deliveries/${delivery.id}'] = deliveryModel.toMap();
 
-      await _firebaseDb.updateMultiple(updates);
+      await _databaseService.updateMultiple(updates);
     } catch (e) {
       debugPrint('---> Deliveries: Erro ao atualizar entrega: $e');
       rethrow;
@@ -97,7 +97,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
         updates['delivered_at'] = DateTime.now().toIso8601String();
       }
 
-      await _firebaseDb.ref.child(deliveryId).update(updates);
+      await _databaseService.ref.child(deliveryId).update(updates);
     } catch (e) {
       debugPrint('---> Deliveries: Erro ao atualizar status da entrega: $e');
       rethrow;
@@ -107,7 +107,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
   @override
   Future<void> delete(String deliveryId) async {
     try {
-      await _firebaseDb.delete(deliveryId);
+      await _databaseService.delete(deliveryId);
     } catch (e) {
       debugPrint('---> Deliveries: Erro ao deletar entrega: $e');
       rethrow;

@@ -4,12 +4,15 @@ import 'package:firebase_database/firebase_database.dart';
 import '../errors/app_failure.dart';
 import '../logger/app_logger.dart';
 
-class FirebaseDatabaseService<T> {
+import 'database_service.dart';
+
+class FirebaseDatabaseService<T> implements DatabaseService<T> {
   final DatabaseReference _ref;
   final AppLogger _logger = const AppLogger('FirebaseDatabaseService');
 
   FirebaseDatabaseService(this._ref);
 
+  @override
   DatabaseReference get ref => _ref;
 
   Future<R> _handleError<R>(Future<R> Function() action) async {
@@ -76,6 +79,7 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Add an item generating an automatic key (push)
+  @override
   Future<void> add(Map<String, dynamic> data) async {
     return _handleError(() async {
       final newRef = _ref.push();
@@ -92,6 +96,7 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Adds/updates on a specific key
+  @override
   Future<void> update(String key, Map<String, dynamic> data) async {
     return _handleError(() async {
       await _ref.child(key).update({
@@ -102,6 +107,7 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Perform a multi-path atomic update at the root
+  @override
   Future<void> updateMultiple(Map<String, dynamic> updates) async {
     return _handleError(() async {
       await _ref.root.update(updates);
@@ -109,6 +115,7 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Remove an item by ID
+  @override
   Future<void> delete(String key) async {
     return _handleError(() async {
       await _ref.child(key).remove();
@@ -116,6 +123,7 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Listen to changes in real time
+  @override
   Stream<Map<String, dynamic>?> listen() {
     return _ref.onValue.map((event) {
       final value = event.snapshot.value;
@@ -127,6 +135,7 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Listen to changes in real time for a specific child
+  @override
   Stream<Map<String, dynamic>?> listenChild(String key) {
     return _ref.child(key).onValue.map((event) {
       final value = event.snapshot.value;
@@ -138,6 +147,7 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Fetch data only once
+  @override
   Future<Map<String, dynamic>?> getOnce() async {
     return _handleError(() async {
       final snapshot = await _ref.get();
@@ -149,6 +159,7 @@ class FirebaseDatabaseService<T> {
   }
 
   /// Fetch child data only once
+  @override
   Future<Map<String, dynamic>?> getChildOnce(String key) async {
     return _handleError(() async {
       final snapshot = await _ref.child(key).get();

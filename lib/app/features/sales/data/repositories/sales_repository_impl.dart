@@ -1,4 +1,4 @@
-import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/core/utils/sale_code_generator.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_history_model.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
@@ -11,13 +11,13 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 
 class SalesRepositoryImpl implements SalesRepository {
-  final FirebaseDatabaseService<SaleEntity> _firebaseDb;
+  final DatabaseService<SaleEntity> _databaseService;
 
-  SalesRepositoryImpl(this._firebaseDb);
+  SalesRepositoryImpl(this._databaseService);
 
   @override
   Stream<List<SaleEntity>> watchAll({int limit = 50}) {
-    return _firebaseDb.ref
+    return _databaseService.ref
         .orderByChild('created_at')
         .limitToLast(limit)
         .onValue
@@ -42,7 +42,7 @@ class SalesRepositoryImpl implements SalesRepository {
           return sales..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         })
         .handleError((e) {
-          debugPrint('---> Sales: Erro no listener Firebase: $e');
+          debugPrint('---> Sales: Erro no listener: $e');
         });
   }
 
@@ -56,7 +56,7 @@ class SalesRepositoryImpl implements SalesRepository {
       final currentStock = productStocks[productId] ?? 0;
       final newStock = currentStock - item.quantity;
 
-      final movPushRef = _firebaseDb.ref.root.child('stock_movements').child(productId).push();
+      final movPushRef = _databaseService.ref.root.child('stock_movements').child(productId).push();
 
       final historyModel = ProductHistoryModel.fromEntity(
         ProductHistoryEntity(
@@ -80,7 +80,7 @@ class SalesRepositoryImpl implements SalesRepository {
   @override
   Future<void> save(SaleEntity sale, {Map<String, int>? productStocks}) async {
     try {
-      final pushRef = _firebaseDb.ref.push();
+      final pushRef = _databaseService.ref.push();
       final saleId = pushRef.key!;
 
       // Auto-generate saleNumber if empty
@@ -98,7 +98,7 @@ class SalesRepositoryImpl implements SalesRepository {
         await _addStockDeductionUpdates(finalSale, updates, productStocks ?? {});
       }
 
-      await _firebaseDb.updateMultiple(updates);
+      await _databaseService.updateMultiple(updates);
     } catch (e) {
       debugPrint('---> Sales: Erro ao salvar venda atômicamente: $e');
       rethrow;
@@ -108,7 +108,7 @@ class SalesRepositoryImpl implements SalesRepository {
   @override
   Future<void> updateSale(SaleEntity sale, {Map<String, int>? productStocks}) async {
     try {
-      final oldSaleSnapshot = await _firebaseDb.ref.child(sale.id).get();
+      final oldSaleSnapshot = await _databaseService.ref.child(sale.id).get();
       String? oldStatus;
       final oldVal = oldSaleSnapshot.value;
       if (oldVal is Map) {
@@ -124,7 +124,7 @@ class SalesRepositoryImpl implements SalesRepository {
         await _addStockDeductionUpdates(sale, updates, productStocks ?? {});
       }
 
-      await _firebaseDb.updateMultiple(updates);
+      await _databaseService.updateMultiple(updates);
     } catch (e) {
       debugPrint('---> Sales: Erro ao atualizar venda pós-venda atômicamente: $e');
       rethrow;
@@ -148,7 +148,7 @@ class SalesRepositoryImpl implements SalesRepository {
       if (currentProductStocks != null) {
         stocksMap.addAll(currentProductStocks);
       } else {
-        final productsSnap = await _firebaseDb.ref.root.child('products').get();
+        final productsSnap = await _databaseService.ref.root.child('products').get();
         if (productsSnap.exists && productsSnap.value is Map) {
           final pMap = productsSnap.value as Map;
           for (final entry in pMap.entries) {
@@ -165,7 +165,7 @@ class SalesRepositoryImpl implements SalesRepository {
         final delta = entry.value;
 
         if (delta != 0 && productId.trim().isNotEmpty) {
-          final movPushRef = _firebaseDb.ref.root.child('stock_movements').child(productId).push();
+          final movPushRef = _databaseService.ref.root.child('stock_movements').child(productId).push();
           final action = delta > 0 ? ProductHistoryAction.remove : ProductHistoryAction.add;
           final note = sale.status == SaleStatus.cancelled
               ? 'Estorno por cancelamento da Venda ${sale.saleNumber}'
@@ -193,7 +193,7 @@ class SalesRepositoryImpl implements SalesRepository {
         }
       }
 
-      await _firebaseDb.updateMultiple(updates);
+      await _databaseService.updateMultiple(updates);
     } catch (e) {
       debugPrint('---> Sales: Erro ao atualizar venda com histórico atômicamente: $e');
       rethrow;
@@ -203,7 +203,7 @@ class SalesRepositoryImpl implements SalesRepository {
   @override
   Future<void> delete(String saleId) async {
     try {
-      await _firebaseDb.delete(saleId);
+      await _databaseService.delete(saleId);
     } catch (e) {
       debugPrint('---> Sales: Erro ao deletar venda: $e');
       rethrow;

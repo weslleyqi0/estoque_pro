@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_history_model.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_model.dart';
@@ -11,15 +11,15 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 
 class ProductsRepositoryImpl implements ProductsRepository {
-  final FirebaseDatabaseService _firebaseDb;
+  final DatabaseService<ProductEntity> _databaseService;
 
   ProductsRepositoryImpl(
-    this._firebaseDb,
+    this._databaseService,
   );
 
   @override
   Stream<List<ProductEntity>> watchAll() {
-    return _firebaseDb
+    return _databaseService
         .listen()
         .map((data) {
           final List<ProductEntity> entities = [];
@@ -37,14 +37,14 @@ class ProductsRepositoryImpl implements ProductsRepository {
           return entities.sortByName((a) => a.name);
         })
         .handleError((e) {
-          debugPrint('---> Products: Erro no listener Firebase: $e');
+          debugPrint('---> Products: Erro no listener: $e');
         });
   }
 
   @override
   Future<List<ProductEntity>> getAll() async {
     try {
-      final data = await _firebaseDb.getOnce();
+      final data = await _databaseService.getOnce();
       final List<ProductEntity> entities = [];
       if (data != null) {
         for (final entry in data.entries) {
@@ -59,7 +59,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
       }
       return entities;
     } catch (e) {
-      debugPrint('---> Products: Erro getAll Firebase: $e');
+      debugPrint('---> Products: Erro getAll: $e');
       return [];
     }
   }
@@ -68,9 +68,9 @@ class ProductsRepositoryImpl implements ProductsRepository {
   Future<void> save(ProductEntity product) async {
     final model = ProductModel.fromEntity(product);
     try {
-      await _firebaseDb.add(model.toMap());
+      await _databaseService.add(model.toMap());
     } catch (e) {
-      debugPrint('---> Products: Erro ao salvar no Firebase: $e');
+      debugPrint('---> Products: Erro ao salvar: $e');
       rethrow;
     }
   }
@@ -79,9 +79,9 @@ class ProductsRepositoryImpl implements ProductsRepository {
   Future<void> update(ProductEntity product) async {
     final model = ProductModel.fromEntity(product);
     try {
-      await _firebaseDb.update(product.id, model.toMap());
+      await _databaseService.update(product.id, model.toMap());
     } catch (e) {
-      debugPrint('---> Products: Erro ao atualizar no Firebase: $e');
+      debugPrint('---> Products: Erro ao atualizar: $e');
       rethrow;
     }
   }
@@ -89,9 +89,9 @@ class ProductsRepositoryImpl implements ProductsRepository {
   @override
   Future<void> archive(String id) async {
     try {
-      await _firebaseDb.update(id, {'isActive': false, 'isArchived': true});
+      await _databaseService.update(id, {'isActive': false, 'isArchived': true});
     } catch (e) {
-      debugPrint('---> Products: Erro ao arquivar no Firebase: $e');
+      debugPrint('---> Products: Erro ao arquivar: $e');
       rethrow;
     }
   }
@@ -99,9 +99,9 @@ class ProductsRepositoryImpl implements ProductsRepository {
   @override
   Future<void> unarchive(String id) async {
     try {
-      await _firebaseDb.update(id, {'isActive': false, 'isArchived': false});
+      await _databaseService.update(id, {'isActive': false, 'isArchived': false});
     } catch (e) {
-      debugPrint('---> Products: Erro ao desarquivar no Firebase: $e');
+      debugPrint('---> Products: Erro ao desarquivar: $e');
       rethrow;
     }
   }
@@ -113,9 +113,9 @@ class ProductsRepositoryImpl implements ProductsRepository {
         'products/$id': null,
         'stock_movements/$id': null,
       };
-      await _firebaseDb.updateMultiple(updates);
+      await _databaseService.updateMultiple(updates);
     } catch (e) {
-      debugPrint('---> Products: Erro ao deletar permanentemente no Firebase: $e');
+      debugPrint('---> Products: Erro ao deletar permanentemente: $e');
       rethrow;
     }
   }
@@ -130,7 +130,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
     }
 
     try {
-      final pushRef = _firebaseDb.ref.root.child('stock_movements').child(productId).push();
+      final pushRef = _databaseService.ref.root.child('stock_movements').child(productId).push();
       final historyModel = ProductHistoryModel.fromEntity(history);
 
       final updates = {
@@ -139,16 +139,16 @@ class ProductsRepositoryImpl implements ProductsRepository {
         'stock_movements/$productId/${pushRef.key}': historyModel.toMap(),
       };
 
-      await _firebaseDb.updateMultiple(updates);
+      await _databaseService.updateMultiple(updates);
     } catch (e) {
-      debugPrint('---> Products: Erro ao ajustar estoque atômicamente no Firebase: $e');
+      debugPrint('---> Products: Erro ao ajustar estoque atômicamente: $e');
       rethrow;
     }
   }
 
   @override
   Stream<List<ProductHistoryEntity>> watchHistory(String productId, {int limit = 20}) {
-    return _firebaseDb.ref.root
+    return _databaseService.ref.root
         .child('stock_movements')
         .child(productId)
         .orderByChild('date')
@@ -179,7 +179,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
     final trimmed = barcode.trim();
     if (trimmed.isEmpty) return false;
     try {
-      final snapshot = await _firebaseDb.ref
+      final snapshot = await _databaseService.ref
           .orderByChild('barcode')
           .equalTo(trimmed)
           .get()

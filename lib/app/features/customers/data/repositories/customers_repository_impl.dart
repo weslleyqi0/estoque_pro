@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/customers/data/models/customer_model.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
@@ -8,13 +8,13 @@ import 'package:estoque_pro/app/features/customers/domain/repositories/customers
 import 'package:flutter/foundation.dart';
 
 class CustomersRepositoryImpl implements CustomersRepository {
-  final FirebaseDatabaseService _firebaseDb;
+  final DatabaseService<CustomerEntity> _databaseService;
 
-  CustomersRepositoryImpl(this._firebaseDb);
+  CustomersRepositoryImpl(this._databaseService);
 
   @override
   Stream<List<CustomerEntity>> watchAll() {
-    return _firebaseDb
+    return _databaseService
         .listen()
         .map((data) {
           final List<CustomerEntity> entities = [];
@@ -32,14 +32,14 @@ class CustomersRepositoryImpl implements CustomersRepository {
           return entities.sortByName((a) => a.name);
         })
         .handleError((e) {
-          debugPrint('---> Customers: Erro no listener Firebase: $e');
+          debugPrint('---> Customers: Erro no listener: $e');
         });
   }
 
   @override
   Future<List<CustomerEntity>> getAll() async {
     try {
-      final data = await _firebaseDb.getOnce();
+      final data = await _databaseService.getOnce();
       final List<CustomerEntity> entities = [];
       if (data != null) {
         for (final entry in data.entries) {
@@ -54,7 +54,7 @@ class CustomersRepositoryImpl implements CustomersRepository {
       }
       return entities;
     } catch (e) {
-      debugPrint('---> Customers: Erro getAll Firebase: $e');
+      debugPrint('---> Customers: Erro getAll: $e');
       return [];
     }
   }
@@ -63,9 +63,9 @@ class CustomersRepositoryImpl implements CustomersRepository {
   Future<void> save(CustomerEntity customer) async {
     final model = CustomerModel.fromEntity(customer);
     try {
-      await _firebaseDb.add(model.toMap());
+      await _databaseService.add(model.toMap());
     } catch (e) {
-      debugPrint('---> Customers: Erro ao salvar no Firebase: $e');
+      debugPrint('---> Customers: Erro ao salvar: $e');
       rethrow;
     }
   }
@@ -74,9 +74,9 @@ class CustomersRepositoryImpl implements CustomersRepository {
   Future<void> update(CustomerEntity customer) async {
     final model = CustomerModel.fromEntity(customer);
     try {
-      await _firebaseDb.update(customer.id, model.toMap());
+      await _databaseService.update(customer.id, model.toMap());
     } catch (e) {
-      debugPrint('---> Customers: Erro ao atualizar no Firebase: $e');
+      debugPrint('---> Customers: Erro ao atualizar: $e');
       rethrow;
     }
   }
@@ -84,9 +84,9 @@ class CustomersRepositoryImpl implements CustomersRepository {
   @override
   Future<void> delete(String id) async {
     try {
-      await _firebaseDb.delete(id);
+      await _databaseService.delete(id);
     } catch (e) {
-      debugPrint('---> Customers: Erro ao deletar no Firebase: $e');
+      debugPrint('---> Customers: Erro ao deletar: $e');
       rethrow;
     }
   }
