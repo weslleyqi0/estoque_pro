@@ -1,4 +1,4 @@
-import 'package:estoque_pro/app/core/errors/app_failure.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
@@ -63,7 +63,7 @@ void main() {
     });
 
     test('saves and returns success when valid', () async {
-      when(() => mockRepository.save(any())).thenAnswer((_) async {});
+      when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = SaveDeliveryUseCase(mockRepository);
       final result = await useCase.call(testDelivery);
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('updates and returns success when valid', () async {
-      when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async {});
+      when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = UpdateDeliveryUseCase(mockRepository);
       final result = await useCase.call(testDelivery);
@@ -104,7 +104,7 @@ void main() {
 
     test('updates status and returns success when valid', () async {
       when(() => mockRepository.updateStatus(any(), any(), deliveredAt: any(named: 'deliveredAt')))
-          .thenAnswer((_) async {});
+          .thenAnswer((_) async => const Result.success(null));
 
       final useCase = UpdateDeliveryStatusUseCase(mockRepository);
       final result = await useCase.call('d1', DeliveryStatus.completed);
@@ -124,7 +124,7 @@ void main() {
     });
 
     test('deletes and returns success when valid', () async {
-      when(() => mockRepository.delete('d1')).thenAnswer((_) async {});
+      when(() => mockRepository.delete('d1')).thenAnswer((_) async => const Result.success(null));
 
       final useCase = DeleteDeliveryUseCase(mockRepository);
       final result = await useCase.call('d1');

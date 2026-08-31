@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
@@ -64,7 +65,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() => tester.view.resetPhysicalSize());
 
-    when(() => mockDeliveriesRepository.updateDelivery(any())).thenAnswer((_) async {});
+    when(() => mockDeliveriesRepository.updateDelivery(any())).thenAnswer((_) async => const Result.success(null));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -108,7 +109,7 @@ void main() {
   });
 
   testWidgets('EditDeliveryBottomSheet allows deleting delivery with confirmation dialog', (tester) async {
-    when(() => mockDeliveriesRepository.delete(any())).thenAnswer((_) async {});
+    when(() => mockDeliveriesRepository.delete(any())).thenAnswer((_) async => const Result.success(null));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -150,7 +151,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() => tester.view.resetPhysicalSize());
 
-    when(() => mockDeliveriesRepository.updateDelivery(any())).thenAnswer((_) async {});
+    when(() => mockDeliveriesRepository.updateDelivery(any())).thenAnswer((_) async => const Result.success(null));
 
     await tester.pumpWidget(
       MaterialApp(

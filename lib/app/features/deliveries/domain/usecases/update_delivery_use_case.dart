@@ -8,15 +8,16 @@ class UpdateDeliveryUseCase {
   const UpdateDeliveryUseCase(this._repository);
 
   AsyncResult<bool> call(DeliveryEntity delivery) async {
-    return Result.guard(() async {
-      if (delivery.id.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'ID da entrega inválido.');
-      }
-      if (delivery.customerAddress.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'O endereço de entrega é obrigatório.');
-      }
-      await _repository.updateDelivery(delivery);
-      return true;
-    });
+    if (delivery.id.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'ID da entrega inválido.'));
+    }
+    if (delivery.customerAddress.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'O endereço de entrega é obrigatório.'));
+    }
+    final result = await _repository.updateDelivery(delivery);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

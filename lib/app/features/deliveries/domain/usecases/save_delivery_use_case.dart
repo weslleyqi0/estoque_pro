@@ -8,12 +8,13 @@ class SaveDeliveryUseCase {
   const SaveDeliveryUseCase(this._repository);
 
   AsyncResult<bool> call(DeliveryEntity delivery) async {
-    return Result.guard(() async {
-      if (delivery.customerAddress.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'O endereço de entrega é obrigatório.');
-      }
-      await _repository.save(delivery);
-      return true;
-    });
+    if (delivery.customerAddress.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'O endereço de entrega é obrigatório.'));
+    }
+    final result = await _repository.save(delivery);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

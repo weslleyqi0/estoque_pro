@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
@@ -107,9 +108,11 @@ void main() {
     controller = StreamController<List<DeliveryEntity>>.broadcast();
     when(() => mockRepository.watchAll(limit: any(named: 'limit')))
         .thenAnswer((_) => controller.stream);
-    when(() => mockRepository.save(any())).thenAnswer((_) async {});
-    when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async {});
-    when(() => mockRepository.delete(any())).thenAnswer((_) async {});
+    when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
+    when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async => const Result.success(null));
+    when(() => mockRepository.updateStatus(any(), any(), deliveredAt: any(named: 'deliveredAt')))
+        .thenAnswer((_) async => const Result.success(null));
+    when(() => mockRepository.delete(any())).thenAnswer((_) async => const Result.success(null));
     viewModel = DeliveriesViewModel(
       GetDeliveriesUseCase(mockRepository),
       SaveDeliveryUseCase(mockRepository),
@@ -194,14 +197,14 @@ void main() {
   });
 
   test('rescheduleDelivery delegates to repository updateDelivery', () async {
-    when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async {});
+    when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async => const Result.success(null));
     final newDate = now.add(const Duration(days: 2));
     await viewModel.rescheduleDelivery(deliveryPending, newDate);
     verify(() => mockRepository.updateDelivery(any(that: isA<DeliveryEntity>().having((d) => d.scheduledAt, 'scheduledAt', newDate)))).called(1);
   });
 
   test('createDelivery creates and saves new DeliveryEntity in repository', () async {
-    when(() => mockRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
     final sale = SaleEntity(
       id: 's1',
       saleNumber: 'A1B2C3',
@@ -240,7 +243,7 @@ void main() {
   });
 
   test('updateDelivery delegates to repository updateDelivery', () async {
-    when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async {});
+    when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async => const Result.success(null));
     final updated = deliveryPending.copyWith(
       customerAddress: 'Nova Rua, 999',
       observations: 'Novo recado',
@@ -250,7 +253,7 @@ void main() {
   });
 
   test('deleteDelivery delegates to repository delete', () async {
-    when(() => mockRepository.delete(any())).thenAnswer((_) async {});
+    when(() => mockRepository.delete(any())).thenAnswer((_) async => const Result.success(null));
     await viewModel.deleteDelivery('d1');
     verify(() => mockRepository.delete('d1')).called(1);
   });

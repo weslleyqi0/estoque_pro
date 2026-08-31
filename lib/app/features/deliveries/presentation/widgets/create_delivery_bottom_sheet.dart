@@ -95,7 +95,8 @@ class _CreateDeliveryBottomSheetState extends State<CreateDeliveryBottomSheet> {
 
     if (sale.customerId != null && sale.customerId!.isNotEmpty) {
       try {
-        final customers = await widget.customersRepository.getAll();
+        final result = await widget.customersRepository.getAll();
+        final customers = result.value ?? [];
         final customer = customers.where((c) => c.id == sale.customerId).firstOrNull;
         if (customer != null) {
           if (customer.address != null && customer.address!.isNotEmpty) {

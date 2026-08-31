@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/services/database_service.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/data/models/delivery_model.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
@@ -44,7 +45,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
   }
 
   @override
-  Future<void> save(DeliveryEntity delivery) async {
+  Future<Result<void>> save(DeliveryEntity delivery) async {
     try {
       final pushRef = _databaseService.ref.push();
       final deliveryId = delivery.id.isNotEmpty ? delivery.id : pushRef.key!;
@@ -56,14 +57,15 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       updates['deliveries/$deliveryId'] = deliveryModel.toMap();
 
       await _databaseService.updateMultiple(updates);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao salvar entrega: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> updateDelivery(DeliveryEntity delivery) async {
+  Future<Result<void>> updateDelivery(DeliveryEntity delivery) async {
     try {
       final deliveryModel = DeliveryModel.fromEntity(
         delivery.copyWith(updatedAt: DateTime.now()),
@@ -73,14 +75,15 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       updates['deliveries/${delivery.id}'] = deliveryModel.toMap();
 
       await _databaseService.updateMultiple(updates);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao atualizar entrega: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> updateStatus(
+  Future<Result<void>> updateStatus(
     String deliveryId,
     DeliveryStatus status, {
     DateTime? deliveredAt,
@@ -98,19 +101,21 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       }
 
       await _databaseService.ref.child(deliveryId).update(updates);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao atualizar status da entrega: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> delete(String deliveryId) async {
+  Future<Result<void>> delete(String deliveryId) async {
     try {
       await _databaseService.delete(deliveryId);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao deletar entrega: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 }

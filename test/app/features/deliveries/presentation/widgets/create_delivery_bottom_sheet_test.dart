@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
@@ -137,18 +138,18 @@ void main() {
     when(() => mockAuthRepository.authStateChanges).thenAnswer((_) => const Stream.empty());
 
     when(() => mockDeliveriesRepository.watchAll()).thenAnswer((_) => Stream.value([existingDelivery]));
-    when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
     when(() => mockSalesRepository.watchAll(limit: any(named: 'limit')))
         .thenAnswer((_) => Stream.value([saleWithoutDelivery, saleWithDelivery]));
-    when(() => mockCustomersRepository.getAll()).thenAnswer((_) async => [
-      const CustomerEntity(
+    when(() => mockCustomersRepository.getAll()).thenAnswer((_) async => const Result.success([
+      CustomerEntity(
         id: 'c1',
         name: 'Maria Silva',
         address: 'Rua das Palmeiras, 100',
         phone: '11988887777',
       ),
-    ]);
+    ]));
 
     authViewModel = AuthViewModel(mockAuthRepository, mockAuthService);
     deliveriesViewModel = DeliveriesViewModel(

@@ -12,12 +12,13 @@ class UpdateDeliveryStatusUseCase {
     DeliveryStatus status, {
     DateTime? deliveredAt,
   }) async {
-    return Result.guard(() async {
-      if (deliveryId.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'ID da entrega inválido.');
-      }
-      await _repository.updateStatus(deliveryId, status, deliveredAt: deliveredAt);
-      return true;
-    });
+    if (deliveryId.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'ID da entrega inválido.'));
+    }
+    final result = await _repository.updateStatus(deliveryId, status, deliveredAt: deliveredAt);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

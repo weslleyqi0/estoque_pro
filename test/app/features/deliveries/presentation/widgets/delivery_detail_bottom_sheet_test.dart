@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
@@ -89,7 +90,7 @@ void main() {
   });
 
   testWidgets('DeliveryDetailBottomSheet shows delete button when delivery is cancelled and allows deletion', (tester) async {
-    when(() => mockDeliveriesRepository.delete(any())).thenAnswer((_) async {});
+    when(() => mockDeliveriesRepository.delete(any())).thenAnswer((_) async => const Result.success(null));
 
     await tester.pumpWidget(
       MaterialApp(
