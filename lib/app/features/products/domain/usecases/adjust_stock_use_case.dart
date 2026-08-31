@@ -12,17 +12,20 @@ class AdjustStockUseCase {
     required int quantityDiff,
     required ProductHistoryEntity history,
   }) async {
-    return Result.guard(() async {
-      if (productId.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'ID do produto inválido.');
-      }
-      if (quantityDiff == 0) {
-        throw const BusinessRuleFailure(
+    if (productId.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'ID do produto inválido.'));
+    }
+    if (quantityDiff == 0) {
+      return Result.failure(
+        const BusinessRuleFailure(
           message: 'A quantidade de alteração de estoque não pode ser zero.',
-        );
-      }
-      await _repository.adjustStock(productId, quantityDiff, history);
-      return true;
-    });
+        ),
+      );
+    }
+    final result = await _repository.adjustStock(productId, quantityDiff, history);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 
@@ -8,5 +9,5 @@ class GetProductsUseCase {
 
   Stream<List<ProductEntity>> watchAll() => _repository.watchAll();
 
-  Future<List<ProductEntity>> getAll() => _repository.getAll();
+  Future<Result<List<ProductEntity>>> getAll() => _repository.getAll();
 }

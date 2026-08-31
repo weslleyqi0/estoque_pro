@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
@@ -57,11 +58,11 @@ void main() {
     });
 
     test('getAll delegates to repository', () async {
-      when(() => mockRepository.getAll()).thenAnswer((_) async => [testProduct]);
+      when(() => mockRepository.getAll()).thenAnswer((_) async => const Result.success([testProduct]));
       final useCase = GetProductsUseCase(mockRepository);
 
       final result = await useCase.getAll();
-      expect(result, [testProduct]);
+      expect(result.value, [testProduct]);
     });
   });
 
@@ -75,7 +76,7 @@ void main() {
     });
 
     test('fails if barcode already exists', () async {
-      when(() => mockRepository.checkBarcodeExists('7891234567890')).thenAnswer((_) async => true);
+      when(() => mockRepository.checkBarcodeExists('7891234567890')).thenAnswer((_) async => const Result.success(true));
       final useCase = SaveProductUseCase(mockRepository);
       final result = await useCase(testProduct);
 
@@ -84,8 +85,8 @@ void main() {
     });
 
     test('succeeds when valid', () async {
-      when(() => mockRepository.checkBarcodeExists('7891234567890')).thenAnswer((_) async => false);
-      when(() => mockRepository.save(any())).thenAnswer((_) async {});
+      when(() => mockRepository.checkBarcodeExists('7891234567890')).thenAnswer((_) async => const Result.success(false));
+      when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
       final useCase = SaveProductUseCase(mockRepository);
       final result = await useCase(testProduct);
 
@@ -108,8 +109,8 @@ void main() {
           '7891234567890',
           ignoreId: 'p1',
         ),
-      ).thenAnswer((_) async => false);
-      when(() => mockRepository.update(any())).thenAnswer((_) async {});
+      ).thenAnswer((_) async => const Result.success(false));
+      when(() => mockRepository.update(any())).thenAnswer((_) async => const Result.success(null));
       final useCase = UpdateProductUseCase(mockRepository);
       final result = await useCase(testProduct);
 
@@ -120,7 +121,7 @@ void main() {
 
   group('Archive / Unarchive / Delete UseCases', () {
     test('ArchiveProductUseCase succeeds with valid id', () async {
-      when(() => mockRepository.archive('p1')).thenAnswer((_) async {});
+      when(() => mockRepository.archive('p1')).thenAnswer((_) async => const Result.success(null));
       final useCase = ArchiveProductUseCase(mockRepository);
       final result = await useCase('p1');
 
@@ -129,7 +130,7 @@ void main() {
     });
 
     test('UnarchiveProductUseCase succeeds with valid id', () async {
-      when(() => mockRepository.unarchive('p1')).thenAnswer((_) async {});
+      when(() => mockRepository.unarchive('p1')).thenAnswer((_) async => const Result.success(null));
       final useCase = UnarchiveProductUseCase(mockRepository);
       final result = await useCase('p1');
 
@@ -138,7 +139,7 @@ void main() {
     });
 
     test('DeleteProductPermanentlyUseCase succeeds with valid id', () async {
-      when(() => mockRepository.deletePermanently('p1')).thenAnswer((_) async {});
+      when(() => mockRepository.deletePermanently('p1')).thenAnswer((_) async => const Result.success(null));
       final useCase = DeleteProductPermanentlyUseCase(mockRepository);
       final result = await useCase('p1');
 

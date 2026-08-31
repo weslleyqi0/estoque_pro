@@ -8,22 +8,30 @@ class SaveProductUseCase {
   const SaveProductUseCase(this._repository);
 
   AsyncResult<bool> call(ProductEntity product) async {
-    return Result.guard(() async {
-      if (product.name.trim().isEmpty) {
-        throw const BusinessRuleFailure(
+    if (product.name.trim().isEmpty) {
+      return Result.failure(
+        const BusinessRuleFailure(
           message: 'O nome do produto é obrigatório.',
+        ),
+      );
+    }
+    if (product.barcode.isNotEmpty) {
+      final barcodeResult = await _repository.checkBarcodeExists(product.barcode);
+      if (barcodeResult.isFailure) {
+        return Result.failure(barcodeResult.error!);
+      }
+      if (barcodeResult.value == true) {
+        return Result.failure(
+          const BusinessRuleFailure(
+            message: 'Já existe um produto cadastrado com este código de barras.',
+          ),
         );
       }
-      if (product.barcode.isNotEmpty) {
-        final barcodeExists = await _repository.checkBarcodeExists(product.barcode);
-        if (barcodeExists) {
-          throw const BusinessRuleFailure(
-            message: 'Já existe um produto cadastrado com este código de barras.',
-          );
-        }
-      }
-      await _repository.save(product);
-      return true;
-    });
+    }
+    final result = await _repository.save(product);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }
