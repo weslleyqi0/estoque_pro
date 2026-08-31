@@ -4,9 +4,9 @@ import 'result.dart';
 
 export 'result.dart';
 
-typedef CommandAction0<Output extends Object> = Future<Result<Output>> Function();
+typedef CommandAction0<Output> = Future<Result<Output>> Function();
 
-typedef CommandAction1<Output extends Object, Input> = Future<Result<Output>> Function(Input);
+typedef CommandAction1<Output, Input> = Future<Result<Output>> Function(Input);
 
 enum CommandState {
   idle,
@@ -15,7 +15,7 @@ enum CommandState {
   failure,
 }
 
-abstract class Command<Output extends Object> extends ChangeNotifier {
+abstract class Command<Output> extends ChangeNotifier {
   Command();
 
   CommandState _state = CommandState.idle;
@@ -59,7 +59,7 @@ abstract class Command<Output extends Object> extends ChangeNotifier {
   }
 }
 
-class Command0<Output extends Object> extends Command<Output> {
+class Command0<Output> extends Command<Output> {
   final CommandAction0<Output> _action;
 
   Command0(this._action);
@@ -70,7 +70,7 @@ class Command0<Output extends Object> extends Command<Output> {
   }
 }
 
-class Command1<Output extends Object, Input> extends Command<Output> {
+class Command1<Output, Input> extends Command<Output> {
   final CommandAction1<Output, Input> _action;
 
   Command1(this._action);

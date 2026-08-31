@@ -2,9 +2,9 @@ import '../errors/app_failure.dart';
 
 export '../errors/app_failure.dart';
 
-typedef AsyncResult<T extends Object> = Future<Result<T>>;
+typedef AsyncResult<T> = Future<Result<T>>;
 
-sealed class Result<T extends Object> {
+sealed class Result<T> {
   const Result();
 
   bool get isSuccess => this is Success<T>;
@@ -14,7 +14,7 @@ sealed class Result<T extends Object> {
 
   factory Result.failure(Object error, [StackTrace? stackTrace]) = Failure<T>;
 
-  static Future<Result<T>> guard<T extends Object>(
+  static Future<Result<T>> guard<T>(
     Future<T> Function() computation,
   ) async {
     try {
@@ -50,7 +50,7 @@ sealed class Result<T extends Object> {
   }
 }
 
-final class Success<T extends Object> extends Result<T> {
+final class Success<T> extends Result<T> {
   final T _value;
 
   @override
@@ -59,7 +59,7 @@ final class Success<T extends Object> extends Result<T> {
   const Success(this._value);
 }
 
-final class Failure<T extends Object> extends Result<T> {
+final class Failure<T> extends Result<T> {
   final AppFailure _error;
 
   @override
