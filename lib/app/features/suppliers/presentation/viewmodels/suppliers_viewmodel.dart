@@ -1,15 +1,15 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
-import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
+import 'package:estoque_pro/app/features/suppliers/domain/usecases/get_suppliers_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
-import 'package:flutter/foundation.dart';
 
 enum SuppliersLoadState { idle, loading, success, failure }
 
-class SuppliersViewModel extends ChangeNotifier {
-  final SuppliersRepository _repository;
+class SuppliersViewModel extends BaseViewModel {
+  final GetSuppliersUseCase _getSuppliersUseCase;
   final CountProductsUseCase _countProductsUseCase;
 
   StreamSubscription<List<SupplierEntity>>? _suppliersSubscription;
@@ -17,6 +17,7 @@ class SuppliersViewModel extends ChangeNotifier {
 
   SuppliersLoadState _state = SuppliersLoadState.idle;
   SuppliersLoadState get state => _state;
+  bool get isLoading => _state == SuppliersLoadState.loading;
 
   List<SupplierEntity> _suppliers = [];
   List<SupplierEntity> get suppliers => _suppliers;
@@ -81,14 +82,14 @@ class SuppliersViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
-  SuppliersViewModel(this._repository, this._countProductsUseCase);
+  SuppliersViewModel(this._getSuppliersUseCase, this._countProductsUseCase);
 
   void listenAll() {
     _state = SuppliersLoadState.loading;
     notifyListeners();
 
     _suppliersSubscription?.cancel();
-    _suppliersSubscription = _repository.watchAll().listen(
+    _suppliersSubscription = _getSuppliersUseCase.watchAll().listen(
       (list) {
         _suppliers = list.sortByName((a) => a.name);
         _state = SuppliersLoadState.success;

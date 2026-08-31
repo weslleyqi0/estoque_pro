@@ -1,51 +1,30 @@
-import 'dart:async';
-
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
-import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:estoque_pro/app/features/suppliers/domain/usecases/delete_supplier_use_case.dart';
+import 'package:estoque_pro/app/features/suppliers/domain/usecases/save_supplier_use_case.dart';
+import 'package:estoque_pro/app/features/suppliers/domain/usecases/update_supplier_use_case.dart';
 
-class SuppliersFormViewmodel extends ChangeNotifier {
-  final SuppliersRepository _repository;
+class SuppliersFormViewmodel extends BaseViewModel {
+  final SaveSupplierUseCase _saveSupplierUseCase;
+  final UpdateSupplierUseCase _updateSupplierUseCase;
+  final DeleteSupplierUseCase _deleteSupplierUseCase;
 
   late final Command1<bool, SupplierEntity> saveSupplierCommand;
   late final Command1<bool, SupplierEntity> updateSupplierCommand;
   late final Command1<bool, String> deleteSupplierCommand;
 
-  Object? _error;
-  Object? get error => _error;
-
-  SuppliersFormViewmodel(this._repository) {
-    saveSupplierCommand = Command1(_saveSupplier);
-    updateSupplierCommand = Command1(_updateSupplier);
-    deleteSupplierCommand = Command1(_deleteSupplier);
-  }
-
-  Future<Result<bool>> _saveSupplier(SupplierEntity supplier) async {
-    try {
-      await _repository.save(supplier);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
-  }
-
-  Future<Result<bool>> _updateSupplier(SupplierEntity supplier) async {
-    try {
-      await _repository.update(supplier);
+  SuppliersFormViewmodel(
+    this._saveSupplierUseCase,
+    this._updateSupplierUseCase,
+    this._deleteSupplierUseCase,
+  ) {
+    saveSupplierCommand = Command1((supplier) => _saveSupplierUseCase(supplier));
+    updateSupplierCommand = Command1((supplier) async {
+      final result = await _updateSupplierUseCase(supplier);
       notifyListeners();
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
-  }
-
-  Future<Result<bool>> _deleteSupplier(String id) async {
-    try {
-      await _repository.delete(id);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+      return result;
+    });
+    deleteSupplierCommand = Command1((id) => _deleteSupplierUseCase(id));
   }
 }
