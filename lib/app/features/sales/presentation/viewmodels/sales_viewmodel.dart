@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
@@ -7,7 +8,6 @@ import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.da
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
-import 'package:flutter/foundation.dart';
 
 enum SalesLoadState { idle, loading, success, failure }
 
@@ -23,7 +23,7 @@ enum SalesFilterTab {
   const SalesFilterTab(this.label);
 }
 
-class SalesViewModel extends ChangeNotifier {
+class SalesViewModel extends BaseViewModel {
   final SalesRepository _repository;
   final DeliveriesRepository? _deliveriesRepository;
 

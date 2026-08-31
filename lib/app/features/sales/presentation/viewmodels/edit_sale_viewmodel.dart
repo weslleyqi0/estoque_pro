@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -9,7 +10,6 @@ import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.
 import 'package:estoque_pro/app/features/sales/domain/usecases/cancel_completed_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/edit_sale_use_case.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
-import 'package:flutter/foundation.dart';
 
 typedef CancelSaleParams = ({
   UserEntity currentUser,
@@ -17,7 +17,7 @@ typedef CancelSaleParams = ({
   String? comment,
 });
 
-class EditSaleViewModel extends ChangeNotifier {
+class EditSaleViewModel extends BaseViewModel {
   final EditSaleUseCase _editSaleUseCase;
   final CancelCompletedSaleUseCase _cancelCompletedSaleUseCase;
   final ProductsRepository _productsRepository;

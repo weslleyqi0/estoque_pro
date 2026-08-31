@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/sale_code_generator.dart';
@@ -8,7 +9,6 @@ import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.da
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/finalize_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/save_draft_sale_use_case.dart';
-import 'package:flutter/foundation.dart';
 
 typedef FinalizeSaleParams = ({
   String userId,
@@ -22,7 +22,7 @@ typedef SaveDraftSaleParams = ({
   List<ProductEntity> availableProducts,
 });
 
-class CartViewModel extends ChangeNotifier {
+class CartViewModel extends BaseViewModel {
   final FinalizeSaleUseCase _finalizeSaleUseCase;
   final SaveDraftSaleUseCase _saveDraftSaleUseCase;
 
