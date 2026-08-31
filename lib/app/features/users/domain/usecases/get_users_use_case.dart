@@ -11,11 +11,11 @@ class GetUsersUseCase {
     return _repository.listenAllUsers();
   }
 
-  Future<List<UserEntity>> getAllUsers() {
+  Future<Result<List<UserEntity>>> getAllUsers() {
     return _repository.getAllUsers();
   }
 
-  Future<UserEntity?> getUser(String uid) {
+  Future<Result<UserEntity?>> getUser(String uid) {
     return _repository.getUser(uid);
   }
 

@@ -93,7 +93,7 @@ void main() {
   });
 
   test('toggleUserPermission toggles permission and executes update command', () async {
-    when(() => mockUsersRepo.saveUser(any())).thenAnswer((_) async {});
+    when(() => mockUsersRepo.saveUser(any())).thenAnswer((_) async => const Result.success(null));
 
     viewModel.toggleUserPermission(sellerUser, UserPermission.editSales);
     await pumpEventQueue();
@@ -103,7 +103,7 @@ void main() {
   });
 
   test('deleteUserCommand executes delete on repository', () async {
-    when(() => mockUsersRepo.deleteUser(any())).thenAnswer((_) async {});
+    when(() => mockUsersRepo.deleteUser(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.deleteUserCommand.execute('u_seller');
 

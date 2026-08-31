@@ -6,19 +6,19 @@ abstract class UsersRepository {
   /// Fetches a [UserEntity] by its [uid].
   ///
   /// Returns `null` if the user is not found.
-  Future<UserEntity?> getUser(String uid);
+  Future<Result<UserEntity?>> getUser(String uid);
 
   /// Listens to realtime changes for a specific user [uid].
   Stream<UserEntity?> listenUser(String uid);
 
   /// Saves or updates the provided [user] in the database.
-  Future<void> saveUser(UserEntity user);
+  Future<Result<void>> saveUser(UserEntity user);
 
   /// Deletes the user identified by [uid] from the database.
-  Future<void> deleteUser(String uid);
+  Future<Result<void>> deleteUser(String uid);
 
   /// Fetches all registered users from the database.
-  Future<List<UserEntity>> getAllUsers();
+  Future<Result<List<UserEntity>>> getAllUsers();
 
   /// Listens to realtime changes across all registered users.
   Stream<Result<List<UserEntity>>> listenAllUsers();

@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
@@ -93,7 +94,7 @@ void main() {
     });
 
     test('updateUserCommand executes repository saveUser and succeeds', () async {
-      when(() => mockUsersRepository.saveUser(any())).thenAnswer((_) async {});
+      when(() => mockUsersRepository.saveUser(any())).thenAnswer((_) async => const Result.success(null));
 
       await viewModel.updateUserCommand.execute(sellerUser);
 

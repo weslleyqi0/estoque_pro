@@ -7,12 +7,13 @@ class DeleteUserUseCase {
   const DeleteUserUseCase(this._repository);
 
   AsyncResult<bool> call(String uid) async {
-    return Result.guard(() async {
-      if (uid.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'UID do usuário inválido.');
-      }
-      await _repository.deleteUser(uid);
-      return true;
-    });
+    if (uid.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'UID do usuário inválido.'));
+    }
+    final result = await _repository.deleteUser(uid);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

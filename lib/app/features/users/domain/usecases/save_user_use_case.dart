@@ -8,18 +8,19 @@ class SaveUserUseCase {
   const SaveUserUseCase(this._repository);
 
   AsyncResult<bool> call(UserEntity user) async {
-    return Result.guard(() async {
-      if (user.uid.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'UID do usuário inválido.');
-      }
-      if (user.name.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'O nome do usuário é obrigatório.');
-      }
-      if (user.email.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'O e-mail do usuário é obrigatório.');
-      }
-      await _repository.saveUser(user);
-      return true;
-    });
+    if (user.uid.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'UID do usuário inválido.'));
+    }
+    if (user.name.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'O nome do usuário é obrigatório.'));
+    }
+    if (user.email.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'O e-mail do usuário é obrigatório.'));
+    }
+    final result = await _repository.saveUser(user);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

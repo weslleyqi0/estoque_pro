@@ -41,19 +41,19 @@ void main() {
     });
 
     test('getAllUsers delegates to repository', () async {
-      when(() => mockRepository.getAllUsers()).thenAnswer((_) async => [testUser]);
+      when(() => mockRepository.getAllUsers()).thenAnswer((_) async => const Result.success([testUser]));
 
       final useCase = GetUsersUseCase(mockRepository);
       final result = await useCase.getAllUsers();
-      expect(result, equals([testUser]));
+      expect(result.value, equals([testUser]));
     });
 
     test('getUser delegates to repository', () async {
-      when(() => mockRepository.getUser('u1')).thenAnswer((_) async => testUser);
+      when(() => mockRepository.getUser('u1')).thenAnswer((_) async => const Result.success(testUser));
 
       final useCase = GetUsersUseCase(mockRepository);
       final result = await useCase.getUser('u1');
-      expect(result, equals(testUser));
+      expect(result.value, equals(testUser));
     });
 
     test('listenUser delegates to repository', () {
@@ -90,7 +90,7 @@ void main() {
     });
 
     test('saves and returns success when valid', () async {
-      when(() => mockRepository.saveUser(any())).thenAnswer((_) async {});
+      when(() => mockRepository.saveUser(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = SaveUserUseCase(mockRepository);
       final result = await useCase.call(testUser);
@@ -110,7 +110,7 @@ void main() {
     });
 
     test('deletes and returns success when valid', () async {
-      when(() => mockRepository.deleteUser('u1')).thenAnswer((_) async {});
+      when(() => mockRepository.deleteUser('u1')).thenAnswer((_) async => const Result.success(null));
 
       final useCase = DeleteUserUseCase(mockRepository);
       final result = await useCase.call('u1');

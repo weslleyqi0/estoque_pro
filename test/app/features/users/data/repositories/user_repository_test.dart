@@ -55,8 +55,10 @@ void main() {
         'permissions': {'manage_users': true},
       });
 
-      final user = await repository.getUser('uid_123');
+      final result = await repository.getUser('uid_123');
 
+      expect(result.isSuccess, isTrue);
+      final user = result.value;
       expect(user, isNotNull);
       expect(user!.uid, 'uid_123');
       expect(user.name, 'Test User');
@@ -70,9 +72,10 @@ void main() {
       when(() => mockUserSnapshot.exists).thenReturn(false);
       when(() => mockUserSnapshot.value).thenReturn(null);
 
-      final user = await repository.getUser('non_existing_uid');
+      final result = await repository.getUser('non_existing_uid');
 
-      expect(user, isNull);
+      expect(result.isSuccess, isTrue);
+      expect(result.value, isNull);
     });
 
     test('saveUser updates user node in DB', () async {
@@ -122,8 +125,10 @@ void main() {
         },
       });
 
-      final users = await repository.getAllUsers();
+      final result = await repository.getAllUsers();
 
+      expect(result.isSuccess, isTrue);
+      final users = result.value!;
       expect(users.length, 2);
       expect(users.map((u) => u.uid), containsAll(['user_1', 'user_2']));
     });
