@@ -1,9 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
+
+import '../errors/app_failure.dart';
+import '../logger/app_logger.dart';
 
 class FirebaseDatabaseService<T> {
   final DatabaseReference _ref;
+  final AppLogger _logger = const AppLogger('FirebaseDatabaseService');
 
   FirebaseDatabaseService(this._ref);
 
@@ -12,25 +15,63 @@ class FirebaseDatabaseService<T> {
   Future<R> _handleError<R>(Future<R> Function() action) async {
     try {
       return await action();
-    } on FirebaseException catch (e) {
-      debugPrint('FirebaseException [${e.code}]: ${e.message}');
-      switch (e.code) {
-        case 'permission-denied':
-          throw Exception('Você não tem permissão para realizar esta operação.');
-        case 'disconnected':
-          throw Exception('Sem conexão com a internet. Tente novamente mais tarde.');
-        case 'network-error':
-          throw Exception('Erro de rede. Verifique sua conexão.');
-        case 'unavailable':
-          throw Exception('O serviço de banco de dados está indisponível.');
-        case 'write-canceled':
-          throw Exception('A operação foi cancelada pelo servidor.');
-        default:
-          throw Exception('Ocorreu um erro inesperado: ${e.message}');
-      }
-    } catch (e) {
-      debugPrint('Unknown Exception: $e');
-      throw Exception('Ocorreu um erro: $e');
+    } on FirebaseException catch (e, stackTrace) {
+      _logger.e(
+        'FirebaseException [${e.code}]: ${e.message}',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw switch (e.code) {
+        'permission-denied' => PermissionFailure(
+            message: 'Você não tem permissão para realizar esta operação.',
+            code: e.code,
+            error: e,
+            stackTrace: stackTrace,
+          ),
+        'disconnected' => NetworkFailure(
+            message: 'Sem conexão com a internet. Tente novamente mais tarde.',
+            code: e.code,
+            error: e,
+            stackTrace: stackTrace,
+          ),
+        'network-error' => NetworkFailure(
+            message: 'Erro de rede. Verifique sua conexão.',
+            code: e.code,
+            error: e,
+            stackTrace: stackTrace,
+          ),
+        'unavailable' => DatabaseFailure(
+            message: 'O serviço de banco de dados está indisponível.',
+            code: e.code,
+            error: e,
+            stackTrace: stackTrace,
+          ),
+        'write-canceled' => DatabaseFailure(
+            message: 'A operação foi cancelada pelo servidor.',
+            code: e.code,
+            error: e,
+            stackTrace: stackTrace,
+          ),
+        _ => DatabaseFailure(
+            message: e.message ?? 'Ocorreu um erro inesperado: ${e.message}',
+            code: e.code,
+            error: e,
+            stackTrace: stackTrace,
+          ),
+      };
+    } on AppFailure {
+      rethrow;
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Unknown Exception: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw UnknownFailure(
+        message: 'Ocorreu um erro: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 

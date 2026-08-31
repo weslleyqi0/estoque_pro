@@ -33,7 +33,7 @@ abstract class Command<Output extends Object> extends ChangeNotifier {
   Result<Output>? get result => _result;
 
   Output? get value => _result?.value;
-  Exception? get error => _result?.error;
+  AppFailure? get error => _result?.error;
 
   Future<void> _execute(
     AsyncResult<Output> Function() action,
