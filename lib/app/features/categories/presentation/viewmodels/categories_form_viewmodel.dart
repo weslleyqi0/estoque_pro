@@ -1,51 +1,30 @@
-import 'dart:async';
-
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
-import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:estoque_pro/app/features/categories/domain/usecases/delete_category_use_case.dart';
+import 'package:estoque_pro/app/features/categories/domain/usecases/save_category_use_case.dart';
+import 'package:estoque_pro/app/features/categories/domain/usecases/update_category_use_case.dart';
 
-class CategoriesFormViewmodel extends ChangeNotifier {
-  final CategoriesRepository _repository;
+class CategoriesFormViewmodel extends BaseViewModel {
+  final SaveCategoryUseCase _saveCategoryUseCase;
+  final UpdateCategoryUseCase _updateCategoryUseCase;
+  final DeleteCategoryUseCase _deleteCategoryUseCase;
 
   late final Command1<bool, CategoryEntity> saveCategoryCommand;
   late final Command1<bool, CategoryEntity> updateCategoryCommand;
   late final Command1<bool, String> deleteCategoryCommand;
 
-  Object? _error;
-  Object? get error => _error;
-
-  CategoriesFormViewmodel(this._repository) {
-    saveCategoryCommand = Command1(_saveCategory);
-    updateCategoryCommand = Command1(_updateCategory);
-    deleteCategoryCommand = Command1(_deleteCategory);
-  }
-
-  Future<Result<bool>> _saveCategory(CategoryEntity category) async {
-    try {
-      await _repository.save(category);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
-  }
-
-  Future<Result<bool>> _updateCategory(CategoryEntity category) async {
-    try {
-      await _repository.update(category);
+  CategoriesFormViewmodel(
+    this._saveCategoryUseCase,
+    this._updateCategoryUseCase,
+    this._deleteCategoryUseCase,
+  ) {
+    saveCategoryCommand = Command1((category) => _saveCategoryUseCase(category));
+    updateCategoryCommand = Command1((category) async {
+      final result = await _updateCategoryUseCase(category);
       notifyListeners();
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
-  }
-
-  Future<Result<bool>> _deleteCategory(String id) async {
-    try {
-      await _repository.delete(id);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+      return result;
+    });
+    deleteCategoryCommand = Command1((id) => _deleteCategoryUseCase(id));
   }
 }

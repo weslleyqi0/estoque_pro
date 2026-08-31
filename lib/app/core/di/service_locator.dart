@@ -58,6 +58,10 @@ import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_
 import 'package:estoque_pro/app/features/categories/data/repositories/categories_repository_impl.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
+import 'package:estoque_pro/app/features/categories/domain/usecases/delete_category_use_case.dart';
+import 'package:estoque_pro/app/features/categories/domain/usecases/get_categories_use_case.dart';
+import 'package:estoque_pro/app/features/categories/domain/usecases/save_category_use_case.dart';
+import 'package:estoque_pro/app/features/categories/domain/usecases/update_category_use_case.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/categories/presentation/viewmodels/categories_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/data/repositories/products_repository_impl.dart';
@@ -266,6 +270,19 @@ Future<void> setupServiceLocator() async {
     () => CancelCustomerPaymentUseCase(getIt<CustomerPaymentsRepository>()),
   );
 
+  getIt.registerFactory<GetCategoriesUseCase>(
+    () => GetCategoriesUseCase(getIt<CategoriesRepository>()),
+  );
+  getIt.registerFactory<SaveCategoryUseCase>(
+    () => SaveCategoryUseCase(getIt<CategoriesRepository>()),
+  );
+  getIt.registerFactory<UpdateCategoryUseCase>(
+    () => UpdateCategoryUseCase(getIt<CategoriesRepository>()),
+  );
+  getIt.registerFactory<DeleteCategoryUseCase>(
+    () => DeleteCategoryUseCase(getIt<CategoriesRepository>()),
+  );
+
   // ViewModels
   getIt.registerLazySingleton<ThemeViewModel>(
     () => ThemeViewModel(getIt<LocalStorageService>()),
@@ -326,12 +343,16 @@ Future<void> setupServiceLocator() async {
 
   getIt.registerFactory<CategoriesViewModel>(
     () => CategoriesViewModel(
-      getIt<CategoriesRepository>(),
+      getIt<GetCategoriesUseCase>(),
       getIt<CountProductsUseCase>(),
     ),
   );
   getIt.registerFactory<CategoriesFormViewmodel>(
-    () => CategoriesFormViewmodel(getIt<CategoriesRepository>()),
+    () => CategoriesFormViewmodel(
+      getIt<SaveCategoryUseCase>(),
+      getIt<UpdateCategoryUseCase>(),
+      getIt<DeleteCategoryUseCase>(),
+    ),
   );
 
   getIt.registerFactory<ProductsViewModel>(
