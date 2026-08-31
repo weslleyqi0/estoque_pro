@@ -1,13 +1,13 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
-import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/save_user_use_case.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 
 typedef CreateUserData = ({
   String name,
@@ -16,8 +16,8 @@ typedef CreateUserData = ({
   UserRole role,
 });
 
-class UserFormViewModel extends ChangeNotifier {
-  final UsersRepository _usersRepository;
+class UserFormViewModel extends BaseViewModel {
+  final SaveUserUseCase _saveUserUseCase;
   final AuthorizationService _authorizationService;
 
   late final Command1<bool, CreateUserData> createUserCommand;
@@ -26,11 +26,11 @@ class UserFormViewModel extends ChangeNotifier {
   UserEntity? get currentUser => _authorizationService.currentUser;
 
   UserFormViewModel(
-    this._usersRepository,
+    this._saveUserUseCase,
     this._authorizationService,
   ) {
     createUserCommand = Command1(_createUser);
-    updateUserCommand = Command1(_updateUser);
+    updateUserCommand = Command1((user) => _saveUserUseCase(user));
   }
 
   Future<Result<bool>> _createUser(CreateUserData data) async {
@@ -59,8 +59,7 @@ class UserFormViewModel extends ChangeNotifier {
         permissions: const {},
       );
 
-      await _usersRepository.saveUser(newUser);
-      return const Success(true);
+      return await _saveUserUseCase(newUser);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         return Failure(Exception('Este e-mail já está cadastrado no sistema.'));
@@ -76,15 +75,6 @@ class UserFormViewModel extends ChangeNotifier {
       if (tempApp != null) {
         await tempApp.delete();
       }
-    }
-  }
-
-  Future<Result<bool>> _updateUser(UserEntity user) async {
-    try {
-      await _usersRepository.saveUser(user);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
     }
   }
 

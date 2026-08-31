@@ -78,6 +78,9 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/produc
 import 'package:estoque_pro/app/features/users/data/repositories/users_repository_impl.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/delete_user_use_case.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/get_users_use_case.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/save_user_use_case.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/user_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/users_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
@@ -300,6 +303,16 @@ Future<void> setupServiceLocator() async {
     () => DeleteSupplierUseCase(getIt<SuppliersRepository>()),
   );
 
+  getIt.registerFactory<GetUsersUseCase>(
+    () => GetUsersUseCase(getIt<UsersRepository>()),
+  );
+  getIt.registerFactory<SaveUserUseCase>(
+    () => SaveUserUseCase(getIt<UsersRepository>()),
+  );
+  getIt.registerFactory<DeleteUserUseCase>(
+    () => DeleteUserUseCase(getIt<UsersRepository>()),
+  );
+
   // ViewModels
   getIt.registerLazySingleton<ThemeViewModel>(
     () => ThemeViewModel(getIt<LocalStorageService>()),
@@ -326,13 +339,15 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerFactory<UsersViewModel>(
     () => UsersViewModel(
-      getIt<UsersRepository>(),
+      getIt<GetUsersUseCase>(),
+      getIt<SaveUserUseCase>(),
+      getIt<DeleteUserUseCase>(),
       getIt<AuthorizationService>(),
     ),
   );
   getIt.registerFactory<UserFormViewModel>(
     () => UserFormViewModel(
-      getIt<UsersRepository>(),
+      getIt<SaveUserUseCase>(),
       getIt<AuthorizationService>(),
     ),
   );

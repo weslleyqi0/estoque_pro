@@ -1,17 +1,22 @@
 import 'dart:async';
 
-import 'package:estoque_pro/app/core/utils/command.dart';
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
+import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
-import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/delete_user_use_case.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/get_users_use_case.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/save_user_use_case.dart';
 import 'package:flutter/foundation.dart';
 
 enum UsersLoadState { loading, success, failure }
 
-class UsersViewModel extends ChangeNotifier {
-  final UsersRepository _usersRepository;
+class UsersViewModel extends BaseViewModel {
+  final GetUsersUseCase _getUsersUseCase;
+  final SaveUserUseCase _saveUserUseCase;
+  final DeleteUserUseCase _deleteUserUseCase;
   final AuthorizationService _authorizationService;
 
   StreamSubscription<Result<List<UserEntity>>>? _usersSubscription;
@@ -23,6 +28,7 @@ class UsersViewModel extends ChangeNotifier {
 
   UsersLoadState _state = UsersLoadState.loading;
   UsersLoadState get state => _state;
+  bool get isLoading => _state == UsersLoadState.loading;
 
   List<UserEntity> _users = [];
   List<UserEntity> get users => _users;
@@ -33,30 +39,13 @@ class UsersViewModel extends ChangeNotifier {
   UserEntity? get currentUser => _authorizationService.currentUser;
 
   UsersViewModel(
-    this._usersRepository,
+    this._getUsersUseCase,
+    this._saveUserUseCase,
+    this._deleteUserUseCase,
     this._authorizationService,
   ) {
-    updateUserProfileCommand = Command1(_updateUser);
-    deleteUserCommand = Command1(_deleteUser);
-  }
-
-  Future<Result<bool>> _updateUser(UserEntity userToUpdate) async {
-    try {
-      await _usersRepository.saveUser(userToUpdate);
-
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
-  }
-
-  Future<Result<bool>> _deleteUser(String uid) async {
-    try {
-      await _usersRepository.deleteUser(uid);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+    updateUserProfileCommand = Command1((user) => _saveUserUseCase(user));
+    deleteUserCommand = Command1((uid) => _deleteUserUseCase(uid));
   }
 
   bool canEditUser(UserEntity targetUser) {
@@ -86,7 +75,7 @@ class UsersViewModel extends ChangeNotifier {
     notifyListeners();
 
     _usersSubscription?.cancel();
-    _usersSubscription = _usersRepository.listenAllUsers().listen(
+    _usersSubscription = _getUsersUseCase.listenAllUsers().listen(
       (result) {
         result.fold(
           onSuccess: (usersList) {

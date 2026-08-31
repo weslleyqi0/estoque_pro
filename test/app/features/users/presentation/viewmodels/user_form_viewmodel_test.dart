@@ -2,6 +2,7 @@ import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/save_user_use_case.dart';
 import 'package:estoque_pro/app/features/users/presentation/viewmodels/user_form_viewmodel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -31,7 +32,10 @@ void main() {
   setUp(() {
     mockUsersRepository = MockUsersRepository();
     mockAuthorizationService = MockAuthorizationService();
-    viewModel = UserFormViewModel(mockUsersRepository, mockAuthorizationService);
+    viewModel = UserFormViewModel(
+      SaveUserUseCase(mockUsersRepository),
+      mockAuthorizationService,
+    );
   });
 
   group('UserFormViewModel RBAC Permission Rules Tests', () {
