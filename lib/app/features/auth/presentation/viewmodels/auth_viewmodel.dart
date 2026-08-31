@@ -1,5 +1,6 @@
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
+import 'package:estoque_pro/app/features/auth/domain/entities/auth_user_entity.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,7 +10,7 @@ class AuthViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
   final AuthorizationService _authorizationService;
 
-  User? get authenticatedUser => _authRepository.currentUser;
+  AuthUserEntity? get authenticatedUser => _authRepository.currentUser;
   bool get isBiometricAuthenticated => _authRepository.isBiometricAuthenticated;
 
   UserEntity? get currentUser => _authorizationService.currentUser;

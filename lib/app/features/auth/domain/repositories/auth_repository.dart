@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:estoque_pro/app/features/auth/domain/entities/auth_user_entity.dart';
 import 'package:flutter/foundation.dart';
 
 abstract class AuthRepository extends ChangeNotifier {
-  Stream<User?> get authStateChanges;
-  User? get currentUser;
+  Stream<AuthUserEntity?> get authStateChanges;
+  AuthUserEntity? get currentUser;
 
   bool get isBiometricEnabled;
   Future<void> setBiometricEnabled(bool enabled);

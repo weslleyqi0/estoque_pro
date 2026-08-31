@@ -120,5 +120,20 @@ void main() {
 
       expect(authRepository.isBiometricAuthenticated, isFalse);
     });
+
+    test('currentUser maps Firebase User to AuthUserEntity', () {
+      final mockUser = MockUser();
+      when(() => mockUser.uid).thenReturn('uid-123');
+      when(() => mockUser.email).thenReturn('test@example.com');
+      when(() => mockUser.displayName).thenReturn('Tester');
+      when(() => mockAuthService.currentUser).thenReturn(mockUser);
+
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
+
+      expect(authRepository.currentUser, isNotNull);
+      expect(authRepository.currentUser?.uid, equals('uid-123'));
+      expect(authRepository.currentUser?.email, equals('test@example.com'));
+      expect(authRepository.currentUser?.displayName, equals('Tester'));
+    });
   });
 }

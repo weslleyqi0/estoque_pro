@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:estoque_pro/app/core/services/local_storage_service.dart';
+import 'package:estoque_pro/app/features/auth/domain/entities/auth_user_entity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../service/auth_service.dart';
@@ -40,11 +41,20 @@ class AuthRepositoryImpl extends AuthRepository {
     });
   }
 
-  @override
-  Stream<User?> get authStateChanges => _authService.authStateChanges;
+  AuthUserEntity? _toEntity(User? user) {
+    if (user == null) return null;
+    return AuthUserEntity(
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+    );
+  }
 
   @override
-  User? get currentUser => _authService.currentUser;
+  Stream<AuthUserEntity?> get authStateChanges => _authService.authStateChanges.map(_toEntity);
+
+  @override
+  AuthUserEntity? get currentUser => _toEntity(_authService.currentUser);
 
   @override
   bool get isBiometricEnabled => _isBiometricEnabled;
