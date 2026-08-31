@@ -1,13 +1,26 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/adjust_stock_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/archive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/save_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/update_product_use_case.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockProductsRepository extends Mock implements ProductsRepository {}
+class MockSaveProductUseCase extends Mock implements SaveProductUseCase {}
+class MockUpdateProductUseCase extends Mock implements UpdateProductUseCase {}
+class MockArchiveProductUseCase extends Mock implements ArchiveProductUseCase {}
+class MockUnarchiveProductUseCase extends Mock implements UnarchiveProductUseCase {}
+class MockAdjustStockUseCase extends Mock implements AdjustStockUseCase {}
 
 void main() {
-  late MockProductsRepository mockRepository;
+  late MockSaveProductUseCase mockSaveProductUseCase;
+  late MockUpdateProductUseCase mockUpdateProductUseCase;
+  late MockArchiveProductUseCase mockArchiveProductUseCase;
+  late MockUnarchiveProductUseCase mockUnarchiveProductUseCase;
+  late MockAdjustStockUseCase mockAdjustStockUseCase;
   late ProductsFormViewModel viewModel;
 
   const testProduct = ProductEntity(
@@ -27,12 +40,27 @@ void main() {
   });
 
   setUp(() {
-    mockRepository = MockProductsRepository();
-    viewModel = ProductsFormViewModel(mockRepository);
+    mockSaveProductUseCase = MockSaveProductUseCase();
+    mockUpdateProductUseCase = MockUpdateProductUseCase();
+    mockArchiveProductUseCase = MockArchiveProductUseCase();
+    mockUnarchiveProductUseCase = MockUnarchiveProductUseCase();
+    mockAdjustStockUseCase = MockAdjustStockUseCase();
+
+    viewModel = ProductsFormViewModel(
+      mockSaveProductUseCase,
+      mockUpdateProductUseCase,
+      mockArchiveProductUseCase,
+      mockUnarchiveProductUseCase,
+      mockAdjustStockUseCase,
+    );
   });
 
-  test('saveProductCommand fails when barcode already exists', () async {
-    when(() => mockRepository.checkBarcodeExists('7891234567890')).thenAnswer((_) async => true);
+  test('saveProductCommand fails when use case returns failure', () async {
+    when(() => mockSaveProductUseCase(any())).thenAnswer(
+      (_) async => Result.failure(
+        const BusinessRuleFailure(message: 'Já existe um produto cadastrado com este código de barras.'),
+      ),
+    );
 
     await viewModel.saveProductCommand.execute(testProduct);
 
@@ -43,35 +71,34 @@ void main() {
     );
   });
 
-  test('saveProductCommand succeeds when barcode does not exist', () async {
-    when(() => mockRepository.checkBarcodeExists('7891234567890')).thenAnswer((_) async => false);
-    when(() => mockRepository.save(any())).thenAnswer((_) async {});
+  test('saveProductCommand succeeds when use case succeeds', () async {
+    when(() => mockSaveProductUseCase(any())).thenAnswer((_) async => const Result.success(true));
 
     await viewModel.saveProductCommand.execute(testProduct);
 
     expect(viewModel.saveProductCommand.isSuccess, isTrue);
-    verify(() => mockRepository.save(any())).called(1);
+    verify(() => mockSaveProductUseCase(any())).called(1);
   });
 
   test('archiveProductCommand executes and archives current product', () async {
-    when(() => mockRepository.archive('p1')).thenAnswer((_) async {});
+    when(() => mockArchiveProductUseCase('p1')).thenAnswer((_) async => const Result.success(true));
 
     viewModel.init(testProduct);
     final success = await viewModel.archiveCurrentProduct();
 
     expect(success, isTrue);
     expect(viewModel.archiveProductCommand.isSuccess, isTrue);
-    verify(() => mockRepository.archive('p1')).called(1);
+    verify(() => mockArchiveProductUseCase('p1')).called(1);
   });
 
   test('unarchiveProductCommand executes and unarchives current product', () async {
-    when(() => mockRepository.unarchive('p1')).thenAnswer((_) async {});
+    when(() => mockUnarchiveProductUseCase('p1')).thenAnswer((_) async => const Result.success(true));
 
     viewModel.init(testProduct);
     final success = await viewModel.unarchiveCurrentProduct();
 
     expect(success, isTrue);
     expect(viewModel.unarchiveProductCommand.isSuccess, isTrue);
-    verify(() => mockRepository.unarchive('p1')).called(1);
+    verify(() => mockUnarchiveProductUseCase('p1')).called(1);
   });
 }

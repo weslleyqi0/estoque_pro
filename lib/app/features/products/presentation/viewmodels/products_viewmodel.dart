@@ -5,11 +5,19 @@ import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/archive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/delete_product_permanently_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
 import 'package:flutter/foundation.dart';
 
 class ProductsViewModel extends ChangeNotifier {
-  final ProductsRepository _repository;
+  final GetProductsUseCase _getProductsUseCase;
+  final ArchiveProductUseCase _archiveProductUseCase;
+  final UnarchiveProductUseCase _unarchiveProductUseCase;
+  final DeleteProductPermanentlyUseCase _deleteProductPermanentlyUseCase;
+  final WatchProductHistoryUseCase _watchProductHistoryUseCase;
 
   StreamSubscription<List<ProductEntity>>? _subscription;
 
@@ -109,7 +117,13 @@ class ProductsViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
-  ProductsViewModel(this._repository) {
+  ProductsViewModel(
+    this._getProductsUseCase,
+    this._archiveProductUseCase,
+    this._unarchiveProductUseCase,
+    this._deleteProductPermanentlyUseCase,
+    this._watchProductHistoryUseCase,
+  ) {
     archiveProductCommand = Command1(_archiveProduct);
     unarchiveProductCommand = Command1(_unarchiveProduct);
     deletePermanentlyCommand = Command1(_deletePermanently);
@@ -122,7 +136,7 @@ class ProductsViewModel extends ChangeNotifier {
     notifyListeners();
 
     _subscription?.cancel();
-    _subscription = _repository.watchAll().listen(
+    _subscription = _getProductsUseCase.watchAll().listen(
       (list) {
         _products = list.sortByName((a) => a.name);
         _state = CommandState.success;
@@ -142,10 +156,11 @@ class ProductsViewModel extends ChangeNotifier {
       _products[index] = _products[index].copyWith(isActive: false, isArchived: true);
       notifyListeners();
     }
-    return Result.guard(() async {
-      await _repository.archive(id);
-      return true;
-    });
+    final result = await _archiveProductUseCase(id);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
   AsyncResult<bool> _unarchiveProduct(String id) async {
@@ -154,19 +169,21 @@ class ProductsViewModel extends ChangeNotifier {
       _products[index] = _products[index].copyWith(isActive: false, isArchived: false);
       notifyListeners();
     }
-    return Result.guard(() async {
-      await _repository.unarchive(id);
-      return true;
-    });
+    final result = await _unarchiveProductUseCase(id);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
   AsyncResult<bool> _deletePermanently(String id) async {
     _products.removeWhere((p) => p.id == id);
     notifyListeners();
-    return Result.guard(() async {
-      await _repository.deletePermanently(id);
-      return true;
-    });
+    final result = await _deleteProductPermanentlyUseCase(id);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
   Future<void> archiveProduct(String id) async {
@@ -191,7 +208,7 @@ class ProductsViewModel extends ChangeNotifier {
   }
 
   Stream<List<ProductHistoryEntity>> watchProductHistory(String productId, {int limit = 100}) {
-    return _repository.watchHistory(productId, limit: limit);
+    return _watchProductHistoryUseCase(productId, limit: limit);
   }
 
   @override

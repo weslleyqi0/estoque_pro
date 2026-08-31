@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
 import 'package:flutter/foundation.dart';
 
 enum ProductHistoryLoadState { idle, loading, success, failure }
 
 class ProductHistoryViewModel extends ChangeNotifier {
-  final ProductsRepository _repository;
+  final WatchProductHistoryUseCase _watchProductHistoryUseCase;
 
   StreamSubscription<List<ProductHistoryEntity>>? _subscription;
 
@@ -29,7 +29,7 @@ class ProductHistoryViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
-  ProductHistoryViewModel(this._repository);
+  ProductHistoryViewModel(this._watchProductHistoryUseCase);
 
   void listenHistory(String productId) {
     _subscription?.cancel();
@@ -37,7 +37,7 @@ class ProductHistoryViewModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _subscription = _repository.watchHistory(productId, limit: _itemsToShow).listen(
+    _subscription = _watchProductHistoryUseCase(productId, limit: _itemsToShow).listen(
       (data) {
         _history = data;
         _isLoading = false;
@@ -61,7 +61,7 @@ class ProductHistoryViewModel extends ChangeNotifier {
   }
 
   Stream<List<ProductHistoryEntity>> watchHistory(String productId, {int limit = 100}) {
-    return _repository.watchHistory(productId, limit: limit);
+    return _watchProductHistoryUseCase(productId, limit: limit);
   }
 
   @override
