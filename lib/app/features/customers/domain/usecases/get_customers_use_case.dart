@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
 
@@ -10,7 +11,7 @@ class GetCustomersUseCase {
     return _repository.watchAll();
   }
 
-  Future<List<CustomerEntity>> getAll() {
+  Future<Result<List<CustomerEntity>>> getAll() {
     return _repository.getAll();
   }
 }

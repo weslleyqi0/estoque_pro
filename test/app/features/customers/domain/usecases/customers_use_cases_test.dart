@@ -1,4 +1,4 @@
-import 'package:estoque_pro/app/core/errors/app_failure.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
@@ -57,11 +57,11 @@ void main() {
     });
 
     test('getAll delegates to repository', () async {
-      when(() => mockCustomersRepository.getAll()).thenAnswer((_) async => [testCustomer]);
+      when(() => mockCustomersRepository.getAll()).thenAnswer((_) async => const Result.success([testCustomer]));
 
       final useCase = GetCustomersUseCase(mockCustomersRepository);
       final result = await useCase.getAll();
-      expect(result, equals([testCustomer]));
+      expect(result.value, equals([testCustomer]));
     });
   });
 
@@ -74,11 +74,11 @@ void main() {
     });
 
     test('getAll delegates to repository', () async {
-      when(() => mockPaymentsRepository.getAll()).thenAnswer((_) async => [testPayment]);
+      when(() => mockPaymentsRepository.getAll()).thenAnswer((_) async => Result.success([testPayment]));
 
       final useCase = GetCustomerPaymentsUseCase(mockPaymentsRepository);
       final result = await useCase.getAll();
-      expect(result, equals([testPayment]));
+      expect(result.value, equals([testPayment]));
     });
   });
 
@@ -92,7 +92,7 @@ void main() {
     });
 
     test('saves and returns success when valid', () async {
-      when(() => mockCustomersRepository.save(any())).thenAnswer((_) async {});
+      when(() => mockCustomersRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = SaveCustomerUseCase(mockCustomersRepository);
       final result = await useCase.call(testCustomer);
@@ -120,7 +120,7 @@ void main() {
     });
 
     test('updates and returns success when valid', () async {
-      when(() => mockCustomersRepository.update(any())).thenAnswer((_) async {});
+      when(() => mockCustomersRepository.update(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = UpdateCustomerUseCase(mockCustomersRepository);
       final result = await useCase.call(testCustomer);
@@ -140,7 +140,7 @@ void main() {
     });
 
     test('deletes and returns success when valid', () async {
-      when(() => mockCustomersRepository.delete('c1')).thenAnswer((_) async {});
+      when(() => mockCustomersRepository.delete('c1')).thenAnswer((_) async => const Result.success(null));
 
       final useCase = DeleteCustomerUseCase(mockCustomersRepository);
       final result = await useCase.call('c1');
@@ -160,7 +160,7 @@ void main() {
     });
 
     test('saves and returns success when valid', () async {
-      when(() => mockPaymentsRepository.save(any())).thenAnswer((_) async {});
+      when(() => mockPaymentsRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = RegisterCustomerPaymentUseCase(mockPaymentsRepository);
       final result = await useCase.call(testPayment);
@@ -180,7 +180,7 @@ void main() {
     });
 
     test('updates payment with cancelled status and reason', () async {
-      when(() => mockPaymentsRepository.save(any())).thenAnswer((_) async {});
+      when(() => mockPaymentsRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = CancelCustomerPaymentUseCase(mockPaymentsRepository);
       final result = await useCase.call(testPayment, reason: 'Pagamento duplicado');

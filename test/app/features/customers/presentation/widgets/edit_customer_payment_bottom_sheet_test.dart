@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
 import 'package:estoque_pro/app/features/customers/domain/usecases/cancel_customer_payment_use_case.dart';
@@ -41,7 +42,7 @@ void main() {
 
     when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
+    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async => const Result.success(null));
 
     debtsViewModel = CustomerDebtsViewModel(
       GetSalesUseCase(mockSalesRepo),

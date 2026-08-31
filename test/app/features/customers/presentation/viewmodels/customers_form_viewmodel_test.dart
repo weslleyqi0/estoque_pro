@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
 import 'package:estoque_pro/app/features/customers/domain/usecases/delete_customer_use_case.dart';
@@ -36,7 +37,7 @@ void main() {
   });
 
   test('saveCustomerCommand executes repository save', () async {
-    when(() => mockRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.saveCustomerCommand.execute(testCustomer);
 
@@ -45,7 +46,7 @@ void main() {
   });
 
   test('updateCustomerCommand executes repository update', () async {
-    when(() => mockRepository.update(any())).thenAnswer((_) async {});
+    when(() => mockRepository.update(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.updateCustomerCommand.execute(testCustomer);
 
@@ -54,7 +55,7 @@ void main() {
   });
 
   test('deleteCustomerCommand executes repository delete', () async {
-    when(() => mockRepository.delete(any())).thenAnswer((_) async {});
+    when(() => mockRepository.delete(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.deleteCustomerCommand.execute('123');
 

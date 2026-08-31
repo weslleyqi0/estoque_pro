@@ -1,4 +1,4 @@
-import 'package:estoque_pro/app/core/errors/app_failure.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_statement_item_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
@@ -235,7 +235,7 @@ void main() {
   test('registerPayment saves entity via repository', () async {
     when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
+    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async => const Result.success(null));
 
     viewModel = createViewModel();
 
@@ -255,7 +255,7 @@ void main() {
   test('updatePayment updates entity via repository', () async {
     when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
+    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async => const Result.success(null));
 
     viewModel = createViewModel();
 
@@ -314,7 +314,7 @@ void main() {
 
     when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment]));
-    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
+    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async => const Result.success(null));
 
     viewModel = createViewModel();
     viewModel.listenAll();

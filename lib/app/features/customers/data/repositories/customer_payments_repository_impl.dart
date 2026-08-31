@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/database_service.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/data/models/customer_payment_model.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
@@ -37,7 +38,7 @@ class CustomerPaymentsRepositoryImpl implements CustomerPaymentsRepository {
   }
 
   @override
-  Future<List<CustomerPaymentEntity>> getAll() async {
+  Future<Result<List<CustomerPaymentEntity>>> getAll() async {
     try {
       final data = await _databaseService.getOnce();
       final List<CustomerPaymentEntity> entities = [];
@@ -53,15 +54,15 @@ class CustomerPaymentsRepositoryImpl implements CustomerPaymentsRepository {
         }
       }
       entities.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      return entities;
-    } catch (e) {
+      return Result.success(entities);
+    } catch (e, stackTrace) {
       debugPrint('---> CustomerPayments: Erro getAll: $e');
-      return [];
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> save(CustomerPaymentEntity payment) async {
+  Future<Result<void>> save(CustomerPaymentEntity payment) async {
     final model = CustomerPaymentModel.fromEntity(payment);
     try {
       if (payment.id.isEmpty) {
@@ -69,19 +70,21 @@ class CustomerPaymentsRepositoryImpl implements CustomerPaymentsRepository {
       } else {
         await _databaseService.update(payment.id, model.toMap());
       }
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> CustomerPayments: Erro ao salvar: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> delete(String id) async {
+  Future<Result<void>> delete(String id) async {
     try {
       await _databaseService.delete(id);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> CustomerPayments: Erro ao deletar: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 }

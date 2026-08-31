@@ -8,15 +8,16 @@ class RegisterCustomerPaymentUseCase {
   const RegisterCustomerPaymentUseCase(this._repository);
 
   AsyncResult<bool> call(CustomerPaymentEntity payment) async {
-    return Result.guard(() async {
-      if (payment.customerId.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'ID do cliente inválido.');
-      }
-      if (payment.amount <= 0) {
-        throw const BusinessRuleFailure(message: 'O valor do pagamento deve ser maior que zero.');
-      }
-      await _repository.save(payment);
-      return true;
-    });
+    if (payment.customerId.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'ID do cliente inválido.'));
+    }
+    if (payment.amount <= 0) {
+      return Result.failure(const BusinessRuleFailure(message: 'O valor do pagamento deve ser maior que zero.'));
+    }
+    final result = await _repository.save(payment);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

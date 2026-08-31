@@ -8,12 +8,13 @@ class SaveCustomerUseCase {
   const SaveCustomerUseCase(this._repository);
 
   AsyncResult<bool> call(CustomerEntity customer) async {
-    return Result.guard(() async {
-      if (customer.name.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'O nome do cliente é obrigatório.');
-      }
-      await _repository.save(customer);
-      return true;
-    });
+    if (customer.name.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'O nome do cliente é obrigatório.'));
+    }
+    final result = await _repository.save(customer);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

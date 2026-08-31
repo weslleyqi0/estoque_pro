@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
@@ -54,7 +55,7 @@ void main() {
 
     when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
+    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async => const Result.success(null));
     when(() => mockAuthRepo.authStateChanges).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthRepo.currentUser).thenReturn(null);
 

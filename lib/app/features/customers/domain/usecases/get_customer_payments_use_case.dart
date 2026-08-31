@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
 
@@ -10,7 +11,7 @@ class GetCustomerPaymentsUseCase {
     return _repository.watchAll();
   }
 
-  Future<List<CustomerPaymentEntity>> getAll() {
+  Future<Result<List<CustomerPaymentEntity>>> getAll() {
     return _repository.getAll();
   }
 }

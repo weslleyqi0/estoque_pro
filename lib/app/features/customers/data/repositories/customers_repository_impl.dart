@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/data/models/customer_model.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
@@ -37,7 +38,7 @@ class CustomersRepositoryImpl implements CustomersRepository {
   }
 
   @override
-  Future<List<CustomerEntity>> getAll() async {
+  Future<Result<List<CustomerEntity>>> getAll() async {
     try {
       final data = await _databaseService.getOnce();
       final List<CustomerEntity> entities = [];
@@ -52,42 +53,45 @@ class CustomersRepositoryImpl implements CustomersRepository {
           }
         }
       }
-      return entities;
-    } catch (e) {
+      return Result.success(entities);
+    } catch (e, stackTrace) {
       debugPrint('---> Customers: Erro getAll: $e');
-      return [];
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> save(CustomerEntity customer) async {
+  Future<Result<void>> save(CustomerEntity customer) async {
     final model = CustomerModel.fromEntity(customer);
     try {
       await _databaseService.add(model.toMap());
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Customers: Erro ao salvar: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> update(CustomerEntity customer) async {
+  Future<Result<void>> update(CustomerEntity customer) async {
     final model = CustomerModel.fromEntity(customer);
     try {
       await _databaseService.update(customer.id, model.toMap());
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Customers: Erro ao atualizar: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> delete(String id) async {
+  Future<Result<void>> delete(String id) async {
     try {
       await _databaseService.delete(id);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Customers: Erro ao deletar: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 }
