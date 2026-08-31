@@ -7,14 +7,14 @@ void main() {
       const failure = NetworkFailure();
       expect(failure.message, contains('Sem conexão'));
       expect(failure.props, equals([failure.message, null, null]));
-      expect(failure.toString(), contains('NetworkFailure'));
+      expect(failure.toString(), equals(failure.message));
     });
 
     test('PermissionFailure has correct defaults and properties', () {
       const failure = PermissionFailure(code: 'permission-denied');
       expect(failure.message, contains('permissão'));
       expect(failure.code, equals('permission-denied'));
-      expect(failure.toString(), contains('Code: permission-denied'));
+      expect(failure.toString(), equals(failure.message));
     });
 
     test('BusinessRuleFailure stores custom message', () {

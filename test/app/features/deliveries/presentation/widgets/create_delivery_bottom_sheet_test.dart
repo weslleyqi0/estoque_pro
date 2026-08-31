@@ -139,7 +139,8 @@ void main() {
     when(() => mockDeliveriesRepository.watchAll()).thenAnswer((_) => Stream.value([existingDelivery]));
     when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async {});
 
-    when(() => mockSalesRepository.watchAll()).thenAnswer((_) => Stream.value([saleWithoutDelivery, saleWithDelivery]));
+    when(() => mockSalesRepository.watchAll(limit: any(named: 'limit')))
+        .thenAnswer((_) => Stream.value([saleWithoutDelivery, saleWithDelivery]));
     when(() => mockCustomersRepository.getAll()).thenAnswer((_) async => [
       const CustomerEntity(
         id: 'c1',

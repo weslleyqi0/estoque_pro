@@ -110,7 +110,7 @@ void main() {
       createdAt: DateTime(2026, 8, 22, 14, 0),
     );
 
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => Stream.value([sale1, sale2]));
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => Stream.value([sale1, sale2]));
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment1]));
 
     viewModel = createViewModel();
@@ -154,7 +154,7 @@ void main() {
       isCancelled: true,
     );
 
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => Stream.value([sale1]));
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => Stream.value([sale1]));
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment1]));
 
     viewModel = createViewModel();
@@ -204,7 +204,7 @@ void main() {
       createdAt: DateTime(2026, 8, 22, 16, 0),
     );
 
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => Stream.value([sale1]));
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => Stream.value([sale1]));
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment1]));
 
     viewModel = createViewModel();
@@ -233,7 +233,7 @@ void main() {
   });
 
   test('registerPayment saves entity via repository', () async {
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
 
@@ -253,7 +253,7 @@ void main() {
   });
 
   test('updatePayment updates entity via repository', () async {
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
 
@@ -287,7 +287,7 @@ void main() {
       createdAt: DateTime.now(),
     );
 
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment]));
 
     viewModel = createViewModel();
@@ -312,7 +312,7 @@ void main() {
       createdAt: DateTime.now(),
     );
 
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment]));
     when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
 

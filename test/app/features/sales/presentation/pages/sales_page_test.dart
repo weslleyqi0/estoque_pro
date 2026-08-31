@@ -58,7 +58,7 @@ void main() {
     mockSalesRepository = MockSalesRepository();
     mockDeliveriesRepository = MockDeliveriesRepository();
 
-    when(() => mockSalesRepository.watchAll()).thenAnswer((_) => Stream.value(<SaleEntity>[]));
+    when(() => mockSalesRepository.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => Stream.value(<SaleEntity>[]));
     when(() => mockDeliveriesRepository.watchAll(limit: any(named: 'limit')))
         .thenAnswer((_) => Stream.value(<DeliveryEntity>[]));
 

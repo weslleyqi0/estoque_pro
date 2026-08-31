@@ -1,5 +1,6 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
@@ -11,12 +12,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockFinalizeSaleUseCase extends Mock implements FinalizeSaleUseCase {}
+
 class MockSaveDraftSaleUseCase extends Mock implements SaveDraftSaleUseCase {}
 
 void main() {
   late MockFinalizeSaleUseCase mockFinalizeSaleUseCase;
   late MockSaveDraftSaleUseCase mockSaveDraftSaleUseCase;
   late CartViewModel cartViewModel;
+
+  setUpAll(() {
+    registerFallbackValue(DiscountType.percent);
+    registerFallbackValue(PaymentMethod.dinheiro);
+  });
 
   setUp(() {
     mockFinalizeSaleUseCase = MockFinalizeSaleUseCase();
@@ -98,9 +105,16 @@ void main() {
         paymentMethod: any(named: 'paymentMethod'),
         amountPaid: any(named: 'amountPaid'),
         change: any(named: 'change'),
+        customerId: any(named: 'customerId'),
+        customerName: any(named: 'customerName'),
+        customerPhone: any(named: 'customerPhone'),
         userId: any(named: 'userId'),
         userName: any(named: 'userName'),
         availableProducts: any(named: 'availableProducts'),
+        isDelivery: any(named: 'isDelivery'),
+        deliveryScheduledAt: any(named: 'deliveryScheduledAt'),
+        deliveryAddress: any(named: 'deliveryAddress'),
+        deliveryNotes: any(named: 'deliveryNotes'),
       ),
     ).thenAnswer((_) async => Result.success(sampleSale));
 

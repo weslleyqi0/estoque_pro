@@ -26,7 +26,7 @@ void main() {
     mockSalesRepo = MockSalesRepository();
     mockPaymentsRepo = MockCustomerPaymentsRepository();
 
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
 
     debtsViewModel = CustomerDebtsViewModel(

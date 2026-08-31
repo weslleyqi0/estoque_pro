@@ -3,6 +3,8 @@ import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repositor
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
+import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
 import 'package:estoque_pro/app/features/customers/domain/usecases/cancel_customer_payment_use_case.dart';
@@ -42,8 +44,8 @@ void main() {
     mockPaymentsRepo = MockCustomerPaymentsRepository();
 
     when(() => mockCustomersRepo.watchAll()).thenAnswer((_) => Stream.value(<CustomerEntity>[]));
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => Stream.value(<SaleEntity>[]));
+    when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value(<CustomerPaymentEntity>[]));
     when(() => mockAuthRepo.authStateChanges).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthRepo.currentUser).thenReturn(null);
   });

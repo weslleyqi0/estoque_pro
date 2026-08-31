@@ -34,7 +34,7 @@ void main() {
     mockAuthRepo = MockAuthRepository();
     mockAuthService = MockAuthorizationService();
 
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthRepo.authStateChanges).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthRepo.currentUser).thenReturn(null);

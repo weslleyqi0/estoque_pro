@@ -72,7 +72,7 @@ void main() {
     productsController = StreamController<List<ProductEntity>>.broadcast();
     deliveriesController = StreamController<List<DeliveryEntity>>.broadcast();
 
-    when(() => mockSalesRepository.watchAll()).thenAnswer((_) => salesController.stream);
+    when(() => mockSalesRepository.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => salesController.stream);
     when(() => mockProductsRepository.watchAll()).thenAnswer((_) => productsController.stream);
     when(() => mockDeliveriesRepository.watchAll()).thenAnswer((_) => deliveriesController.stream);
 

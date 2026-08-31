@@ -53,10 +53,39 @@ void main() {
     createdAt: DateTime.now(),
   );
 
+  setUpAll(() {
+    registerFallbackValue(
+      SaleEntity(
+        id: '',
+        saleNumber: '',
+        userId: '',
+        userName: '',
+        items: const [],
+        subtotal: 0,
+        total: 0,
+        paymentMethod: PaymentMethod.dinheiro,
+        createdAt: DateTime.now(),
+      ),
+    );
+    registerFallbackValue(
+      const UserEntity(
+        uid: '',
+        name: '',
+        email: '',
+        role: UserRole.seller,
+        isActive: true,
+        permissions: {},
+      ),
+    );
+  });
+
   setUp(() {
     mockEditSaleUseCase = MockEditSaleUseCase();
     mockCancelCompletedSaleUseCase = MockCancelCompletedSaleUseCase();
     mockGetProductsUseCase = MockGetProductsUseCase();
+
+    when(() => mockGetProductsUseCase.getAll()).thenAnswer((_) async => []);
+
     viewModel = EditSaleViewModel(
       mockEditSaleUseCase,
       mockCancelCompletedSaleUseCase,

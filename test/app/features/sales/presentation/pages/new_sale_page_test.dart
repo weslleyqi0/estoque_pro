@@ -62,7 +62,7 @@ void main() {
 
     when(() => mockProductsRepository.watchAll()).thenAnswer((_) => Stream.value(<ProductEntity>[]));
     when(() => mockCustomersRepository.watchAll()).thenAnswer((_) => const Stream.empty());
-    when(() => mockSalesRepository.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockSalesRepository.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepository.watchAll()).thenAnswer((_) => const Stream.empty());
 
     const currentUser = UserEntity(

@@ -96,6 +96,7 @@ void main() {
     when(() => mockUsersRepo.saveUser(any())).thenAnswer((_) async {});
 
     viewModel.toggleUserPermission(sellerUser, UserPermission.editSales);
+    await pumpEventQueue();
 
     expect(viewModel.updateUserProfileCommand.isSuccess, isTrue);
     verify(() => mockUsersRepo.saveUser(any())).called(1);
