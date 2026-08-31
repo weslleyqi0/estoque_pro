@@ -136,53 +136,33 @@ class DeliveriesViewModel extends BaseViewModel {
   int get completedCount => _deliveries.where((d) => d.status == DeliveryStatus.completed).length;
   int get cancelledCount => _deliveries.where((d) => d.status == DeliveryStatus.cancelled).length;
 
-  int countForTab(DeliveryFilterTab tab) {
-    switch (tab) {
-      case DeliveryFilterTab.all:
-        return _deliveries.length;
-      case DeliveryFilterTab.delayed:
-        return delayedCount;
-      case DeliveryFilterTab.pending:
-        return pendingCount;
-      case DeliveryFilterTab.inProgress:
-        return inProgressCount;
-      case DeliveryFilterTab.completed:
-        return completedCount;
-      case DeliveryFilterTab.cancelled:
-        return cancelledCount;
-    }
-  }
+  int countForTab(DeliveryFilterTab tab) => switch (tab) {
+        DeliveryFilterTab.all => _deliveries.length,
+        DeliveryFilterTab.delayed => delayedCount,
+        DeliveryFilterTab.pending => pendingCount,
+        DeliveryFilterTab.inProgress => inProgressCount,
+        DeliveryFilterTab.completed => completedCount,
+        DeliveryFilterTab.cancelled => cancelledCount,
+      };
 
   int getTabCount(DeliveryFilterTab tab) => countForTab(tab);
 
   List<DeliveryEntity> get filteredDeliveries {
-    List<DeliveryEntity> list;
-
-    switch (_selectedTab) {
-      case DeliveryFilterTab.all:
-        list = _sortDeliveriesForAllTab(_deliveries);
-        break;
-      case DeliveryFilterTab.delayed:
-        list = _deliveries.where((d) => d.isDelayed).toList()
-          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-        break;
-      case DeliveryFilterTab.pending:
-        list = _deliveries.where((d) => d.status == DeliveryStatus.pending && !d.isDelayed).toList()
-          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-        break;
-      case DeliveryFilterTab.inProgress:
-        list = _deliveries.where((d) => d.status == DeliveryStatus.inProgress && !d.isDelayed).toList()
-          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-        break;
-      case DeliveryFilterTab.completed:
-        list = _deliveries.where((d) => d.status == DeliveryStatus.completed).toList()
-          ..sort((a, b) => (b.deliveredAt ?? b.scheduledAt).compareTo(a.deliveredAt ?? a.scheduledAt));
-        break;
-      case DeliveryFilterTab.cancelled:
-        list = _deliveries.where((d) => d.status == DeliveryStatus.cancelled).toList()
-          ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
-        break;
-    }
+    final list = switch (_selectedTab) {
+      DeliveryFilterTab.all => _sortDeliveriesForAllTab(_deliveries),
+      DeliveryFilterTab.delayed => _deliveries.where((d) => d.isDelayed).toList()
+        ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt)),
+      DeliveryFilterTab.pending =>
+        _deliveries.where((d) => d.status == DeliveryStatus.pending && !d.isDelayed).toList()
+          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt)),
+      DeliveryFilterTab.inProgress =>
+        _deliveries.where((d) => d.status == DeliveryStatus.inProgress && !d.isDelayed).toList()
+          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt)),
+      DeliveryFilterTab.completed => _deliveries.where((d) => d.status == DeliveryStatus.completed).toList()
+        ..sort((a, b) => (b.deliveredAt ?? b.scheduledAt).compareTo(a.deliveredAt ?? a.scheduledAt)),
+      DeliveryFilterTab.cancelled => _deliveries.where((d) => d.status == DeliveryStatus.cancelled).toList()
+        ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt)),
+    };
 
     if (_searchQuery.isEmpty) return list;
 

@@ -24,36 +24,26 @@ class DeliveryStatusBanner extends StatelessWidget {
     if (isDelayed || status == DeliveryStatus.delayed) {
       return AppColors.error;
     }
-    switch (status) {
-      case DeliveryStatus.pending:
-        return AppColors.warning;
-      case DeliveryStatus.inProgress:
-        return context.colorScheme.primary;
-      case DeliveryStatus.completed:
-        return Colors.green;
-      case DeliveryStatus.delayed:
-        return AppColors.error;
-      case DeliveryStatus.cancelled:
-        return context.colorScheme.onSurfaceVariant;
-    }
+    return switch (status) {
+      DeliveryStatus.pending => AppColors.warning,
+      DeliveryStatus.inProgress => context.colorScheme.primary,
+      DeliveryStatus.completed => Colors.green,
+      DeliveryStatus.delayed => AppColors.error,
+      DeliveryStatus.cancelled => context.colorScheme.onSurfaceVariant,
+    };
   }
 
   IconData _getIcon() {
     if (isDelayed || status == DeliveryStatus.delayed) {
       return AppIcons.warning;
     }
-    switch (status) {
-      case DeliveryStatus.pending:
-        return AppIcons.schedule;
-      case DeliveryStatus.inProgress:
-        return AppIcons.truck;
-      case DeliveryStatus.completed:
-        return AppIcons.checkCircle;
-      case DeliveryStatus.delayed:
-        return AppIcons.warning;
-      case DeliveryStatus.cancelled:
-        return AppIcons.close;
-    }
+    return switch (status) {
+      DeliveryStatus.pending => AppIcons.schedule,
+      DeliveryStatus.inProgress => AppIcons.truck,
+      DeliveryStatus.completed => AppIcons.checkCircle,
+      DeliveryStatus.delayed => AppIcons.warning,
+      DeliveryStatus.cancelled => AppIcons.close,
+    };
   }
 
   String _getTitle() {
@@ -70,18 +60,13 @@ class DeliveryStatusBanner extends StatelessWidget {
       final formatted = DateFormat("dd/MM/yyyy 'às' HH:mm", 'pt_BR').format(scheduledAt!);
       return 'Agendado para $formatted';
     }
-    switch (status) {
-      case DeliveryStatus.pending:
-        return 'Aguardando início do envio';
-      case DeliveryStatus.inProgress:
-        return 'Entrega a caminho do destinatário';
-      case DeliveryStatus.completed:
-        return 'Entrega concluída com sucesso';
-      case DeliveryStatus.delayed:
-        return 'Prazo previsto expirou';
-      case DeliveryStatus.cancelled:
-        return 'Entrega foi cancelada';
-    }
+    return switch (status) {
+      DeliveryStatus.pending => 'Aguardando início do envio',
+      DeliveryStatus.inProgress => 'Entrega a caminho do destinatário',
+      DeliveryStatus.completed => 'Entrega concluída com sucesso',
+      DeliveryStatus.delayed => 'Prazo previsto expirou',
+      DeliveryStatus.cancelled => 'Entrega foi cancelada',
+    };
   }
 
   @override

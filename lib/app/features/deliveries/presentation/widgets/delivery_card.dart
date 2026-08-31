@@ -34,20 +34,13 @@ class DeliveryCard extends StatelessWidget {
     }
   }
 
-  Color _getStatusColor(DeliveryStatus status) {
-    switch (status) {
-      case DeliveryStatus.pending:
-        return AppColors.warning;
-      case DeliveryStatus.inProgress:
-        return Colors.blue;
-      case DeliveryStatus.completed:
-        return Colors.green;
-      case DeliveryStatus.delayed:
-        return AppColors.error;
-      case DeliveryStatus.cancelled:
-        return Colors.grey;
-    }
-  }
+  Color _getStatusColor(DeliveryStatus status) => switch (status) {
+        DeliveryStatus.pending => AppColors.warning,
+        DeliveryStatus.inProgress => Colors.blue,
+        DeliveryStatus.completed => Colors.green,
+        DeliveryStatus.delayed => AppColors.error,
+        DeliveryStatus.cancelled => Colors.grey,
+      };
 
   @override
   Widget build(BuildContext context) {
