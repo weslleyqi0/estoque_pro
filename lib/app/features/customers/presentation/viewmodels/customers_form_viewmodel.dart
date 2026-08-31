@@ -1,51 +1,30 @@
-import 'dart:async';
-
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
-import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/delete_customer_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/save_customer_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/update_customer_use_case.dart';
 
-class CustomersFormViewModel extends ChangeNotifier {
-  final CustomersRepository _repository;
+class CustomersFormViewModel extends BaseViewModel {
+  final SaveCustomerUseCase _saveCustomerUseCase;
+  final UpdateCustomerUseCase _updateCustomerUseCase;
+  final DeleteCustomerUseCase _deleteCustomerUseCase;
 
   late final Command1<bool, CustomerEntity> saveCustomerCommand;
   late final Command1<bool, CustomerEntity> updateCustomerCommand;
   late final Command1<bool, String> deleteCustomerCommand;
 
-  Object? _error;
-  Object? get error => _error;
-
-  CustomersFormViewModel(this._repository) {
-    saveCustomerCommand = Command1(_saveCustomer);
-    updateCustomerCommand = Command1(_updateCustomer);
-    deleteCustomerCommand = Command1(_deleteCustomer);
-  }
-
-  Future<Result<bool>> _saveCustomer(CustomerEntity customer) async {
-    try {
-      await _repository.save(customer);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
-  }
-
-  Future<Result<bool>> _updateCustomer(CustomerEntity customer) async {
-    try {
-      await _repository.update(customer);
+  CustomersFormViewModel(
+    this._saveCustomerUseCase,
+    this._updateCustomerUseCase,
+    this._deleteCustomerUseCase,
+  ) {
+    saveCustomerCommand = Command1((customer) => _saveCustomerUseCase(customer));
+    updateCustomerCommand = Command1((customer) async {
+      final result = await _updateCustomerUseCase(customer);
       notifyListeners();
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
-  }
-
-  Future<Result<bool>> _deleteCustomer(String id) async {
-    try {
-      await _repository.delete(id);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+      return result;
+    });
+    deleteCustomerCommand = Command1((id) => _deleteCustomerUseCase(id));
   }
 }

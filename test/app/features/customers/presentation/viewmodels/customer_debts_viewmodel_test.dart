@@ -1,12 +1,17 @@
+import 'package:estoque_pro/app/core/errors/app_failure.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_statement_item_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/cancel_customer_payment_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/get_customer_payments_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/register_customer_payment_use_case.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -17,6 +22,15 @@ void main() {
   late MockSalesRepository mockSalesRepo;
   late MockCustomerPaymentsRepository mockPaymentsRepo;
   late CustomerDebtsViewModel viewModel;
+
+  CustomerDebtsViewModel createViewModel() {
+    return CustomerDebtsViewModel(
+      GetSalesUseCase(mockSalesRepo),
+      GetCustomerPaymentsUseCase(mockPaymentsRepo),
+      RegisterCustomerPaymentUseCase(mockPaymentsRepo),
+      CancelCustomerPaymentUseCase(mockPaymentsRepo),
+    );
+  }
 
   setUpAll(() {
     registerFallbackValue(
@@ -99,7 +113,7 @@ void main() {
     when(() => mockSalesRepo.watchAll()).thenAnswer((_) => Stream.value([sale1, sale2]));
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment1]));
 
-    viewModel = CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo);
+    viewModel = createViewModel();
     viewModel.listenAll();
 
     await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -143,7 +157,7 @@ void main() {
     when(() => mockSalesRepo.watchAll()).thenAnswer((_) => Stream.value([sale1]));
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment1]));
 
-    viewModel = CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo);
+    viewModel = createViewModel();
     viewModel.listenAll();
 
     await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -193,7 +207,7 @@ void main() {
     when(() => mockSalesRepo.watchAll()).thenAnswer((_) => Stream.value([sale1]));
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment1]));
 
-    viewModel = CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo);
+    viewModel = createViewModel();
     viewModel.listenAll();
 
     await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -223,7 +237,7 @@ void main() {
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
 
-    viewModel = CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo);
+    viewModel = createViewModel();
 
     await viewModel.registerPayment(
       customerId: 'cust_1',
@@ -243,7 +257,7 @@ void main() {
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
 
-    viewModel = CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo);
+    viewModel = createViewModel();
 
     final payment = CustomerPaymentEntity(
       id: 'pay_1',
@@ -261,11 +275,28 @@ void main() {
     verify(() => mockPaymentsRepo.save(payment)).called(1);
   });
 
-  test('cancelPayment throws ArgumentError when reason is empty', () async {
-    viewModel = CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo);
+  test('cancelPayment throws error when reason is empty', () async {
+    final payment = CustomerPaymentEntity(
+      id: 'pay_1',
+      customerId: 'cust_1',
+      customerName: 'João Silva',
+      amount: 50.0,
+      paymentMethod: PaymentMethod.pix,
+      userId: 'u1',
+      userName: 'Operador',
+      createdAt: DateTime.now(),
+    );
+
+    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment]));
+
+    viewModel = createViewModel();
+    viewModel.listenAll();
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+
     expect(
       () => viewModel.cancelPayment('pay_1', reason: '   '),
-      throwsA(isA<ArgumentError>()),
+      throwsA(isA<BusinessRuleFailure>()),
     );
   });
 
@@ -285,7 +316,7 @@ void main() {
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => Stream.value([payment]));
     when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
 
-    viewModel = CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo);
+    viewModel = createViewModel();
     viewModel.listenAll();
 
     await Future<void>.delayed(const Duration(milliseconds: 50));

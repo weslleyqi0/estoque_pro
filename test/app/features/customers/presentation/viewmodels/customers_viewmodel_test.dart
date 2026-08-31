@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/get_customers_use_case.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -44,7 +45,7 @@ void main() {
     mockRepository = MockCustomersRepository();
     streamController = StreamController<List<CustomerEntity>>.broadcast();
     when(() => mockRepository.watchAll()).thenAnswer((_) => streamController.stream);
-    viewModel = CustomersViewModel(mockRepository);
+    viewModel = CustomersViewModel(GetCustomersUseCase(mockRepository));
   });
 
   tearDown(() {

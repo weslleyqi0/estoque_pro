@@ -3,8 +3,13 @@ import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repositor
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/cancel_customer_payment_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/get_customer_payments_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/get_customers_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/register_customer_payment_use_case.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/archive_product_use_case.dart';
@@ -96,8 +101,13 @@ void main() {
             createdCartVm = CartViewModel(mockFinalizeSaleUseCase, mockSaveDraftSaleUseCase);
             return createdCartVm;
           },
-          customersViewModelFactory: () => CustomersViewModel(mockCustomersRepository),
-          debtsViewModelFactory: () => CustomerDebtsViewModel(mockSalesRepository, mockPaymentsRepository),
+          customersViewModelFactory: () => CustomersViewModel(GetCustomersUseCase(mockCustomersRepository)),
+          debtsViewModelFactory: () => CustomerDebtsViewModel(
+            GetSalesUseCase(mockSalesRepository),
+            GetCustomerPaymentsUseCase(mockPaymentsRepository),
+            RegisterCustomerPaymentUseCase(mockPaymentsRepository),
+            CancelCustomerPaymentUseCase(mockPaymentsRepository),
+          ),
           authViewModel: authViewModel,
         ),
       ),

@@ -1,9 +1,13 @@
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/cancel_customer_payment_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/get_customer_payments_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/register_customer_payment_use_case.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/widgets/edit_customer_payment_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -39,7 +43,12 @@ void main() {
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
 
-    debtsViewModel = CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo);
+    debtsViewModel = CustomerDebtsViewModel(
+      GetSalesUseCase(mockSalesRepo),
+      GetCustomerPaymentsUseCase(mockPaymentsRepo),
+      RegisterCustomerPaymentUseCase(mockPaymentsRepo),
+      CancelCustomerPaymentUseCase(mockPaymentsRepo),
+    );
   });
 
   testWidgets('EditCustomerPaymentBottomSheet updates amount and saves', (tester) async {
