@@ -2,7 +2,7 @@ import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_reason.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
@@ -20,7 +20,7 @@ typedef CancelSaleParams = ({
 class EditSaleViewModel extends BaseViewModel {
   final EditSaleUseCase _editSaleUseCase;
   final CancelCompletedSaleUseCase _cancelCompletedSaleUseCase;
-  final ProductsRepository _productsRepository;
+  final GetProductsUseCase _getProductsUseCase;
 
   late final Command1<SaleEntity, UserEntity> saveEditCommand;
   late final Command1<SaleEntity, CancelSaleParams> cancelSaleCommand;
@@ -28,7 +28,7 @@ class EditSaleViewModel extends BaseViewModel {
   EditSaleViewModel(
     this._editSaleUseCase,
     this._cancelCompletedSaleUseCase,
-    this._productsRepository,
+    this._getProductsUseCase,
   ) {
     saveEditCommand = Command1(_saveEdit);
     cancelSaleCommand = Command1(_cancelSale);
@@ -78,7 +78,7 @@ class EditSaleViewModel extends BaseViewModel {
   }
 
   Future<List<ProductEntity>> loadProducts() async {
-    _products = await _productsRepository.getAll();
+    _products = await _getProductsUseCase.getAll();
     notifyListeners();
     return _products;
   }

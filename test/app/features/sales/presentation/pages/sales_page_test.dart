@@ -3,9 +3,12 @@ import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repositor
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/delete_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/sales_page.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
@@ -51,6 +54,14 @@ void main() {
     authViewModel = AuthViewModel(mockAuthRepository, mockAuthService);
   });
 
+  SalesViewModel createSalesViewModel() {
+    return SalesViewModel(
+      GetSalesUseCase(mockSalesRepository),
+      DeleteSaleUseCase(mockSalesRepository),
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+    );
+  }
+
   testWidgets('SalesPage initializes viewModel via factory and sets initialTab when provided', (tester) async {
     late SalesViewModel createdVm;
 
@@ -58,7 +69,7 @@ void main() {
       MaterialApp(
         home: SalesPage(
           viewModelFactory: () {
-            createdVm = SalesViewModel(mockSalesRepository, mockDeliveriesRepository);
+            createdVm = createSalesViewModel();
             return createdVm;
           },
           deliveriesViewModelFactory: () => DeliveriesViewModel(mockDeliveriesRepository),
@@ -81,7 +92,7 @@ void main() {
       MaterialApp(
         home: SalesPage(
           viewModelFactory: () {
-            createdVm = SalesViewModel(mockSalesRepository, mockDeliveriesRepository);
+            createdVm = createSalesViewModel();
             return createdVm;
           },
           deliveriesViewModelFactory: () => DeliveriesViewModel(mockDeliveriesRepository),

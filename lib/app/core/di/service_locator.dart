@@ -6,6 +6,7 @@ import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dar
 import 'package:estoque_pro/app/features/deliveries/data/repositories/deliveries_repository_impl.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/data/repositories/sales_repository_impl.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
@@ -20,8 +21,10 @@ import 'package:estoque_pro/app/features/products/domain/usecases/update_product
 import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/cancel_completed_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/delete_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/edit_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/finalize_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/save_draft_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
@@ -224,6 +227,15 @@ Future<void> setupServiceLocator() async {
   getIt.registerFactory<CancelCompletedSaleUseCase>(
     () => CancelCompletedSaleUseCase(getIt<SalesRepository>()),
   );
+  getIt.registerFactory<GetSalesUseCase>(
+    () => GetSalesUseCase(getIt<SalesRepository>()),
+  );
+  getIt.registerFactory<DeleteSaleUseCase>(
+    () => DeleteSaleUseCase(getIt<SalesRepository>()),
+  );
+  getIt.registerFactory<GetDeliveriesUseCase>(
+    () => GetDeliveriesUseCase(getIt<DeliveriesRepository>()),
+  );
 
   // ViewModels
   getIt.registerLazySingleton<ThemeViewModel>(
@@ -318,8 +330,9 @@ Future<void> setupServiceLocator() async {
 
   getIt.registerFactory<SalesViewModel>(
     () => SalesViewModel(
-      getIt<SalesRepository>(),
-      getIt<DeliveriesRepository>(),
+      getIt<GetSalesUseCase>(),
+      getIt<DeleteSaleUseCase>(),
+      getIt<GetDeliveriesUseCase>(),
     ),
   );
 
@@ -338,7 +351,7 @@ Future<void> setupServiceLocator() async {
     () => EditSaleViewModel(
       getIt<EditSaleUseCase>(),
       getIt<CancelCompletedSaleUseCase>(),
-      getIt<ProductsRepository>(),
+      getIt<GetProductsUseCase>(),
     ),
   );
 }

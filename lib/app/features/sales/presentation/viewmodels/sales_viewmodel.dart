@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
+import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
-import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
-import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
-
-enum SalesLoadState { idle, loading, success, failure }
+import 'package:estoque_pro/app/features/sales/domain/usecases/delete_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 
 enum SalesFilterTab {
   all('Todas'),
@@ -24,10 +24,21 @@ enum SalesFilterTab {
 }
 
 class SalesViewModel extends BaseViewModel {
-  final SalesRepository _repository;
-  final DeliveriesRepository? _deliveriesRepository;
+  final GetSalesUseCase _getSalesUseCase;
+  final DeleteSaleUseCase _deleteSaleUseCase;
+  final GetDeliveriesUseCase? _getDeliveriesUseCase;
 
-  SalesViewModel(this._repository, [this._deliveriesRepository]);
+  late final Command1<bool, String> deleteSaleCommand;
+
+  SalesViewModel(
+    this._getSalesUseCase,
+    this._deleteSaleUseCase, [
+    this._getDeliveriesUseCase,
+  ]) {
+    deleteSaleCommand = Command1((saleId) async {
+      return _deleteSaleUseCase(saleId);
+    });
+  }
 
   StreamSubscription<List<SaleEntity>>? _salesSubscription;
   StreamSubscription<List<DeliveryEntity>>? _deliveriesSubscription;
@@ -38,8 +49,9 @@ class SalesViewModel extends BaseViewModel {
     return _deliveriesBySaleId[saleId] ?? (saleNumber != null ? _deliveriesBySaleId[saleNumber] : null);
   }
 
-  SalesLoadState _state = SalesLoadState.idle;
-  SalesLoadState get state => _state;
+  CommandState _state = CommandState.idle;
+  CommandState get state => _state;
+  bool get isLoading => _state == CommandState.running;
 
   List<SaleEntity> _sales = [];
   List<SaleEntity> get sales => _sales;
@@ -124,25 +136,25 @@ class SalesViewModel extends BaseViewModel {
   void listenAll() {
     if (_salesSubscription != null) return;
 
-    _state = SalesLoadState.loading;
+    _state = CommandState.running;
     notifyListeners();
 
     _salesSubscription?.cancel();
-    _salesSubscription = _repository.watchAll().listen(
+    _salesSubscription = _getSalesUseCase.watchAll().listen(
       (list) {
         _sales = list;
-        _state = SalesLoadState.success;
+        _state = CommandState.success;
         notifyListeners();
       },
       onError: (e) {
         _error = e;
-        _state = SalesLoadState.failure;
+        _state = CommandState.failure;
         notifyListeners();
       },
     );
 
-    if (_deliveriesRepository != null && _deliveriesSubscription == null) {
-      _deliveriesSubscription = _deliveriesRepository.watchAll().listen((deliveries) {
+    if (_getDeliveriesUseCase != null && _deliveriesSubscription == null) {
+      _deliveriesSubscription = _getDeliveriesUseCase.watchAll().listen((deliveries) {
         final map = <String, DeliveryEntity>{};
         for (final d in deliveries) {
           if (d.saleId.isNotEmpty) {
@@ -159,13 +171,9 @@ class SalesViewModel extends BaseViewModel {
   }
 
   Future<void> deleteSale(String saleId) async {
-    try {
-      await _repository.delete(saleId);
-      notifyListeners();
-    } catch (e) {
-      _error = e;
-      notifyListeners();
-      rethrow;
+    await deleteSaleCommand.execute(saleId);
+    if (deleteSaleCommand.isFailure) {
+      throw deleteSaleCommand.error!;
     }
   }
 

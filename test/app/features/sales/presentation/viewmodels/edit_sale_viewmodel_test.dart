@@ -1,5 +1,5 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
@@ -15,12 +15,12 @@ import 'package:mocktail/mocktail.dart';
 
 class MockEditSaleUseCase extends Mock implements EditSaleUseCase {}
 class MockCancelCompletedSaleUseCase extends Mock implements CancelCompletedSaleUseCase {}
-class MockProductsRepository extends Mock implements ProductsRepository {}
+class MockGetProductsUseCase extends Mock implements GetProductsUseCase {}
 
 void main() {
   late MockEditSaleUseCase mockEditSaleUseCase;
   late MockCancelCompletedSaleUseCase mockCancelCompletedSaleUseCase;
-  late MockProductsRepository mockProductsRepository;
+  late MockGetProductsUseCase mockGetProductsUseCase;
   late EditSaleViewModel viewModel;
 
   const testUser = UserEntity(
@@ -56,11 +56,11 @@ void main() {
   setUp(() {
     mockEditSaleUseCase = MockEditSaleUseCase();
     mockCancelCompletedSaleUseCase = MockCancelCompletedSaleUseCase();
-    mockProductsRepository = MockProductsRepository();
+    mockGetProductsUseCase = MockGetProductsUseCase();
     viewModel = EditSaleViewModel(
       mockEditSaleUseCase,
       mockCancelCompletedSaleUseCase,
-      mockProductsRepository,
+      mockGetProductsUseCase,
     );
     viewModel.initWithSale(sampleSale);
   });

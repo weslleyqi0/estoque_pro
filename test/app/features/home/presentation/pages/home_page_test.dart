@@ -6,6 +6,7 @@ import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewm
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
 import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
@@ -20,6 +21,8 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/produc
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/delete_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
@@ -82,7 +85,11 @@ void main() {
     when(() => mockAuthRepository.authStateChanges).thenAnswer((_) => const Stream.empty());
 
     authViewModel = AuthViewModel(mockAuthRepository, mockAuthService);
-    salesViewModel = SalesViewModel(mockSalesRepository, mockDeliveriesRepository);
+    salesViewModel = SalesViewModel(
+      GetSalesUseCase(mockSalesRepository),
+      DeleteSaleUseCase(mockSalesRepository),
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+    );
     productsViewModel = ProductsViewModel(
       GetProductsUseCase(mockProductsRepository),
       ArchiveProductUseCase(mockProductsRepository),

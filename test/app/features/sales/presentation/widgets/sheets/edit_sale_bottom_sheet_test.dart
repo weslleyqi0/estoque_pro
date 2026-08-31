@@ -3,6 +3,7 @@ import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repositor
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
@@ -99,7 +100,7 @@ void main() {
     final vm = EditSaleViewModel(
       mockEditSaleUseCase,
       mockCancelUseCase,
-      mockProductsRepository,
+      GetProductsUseCase(mockProductsRepository),
     )..initWithSale(initialSale);
 
     expect(vm.selectedCustomerId, 'c1');
@@ -126,7 +127,7 @@ void main() {
     final vm = EditSaleViewModel(
       mockEditSaleUseCase,
       mockCancelUseCase,
-      mockProductsRepository,
+      GetProductsUseCase(mockProductsRepository),
     );
 
     await tester.pumpWidget(
