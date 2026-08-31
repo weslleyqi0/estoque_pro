@@ -59,11 +59,11 @@ void main() {
     mockProductsRepository = MockProductsRepository();
     saveSaleUseCase = SaveSaleUseCase(mockSalesRepository, mockProductsRepository);
 
-    when(() => mockProductsRepository.getAll()).thenAnswer((_) async => [testProduct]);
+    when(() => mockProductsRepository.getAll()).thenAnswer((_) async => const Result.success([testProduct]));
     when(() => mockSalesRepository.save(any(), productStocks: any(named: 'productStocks')))
-        .thenAnswer((_) async {});
+        .thenAnswer((_) async => const Result.success(null));
     when(() => mockSalesRepository.updateSale(any(), productStocks: any(named: 'productStocks')))
-        .thenAnswer((_) async {});
+        .thenAnswer((_) async => const Result.success(null));
   });
 
   test('returns BusinessRuleFailure when sale has no items', () async {

@@ -1,4 +1,4 @@
-import 'package:estoque_pro/app/core/errors/app_failure.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('deletes sale and returns success when saleId is valid', () async {
-      when(() => mockSalesRepository.delete('s1')).thenAnswer((_) async {});
+      when(() => mockSalesRepository.delete('s1')).thenAnswer((_) async => const Result.success(null));
 
       final result = await deleteSaleUseCase('s1');
 

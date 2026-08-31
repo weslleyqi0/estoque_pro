@@ -150,12 +150,9 @@ class FinalizeSaleUseCase {
         createdAt: DateTime.now(),
       );
 
-      try {
-        await _deliveriesRepository.save(delivery);
-      } on AppFailure catch (e) {
-        return Result.failure(e);
-      } catch (e, stackTrace) {
-        return Result.failure(e, stackTrace);
+      final deliveryResult = await _deliveriesRepository.save(delivery);
+      if (deliveryResult.isFailure) {
+        return Result.failure(deliveryResult.error!);
       }
     }
 

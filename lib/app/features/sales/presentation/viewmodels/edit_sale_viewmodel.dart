@@ -78,7 +78,8 @@ class EditSaleViewModel extends BaseViewModel {
   }
 
   Future<List<ProductEntity>> loadProducts() async {
-    _products = await _getProductsUseCase.getAll();
+    final result = await _getProductsUseCase.getAll();
+    _products = result.value ?? [];
     notifyListeners();
     return _products;
   }

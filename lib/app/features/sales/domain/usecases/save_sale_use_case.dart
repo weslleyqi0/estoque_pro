@@ -33,7 +33,8 @@ class SaveSaleUseCase {
 
     // Se for uma venda concluída, busca os estoques atuais e valida disponibilidade
     if (sale.status != SaleStatus.inProgress) {
-      final allProducts = await _productsRepository.getAll();
+      final allProductsResult = await _productsRepository.getAll();
+      final allProducts = allProductsResult.value ?? [];
       final productsMap = {for (var p in allProducts) p.id: p};
 
       for (final item in sale.items) {
@@ -50,13 +51,12 @@ class SaveSaleUseCase {
       }
     }
 
-    return Result.guard(() async {
-      if (isUpdate) {
-        await _salesRepository.updateSale(sale, productStocks: productStocks);
-      } else {
-        await _salesRepository.save(sale, productStocks: productStocks);
-      }
-      return sale;
-    });
+    final result = isUpdate
+        ? await _salesRepository.updateSale(sale, productStocks: productStocks)
+        : await _salesRepository.save(sale, productStocks: productStocks);
+    return result.fold(
+      onSuccess: (_) => Result.success(sale),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

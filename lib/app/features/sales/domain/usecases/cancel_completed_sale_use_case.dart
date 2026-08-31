@@ -17,50 +17,59 @@ class CancelCompletedSaleUseCase {
     String? comment,
     required UserEntity currentUser,
   }) async {
-    return Result.guard(() async {
-      if (!currentUser.hasPermission(UserPermission.cancelCompletedSales)) {
-        throw Exception('Usuário não possui permissão para cancelar vendas concluídas.');
-      }
-
-      if (sale.status == SaleStatus.cancelled) {
-        throw Exception('Esta venda já está cancelada.');
-      }
-
-      final Map<String, int> stockDeltas = {
-        for (final item in sale.items) item.productId: -item.quantity,
-      };
-
-      final nextSequence = sale.editHistory.length + 1;
-      final cancelHistoryEntry = SaleEditHistoryEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sequenceNumber: nextSequence,
-        userId: currentUser.uid,
-        userName: currentUser.name,
-        timestamp: DateTime.now(),
-        reason: reason ?? 'Cancelamento',
-        addedItems: const [],
-        removedItems: sale.items,
-        comment: comment,
+    if (!currentUser.hasPermission(UserPermission.cancelCompletedSales)) {
+      return Result.failure(
+        const PermissionFailure(
+          message: 'Usuário não possui permissão para cancelar vendas concluídas.',
+        ),
       );
+    }
 
-      final updatedHistory = [
-        ...sale.editHistory,
-        cancelHistoryEntry,
-      ];
-
-      final cancelledSale = sale.copyWith(
-        status: SaleStatus.cancelled,
-        editHistory: updatedHistory,
-        updatedAt: DateTime.now(),
+    if (sale.status == SaleStatus.cancelled) {
+      return Result.failure(
+        const BusinessRuleFailure(
+          message: 'Esta venda já está cancelada.',
+        ),
       );
+    }
 
-      await _salesRepository.updateSaleWithStockAndHistory(
-        sale: cancelledSale,
-        stockDeltas: stockDeltas,
-        editHistoryEntry: cancelHistoryEntry,
-      );
+    final Map<String, int> stockDeltas = {
+      for (final item in sale.items) item.productId: -item.quantity,
+    };
 
-      return cancelledSale;
-    });
+    final nextSequence = sale.editHistory.length + 1;
+    final cancelHistoryEntry = SaleEditHistoryEntity(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      sequenceNumber: nextSequence,
+      userId: currentUser.uid,
+      userName: currentUser.name,
+      timestamp: DateTime.now(),
+      reason: reason ?? 'Cancelamento',
+      addedItems: const [],
+      removedItems: sale.items,
+      comment: comment,
+    );
+
+    final updatedHistory = [
+      ...sale.editHistory,
+      cancelHistoryEntry,
+    ];
+
+    final cancelledSale = sale.copyWith(
+      status: SaleStatus.cancelled,
+      editHistory: updatedHistory,
+      updatedAt: DateTime.now(),
+    );
+
+    final updateResult = await _salesRepository.updateSaleWithStockAndHistory(
+      sale: cancelledSale,
+      stockDeltas: stockDeltas,
+      editHistoryEntry: cancelHistoryEntry,
+    );
+
+    return updateResult.fold(
+      onSuccess: (_) => Result.success(cancelledSale),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

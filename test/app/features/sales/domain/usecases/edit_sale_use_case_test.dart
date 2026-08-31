@@ -93,8 +93,8 @@ void main() {
     mockProductsRepository = MockProductsRepository();
     editSaleUseCase = EditSaleUseCase(mockSalesRepository, mockProductsRepository);
 
-    when(() => mockProductsRepository.getAll()).thenAnswer((_) async => [testProduct]);
-    when(() => mockSalesRepository.updateSale(any())).thenAnswer((_) async {});
+    when(() => mockProductsRepository.getAll()).thenAnswer((_) async => const Result.success([testProduct]));
+    when(() => mockSalesRepository.updateSale(any())).thenAnswer((_) async => const Result.success(null));
     when(
       () => mockSalesRepository.updateSaleWithStockAndHistory(
         sale: any(named: 'sale'),
@@ -102,7 +102,7 @@ void main() {
         editHistoryEntry: any(named: 'editHistoryEntry'),
         currentProductStocks: any(named: 'currentProductStocks'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => const Result.success(null));
   });
 
   test('returns PermissionFailure when user does not have permission', () async {

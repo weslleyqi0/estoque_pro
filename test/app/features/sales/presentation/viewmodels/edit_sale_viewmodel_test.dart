@@ -84,7 +84,7 @@ void main() {
     mockCancelCompletedSaleUseCase = MockCancelCompletedSaleUseCase();
     mockGetProductsUseCase = MockGetProductsUseCase();
 
-    when(() => mockGetProductsUseCase.getAll()).thenAnswer((_) async => []);
+    when(() => mockGetProductsUseCase.getAll()).thenAnswer((_) async => const Result.success([]));
 
     viewModel = EditSaleViewModel(
       mockEditSaleUseCase,

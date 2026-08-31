@@ -79,7 +79,8 @@ class EditSaleUseCase {
       }
     }
 
-    final allProducts = await _productsRepository.getAll();
+    final allProductsResult = await _productsRepository.getAll();
+    final allProducts = allProductsResult.value ?? [];
     final productsMap = {for (var p in allProducts) p.id: p};
 
     for (final entry in stockDeltas.entries) {
@@ -101,71 +102,75 @@ class EditSaleUseCase {
       }
     }
 
-    return Result.guard(() async {
-      final newSubtotal = updatedItems.fold<double>(
-        0.0,
-        (sum, item) => sum + (item.unitPrice * item.quantity),
-      );
+    final newSubtotal = updatedItems.fold<double>(
+      0.0,
+      (sum, item) => sum + (item.unitPrice * item.quantity),
+    );
 
-      double newTotal = newSubtotal;
-      if (originalSale.discountValue > 0) {
-        final calculatedDiscount = originalSale.discountType == DiscountType.percent
-            ? newSubtotal * (originalSale.discountValue / 100)
-            : originalSale.discountValue;
-        newTotal = (newSubtotal - calculatedDiscount).clamp(0.0, double.infinity);
-      }
+    double newTotal = newSubtotal;
+    if (originalSale.discountValue > 0) {
+      final calculatedDiscount = originalSale.discountType == DiscountType.percent
+          ? newSubtotal * (originalSale.discountValue / 100)
+          : originalSale.discountValue;
+      newTotal = (newSubtotal - calculatedDiscount).clamp(0.0, double.infinity);
+    }
 
-      final hasItemChanges = addedItems.isNotEmpty || removedItems.isNotEmpty;
+    final hasItemChanges = addedItems.isNotEmpty || removedItems.isNotEmpty;
 
-      if (!hasItemChanges) {
-        // Se apenas o cliente ou dados cadastrais mudaram, não adiciona histórico de edição
-        final updatedSale = originalSale.copyWith(
-          customerId: customerId ?? originalSale.customerId,
-          customerName: customerName ?? originalSale.customerName,
-          updatedAt: DateTime.now(),
-        );
-
-        await _salesRepository.updateSale(updatedSale);
-        return updatedSale;
-      }
-
-      final nextSequence = originalSale.editHistory.length + 1;
-      final newHistoryEntry = SaleEditHistoryEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sequenceNumber: nextSequence,
-        userId: currentUser.uid,
-        userName: currentUser.name,
-        timestamp: DateTime.now(),
-        reason: reason,
-        addedItems: addedItems,
-        removedItems: removedItems,
-        comment: comment,
-      );
-
-      final updatedHistory = [
-        ...originalSale.editHistory,
-        newHistoryEntry,
-      ];
-
+    if (!hasItemChanges) {
+      // Se apenas o cliente ou dados cadastrais mudaram, não adiciona histórico de edição
       final updatedSale = originalSale.copyWith(
-        items: updatedItems,
-        subtotal: newSubtotal,
-        total: newTotal,
-        status: SaleStatus.edited,
         customerId: customerId ?? originalSale.customerId,
         customerName: customerName ?? originalSale.customerName,
-        editHistory: updatedHistory,
         updatedAt: DateTime.now(),
       );
 
-      await _salesRepository.updateSaleWithStockAndHistory(
-        sale: updatedSale,
-        stockDeltas: stockDeltas,
-        editHistoryEntry: newHistoryEntry,
-        currentProductStocks: {for (var p in allProducts) p.id: p.stock},
+      final updateResult = await _salesRepository.updateSale(updatedSale);
+      return updateResult.fold(
+        onSuccess: (_) => Result.success(updatedSale),
+        onFailure: (error) => Result.failure(error),
       );
+    }
 
-      return updatedSale;
-    });
+    final nextSequence = originalSale.editHistory.length + 1;
+    final newHistoryEntry = SaleEditHistoryEntity(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      sequenceNumber: nextSequence,
+      userId: currentUser.uid,
+      userName: currentUser.name,
+      timestamp: DateTime.now(),
+      reason: reason,
+      addedItems: addedItems,
+      removedItems: removedItems,
+      comment: comment,
+    );
+
+    final updatedHistory = [
+      ...originalSale.editHistory,
+      newHistoryEntry,
+    ];
+
+    final updatedSale = originalSale.copyWith(
+      items: updatedItems,
+      subtotal: newSubtotal,
+      total: newTotal,
+      status: SaleStatus.edited,
+      customerId: customerId ?? originalSale.customerId,
+      customerName: customerName ?? originalSale.customerName,
+      editHistory: updatedHistory,
+      updatedAt: DateTime.now(),
+    );
+
+    final saveResult = await _salesRepository.updateSaleWithStockAndHistory(
+      sale: updatedSale,
+      stockDeltas: stockDeltas,
+      editHistoryEntry: newHistoryEntry,
+      currentProductStocks: {for (var p in allProducts) p.id: p.stock},
+    );
+
+    return saveResult.fold(
+      onSuccess: (_) => Result.success(updatedSale),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

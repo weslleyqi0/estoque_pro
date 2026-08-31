@@ -77,7 +77,7 @@ void main() {
       final sale = invocation.namedArguments[#sale] as SaleEntity;
       return Result.success(sale);
     });
-    when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async => const Result.success(null));
   });
 
   test('finalize sale with cash succeeds without customer', () async {

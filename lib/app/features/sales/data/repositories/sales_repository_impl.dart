@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/services/database_service.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/core/utils/sale_code_generator.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_history_model.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
@@ -78,15 +79,13 @@ class SalesRepositoryImpl implements SalesRepository {
   }
 
   @override
-  Future<void> save(SaleEntity sale, {Map<String, int>? productStocks}) async {
+  Future<Result<void>> save(SaleEntity sale, {Map<String, int>? productStocks}) async {
     try {
       final pushRef = _databaseService.ref.push();
       final saleId = pushRef.key!;
 
       // Auto-generate saleNumber if empty
-      final saleNumber = sale.saleNumber.isNotEmpty
-          ? sale.saleNumber
-          : SaleCodeGenerator.generate();
+      final saleNumber = sale.saleNumber.isNotEmpty ? sale.saleNumber : SaleCodeGenerator.generate();
 
       final finalSale = sale.copyWith(id: saleId, saleNumber: saleNumber);
       final saleModel = SaleModel.fromEntity(finalSale);
@@ -99,14 +98,15 @@ class SalesRepositoryImpl implements SalesRepository {
       }
 
       await _databaseService.updateMultiple(updates);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Sales: Erro ao salvar venda atômicamente: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> updateSale(SaleEntity sale, {Map<String, int>? productStocks}) async {
+  Future<Result<void>> updateSale(SaleEntity sale, {Map<String, int>? productStocks}) async {
     try {
       final oldSaleSnapshot = await _databaseService.ref.child(sale.id).get();
       String? oldStatus;
@@ -125,14 +125,15 @@ class SalesRepositoryImpl implements SalesRepository {
       }
 
       await _databaseService.updateMultiple(updates);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Sales: Erro ao atualizar venda pós-venda atômicamente: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> updateSaleWithStockAndHistory({
+  Future<Result<void>> updateSaleWithStockAndHistory({
     required SaleEntity sale,
     required Map<String, int> stockDeltas,
     required SaleEditHistoryEntity editHistoryEntry,
@@ -194,19 +195,21 @@ class SalesRepositoryImpl implements SalesRepository {
       }
 
       await _databaseService.updateMultiple(updates);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Sales: Erro ao atualizar venda com histórico atômicamente: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> delete(String saleId) async {
+  Future<Result<void>> delete(String saleId) async {
     try {
       await _databaseService.delete(saleId);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Sales: Erro ao deletar venda: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 }
