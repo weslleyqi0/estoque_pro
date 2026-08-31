@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
@@ -14,6 +15,7 @@ import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_cas
 ///
 /// Responsibilities:
 /// - validate cart is not empty and stock availability;
+/// - validate customer requirements for fiado / delivery;
 /// - build the [SaleEntity] from the cart;
 /// - persist the sale via [SaveSaleUseCase];
 /// - optionally create and persist a [DeliveryEntity] if delivery is requested.
@@ -26,7 +28,7 @@ class FinalizeSaleUseCase {
     this._deliveriesRepository,
   );
 
-  Future<void> execute({
+  AsyncResult<SaleEntity> execute({
     required List<CartItem> items,
     required String saleNumber,
     required String? editingSaleId,
@@ -50,26 +52,44 @@ class FinalizeSaleUseCase {
     String? deliveryNotes,
   }) async {
     if (items.isEmpty) {
-      throw Exception('O carrinho está vazio.');
+      return Result.failure(
+        const BusinessRuleFailure(message: 'O carrinho está vazio.'),
+      );
     }
 
-    if (paymentMethod == PaymentMethod.fiado && (customerName == null || customerName.trim().isEmpty)) {
-      throw Exception('Para vendas no fiado, é obrigatório selecionar um cliente.');
+    if (paymentMethod == PaymentMethod.fiado &&
+        (customerName == null || customerName.trim().isEmpty)) {
+      return Result.failure(
+        const BusinessRuleFailure(
+          message: 'Para vendas no fiado, é obrigatório selecionar um cliente.',
+        ),
+      );
     }
 
     if (isDelivery) {
       if (customerName == null || customerName.trim().isEmpty) {
-        throw Exception('Para entregas, é obrigatório selecionar um cliente.');
+        return Result.failure(
+          const BusinessRuleFailure(
+            message: 'Para entregas, é obrigatório selecionar um cliente.',
+          ),
+        );
       }
       if (deliveryAddress == null || deliveryAddress.trim().isEmpty) {
-        throw Exception('Para entregas, é obrigatório informar o endereço de entrega.');
+        return Result.failure(
+          const BusinessRuleFailure(
+            message: 'Para entregas, é obrigatório informar o endereço de entrega.',
+          ),
+        );
       }
     }
 
     final outOfStock = _getOutOfStockProducts(items, availableProducts);
     if (outOfStock.isNotEmpty) {
-      final names = outOfStock.map((p) => '${p.name} (Estoque: ${p.stock})').join(', ');
-      throw Exception('Estoque insuficiente para: $names');
+      final names =
+          outOfStock.map((p) => '${p.name} (Estoque: ${p.stock})').join(', ');
+      return Result.failure(
+        BusinessRuleFailure(message: 'Estoque insuficiente para: $names'),
+      );
     }
 
     final saleItems = items
@@ -104,7 +124,10 @@ class FinalizeSaleUseCase {
     );
 
     final isUpdate = editingSaleId != null && editingSaleId.isNotEmpty;
-    await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
+    final saveResult = await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
+    if (saveResult.isFailure) {
+      return saveResult;
+    }
 
     if (isDelivery) {
       final delivery = DeliveryEntity(
@@ -127,8 +150,16 @@ class FinalizeSaleUseCase {
         createdAt: DateTime.now(),
       );
 
-      await _deliveriesRepository.save(delivery);
+      try {
+        await _deliveriesRepository.save(delivery);
+      } on AppFailure catch (e) {
+        return Result.failure(e);
+      } catch (e, stackTrace) {
+        return Result.failure(e, stackTrace);
+      }
     }
+
+    return Result.success(sale);
   }
 
   List<ProductEntity> _getOutOfStockProducts(
@@ -148,4 +179,3 @@ class FinalizeSaleUseCase {
     return invalid;
   }
 }
-

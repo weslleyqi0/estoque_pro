@@ -18,7 +18,7 @@ class EditSaleUseCase {
     this._productsRepository,
   );
 
-  Future<Result<SaleEntity>> call({
+  AsyncResult<SaleEntity> call({
     required SaleEntity originalSale,
     required List<SaleItemEntity> updatedItems,
     required String reason,
@@ -27,70 +27,81 @@ class EditSaleUseCase {
     String? customerName,
     required UserEntity currentUser,
   }) async {
-    return Result.guard(() async {
-      if (!currentUser.hasPermission(UserPermission.editSales)) {
-        throw Exception('Usuário não possui permissão para editar vendas.');
-      }
+    if (!currentUser.hasPermission(UserPermission.editSales)) {
+      return Result.failure(
+        const PermissionFailure(
+          message: 'Usuário não possui permissão para editar vendas.',
+        ),
+      );
+    }
 
-      if (updatedItems.isEmpty) {
-        throw Exception('A venda deve possuir pelo menos um item.');
-      }
+    if (updatedItems.isEmpty) {
+      return Result.failure(
+        const BusinessRuleFailure(
+          message: 'A venda deve possuir pelo menos um item.',
+        ),
+      );
+    }
 
-      final Map<String, int> originalQuantities = {
-        for (var item in originalSale.items) item.productId: item.quantity,
-      };
+    final Map<String, int> originalQuantities = {
+      for (var item in originalSale.items) item.productId: item.quantity,
+    };
 
-      final Map<String, int> updatedQuantities = {
-        for (var item in updatedItems) item.productId: item.quantity,
-      };
+    final Map<String, int> updatedQuantities = {
+      for (var item in updatedItems) item.productId: item.quantity,
+    };
 
-      final Set<String> allProductIds = {
-        ...originalQuantities.keys,
-        ...updatedQuantities.keys,
-      };
+    final Set<String> allProductIds = {
+      ...originalQuantities.keys,
+      ...updatedQuantities.keys,
+    };
 
-      final List<SaleItemEntity> addedItems = [];
-      final List<SaleItemEntity> removedItems = [];
-      final Map<String, int> stockDeltas = {};
+    final List<SaleItemEntity> addedItems = [];
+    final List<SaleItemEntity> removedItems = [];
+    final Map<String, int> stockDeltas = {};
 
-      for (final productId in allProductIds) {
-        if (productId.trim().isEmpty) continue;
-        final origQty = originalQuantities[productId] ?? 0;
-        final newQty = updatedQuantities[productId] ?? 0;
-        final delta = newQty - origQty;
+    for (final productId in allProductIds) {
+      if (productId.trim().isEmpty) continue;
+      final origQty = originalQuantities[productId] ?? 0;
+      final newQty = updatedQuantities[productId] ?? 0;
+      final delta = newQty - origQty;
 
-        if (delta != 0) {
-          stockDeltas[productId] = delta;
-
-          if (delta > 0) {
-            final item = updatedItems.firstWhere((i) => i.productId == productId);
-            addedItems.add(item.copyWith(quantity: delta));
-          } else {
-            final item = originalSale.items.firstWhere((i) => i.productId == productId);
-            removedItems.add(item.copyWith(quantity: delta.abs()));
-          }
-        }
-      }
-
-      final allProducts = await _productsRepository.getAll();
-      final productsMap = {for (var p in allProducts) p.id: p};
-
-      for (final entry in stockDeltas.entries) {
-        final productId = entry.key;
-        final delta = entry.value;
+      if (delta != 0) {
+        stockDeltas[productId] = delta;
 
         if (delta > 0) {
-          final product = productsMap[productId];
-          final availableStock = product?.stock ?? 0;
-          if (availableStock < delta) {
-            final productName = product?.name ?? productId;
-            throw Exception(
-              'Estoque insuficiente para o produto "$productName". Disponível: $availableStock, Solicitado: $delta.',
-            );
-          }
+          final item = updatedItems.firstWhere((i) => i.productId == productId);
+          addedItems.add(item.copyWith(quantity: delta));
+        } else {
+          final item = originalSale.items.firstWhere((i) => i.productId == productId);
+          removedItems.add(item.copyWith(quantity: delta.abs()));
         }
       }
+    }
 
+    final allProducts = await _productsRepository.getAll();
+    final productsMap = {for (var p in allProducts) p.id: p};
+
+    for (final entry in stockDeltas.entries) {
+      final productId = entry.key;
+      final delta = entry.value;
+
+      if (delta > 0) {
+        final product = productsMap[productId];
+        final availableStock = product?.stock ?? 0;
+        if (availableStock < delta) {
+          final productName = product?.name ?? productId;
+          return Result.failure(
+            BusinessRuleFailure(
+              message:
+                  'Estoque insuficiente para o produto "$productName". Disponível: $availableStock, Solicitado: $delta.',
+            ),
+          );
+        }
+      }
+    }
+
+    return Result.guard(() async {
       final newSubtotal = updatedItems.fold<double>(
         0.0,
         (sum, item) => sum + (item.unitPrice * item.quantity),

@@ -18,8 +18,7 @@ sealed class AppFailure extends Equatable implements Exception {
   List<Object?> get props => [message, code, error];
 
   @override
-  String toString() =>
-      '$runtimeType: $message${code != null ? ' (Code: $code)' : ''}';
+  String toString() => message;
 }
 
 /// Failure representing connection issues, timeouts, or lack of internet connectivity.

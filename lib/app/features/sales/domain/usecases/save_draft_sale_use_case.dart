@@ -78,7 +78,10 @@ class SaveDraftSaleUseCase {
     );
 
     final isUpdate = editingSaleId != null && editingSaleId.isNotEmpty;
-    await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
+    final saveResult = await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
+    if (saveResult.isFailure) {
+      throw saveResult.error!;
+    }
   }
 
   List<ProductEntity> _getOutOfStockProducts(

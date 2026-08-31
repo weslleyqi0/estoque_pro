@@ -294,7 +294,7 @@ class CartViewModel extends ChangeNotifier {
     required String userName,
     required List<ProductEntity> availableProducts,
   }) async {
-    await _finalizeSaleUseCase.execute(
+    final result = await _finalizeSaleUseCase.execute(
       items: _items,
       saleNumber: _saleNumber,
       editingSaleId: _editingSaleId,
@@ -317,8 +317,15 @@ class CartViewModel extends ChangeNotifier {
       deliveryNotes: _deliveryNotes,
     );
 
-    clearCart();
-    return true;
+    return result.fold(
+      onSuccess: (_) {
+        clearCart();
+        return true;
+      },
+      onFailure: (failure) {
+        throw failure;
+      },
+    );
   }
 
   Future<bool> saveInProgressToFirebase({
