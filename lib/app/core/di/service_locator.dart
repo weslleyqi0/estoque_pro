@@ -10,6 +10,14 @@ import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deli
 import 'package:estoque_pro/app/features/sales/data/repositories/sales_repository_impl.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/adjust_stock_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/archive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/delete_product_permanently_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/save_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/update_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/cancel_completed_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/edit_sale_use_case.dart';
@@ -163,6 +171,30 @@ Future<void> setupServiceLocator() async {
   getIt.registerFactory<CountProductsUseCase>(
     () => CountProductsUseCase(getIt<ProductsRepository>()),
   );
+  getIt.registerFactory<GetProductsUseCase>(
+    () => GetProductsUseCase(getIt<ProductsRepository>()),
+  );
+  getIt.registerFactory<SaveProductUseCase>(
+    () => SaveProductUseCase(getIt<ProductsRepository>()),
+  );
+  getIt.registerFactory<UpdateProductUseCase>(
+    () => UpdateProductUseCase(getIt<ProductsRepository>()),
+  );
+  getIt.registerFactory<ArchiveProductUseCase>(
+    () => ArchiveProductUseCase(getIt<ProductsRepository>()),
+  );
+  getIt.registerFactory<UnarchiveProductUseCase>(
+    () => UnarchiveProductUseCase(getIt<ProductsRepository>()),
+  );
+  getIt.registerFactory<DeleteProductPermanentlyUseCase>(
+    () => DeleteProductPermanentlyUseCase(getIt<ProductsRepository>()),
+  );
+  getIt.registerFactory<AdjustStockUseCase>(
+    () => AdjustStockUseCase(getIt<ProductsRepository>()),
+  );
+  getIt.registerFactory<WatchProductHistoryUseCase>(
+    () => WatchProductHistoryUseCase(getIt<ProductsRepository>()),
+  );
 
   getIt.registerFactory<SaveSaleUseCase>(
     () => SaveSaleUseCase(
@@ -256,16 +288,32 @@ Future<void> setupServiceLocator() async {
   );
 
   getIt.registerFactory<ProductsViewModel>(
-    () => ProductsViewModel(getIt<ProductsRepository>()),
+    () => ProductsViewModel(
+      getIt<GetProductsUseCase>(),
+      getIt<ArchiveProductUseCase>(),
+      getIt<UnarchiveProductUseCase>(),
+      getIt<DeleteProductPermanentlyUseCase>(),
+      getIt<WatchProductHistoryUseCase>(),
+    ),
   );
   getIt.registerFactory<ArchivedProductsViewModel>(
-    () => ArchivedProductsViewModel(getIt<ProductsRepository>()),
+    () => ArchivedProductsViewModel(
+      getIt<GetProductsUseCase>(),
+      getIt<UnarchiveProductUseCase>(),
+      getIt<DeleteProductPermanentlyUseCase>(),
+    ),
   );
   getIt.registerFactory<ProductHistoryViewModel>(
-    () => ProductHistoryViewModel(getIt<ProductsRepository>()),
+    () => ProductHistoryViewModel(getIt<WatchProductHistoryUseCase>()),
   );
   getIt.registerFactory<ProductsFormViewModel>(
-    () => ProductsFormViewModel(getIt<ProductsRepository>()),
+    () => ProductsFormViewModel(
+      getIt<SaveProductUseCase>(),
+      getIt<UpdateProductUseCase>(),
+      getIt<ArchiveProductUseCase>(),
+      getIt<UnarchiveProductUseCase>(),
+      getIt<AdjustStockUseCase>(),
+    ),
   );
 
   getIt.registerFactory<SalesViewModel>(

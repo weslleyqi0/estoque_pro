@@ -7,6 +7,11 @@ import 'package:estoque_pro/app/features/customers/presentation/viewmodels/custo
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/archive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/delete_product_permanently_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/finalize_sale_use_case.dart';
@@ -78,7 +83,13 @@ void main() {
       MaterialApp(
         home: NewSalePage(
           productsViewModelFactory: () {
-            createdProductsVm = ProductsViewModel(mockProductsRepository);
+            createdProductsVm = ProductsViewModel(
+              GetProductsUseCase(mockProductsRepository),
+              ArchiveProductUseCase(mockProductsRepository),
+              UnarchiveProductUseCase(mockProductsRepository),
+              DeleteProductPermanentlyUseCase(mockProductsRepository),
+              WatchProductHistoryUseCase(mockProductsRepository),
+            );
             return createdProductsVm;
           },
           cartViewModelFactory: () {
