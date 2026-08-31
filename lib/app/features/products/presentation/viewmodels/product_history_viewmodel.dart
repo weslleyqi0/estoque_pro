@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
-import 'package:flutter/foundation.dart';
 
 enum ProductHistoryLoadState { idle, loading, success, failure }
 
-class ProductHistoryViewModel extends ChangeNotifier {
+class ProductHistoryViewModel extends BaseViewModel {
   final WatchProductHistoryUseCase _watchProductHistoryUseCase;
 
   StreamSubscription<List<ProductHistoryEntity>>? _subscription;

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_category_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -10,9 +11,8 @@ import 'package:estoque_pro/app/features/products/domain/usecases/archive_produc
 import 'package:estoque_pro/app/features/products/domain/usecases/save_product_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/update_product_use_case.dart';
-import 'package:flutter/foundation.dart';
 
-class ProductsFormViewModel extends ChangeNotifier {
+class ProductsFormViewModel extends BaseViewModel {
   final SaveProductUseCase _saveProductUseCase;
   final UpdateProductUseCase _updateProductUseCase;
   final ArchiveProductUseCase _archiveProductUseCase;

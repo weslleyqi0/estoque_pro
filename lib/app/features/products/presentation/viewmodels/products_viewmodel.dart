@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
@@ -10,9 +11,8 @@ import 'package:estoque_pro/app/features/products/domain/usecases/delete_product
 import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
-import 'package:flutter/foundation.dart';
 
-class ProductsViewModel extends ChangeNotifier {
+class ProductsViewModel extends BaseViewModel {
   final GetProductsUseCase _getProductsUseCase;
   final ArchiveProductUseCase _archiveProductUseCase;
   final UnarchiveProductUseCase _unarchiveProductUseCase;
