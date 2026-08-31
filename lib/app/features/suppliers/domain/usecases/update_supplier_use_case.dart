@@ -8,15 +8,16 @@ class UpdateSupplierUseCase {
   const UpdateSupplierUseCase(this._repository);
 
   AsyncResult<bool> call(SupplierEntity supplier) async {
-    return Result.guard(() async {
-      if (supplier.id.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'ID do fornecedor inválido.');
-      }
-      if (supplier.name.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'O nome do fornecedor é obrigatório.');
-      }
-      await _repository.update(supplier);
-      return true;
-    });
+    if (supplier.id.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'ID do fornecedor inválido.'));
+    }
+    if (supplier.name.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'O nome do fornecedor é obrigatório.'));
+    }
+    final result = await _repository.update(supplier);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

@@ -8,12 +8,13 @@ class SaveSupplierUseCase {
   const SaveSupplierUseCase(this._repository);
 
   AsyncResult<bool> call(SupplierEntity supplier) async {
-    return Result.guard(() async {
-      if (supplier.name.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'O nome do fornecedor é obrigatório.');
-      }
-      await _repository.save(supplier);
-      return true;
-    });
+    if (supplier.name.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'O nome do fornecedor é obrigatório.'));
+    }
+    final result = await _repository.save(supplier);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

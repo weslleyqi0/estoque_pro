@@ -1,4 +1,4 @@
-import 'package:estoque_pro/app/core/errors/app_failure.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/usecases/delete_supplier_use_case.dart';
@@ -37,11 +37,11 @@ void main() {
     });
 
     test('getAll delegates to repository', () async {
-      when(() => mockRepository.getAll()).thenAnswer((_) async => [testSupplier]);
+      when(() => mockRepository.getAll()).thenAnswer((_) async => const Result.success([testSupplier]));
 
       final useCase = GetSuppliersUseCase(mockRepository);
       final result = await useCase.getAll();
-      expect(result, equals([testSupplier]));
+      expect(result.value, equals([testSupplier]));
     });
   });
 
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('saves and returns success when valid', () async {
-      when(() => mockRepository.save(any())).thenAnswer((_) async {});
+      when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = SaveSupplierUseCase(mockRepository);
       final result = await useCase.call(testSupplier);
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('updates and returns success when valid', () async {
-      when(() => mockRepository.update(any())).thenAnswer((_) async {});
+      when(() => mockRepository.update(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = UpdateSupplierUseCase(mockRepository);
       final result = await useCase.call(testSupplier);
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('deletes and returns success when valid', () async {
-      when(() => mockRepository.delete('sup1')).thenAnswer((_) async {});
+      when(() => mockRepository.delete('sup1')).thenAnswer((_) async => const Result.success(null));
 
       final useCase = DeleteSupplierUseCase(mockRepository);
       final result = await useCase.call('sup1');

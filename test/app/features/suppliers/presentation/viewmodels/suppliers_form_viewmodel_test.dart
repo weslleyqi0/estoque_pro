@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/usecases/delete_supplier_use_case.dart';
@@ -34,7 +35,7 @@ void main() {
   });
 
   test('saveSupplierCommand executes repository save', () async {
-    when(() => mockRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.saveSupplierCommand.execute(testSupplier);
 
@@ -43,7 +44,7 @@ void main() {
   });
 
   test('updateSupplierCommand executes repository update', () async {
-    when(() => mockRepository.update(any())).thenAnswer((_) async {});
+    when(() => mockRepository.update(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.updateSupplierCommand.execute(testSupplier);
 
@@ -52,7 +53,7 @@ void main() {
   });
 
   test('deleteSupplierCommand executes repository delete', () async {
-    when(() => mockRepository.delete(any())).thenAnswer((_) async {});
+    when(() => mockRepository.delete(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.deleteSupplierCommand.execute('123');
 

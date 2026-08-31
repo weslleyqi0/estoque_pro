@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/entities/supplier_entity.dart';
 import 'package:estoque_pro/app/features/suppliers/domain/repositories/suppliers_repository.dart';
 
@@ -10,7 +11,7 @@ class GetSuppliersUseCase {
     return _repository.watchAll();
   }
 
-  Future<List<SupplierEntity>> getAll() {
+  Future<Result<List<SupplierEntity>>> getAll() {
     return _repository.getAll();
   }
 }
