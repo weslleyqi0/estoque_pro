@@ -117,63 +117,60 @@ class ProductsFormViewModel extends ChangeNotifier {
   }
 
   Future<Result<bool>> _saveProduct(ProductEntity product) async {
-    try {
+    return Result.guard(() async {
       if (product.barcode.isNotEmpty) {
         final barcodeExists = await _repository.checkBarcodeExists(product.barcode);
         if (barcodeExists) {
-          throw Exception('Já existe um produto cadastrado com este código de barras.');
+          throw const BusinessRuleFailure(
+            message: 'Já existe um produto cadastrado com este código de barras.',
+          );
         }
       }
       await _repository.save(product);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+      return true;
+    });
   }
 
   Future<Result<bool>> _updateProduct(ProductEntity product) async {
-    try {
+    return Result.guard(() async {
       if (product.barcode.isNotEmpty) {
-        final barcodeExists = await _repository.checkBarcodeExists(product.barcode, ignoreId: product.id);
+        final barcodeExists =
+            await _repository.checkBarcodeExists(product.barcode, ignoreId: product.id);
         if (barcodeExists) {
-          throw Exception('Já existe um produto cadastrado com este código de barras.');
+          throw const BusinessRuleFailure(
+            message: 'Já existe um produto cadastrado com este código de barras.',
+          );
         }
       }
       await _repository.update(product);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+      return true;
+    });
   }
 
   Future<Result<bool>> _archiveProduct(String id) async {
-    try {
+    return Result.guard(() async {
       await _repository.archive(id);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+      return true;
+    });
   }
 
   Future<Result<bool>> _unarchiveProduct(String id) async {
-    try {
+    return Result.guard(() async {
       await _repository.unarchive(id);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+      return true;
+    });
   }
 
-  Future<Result<bool>> _adjustStock(({String productId, int quantityDiff, ProductHistoryEntity history}) args) async {
-    try {
+  Future<Result<bool>> _adjustStock(
+    ({String productId, int quantityDiff, ProductHistoryEntity history}) args,
+  ) async {
+    return Result.guard(() async {
       await _repository.adjustStock(
         args.productId,
         args.quantityDiff,
         args.history,
       );
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+      return true;
+    });
   }
 }

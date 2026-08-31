@@ -1,22 +1,28 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
-
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:flutter/foundation.dart';
-
-enum ProductsLoadState { idle, loading, success, failure }
 
 class ProductsViewModel extends ChangeNotifier {
   final ProductsRepository _repository;
 
   StreamSubscription<List<ProductEntity>>? _subscription;
 
-  ProductsLoadState _state = ProductsLoadState.idle;
-  ProductsLoadState get state => _state;
+  late final Command1<bool, String> archiveProductCommand;
+  late final Command1<bool, String> unarchiveProductCommand;
+  late final Command1<bool, String> deletePermanentlyCommand;
+
+  CommandState _state = CommandState.idle;
+  CommandState get state => _state;
+
+  bool get isLoading => _state == CommandState.running;
+  bool get isSuccess => _state == CommandState.success;
+  bool get isFailure => _state == CommandState.failure;
 
   List<ProductEntity> _products = [];
   List<ProductEntity> get products => _products;
@@ -103,68 +109,84 @@ class ProductsViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
-  ProductsViewModel(this._repository);
+  ProductsViewModel(this._repository) {
+    archiveProductCommand = Command1(_archiveProduct);
+    unarchiveProductCommand = Command1(_unarchiveProduct);
+    deletePermanentlyCommand = Command1(_deletePermanently);
+  }
 
   void listenAll() {
     if (_subscription != null) return;
 
-    _state = ProductsLoadState.loading;
+    _state = CommandState.running;
     notifyListeners();
 
     _subscription?.cancel();
     _subscription = _repository.watchAll().listen(
       (list) {
         _products = list.sortByName((a) => a.name);
-        _state = ProductsLoadState.success;
+        _state = CommandState.success;
         notifyListeners();
       },
       onError: (e) {
-        _error = e;
-        _state = ProductsLoadState.failure;
+        _error = e is AppFailure ? e : UnknownFailure(message: e.toString(), error: e);
+        _state = CommandState.failure;
         notifyListeners();
       },
     );
   }
 
-  Future<void> archiveProduct(String id) async {
-    try {
-      final index = _products.indexWhere((p) => p.id == id);
-      if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: false, isArchived: true);
-        notifyListeners();
-      }
-      await _repository.archive(id);
-    } catch (e) {
-      _error = e;
+  AsyncResult<bool> _archiveProduct(String id) async {
+    final index = _products.indexWhere((p) => p.id == id);
+    if (index != -1) {
+      _products[index] = _products[index].copyWith(isActive: false, isArchived: true);
       notifyListeners();
-      rethrow;
+    }
+    return Result.guard(() async {
+      await _repository.archive(id);
+      return true;
+    });
+  }
+
+  AsyncResult<bool> _unarchiveProduct(String id) async {
+    final index = _products.indexWhere((p) => p.id == id);
+    if (index != -1) {
+      _products[index] = _products[index].copyWith(isActive: false, isArchived: false);
+      notifyListeners();
+    }
+    return Result.guard(() async {
+      await _repository.unarchive(id);
+      return true;
+    });
+  }
+
+  AsyncResult<bool> _deletePermanently(String id) async {
+    _products.removeWhere((p) => p.id == id);
+    notifyListeners();
+    return Result.guard(() async {
+      await _repository.deletePermanently(id);
+      return true;
+    });
+  }
+
+  Future<void> archiveProduct(String id) async {
+    await archiveProductCommand.execute(id);
+    if (archiveProductCommand.isFailure) {
+      throw archiveProductCommand.error!;
     }
   }
 
   Future<void> unarchiveProduct(String id) async {
-    try {
-      final index = _products.indexWhere((p) => p.id == id);
-      if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: false, isArchived: false);
-        notifyListeners();
-      }
-      await _repository.unarchive(id);
-    } catch (e) {
-      _error = e;
-      notifyListeners();
-      rethrow;
+    await unarchiveProductCommand.execute(id);
+    if (unarchiveProductCommand.isFailure) {
+      throw unarchiveProductCommand.error!;
     }
   }
 
   Future<void> deletePermanently(String id) async {
-    try {
-      _products.removeWhere((p) => p.id == id);
-      notifyListeners();
-      await _repository.deletePermanently(id);
-    } catch (e) {
-      _error = e;
-      notifyListeners();
-      rethrow;
+    await deletePermanentlyCommand.execute(id);
+    if (deletePermanentlyCommand.isFailure) {
+      throw deletePermanentlyCommand.error!;
     }
   }
 

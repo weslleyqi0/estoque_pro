@@ -79,7 +79,7 @@ class _SelectProductPageState extends State<SelectProductPage> {
                   ),
                 ),
               ),
-              if (widget.viewModel.state == ProductsLoadState.loading)
+              if (widget.viewModel.isLoading)
                 const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
                 )

@@ -19,13 +19,13 @@ class SaleProductsListSliver extends StatelessWidget {
   Widget build(BuildContext context) {
     final products = productsViewModel.filteredProducts.where((p) => p.isActive).toList();
 
-    if (productsViewModel.state == ProductsLoadState.loading) {
+    if (productsViewModel.isLoading) {
       return const SliverFillRemaining(
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (productsViewModel.state == ProductsLoadState.failure) {
+    if (productsViewModel.isFailure) {
       return SliverFillRemaining(
         child: Center(child: Text(productsViewModel.error.toString())),
       );
