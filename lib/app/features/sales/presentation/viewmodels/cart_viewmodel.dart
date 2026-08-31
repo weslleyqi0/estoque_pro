@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/sale_code_generator.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -9,15 +10,32 @@ import 'package:estoque_pro/app/features/sales/domain/usecases/finalize_sale_use
 import 'package:estoque_pro/app/features/sales/domain/usecases/save_draft_sale_use_case.dart';
 import 'package:flutter/foundation.dart';
 
+typedef FinalizeSaleParams = ({
+  String userId,
+  String userName,
+  List<ProductEntity> availableProducts,
+});
+
+typedef SaveDraftSaleParams = ({
+  String userId,
+  String userName,
+  List<ProductEntity> availableProducts,
+});
+
 class CartViewModel extends ChangeNotifier {
   final FinalizeSaleUseCase _finalizeSaleUseCase;
   final SaveDraftSaleUseCase _saveDraftSaleUseCase;
+
+  late final Command1<SaleEntity, FinalizeSaleParams> finalizeSaleCommand;
+  late final Command1<bool, SaveDraftSaleParams> saveDraftCommand;
 
   CartViewModel(
     this._finalizeSaleUseCase,
     this._saveDraftSaleUseCase,
   ) {
     _initSaleNumber();
+    finalizeSaleCommand = Command1(_finalizeSale);
+    saveDraftCommand = Command1(_saveDraft);
   }
 
   final DateTime _createdAt = DateTime.now();
@@ -289,11 +307,7 @@ class CartViewModel extends ChangeNotifier {
     return invalid;
   }
 
-  Future<bool> executeFinalize({
-    required String userId,
-    required String userName,
-    required List<ProductEntity> availableProducts,
-  }) async {
+  AsyncResult<SaleEntity> _finalizeSale(FinalizeSaleParams params) async {
     final result = await _finalizeSaleUseCase.execute(
       items: _items,
       saleNumber: _saleNumber,
@@ -308,24 +322,64 @@ class CartViewModel extends ChangeNotifier {
       customerId: _customerId,
       customerName: _customerName,
       customerPhone: _customerPhone,
-      userId: userId,
-      userName: userName,
-      availableProducts: availableProducts,
+      userId: params.userId,
+      userName: params.userName,
+      availableProducts: params.availableProducts,
       isDelivery: _isDelivery,
       deliveryScheduledAt: _scheduledDeliveryDate,
       deliveryAddress: _deliveryAddress,
       deliveryNotes: _deliveryNotes,
     );
 
-    return result.fold(
-      onSuccess: (_) {
-        clearCart();
-        return true;
-      },
-      onFailure: (failure) {
-        throw failure;
-      },
-    );
+    if (result.isSuccess) {
+      clearCart();
+    }
+    return result;
+  }
+
+  AsyncResult<bool> _saveDraft(SaveDraftSaleParams params) async {
+    try {
+      await _saveDraftSaleUseCase.execute(
+        items: _items,
+        saleNumber: _saleNumber,
+        editingSaleId: _editingSaleId,
+        discountType: _discountType,
+        discountValue: _discountValue,
+        subtotal: subtotal,
+        total: total,
+        paymentMethod: _paymentMethod ?? PaymentMethod.dinheiro,
+        amountPaid: _amountPaid,
+        change: change,
+        customerId: _customerId,
+        customerName: _customerName,
+        userId: params.userId,
+        userName: params.userName,
+        availableProducts: params.availableProducts,
+        createdAt: _createdAt,
+      );
+
+      clearCart();
+      return const Result.success(true);
+    } catch (e, stackTrace) {
+      return Result.failure(e, stackTrace);
+    }
+  }
+
+  Future<bool> executeFinalize({
+    required String userId,
+    required String userName,
+    required List<ProductEntity> availableProducts,
+  }) async {
+    await finalizeSaleCommand.execute((
+      userId: userId,
+      userName: userName,
+      availableProducts: availableProducts,
+    ));
+
+    if (finalizeSaleCommand.isFailure) {
+      throw finalizeSaleCommand.error!;
+    }
+    return true;
   }
 
   Future<bool> saveInProgressToFirebase({
@@ -333,26 +387,15 @@ class CartViewModel extends ChangeNotifier {
     required String userName,
     required List<ProductEntity> availableProducts,
   }) async {
-    await _saveDraftSaleUseCase.execute(
-      items: _items,
-      saleNumber: _saleNumber,
-      editingSaleId: _editingSaleId,
-      discountType: _discountType,
-      discountValue: _discountValue,
-      subtotal: subtotal,
-      total: total,
-      paymentMethod: _paymentMethod ?? PaymentMethod.dinheiro,
-      amountPaid: _amountPaid,
-      change: change,
-      customerId: _customerId,
-      customerName: _customerName,
+    await saveDraftCommand.execute((
       userId: userId,
       userName: userName,
       availableProducts: availableProducts,
-      createdAt: _createdAt,
-    );
+    ));
 
-    clearCart();
+    if (saveDraftCommand.isFailure) {
+      throw saveDraftCommand.error!;
+    }
     return true;
   }
 }

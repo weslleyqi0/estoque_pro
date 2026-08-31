@@ -1,5 +1,5 @@
+import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
-import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -11,16 +11,28 @@ import 'package:estoque_pro/app/features/sales/domain/usecases/edit_sale_use_cas
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:flutter/foundation.dart';
 
+typedef CancelSaleParams = ({
+  UserEntity currentUser,
+  String? reason,
+  String? comment,
+});
+
 class EditSaleViewModel extends ChangeNotifier {
   final EditSaleUseCase _editSaleUseCase;
   final CancelCompletedSaleUseCase _cancelCompletedSaleUseCase;
   final ProductsRepository _productsRepository;
 
+  late final Command1<SaleEntity, UserEntity> saveEditCommand;
+  late final Command1<SaleEntity, CancelSaleParams> cancelSaleCommand;
+
   EditSaleViewModel(
     this._editSaleUseCase,
     this._cancelCompletedSaleUseCase,
     this._productsRepository,
-  );
+  ) {
+    saveEditCommand = Command1(_saveEdit);
+    cancelSaleCommand = Command1(_cancelSale);
+  }
 
   late SaleEntity _originalSale;
   SaleEntity get originalSale => _originalSale;
@@ -43,11 +55,10 @@ class EditSaleViewModel extends ChangeNotifier {
   String _comment = '';
   String get comment => _comment;
 
-  bool _isSaving = false;
-  bool get isSaving => _isSaving;
+  bool get isSaving => saveEditCommand.isRunning || cancelSaleCommand.isRunning;
 
-  String? _errorMessage;
-  String? get errorMessage => _errorMessage;
+  String? get errorMessage =>
+      saveEditCommand.error?.message ?? cancelSaleCommand.error?.message;
 
   void initWithSale(SaleEntity sale) {
     _originalSale = sale;
@@ -57,8 +68,6 @@ class EditSaleViewModel extends ChangeNotifier {
     _selectedCustomerName = sale.customerName;
     _selectedReason = SaleEditReason.addition;
     _comment = '';
-    _errorMessage = null;
-    _isSaving = false;
     notifyListeners();
   }
 
@@ -190,12 +199,8 @@ class EditSaleViewModel extends ChangeNotifier {
 
   double get totalDifference => newTotal - _originalSale.total;
 
-  Future<Result<SaleEntity>> saveEdit({required UserEntity currentUser}) async {
-    _isSaving = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    final result = await _editSaleUseCase.call(
+  AsyncResult<SaleEntity> _saveEdit(UserEntity currentUser) async {
+    return _editSaleUseCase.call(
       originalSale: _originalSale,
       updatedItems: _draftItems,
       reason: _selectedReason.label,
@@ -204,13 +209,21 @@ class EditSaleViewModel extends ChangeNotifier {
       customerName: _selectedCustomerName,
       currentUser: currentUser,
     );
+  }
 
-    _isSaving = false;
-    if (result.isFailure) {
-      _errorMessage = result.error.toString();
-    }
-    notifyListeners();
-    return result;
+  AsyncResult<SaleEntity> _cancelSale(CancelSaleParams params) async {
+    return _cancelCompletedSaleUseCase.call(
+      sale: _originalSale,
+      reason: params.reason ?? 'Cancelamento',
+      comment: params.comment ?? (_comment.isNotEmpty ? _comment : null),
+      currentUser: params.currentUser,
+    );
+  }
+
+  Future<Result<SaleEntity>> saveEdit({required UserEntity currentUser}) async {
+    await saveEditCommand.execute(currentUser);
+    return saveEditCommand.result ??
+        Result.failure(const UnknownFailure(message: 'Erro desconhecido ao salvar edição.'));
   }
 
   Future<Result<SaleEntity>> cancelSale({
@@ -218,22 +231,12 @@ class EditSaleViewModel extends ChangeNotifier {
     String? reason,
     String? comment,
   }) async {
-    _isSaving = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    final result = await _cancelCompletedSaleUseCase.call(
-      sale: _originalSale,
-      reason: reason ?? 'Cancelamento',
-      comment: comment ?? (_comment.isNotEmpty ? _comment : null),
+    await cancelSaleCommand.execute((
       currentUser: currentUser,
-    );
-
-    _isSaving = false;
-    if (result.isFailure) {
-      _errorMessage = result.error.toString();
-    }
-    notifyListeners();
-    return result;
+      reason: reason,
+      comment: comment,
+    ));
+    return cancelSaleCommand.result ??
+        Result.failure(const UnknownFailure(message: 'Erro desconhecido ao cancelar venda.'));
   }
 }
