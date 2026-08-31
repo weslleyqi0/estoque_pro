@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/categories/data/models/category_model.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
@@ -39,7 +40,7 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
   }
 
   @override
-  Future<List<CategoryEntity>> getAll() async {
+  Future<Result<List<CategoryEntity>>> getAll() async {
     try {
       final data = await _databaseService.getOnce();
       final List<CategoryEntity> entities = [];
@@ -54,42 +55,45 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
           }
         }
       }
-      return entities;
-    } catch (e) {
+      return Result.success(entities);
+    } catch (e, stackTrace) {
       debugPrint('---> Categories: Erro getAll: $e');
-      return [];
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> save(CategoryEntity category) async {
+  Future<Result<void>> save(CategoryEntity category) async {
     final model = CategoryModel.fromEntity(category);
     try {
       await _databaseService.add(model.toMap());
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Categories: Erro ao salvar: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> update(CategoryEntity category) async {
+  Future<Result<void>> update(CategoryEntity category) async {
     final model = CategoryModel.fromEntity(category);
     try {
       await _databaseService.update(category.id, model.toMap());
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Categories: Erro ao atualizar: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> delete(String id) async {
+  Future<Result<void>> delete(String id) async {
     try {
       await _databaseService.delete(id);
-    } catch (e) {
+      return const Result.success(null);
+    } catch (e, stackTrace) {
       debugPrint('---> Categories: Erro ao deletar: $e');
-      rethrow;
+      return Result.failure(e, stackTrace);
     }
   }
 }

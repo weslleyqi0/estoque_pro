@@ -1,4 +1,4 @@
-import 'package:estoque_pro/app/core/errors/app_failure.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
 import 'package:estoque_pro/app/features/categories/domain/usecases/delete_category_use_case.dart';
@@ -36,11 +36,11 @@ void main() {
     });
 
     test('getAll delegates to repository', () async {
-      when(() => mockRepository.getAll()).thenAnswer((_) async => [testCategory]);
+      when(() => mockRepository.getAll()).thenAnswer((_) async => const Result.success([testCategory]));
 
       final useCase = GetCategoriesUseCase(mockRepository);
       final result = await useCase.getAll();
-      expect(result, equals([testCategory]));
+      expect(result.value, equals([testCategory]));
     });
   });
 
@@ -54,7 +54,7 @@ void main() {
     });
 
     test('saves and returns success when valid', () async {
-      when(() => mockRepository.save(any())).thenAnswer((_) async {});
+      when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = SaveCategoryUseCase(mockRepository);
       final result = await useCase.call(testCategory);
@@ -82,7 +82,7 @@ void main() {
     });
 
     test('updates and returns success when valid', () async {
-      when(() => mockRepository.update(any())).thenAnswer((_) async {});
+      when(() => mockRepository.update(any())).thenAnswer((_) async => const Result.success(null));
 
       final useCase = UpdateCategoryUseCase(mockRepository);
       final result = await useCase.call(testCategory);
@@ -102,7 +102,7 @@ void main() {
     });
 
     test('deletes and returns success when valid', () async {
-      when(() => mockRepository.delete('cat1')).thenAnswer((_) async {});
+      when(() => mockRepository.delete('cat1')).thenAnswer((_) async => const Result.success(null));
 
       final useCase = DeleteCategoryUseCase(mockRepository);
       final result = await useCase.call('cat1');

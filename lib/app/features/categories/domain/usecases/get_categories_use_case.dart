@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
 
@@ -10,7 +11,7 @@ class GetCategoriesUseCase {
     return _repository.watchAll();
   }
 
-  Future<List<CategoryEntity>> getAll() {
+  Future<Result<List<CategoryEntity>>> getAll() {
     return _repository.getAll();
   }
 }

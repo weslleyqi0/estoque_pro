@@ -8,15 +8,16 @@ class UpdateCategoryUseCase {
   const UpdateCategoryUseCase(this._repository);
 
   AsyncResult<bool> call(CategoryEntity category) async {
-    return Result.guard(() async {
-      if (category.id.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'ID da categoria inválido.');
-      }
-      if (category.name.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'O nome da categoria é obrigatório.');
-      }
-      await _repository.update(category);
-      return true;
-    });
+    if (category.id.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'ID da categoria inválido.'));
+    }
+    if (category.name.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'O nome da categoria é obrigatório.'));
+    }
+    final result = await _repository.update(category);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

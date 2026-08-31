@@ -8,12 +8,13 @@ class SaveCategoryUseCase {
   const SaveCategoryUseCase(this._repository);
 
   AsyncResult<bool> call(CategoryEntity category) async {
-    return Result.guard(() async {
-      if (category.name.trim().isEmpty) {
-        throw const BusinessRuleFailure(message: 'O nome da categoria é obrigatório.');
-      }
-      await _repository.save(category);
-      return true;
-    });
+    if (category.name.trim().isEmpty) {
+      return Result.failure(const BusinessRuleFailure(message: 'O nome da categoria é obrigatório.'));
+    }
+    final result = await _repository.save(category);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

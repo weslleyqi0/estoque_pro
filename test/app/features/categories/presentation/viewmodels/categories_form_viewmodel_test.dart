@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
 import 'package:estoque_pro/app/features/categories/domain/usecases/delete_category_use_case.dart';
@@ -33,7 +34,7 @@ void main() {
   });
 
   test('saveCategoryCommand executes repository save', () async {
-    when(() => mockRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.saveCategoryCommand.execute(testCategory);
 
@@ -42,7 +43,7 @@ void main() {
   });
 
   test('updateCategoryCommand executes repository update', () async {
-    when(() => mockRepository.update(any())).thenAnswer((_) async {});
+    when(() => mockRepository.update(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.updateCategoryCommand.execute(testCategory);
 
@@ -51,7 +52,7 @@ void main() {
   });
 
   test('deleteCategoryCommand executes repository delete', () async {
-    when(() => mockRepository.delete(any())).thenAnswer((_) async {});
+    when(() => mockRepository.delete(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.deleteCategoryCommand.execute('123');
 
