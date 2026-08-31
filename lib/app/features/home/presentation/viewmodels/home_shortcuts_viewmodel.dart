@@ -1,8 +1,8 @@
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:estoque_pro/app/features/home/domain/entities/home_shortcut_type.dart';
-import 'package:flutter/foundation.dart';
 
-class HomeShortcutsViewModel extends ChangeNotifier {
+class HomeShortcutsViewModel extends BaseViewModel {
   static const String _storageKey = 'home_shortcuts_order';
 
   final LocalStorageService _localStorageService;

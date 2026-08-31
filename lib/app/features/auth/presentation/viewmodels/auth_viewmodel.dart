@@ -1,12 +1,12 @@
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/auth/domain/entities/auth_user_entity.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
-class AuthViewModel extends ChangeNotifier {
+class AuthViewModel extends BaseViewModel {
   final AuthRepository _authRepository;
   final AuthorizationService _authorizationService;
 
