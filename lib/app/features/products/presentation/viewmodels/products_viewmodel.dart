@@ -207,13 +207,32 @@ class ProductsViewModel extends BaseViewModel {
     }
   }
 
+  StreamSubscription<List<ProductHistoryEntity>>? _historySubscription;
+  List<ProductHistoryEntity> _productHistory = [];
+  List<ProductHistoryEntity> get productHistory => _productHistory;
+
   Stream<List<ProductHistoryEntity>> watchProductHistory(String productId, {int limit = 100}) {
     return _watchProductHistoryUseCase(productId, limit: limit);
+  }
+
+  void listenProductHistory(String productId, {int limit = 6}) {
+    _historySubscription?.cancel();
+    _historySubscription = _watchProductHistoryUseCase(productId, limit: limit).listen(
+      (history) {
+        _productHistory = history;
+        notifyListeners();
+      },
+      onError: (e) {
+        _error = e is AppFailure ? e : UnknownFailure(message: e.toString(), error: e);
+        notifyListeners();
+      },
+    );
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
+    _historySubscription?.cancel();
     super.dispose();
   }
 }

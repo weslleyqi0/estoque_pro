@@ -1,5 +1,6 @@
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/archive_product_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/delete_product_permanently_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
@@ -10,9 +11,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockGetProductsUseCase extends Mock implements GetProductsUseCase {}
+
 class MockArchiveProductUseCase extends Mock implements ArchiveProductUseCase {}
+
 class MockUnarchiveProductUseCase extends Mock implements UnarchiveProductUseCase {}
+
 class MockDeleteProductPermanentlyUseCase extends Mock implements DeleteProductPermanentlyUseCase {}
+
 class MockWatchProductHistoryUseCase extends Mock implements WatchProductHistoryUseCase {}
 
 void main() {
@@ -92,5 +97,24 @@ void main() {
 
     expect(viewModel.deletePermanentlyCommand.isSuccess, isTrue);
     verify(() => mockDeleteProductPermanentlyUseCase('p1')).called(1);
+  });
+
+  test('listenProductHistory updates productHistory list', () async {
+    final historyItem = ProductHistoryEntity(
+      action: ProductHistoryAction.add,
+      quantity: 5,
+      oldStock: 0,
+      newStock: 5,
+      date: DateTime(2026, 1, 1),
+    );
+
+    when(() => mockWatchProductHistoryUseCase('p1', limit: 6)).thenAnswer((_) => Stream.value([historyItem]));
+
+    viewModel.listenProductHistory('p1', limit: 6);
+
+    await Future.delayed(Duration.zero);
+
+    expect(viewModel.productHistory.length, equals(1));
+    expect(viewModel.productHistory.first.quantity, equals(5));
   });
 }

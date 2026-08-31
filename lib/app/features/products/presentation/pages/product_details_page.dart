@@ -46,6 +46,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   void initState() {
     super.initState();
     _viewModel.listenAll();
+    _viewModel.listenProductHistory(widget.product.id, limit: 6);
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductDetailsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.product.id != widget.product.id) {
+      _viewModel.listenProductHistory(widget.product.id, limit: 6);
+    }
   }
 
   ProductEntity get _currentProduct {
@@ -236,24 +245,16 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               ],
 
               if (canViewHistory) ...[
-                StreamBuilder<List<ProductHistoryEntity>>(
-                  stream: _viewModel.watchProductHistory(product.id, limit: 6),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return const SizedBox.shrink();
-                    }
-                    final historyList = snapshot.data ?? [];
-                    final hasMore = historyList.length > 5;
-                    final displayedHistory = hasMore ? historyList.take(5).toList() : historyList;
-
-                    return ProductHistoryCard(
-                      title: 'Histórico de Movimentações',
-                      subtitle: 'Últimas movimentações',
-                      history: displayedHistory,
-                      showEmptyMessage: true,
-                      onViewAll: hasMore ? () => context.push(AppRoutes.productHistory, extra: product) : null,
-                    );
-                  },
+                ProductHistoryCard(
+                  title: 'Histórico de Movimentações',
+                  subtitle: 'Últimas movimentações',
+                  history: _viewModel.productHistory.length > 5
+                      ? _viewModel.productHistory.take(5).toList()
+                      : _viewModel.productHistory,
+                  showEmptyMessage: true,
+                  onViewAll: _viewModel.productHistory.length > 5
+                      ? () => context.push(AppRoutes.productHistory, extra: product)
+                      : null,
                 ),
                 const Gap(AppSpacing.space16),
               ],
