@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/biometric_viewmodel.dart';
 import 'package:flutter/widgets.dart';
@@ -133,7 +134,7 @@ void main() {
     });
 
     test('usePassword executes signOut on AuthRepository', () async {
-      when(() => mockAuthRepository.signOut()).thenAnswer((_) async {});
+      when(() => mockAuthRepository.signOut()).thenAnswer((_) async => const Result.success(null));
 
       await viewModel.usePassword();
 

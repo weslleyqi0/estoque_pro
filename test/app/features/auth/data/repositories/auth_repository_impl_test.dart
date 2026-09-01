@@ -3,26 +3,25 @@ import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:estoque_pro/app/features/auth/domain/entities/auth_user_entity.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAuthService extends Mock implements AuthService {}
 class MockBiometricService extends Mock implements BiometricService {}
 class MockLocalStorageService extends Mock implements LocalStorageService {}
-class MockUser extends Mock implements User {}
 
 void main() {
   late MockAuthService mockAuthService;
   late MockBiometricService mockBiometricService;
   late MockLocalStorageService mockLocalStorageService;
-  late StreamController<User?> authStateController;
+  late StreamController<AuthUserEntity?> authStateController;
 
   setUp(() {
     mockAuthService = MockAuthService();
     mockBiometricService = MockBiometricService();
     mockLocalStorageService = MockLocalStorageService();
-    authStateController = StreamController<User?>.broadcast();
+    authStateController = StreamController<AuthUserEntity?>.broadcast();
 
     when(() => mockAuthService.authStateChanges).thenAnswer((_) => authStateController.stream);
     when(() => mockAuthService.currentUser).thenReturn(null);
@@ -92,8 +91,14 @@ void main() {
       expect(authRepository.isBiometricAuthenticated, isTrue);
     });
 
+    const testUser = AuthUserEntity(
+      uid: 'uid-123',
+      email: 'test@example.com',
+      displayName: 'Tester',
+    );
+
     test('when constructed with existing user, isBiometricAuthenticated starts as false when enabled', () {
-      when(() => mockAuthService.currentUser).thenReturn(MockUser());
+      when(() => mockAuthService.currentUser).thenReturn(testUser);
       final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       expect(authRepository.isBiometricAuthenticated, isFalse);
     });
@@ -103,14 +108,14 @@ void main() {
       expect(authRepository.isBiometricAuthenticated, isFalse);
 
       // Trigger log in
-      authStateController.add(MockUser());
+      authStateController.add(testUser);
       await Future.delayed(Duration.zero);
 
       expect(authRepository.isBiometricAuthenticated, isTrue);
     });
 
     test('transition from logged in to logged out sets isBiometricAuthenticated to false', () async {
-      when(() => mockAuthService.currentUser).thenReturn(MockUser());
+      when(() => mockAuthService.currentUser).thenReturn(testUser);
       final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       authRepository.setBiometricAuthenticated(true);
 
@@ -121,12 +126,8 @@ void main() {
       expect(authRepository.isBiometricAuthenticated, isFalse);
     });
 
-    test('currentUser maps Firebase User to AuthUserEntity', () {
-      final mockUser = MockUser();
-      when(() => mockUser.uid).thenReturn('uid-123');
-      when(() => mockUser.email).thenReturn('test@example.com');
-      when(() => mockUser.displayName).thenReturn('Tester');
-      when(() => mockAuthService.currentUser).thenReturn(mockUser);
+    test('currentUser returns user from AuthService', () {
+      when(() => mockAuthService.currentUser).thenReturn(testUser);
 
       final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
 
