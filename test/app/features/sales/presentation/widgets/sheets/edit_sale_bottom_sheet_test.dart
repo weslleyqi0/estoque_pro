@@ -156,6 +156,69 @@ void main() {
     expect(find.text('Cliente da Venda'), findsOneWidget);
     expect(find.text('João da Silva'), findsOneWidget);
     expect(find.text('Trocar'), findsOneWidget);
+    expect(find.text('Cancelar Venda'), findsOneWidget);
+  });
+
+  testWidgets('EditSaleBottomSheet allows cancelling sale with confirmation dialog', (tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    when(() => mockCancelUseCase.call(
+      sale: any(named: 'sale'),
+      reason: any(named: 'reason'),
+      comment: any(named: 'comment'),
+      currentUser: any(named: 'currentUser'),
+    )).thenAnswer((_) async => Result.success(initialSale.copyWith(status: SaleStatus.cancelled)));
+
+    final vm = EditSaleViewModel(
+      mockEditSaleUseCase,
+      mockCancelUseCase,
+      GetProductsUseCase(mockProductsRepository),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => EditSaleBottomSheet.show(
+                context,
+                initialSale,
+                authViewModel: authViewModel,
+                viewModelFactory: () => vm,
+              ),
+              child: const Text('Open Sale Edit'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Sale Edit'));
+    await tester.pumpAndSettle();
+
+    // Tap 'Cancelar Venda' button in footer
+    await tester.tap(find.text('Cancelar Venda'));
+    await tester.pumpAndSettle();
+
+    // Confirmation dialog should be visible
+    expect(find.text('Cancelar Venda'), findsWidgets);
+    expect(find.text('Sim, Cancelar Venda'), findsOneWidget);
+
+    // Confirm cancellation
+    await tester.tap(find.text('Sim, Cancelar Venda'));
+    await tester.pumpAndSettle();
+
+    verify(() => mockCancelUseCase.call(
+      sale: any(named: 'sale'),
+      reason: any(named: 'reason'),
+      comment: any(named: 'comment'),
+      currentUser: any(named: 'currentUser'),
+    )).called(1);
+
+    // Bottom sheet is closed
+    expect(find.text('Editar Venda VENDA-001'), findsNothing);
   });
 
   test('EditSaleUseCase does not append to editHistory when only customer changes', () async {
