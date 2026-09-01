@@ -2,7 +2,6 @@ import 'package:estoque_pro/app/core/utils/date_parser.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_category_model.dart';
 import 'package:estoque_pro/app/features/products/data/models/product_supplier_model.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 class ProductModel {
   final String id;
@@ -78,7 +77,7 @@ class ProductModel {
       'minStock': minStock,
       'isActive': isActive,
       'isArchived': isArchived,
-      if (updatedAt != null) 'updatedAt': ServerValue.timestamp,
+      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
     };
   }
 

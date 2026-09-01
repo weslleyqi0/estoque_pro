@@ -1,6 +1,5 @@
 import 'package:estoque_pro/app/core/utils/date_parser.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 class ProductHistoryModel {
   final ProductHistoryAction action;
@@ -49,7 +48,7 @@ class ProductHistoryModel {
       'quantity': quantity,
       'oldStock': oldStock,
       'newStock': newStock,
-      'date': isNew ? ServerValue.timestamp : date.millisecondsSinceEpoch,
+      'date': date.millisecondsSinceEpoch,
       'note': note,
       if (userName != null) 'userName': userName,
     };

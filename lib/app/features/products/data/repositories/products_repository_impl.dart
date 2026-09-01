@@ -8,7 +8,6 @@ import 'package:estoque_pro/app/features/products/data/models/product_model.dart
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 
 class ProductsRepositoryImpl implements ProductsRepository {
@@ -136,13 +135,13 @@ class ProductsRepositoryImpl implements ProductsRepository {
     }
 
     try {
-      final pushRef = _databaseService.ref.root.child('stock_movements').child(productId).push();
+      final pushKey = _databaseService.pushKey('stock_movements/$productId');
       final historyModel = ProductHistoryModel.fromEntity(history);
 
       final updates = {
-        'products/$productId/stock': ServerValue.increment(quantityDiff),
-        'products/$productId/updatedAt': ServerValue.timestamp,
-        'stock_movements/$productId/${pushRef.key}': historyModel.toMap(),
+        'products/$productId/stock': _databaseService.increment(quantityDiff),
+        'products/$productId/updatedAt': _databaseService.serverTimestamp,
+        'stock_movements/$productId/$pushKey': historyModel.toMap(),
       };
 
       await _databaseService.updateMultiple(updates);
@@ -155,17 +154,16 @@ class ProductsRepositoryImpl implements ProductsRepository {
 
   @override
   Stream<List<ProductHistoryEntity>> watchHistory(String productId, {int limit = 20}) {
-    return _databaseService.ref.root
-        .child('stock_movements')
-        .child(productId)
-        .orderByChild('date')
-        .limitToLast(limit)
-        .onValue
-        .map((event) {
+    return _databaseService
+        .listenOrdered(
+          subPath: 'stock_movements/$productId',
+          orderByChild: 'date',
+          limitToLast: limit,
+        )
+        .map((data) {
           final List<ProductHistoryEntity> history = [];
-          final value = event.snapshot.value;
-          if (value is Map) {
-            for (final entry in value.entries) {
+          if (data != null) {
+            for (final entry in data.entries) {
               if (entry.value is Map) {
                 final model = ProductHistoryModel.fromMap(
                   Map<dynamic, dynamic>.from(entry.value as Map),
@@ -186,14 +184,13 @@ class ProductsRepositoryImpl implements ProductsRepository {
     final trimmed = barcode.trim();
     if (trimmed.isEmpty) return const Result.success(false);
     try {
-      final snapshot = await _databaseService.ref
-          .orderByChild('barcode')
-          .equalTo(trimmed)
-          .get()
-          .timeout(const Duration(milliseconds: 800));
-      if (!snapshot.exists) return const Result.success(false);
+      final data = await _databaseService.queryOnce(
+        orderByChild: 'barcode',
+        equalTo: trimmed,
+        timeout: const Duration(milliseconds: 800),
+      );
+      if (data == null || data.isEmpty) return const Result.success(false);
 
-      final data = snapshot.value as Map;
       if (ignoreId != null) {
         // Se houver apenas 1 produto com esse barcode e for ele mesmo, não é duplicidade.
         if (data.length == 1 && data.keys.first == ignoreId) {
