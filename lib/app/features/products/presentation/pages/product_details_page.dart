@@ -21,15 +21,15 @@ import 'package:go_router/go_router.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
-  final ProductsViewModel viewModel;
-  final ProductsFormViewModel formViewModel;
+  final ProductsViewModel Function() viewModelFactory;
+  final ProductsFormViewModel Function() formViewModelFactory;
   final AuthViewModel authViewModel;
 
   const ProductDetailsPage({
     super.key,
     required this.product,
-    required this.viewModel,
-    required this.formViewModel,
+    required this.viewModelFactory,
+    required this.formViewModelFactory,
     required this.authViewModel,
   });
 
@@ -38,15 +38,24 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  ProductsViewModel get _viewModel => widget.viewModel;
-  ProductsFormViewModel get _formViewModel => widget.formViewModel;
+  late final ProductsViewModel _viewModel;
+  late final ProductsFormViewModel _formViewModel;
   AuthViewModel get _authViewModel => widget.authViewModel;
 
   @override
   void initState() {
     super.initState();
+    _viewModel = widget.viewModelFactory();
+    _formViewModel = widget.formViewModelFactory();
     _viewModel.listenAll();
     _viewModel.listenProductHistory(widget.product.id, limit: 6);
+  }
+
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    _formViewModel.dispose();
+    super.dispose();
   }
 
   @override

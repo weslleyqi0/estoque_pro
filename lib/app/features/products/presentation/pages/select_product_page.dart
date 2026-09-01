@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class SelectProductPage extends StatefulWidget {
-  final ProductsViewModel viewModel;
+  final ProductsViewModel Function() viewModelFactory;
   final String? title;
 
   const SelectProductPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
     this.title,
   });
 
@@ -20,23 +20,27 @@ class SelectProductPage extends StatefulWidget {
 }
 
 class _SelectProductPageState extends State<SelectProductPage> {
+  late final ProductsViewModel viewModel;
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.listenAll();
+    viewModel = widget.viewModelFactory();
+    viewModel.listenAll();
   }
 
   @override
   void dispose() {
-    widget.viewModel.setSearchQuery('', notify: false);
-    widget.viewModel.clearLowStockFilter(notify: false);
+    viewModel.setSearchQuery('', notify: false);
+    viewModel.clearLowStockFilter(notify: false);
+    viewModel.dispose();
     super.dispose();
   }
 
   Future<void> _openBarcodeScanner() async {
     final scannedCode = await context.push<String>(AppRoutes.saleScanner);
     if (scannedCode != null && mounted) {
-      widget.viewModel.setSearchQuery(scannedCode);
+      viewModel.setSearchQuery(scannedCode);
     }
   }
 
@@ -48,16 +52,16 @@ class _SelectProductPageState extends State<SelectProductPage> {
         centerTitle: true,
       ),
       body: ListenableBuilder(
-        listenable: widget.viewModel,
+        listenable: viewModel,
         builder: (context, _) {
-          final products = widget.viewModel.filteredProducts.where((p) => p.isActive).toList();
+          final products = viewModel.filteredProducts.where((p) => p.isActive).toList();
 
           return CustomScrollView(
             slivers: [
               AppFloatingSearch(
                 hint: 'Buscar por nome, categoria, fornecedor ou código...',
-                initialValue: widget.viewModel.searchQuery,
-                onChanged: widget.viewModel.setSearchQuery,
+                initialValue: viewModel.searchQuery,
+                onChanged: viewModel.setSearchQuery,
                 trailing: Tooltip(
                   message: 'Abrir leitor de código de barras',
                   child: InkWell(
@@ -79,17 +83,17 @@ class _SelectProductPageState extends State<SelectProductPage> {
                   ),
                 ),
               ),
-              if (widget.viewModel.isLoading)
+              if (viewModel.isLoading)
                 const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
                 )
               else if (products.isEmpty)
                 SliverFillRemaining(
                   child: AppEmptyList(
-                    message: widget.viewModel.searchQuery.isNotEmpty
-                        ? 'Nenhum produto encontrado para "${widget.viewModel.searchQuery}"'
+                    message: viewModel.searchQuery.isNotEmpty
+                        ? 'Nenhum produto encontrado para "${viewModel.searchQuery}"'
                         : 'Nenhum produto disponível.',
-                    icon: widget.viewModel.searchQuery.isNotEmpty ? AppIcons.searchOff : AppIcons.inventory2,
+                    icon: viewModel.searchQuery.isNotEmpty ? AppIcons.searchOff : AppIcons.inventory2,
                   ),
                 )
               else
