@@ -200,54 +200,7 @@ class CustomerDebtsViewModel extends BaseViewModel {
     return matches.isNotEmpty ? matches.first : null;
   }
 
-  /// Registra o pagamento / quitação de débito de um cliente.
-  Future<void> registerPayment({
-    required String customerId,
-    required String customerName,
-    required double amount,
-    required PaymentMethod paymentMethod,
-    String notes = '',
-    required String userId,
-    required String userName,
-  }) async {
-    final payment = CustomerPaymentEntity(
-      id: '',
-      customerId: customerId,
-      customerName: customerName,
-      amount: amount,
-      paymentMethod: paymentMethod,
-      notes: notes.trim(),
-      userId: userId,
-      userName: userName,
-      createdAt: DateTime.now(),
-    );
 
-    final result = await _registerCustomerPaymentUseCase(payment);
-    if (result.isFailure) {
-      throw result.error!;
-    }
-  }
-
-  /// Atualiza os dados de um pagamento existente (ex: valor, forma de pagamento, observações).
-  Future<void> updatePayment(CustomerPaymentEntity payment) async {
-    final result = await _registerCustomerPaymentUseCase(payment);
-    if (result.isFailure) {
-      throw result.error!;
-    }
-  }
-
-  /// Cancela um pagamento existente com motivo obrigatório. O valor retorna automaticamente para a dívida do cliente
-  /// e o registro permanece no extrato com status cancelado.
-  Future<void> cancelPayment(String paymentId, {required String reason}) async {
-    final matches = _payments.where((p) => p.id == paymentId);
-    if (matches.isNotEmpty) {
-      final payment = matches.first;
-      final result = await _cancelCustomerPaymentUseCase(payment, reason: reason);
-      if (result.isFailure) {
-        throw result.error!;
-      }
-    }
-  }
 
   @override
   void dispose() {

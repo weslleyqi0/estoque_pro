@@ -232,14 +232,15 @@ void main() {
     expect(statement[1].items.first.productName, 'Coca Cola');
   });
 
-  test('registerPayment saves entity via repository', () async {
+  test('registerPaymentCommand saves entity via repository', () async {
     when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async => const Result.success(null));
 
     viewModel = createViewModel();
 
-    await viewModel.registerPayment(
+    final payment = CustomerPaymentEntity(
+      id: 'cust_1',
       customerId: 'cust_1',
       customerName: 'João Silva',
       amount: 50.0,
@@ -247,12 +248,16 @@ void main() {
       notes: 'Pagamento parcial',
       userId: 'u1',
       userName: 'Operador Teste',
+      createdAt: DateTime.now(),
     );
 
+    await viewModel.registerPaymentCommand.execute(payment);
+
+    expect(viewModel.registerPaymentCommand.isSuccess, isTrue);
     verify(() => mockPaymentsRepo.save(any())).called(1);
   });
 
-  test('updatePayment updates entity via repository', () async {
+  test('registerPaymentCommand updates entity via repository', () async {
     when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async => const Result.success(null));
@@ -270,12 +275,13 @@ void main() {
       createdAt: DateTime.now(),
     );
 
-    await viewModel.updatePayment(payment);
+    await viewModel.registerPaymentCommand.execute(payment);
 
+    expect(viewModel.registerPaymentCommand.isSuccess, isTrue);
     verify(() => mockPaymentsRepo.save(payment)).called(1);
   });
 
-  test('cancelPayment throws error when reason is empty', () async {
+  test('cancelPaymentCommand fails when reason is empty', () async {
     final payment = CustomerPaymentEntity(
       id: 'pay_1',
       customerId: 'cust_1',
@@ -294,13 +300,13 @@ void main() {
     viewModel.listenAll();
     await Future<void>.delayed(const Duration(milliseconds: 50));
 
-    expect(
-      () => viewModel.cancelPayment('pay_1', reason: '   '),
-      throwsA(isA<BusinessRuleFailure>()),
-    );
+    await viewModel.cancelPaymentCommand.execute((payment: payment, reason: '   '));
+
+    expect(viewModel.cancelPaymentCommand.isFailure, isTrue);
+    expect(viewModel.cancelPaymentCommand.error, isA<BusinessRuleFailure>());
   });
 
-  test('cancelPayment updates payment with isCancelled true and cancellationReason', () async {
+  test('cancelPaymentCommand updates payment with isCancelled true and cancellationReason', () async {
     final payment = CustomerPaymentEntity(
       id: 'pay_1',
       customerId: 'cust_1',
@@ -321,8 +327,9 @@ void main() {
 
     await Future<void>.delayed(const Duration(milliseconds: 50));
 
-    await viewModel.cancelPayment('pay_1', reason: 'Lançamento duplicado');
+    await viewModel.cancelPaymentCommand.execute((payment: payment, reason: 'Lançamento duplicado'));
 
+    expect(viewModel.cancelPaymentCommand.isSuccess, isTrue);
     final captured = verify(() => mockPaymentsRepo.save(captureAny())).captured;
     expect(captured.isNotEmpty, isTrue);
     final saved = captured.first as CustomerPaymentEntity;
