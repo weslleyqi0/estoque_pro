@@ -31,12 +31,15 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/produc
 import 'package:estoque_pro/app/features/deliveries/presentation/pages/deliveries_page.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
+import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/new_sale_page.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/sale_scanner_page.dart';
 import 'package:estoque_pro/app/features/sales/presentation/pages/sales_page.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
+import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
 import 'package:estoque_pro/app/features/customers/presentation/pages/customer_form_page.dart';
 import 'package:estoque_pro/app/features/customers/presentation/pages/customers_page.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
@@ -310,6 +313,9 @@ class AppRouter {
           return SalesPage(
             viewModelFactory: () => getIt<SalesViewModel>(),
             deliveriesViewModelFactory: () => getIt<DeliveriesViewModel>(),
+            editSaleViewModelFactory: () => getIt<EditSaleViewModel>(),
+            customersViewModelFactory: () => getIt<CustomersViewModel>(),
+            debtsViewModelFactory: () => getIt<CustomerDebtsViewModel>(),
             authViewModel: getIt<AuthViewModel>(),
             initialTab: initialTab,
           );
@@ -339,6 +345,10 @@ class AppRouter {
           final initialTab = state.extra as DeliveryFilterTab?;
           return DeliveriesPage(
             viewModelFactory: () => getIt<DeliveriesViewModel>(),
+            customersViewModelFactory: () => getIt<CustomersViewModel>(),
+            debtsViewModelFactory: () => getIt<CustomerDebtsViewModel>(),
+            salesRepository: getIt<SalesRepository>(),
+            customersRepository: getIt<CustomersRepository>(),
             authViewModel: getIt<AuthViewModel>(),
             initialTab: initialTab,
           );
