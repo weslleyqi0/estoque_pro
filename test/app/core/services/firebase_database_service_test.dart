@@ -23,8 +23,9 @@ void main() {
     expect(service, isA<DatabaseService>());
   });
 
-  test('ref returns underlying DatabaseReference', () {
-    expect(service.ref, equals(mockRef));
+  test('serverTimestamp and increment return expected values', () {
+    expect(service.serverTimestamp, equals(ServerValue.timestamp));
+    expect(service.increment(5), equals(ServerValue.increment(5)));
   });
 
   test('delete calls child remove on reference', () async {

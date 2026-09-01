@@ -13,7 +13,18 @@ class FirebaseDatabaseService<T> implements DatabaseService<T> {
   FirebaseDatabaseService(this._ref);
 
   @override
-  DatabaseReference get ref => _ref;
+  String pushKey([String? subPath]) {
+    if (subPath != null && subPath.isNotEmpty) {
+      return _ref.root.child(subPath).push().key ?? '';
+    }
+    return _ref.push().key ?? '';
+  }
+
+  @override
+  Object get serverTimestamp => ServerValue.timestamp;
+
+  @override
+  Object increment(num value) => ServerValue.increment(value);
 
   Future<R> _handleError<R>(Future<R> Function() action) async {
     try {
@@ -146,6 +157,31 @@ class FirebaseDatabaseService<T> implements DatabaseService<T> {
     });
   }
 
+  /// Listen with order and limit filters
+  @override
+  Stream<Map<String, dynamic>?> listenOrdered({
+    String? subPath,
+    String? orderByChild,
+    int? limitToLast,
+  }) {
+    Query query = subPath != null && subPath.isNotEmpty ? _ref.root.child(subPath) : _ref;
+
+    if (orderByChild != null && orderByChild.isNotEmpty) {
+      query = query.orderByChild(orderByChild);
+    }
+    if (limitToLast != null && limitToLast > 0) {
+      query = query.limitToLast(limitToLast);
+    }
+
+    return query.onValue.map((event) {
+      final value = event.snapshot.value;
+      if (value is Map) {
+        return Map<String, dynamic>.from(value);
+      }
+      return null;
+    });
+  }
+
   /// Fetch data only once
   @override
   Future<Map<String, dynamic>?> getOnce() async {
@@ -163,6 +199,38 @@ class FirebaseDatabaseService<T> implements DatabaseService<T> {
   Future<Map<String, dynamic>?> getChildOnce(String key) async {
     return _handleError(() async {
       final snapshot = await _ref.child(key).get();
+      if (snapshot.exists && snapshot.value is Map) {
+        return Map<String, dynamic>.from(snapshot.value as Map);
+      }
+      return null;
+    });
+  }
+
+  /// Query once with order, filter, and limit
+  @override
+  Future<Map<String, dynamic>?> queryOnce({
+    String? subPath,
+    String? orderByChild,
+    dynamic equalTo,
+    int? limitToLast,
+    Duration? timeout,
+  }) async {
+    return _handleError(() async {
+      Query query = subPath != null && subPath.isNotEmpty ? _ref.root.child(subPath) : _ref;
+
+      if (orderByChild != null && orderByChild.isNotEmpty) {
+        query = query.orderByChild(orderByChild);
+      }
+      if (equalTo != null) {
+        query = query.equalTo(equalTo);
+      }
+      if (limitToLast != null && limitToLast > 0) {
+        query = query.limitToLast(limitToLast);
+      }
+
+      final future = query.get();
+      final snapshot = timeout != null ? await future.timeout(timeout) : await future;
+
       if (snapshot.exists && snapshot.value is Map) {
         return Map<String, dynamic>.from(snapshot.value as Map);
       }
