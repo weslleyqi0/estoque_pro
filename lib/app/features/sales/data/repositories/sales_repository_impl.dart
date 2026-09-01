@@ -8,7 +8,6 @@ import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 
 class SalesRepositoryImpl implements SalesRepository {
@@ -18,15 +17,15 @@ class SalesRepositoryImpl implements SalesRepository {
 
   @override
   Stream<List<SaleEntity>> watchAll({int limit = 50}) {
-    return _databaseService.ref
-        .orderByChild('created_at')
-        .limitToLast(limit)
-        .onValue
-        .map((event) {
+    return _databaseService
+        .listenOrdered(
+          orderByChild: 'created_at',
+          limitToLast: limit,
+        )
+        .map((data) {
           final List<SaleEntity> sales = [];
-          final value = event.snapshot.value;
-          if (value is Map) {
-            for (final entry in value.entries) {
+          if (data != null) {
+            for (final entry in data.entries) {
               if (entry.value is Map) {
                 try {
                   final model = SaleModel.fromMap(
@@ -57,7 +56,7 @@ class SalesRepositoryImpl implements SalesRepository {
       final currentStock = productStocks[productId] ?? 0;
       final newStock = currentStock - item.quantity;
 
-      final movPushRef = _databaseService.ref.root.child('stock_movements').child(productId).push();
+      final movPushKey = _databaseService.pushKey('stock_movements/$productId');
 
       final historyModel = ProductHistoryModel.fromEntity(
         ProductHistoryEntity(
@@ -72,17 +71,17 @@ class SalesRepositoryImpl implements SalesRepository {
         ),
       );
 
-      updates['products/$productId/stock'] = ServerValue.increment(-item.quantity);
-      updates['products/$productId/updatedAt'] = ServerValue.timestamp;
-      updates['stock_movements/$productId/${movPushRef.key}'] = historyModel.toMap();
+      updates['products/$productId/stock'] = _databaseService.increment(-item.quantity);
+      updates['products/$productId/updatedAt'] = _databaseService.serverTimestamp;
+      updates['stock_movements/$productId/$movPushKey'] = historyModel.toMap();
     }
   }
 
   @override
   Future<Result<void>> save(SaleEntity sale, {Map<String, int>? productStocks}) async {
     try {
-      final pushRef = _databaseService.ref.push();
-      final saleId = pushRef.key!;
+      final pushKey = _databaseService.pushKey();
+      final saleId = pushKey;
 
       // Auto-generate saleNumber if empty
       final saleNumber = sale.saleNumber.isNotEmpty ? sale.saleNumber : SaleCodeGenerator.generate();
@@ -108,10 +107,9 @@ class SalesRepositoryImpl implements SalesRepository {
   @override
   Future<Result<void>> updateSale(SaleEntity sale, {Map<String, int>? productStocks}) async {
     try {
-      final oldSaleSnapshot = await _databaseService.ref.child(sale.id).get();
+      final oldVal = await _databaseService.getChildOnce(sale.id);
       String? oldStatus;
-      final oldVal = oldSaleSnapshot.value;
-      if (oldVal is Map) {
+      if (oldVal != null) {
         oldStatus = oldVal['status'] as String?;
       }
 
@@ -149,9 +147,8 @@ class SalesRepositoryImpl implements SalesRepository {
       if (currentProductStocks != null) {
         stocksMap.addAll(currentProductStocks);
       } else {
-        final productsSnap = await _databaseService.ref.root.child('products').get();
-        if (productsSnap.exists && productsSnap.value is Map) {
-          final pMap = productsSnap.value as Map;
+        final pMap = await _databaseService.queryOnce(subPath: 'products');
+        if (pMap != null) {
           for (final entry in pMap.entries) {
             if (entry.value is Map) {
               final stock = (entry.value['stock'] as num?)?.toInt() ?? 0;
@@ -166,7 +163,7 @@ class SalesRepositoryImpl implements SalesRepository {
         final delta = entry.value;
 
         if (delta != 0 && productId.trim().isNotEmpty) {
-          final movPushRef = _databaseService.ref.root.child('stock_movements').child(productId).push();
+          final movPushKey = _databaseService.pushKey('stock_movements/$productId');
           final action = delta > 0 ? ProductHistoryAction.remove : ProductHistoryAction.add;
           final note = sale.status == SaleStatus.cancelled
               ? 'Estorno por cancelamento da Venda ${sale.saleNumber}'
@@ -188,9 +185,9 @@ class SalesRepositoryImpl implements SalesRepository {
             ),
           );
 
-          updates['products/$productId/stock'] = ServerValue.increment(-delta);
-          updates['products/$productId/updatedAt'] = ServerValue.timestamp;
-          updates['stock_movements/$productId/${movPushRef.key}'] = historyModel.toMap();
+          updates['products/$productId/stock'] = _databaseService.increment(-delta);
+          updates['products/$productId/updatedAt'] = _databaseService.serverTimestamp;
+          updates['stock_movements/$productId/$movPushKey'] = historyModel.toMap();
         }
       }
 

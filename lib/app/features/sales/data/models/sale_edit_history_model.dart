@@ -1,7 +1,6 @@
 import 'package:estoque_pro/app/core/utils/date_parser.dart';
 import 'package:estoque_pro/app/features/sales/data/models/sale_item_model.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history_entity.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 class SaleEditHistoryModel {
   final String id;
@@ -63,7 +62,7 @@ class SaleEditHistoryModel {
       'sequence_number': sequenceNumber,
       'user_id': userId,
       'user_name': userName,
-      'timestamp': ServerValue.timestamp,
+      'timestamp': timestamp.toIso8601String(),
       'reason': reason,
       'added_items': addedItems.map((e) => e.toMap()).toList(),
       'removed_items': removedItems.map((e) => e.toMap()).toList(),
