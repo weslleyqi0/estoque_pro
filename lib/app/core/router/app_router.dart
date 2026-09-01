@@ -121,11 +121,11 @@ class AppRouter {
     routes: [
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => LoginPage(viewModel: getIt<AuthViewModel>()),
+        builder: (context, state) => LoginPage(viewModelFactory: () => getIt<AuthViewModel>()),
       ),
       GoRoute(
         path: AppRoutes.biometric,
-        builder: (context, state) => BiometricPage(viewModel: getIt<BiometricViewModel>()),
+        builder: (context, state) => BiometricPage(viewModelFactory: () => getIt<BiometricViewModel>()),
       ),
       GoRoute(
         path: AppRoutes.home,
@@ -148,7 +148,7 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.homeShortcutsSettings,
         builder: (context, state) => HomeShortcutsSettingsPage(
-          viewModel: getIt<HomeShortcutsViewModel>(),
+          viewModelFactory: () => getIt<HomeShortcutsViewModel>(),
           authViewModel: getIt<AuthViewModel>(),
         ),
       ),
@@ -163,7 +163,7 @@ class AppRouter {
         builder: (context, state) {
           final user = state.extra as UserEntity?;
           return UserFormPage(
-            viewModel: getIt<UserFormViewModel>(),
+            viewModelFactory: () => getIt<UserFormViewModel>(),
             user: user,
           );
         },
@@ -180,7 +180,7 @@ class AppRouter {
         builder: (context, state) {
           final supplier = state.extra as SupplierEntity?;
           return SupplierFormPage(
-            viewModel: getIt<SuppliersFormViewmodel>(),
+            viewModelFactory: () => getIt<SuppliersFormViewmodel>(),
             supplier: supplier,
           );
         },
@@ -198,7 +198,7 @@ class AppRouter {
         builder: (context, state) {
           final customer = state.extra as CustomerEntity?;
           return CustomerFormPage(
-            viewModel: getIt<CustomersFormViewModel>(),
+            viewModelFactory: () => getIt<CustomersFormViewModel>(),
             customer: customer,
           );
         },
@@ -215,7 +215,7 @@ class AppRouter {
         builder: (context, state) {
           final category = state.extra as CategoryEntity?;
           return CategoryFormPage(
-            viewModel: getIt<CategoriesFormViewmodel>(),
+            viewModelFactory: () => getIt<CategoriesFormViewmodel>(),
             category: category,
           );
         },
@@ -240,9 +240,9 @@ class AppRouter {
           final product = state.extra as ProductEntity?;
           return ProductFormPage(
             product: product,
-            viewModel: getIt<ProductsFormViewModel>(),
-            categoriesVM: getIt<CategoriesViewModel>(),
-            suppliersVM: getIt<SuppliersViewModel>(),
+            viewModelFactory: () => getIt<ProductsFormViewModel>(),
+            categoriesVMFactory: () => getIt<CategoriesViewModel>(),
+            suppliersVMFactory: () => getIt<SuppliersViewModel>(),
             authViewModel: getIt<AuthViewModel>(),
           );
         },
@@ -255,8 +255,8 @@ class AppRouter {
             _lastSelectedProduct = product;
             return ProductDetailsPage(
               product: product,
-              viewModel: getIt<ProductsViewModel>(),
-              formViewModel: getIt<ProductsFormViewModel>(),
+              viewModelFactory: () => getIt<ProductsViewModel>(),
+              formViewModelFactory: () => getIt<ProductsFormViewModel>(),
               authViewModel: getIt<AuthViewModel>(),
             );
           }
@@ -280,7 +280,7 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: SelectProductPage(
-              viewModel: getIt<ProductsViewModel>(),
+              viewModelFactory: () => getIt<ProductsViewModel>(),
               title: title,
             ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -347,7 +347,7 @@ class AppRouter {
 
       GoRoute(
         path: AppRoutes.inactive,
-        builder: (context, state) => InactivePage(viewModel: getIt<AuthViewModel>()),
+        builder: (context, state) => InactivePage(viewModelFactory: () => getIt<AuthViewModel>()),
       ),
       GoRoute(
         path: AppRoutes.unauthorized,
