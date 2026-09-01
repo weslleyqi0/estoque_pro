@@ -61,12 +61,12 @@ void main() {
 
     viewModel.listenAll();
 
-    expect(viewModel.state, equals(CommandState.running));
+    expect(viewModel.state, equals(ProductsLoadState.loading));
     expect(viewModel.isLoading, isTrue);
 
     await Future.delayed(Duration.zero);
 
-    expect(viewModel.state, equals(CommandState.success));
+    expect(viewModel.state, equals(ProductsLoadState.success));
     expect(viewModel.isSuccess, isTrue);
     expect(viewModel.products.length, equals(1));
     expect(viewModel.products.first.name, equals('Camisa Polo'));

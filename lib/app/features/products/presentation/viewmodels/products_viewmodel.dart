@@ -12,6 +12,8 @@ import 'package:estoque_pro/app/features/products/domain/usecases/get_products_u
 import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
 
+enum ProductsLoadState { idle, loading, success, failure }
+
 class ProductsViewModel extends BaseViewModel {
   final GetProductsUseCase _getProductsUseCase;
   final ArchiveProductUseCase _archiveProductUseCase;
@@ -25,12 +27,12 @@ class ProductsViewModel extends BaseViewModel {
   late final Command1<bool, String> unarchiveProductCommand;
   late final Command1<bool, String> deletePermanentlyCommand;
 
-  CommandState _state = CommandState.idle;
-  CommandState get state => _state;
+  ProductsLoadState _state = ProductsLoadState.idle;
+  ProductsLoadState get state => _state;
 
-  bool get isLoading => _state == CommandState.running;
-  bool get isSuccess => _state == CommandState.success;
-  bool get isFailure => _state == CommandState.failure;
+  bool get isLoading => _state == ProductsLoadState.loading;
+  bool get isSuccess => _state == ProductsLoadState.success;
+  bool get isFailure => _state == ProductsLoadState.failure;
 
   List<ProductEntity> _products = [];
   List<ProductEntity> get products => _products;
@@ -132,19 +134,19 @@ class ProductsViewModel extends BaseViewModel {
   void listenAll() {
     if (_subscription != null) return;
 
-    _state = CommandState.running;
+    _state = ProductsLoadState.loading;
     notifyListeners();
 
     _subscription?.cancel();
     _subscription = _getProductsUseCase.watchAll().listen(
       (list) {
         _products = list.sortByName((a) => a.name);
-        _state = CommandState.success;
+        _state = ProductsLoadState.success;
         notifyListeners();
       },
       onError: (e) {
         _error = e is AppFailure ? e : UnknownFailure(message: e.toString(), error: e);
-        _state = CommandState.failure;
+        _state = ProductsLoadState.failure;
         notifyListeners();
       },
     );
