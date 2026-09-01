@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
@@ -34,7 +33,7 @@ class SalesListSliver extends StatelessWidget {
       );
     }
 
-    if (viewModel.state == CommandState.failure) {
+    if (viewModel.isFailure) {
       return SliverFillRemaining(
         child: Center(
           child: Text(

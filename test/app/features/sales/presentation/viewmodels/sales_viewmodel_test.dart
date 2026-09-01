@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
@@ -107,7 +106,7 @@ void main() {
     deliveriesController.add([delivery1]);
     await Future.delayed(Duration.zero);
 
-    expect(viewModel.state, CommandState.success);
+    expect(viewModel.state, SalesLoadState.success);
     expect(viewModel.sales.length, 1);
 
     final deliveryFoundById = viewModel.getDeliveryForSale('s1');

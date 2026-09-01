@@ -23,6 +23,8 @@ enum SalesFilterTab {
   const SalesFilterTab(this.label);
 }
 
+enum SalesLoadState { idle, loading, success, failure }
+
 class SalesViewModel extends BaseViewModel {
   final GetSalesUseCase _getSalesUseCase;
   final DeleteSaleUseCase _deleteSaleUseCase;
@@ -49,9 +51,11 @@ class SalesViewModel extends BaseViewModel {
     return _deliveriesBySaleId[saleId] ?? (saleNumber != null ? _deliveriesBySaleId[saleNumber] : null);
   }
 
-  CommandState _state = CommandState.idle;
-  CommandState get state => _state;
-  bool get isLoading => _state == CommandState.running;
+  SalesLoadState _state = SalesLoadState.idle;
+  SalesLoadState get state => _state;
+  bool get isLoading => _state == SalesLoadState.loading;
+  bool get isSuccess => _state == SalesLoadState.success;
+  bool get isFailure => _state == SalesLoadState.failure;
 
   List<SaleEntity> _sales = [];
   List<SaleEntity> get sales => _sales;
@@ -136,19 +140,19 @@ class SalesViewModel extends BaseViewModel {
   void listenAll() {
     if (_salesSubscription != null) return;
 
-    _state = CommandState.running;
+    _state = SalesLoadState.loading;
     notifyListeners();
 
     _salesSubscription?.cancel();
     _salesSubscription = _getSalesUseCase.watchAll().listen(
       (list) {
         _sales = list;
-        _state = CommandState.success;
+        _state = SalesLoadState.success;
         notifyListeners();
       },
       onError: (e) {
         _error = e;
-        _state = CommandState.failure;
+        _state = SalesLoadState.failure;
         notifyListeners();
       },
     );
