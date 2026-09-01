@@ -50,7 +50,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: HomeShortcutsSettingsPage(
-          viewModel: shortcutsViewModel,
+          viewModelFactory: () => shortcutsViewModel,
           authViewModel: authViewModel,
         ),
       ),

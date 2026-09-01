@@ -116,29 +116,31 @@ class _PaymentSheetState extends State<PaymentSheet> {
       vm.setDeliveryNotes(_deliveryNotesController.text.trim());
     }
 
+    final currentUser = widget.authViewModel.currentUser;
+    if (currentUser == null) {
+      AppSnackbar.error(context, 'Usuário não autenticado.');
+      return;
+    }
+
     setState(() => _isLoading = true);
-    try {
-      final currentUser = widget.authViewModel.currentUser;
 
-      if (currentUser == null) {
-        throw Exception('Usuário não autenticado.');
-      }
+    await widget.cartViewModel.finalizeSaleCommand.execute((
+      userId: currentUser.uid,
+      userName: currentUser.name,
+      availableProducts: widget.availableProducts,
+    ));
 
-      await widget.cartViewModel.executeFinalize(
-        userId: currentUser.uid,
-        userName: currentUser.name,
-        availableProducts: widget.availableProducts,
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (widget.cartViewModel.finalizeSaleCommand.isSuccess) {
+      Navigator.pop(context);
+      widget.onSaleSuccess();
+    } else if (widget.cartViewModel.finalizeSaleCommand.isFailure) {
+      AppSnackbar.error(
+        context,
+        widget.cartViewModel.finalizeSaleCommand.error?.message ?? 'Erro ao finalizar venda.',
       );
-
-      if (mounted) {
-        Navigator.pop(context);
-        widget.onSaleSuccess();
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        AppSnackbar.error(context, e.toString().replaceAll('Exception: ', ''));
-      }
     }
   }
 

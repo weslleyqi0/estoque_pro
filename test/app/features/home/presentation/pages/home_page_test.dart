@@ -6,15 +6,27 @@ import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewm
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/delete_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/home/presentation/pages/home_page.dart';
 import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/archive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/delete_product_permanently_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/delete_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
@@ -60,7 +72,7 @@ void main() {
     productsController = StreamController<List<ProductEntity>>.broadcast();
     deliveriesController = StreamController<List<DeliveryEntity>>.broadcast();
 
-    when(() => mockSalesRepository.watchAll()).thenAnswer((_) => salesController.stream);
+    when(() => mockSalesRepository.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => salesController.stream);
     when(() => mockProductsRepository.watchAll()).thenAnswer((_) => productsController.stream);
     when(() => mockDeliveriesRepository.watchAll()).thenAnswer((_) => deliveriesController.stream);
 
@@ -77,9 +89,25 @@ void main() {
     when(() => mockAuthRepository.authStateChanges).thenAnswer((_) => const Stream.empty());
 
     authViewModel = AuthViewModel(mockAuthRepository, mockAuthService);
-    salesViewModel = SalesViewModel(mockSalesRepository, mockDeliveriesRepository);
-    productsViewModel = ProductsViewModel(mockProductsRepository);
-    deliveriesViewModel = DeliveriesViewModel(mockDeliveriesRepository);
+    salesViewModel = SalesViewModel(
+      GetSalesUseCase(mockSalesRepository),
+      DeleteSaleUseCase(mockSalesRepository),
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+    );
+    productsViewModel = ProductsViewModel(
+      GetProductsUseCase(mockProductsRepository),
+      ArchiveProductUseCase(mockProductsRepository),
+      UnarchiveProductUseCase(mockProductsRepository),
+      DeleteProductPermanentlyUseCase(mockProductsRepository),
+      WatchProductHistoryUseCase(mockProductsRepository),
+    );
+    deliveriesViewModel = DeliveriesViewModel(
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+      SaveDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryStatusUseCase(mockDeliveriesRepository),
+      DeleteDeliveryUseCase(mockDeliveriesRepository),
+    );
   });
 
   tearDown(() {

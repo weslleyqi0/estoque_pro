@@ -13,13 +13,13 @@ class ProductsListSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (viewModel.state == ProductsLoadState.loading) {
+    if (viewModel.isLoading) {
       return const SliverFillRemaining(
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (viewModel.state == ProductsLoadState.failure) {
+    if (viewModel.isFailure) {
       return SliverFillRemaining(
         child: Center(child: Text(viewModel.error.toString())),
       );

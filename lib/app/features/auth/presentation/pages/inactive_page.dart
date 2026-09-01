@@ -4,15 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class InactivePage extends StatelessWidget {
-  final AuthViewModel viewModel;
+  final AuthViewModel Function() viewModelFactory;
 
   const InactivePage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
   });
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = viewModelFactory();
     return Scaffold(
       body: SafeArea(
         child: Padding(

@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
@@ -18,36 +19,44 @@ class SaveSaleUseCase {
     this._productsRepository,
   );
 
-  Future<void> execute({
+  AsyncResult<SaleEntity> call({
     required SaleEntity sale,
     bool isUpdate = false,
   }) async {
     if (sale.items.isEmpty) {
-      throw Exception('A venda não possui itens.');
+      return Result.failure(
+        const BusinessRuleFailure(message: 'A venda não possui itens.'),
+      );
     }
 
     final Map<String, int> productStocks = {};
 
     // Se for uma venda concluída, busca os estoques atuais e valida disponibilidade
     if (sale.status != SaleStatus.inProgress) {
-      final allProducts = await _productsRepository.getAll();
+      final allProductsResult = await _productsRepository.getAll();
+      final allProducts = allProductsResult.value ?? [];
       final productsMap = {for (var p in allProducts) p.id: p};
 
       for (final item in sale.items) {
         final product = productsMap[item.productId];
         if (product != null && product.stock < item.quantity) {
-          throw Exception(
-            'Estoque insuficiente para o produto "${product.name}". Estoque disponível: ${product.stock}, Solicitado: ${item.quantity}.',
+          return Result.failure(
+            BusinessRuleFailure(
+              message:
+                  'Estoque insuficiente para o produto "${product.name}". Estoque disponível: ${product.stock}, Solicitado: ${item.quantity}.',
+            ),
           );
         }
         productStocks[item.productId] = product?.stock ?? 0;
       }
     }
 
-    if (isUpdate) {
-      await _salesRepository.updateSale(sale, productStocks: productStocks);
-    } else {
-      await _salesRepository.save(sale, productStocks: productStocks);
-    }
+    final result = isUpdate
+        ? await _salesRepository.updateSale(sale, productStocks: productStocks)
+        : await _salesRepository.save(sale, productStocks: productStocks);
+    return result.fold(
+      onSuccess: (_) => Result.success(sale),
+      onFailure: (error) => Result.failure(error),
+    );
   }
 }

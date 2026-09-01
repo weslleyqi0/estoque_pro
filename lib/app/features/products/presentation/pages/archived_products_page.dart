@@ -39,15 +39,15 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
   }
 
   Future<void> _unarchive(String id, String name) async {
-    try {
-      await viewModel.unarchiveProduct(id);
-      if (mounted) {
-        AppSnackbar.success(context, 'Produto "$name" restaurado para a lista (desativado).');
-      }
-    } catch (e) {
-      if (mounted) {
-        AppSnackbar.error(context, 'Erro ao restaurar produto: $e');
-      }
+    await viewModel.unarchiveProductCommand.execute(id);
+    if (!mounted) return;
+    if (viewModel.unarchiveProductCommand.isSuccess) {
+      AppSnackbar.success(context, 'Produto "$name" restaurado para a lista (desativado).');
+    } else if (viewModel.unarchiveProductCommand.isFailure) {
+      AppSnackbar.error(
+        context,
+        viewModel.unarchiveProductCommand.error?.message ?? 'Erro ao restaurar produto.',
+      );
     }
   }
 
@@ -63,15 +63,15 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
     );
 
     if (confirmed == true && mounted) {
-      try {
-        await viewModel.deletePermanently(id);
-        if (mounted) {
-          AppSnackbar.success(context, 'Produto e histórico de movimentações excluídos permanentemente.');
-        }
-      } catch (e) {
-        if (mounted) {
-          AppSnackbar.error(context, 'Erro ao excluir permanentemente: $e');
-        }
+      await viewModel.deletePermanentlyCommand.execute(id);
+      if (!mounted) return;
+      if (viewModel.deletePermanentlyCommand.isSuccess) {
+        AppSnackbar.success(context, 'Produto e histórico de movimentações excluídos permanentemente.');
+      } else if (viewModel.deletePermanentlyCommand.isFailure) {
+        AppSnackbar.error(
+          context,
+          viewModel.deletePermanentlyCommand.error?.message ?? 'Erro ao excluir permanentemente.',
+        );
       }
     }
   }

@@ -1,7 +1,8 @@
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:flutter/material.dart';
 
-class ThemeViewModel extends ChangeNotifier {
+class ThemeViewModel extends BaseViewModel {
   static const String _themeModeKey = 'app_theme_mode';
 
   final LocalStorageService _localStorageService;

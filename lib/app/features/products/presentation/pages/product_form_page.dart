@@ -16,17 +16,17 @@ import 'package:go_router/go_router.dart';
 
 class ProductFormPage extends StatefulWidget {
   final ProductEntity? product;
-  final ProductsFormViewModel viewModel;
-  final CategoriesViewModel categoriesVM;
-  final SuppliersViewModel suppliersVM;
+  final ProductsFormViewModel Function() viewModelFactory;
+  final CategoriesViewModel Function() categoriesVMFactory;
+  final SuppliersViewModel Function() suppliersVMFactory;
   final AuthViewModel authViewModel;
 
   const ProductFormPage({
     super.key,
     this.product,
-    required this.viewModel,
-    required this.categoriesVM,
-    required this.suppliersVM,
+    required this.viewModelFactory,
+    required this.categoriesVMFactory,
+    required this.suppliersVMFactory,
     required this.authViewModel,
   });
 
@@ -35,9 +35,9 @@ class ProductFormPage extends StatefulWidget {
 }
 
 class _ProductFormPageState extends State<ProductFormPage> {
-  ProductsFormViewModel get _viewModel => widget.viewModel;
-  CategoriesViewModel get _categoriesVM => widget.categoriesVM;
-  SuppliersViewModel get _suppliersVM => widget.suppliersVM;
+  late final ProductsFormViewModel _viewModel;
+  late final CategoriesViewModel _categoriesVM;
+  late final SuppliersViewModel _suppliersVM;
   AuthViewModel get _authViewModel => widget.authViewModel;
   final _formKey = GlobalKey<FormState>();
 
@@ -55,6 +55,9 @@ class _ProductFormPageState extends State<ProductFormPage> {
   @override
   void initState() {
     super.initState();
+    _viewModel = widget.viewModelFactory();
+    _categoriesVM = widget.categoriesVMFactory();
+    _suppliersVM = widget.suppliersVMFactory();
 
     _viewModel.init(widget.product);
 
@@ -88,6 +91,9 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
   @override
   void dispose() {
+    _viewModel.dispose();
+    _categoriesVM.dispose();
+    _suppliersVM.dispose();
     _nameController.dispose();
     _imgUrlController.dispose();
     _descriptionController.dispose();

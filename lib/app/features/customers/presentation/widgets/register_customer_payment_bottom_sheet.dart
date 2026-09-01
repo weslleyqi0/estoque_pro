@@ -2,6 +2,7 @@ import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
+import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:flutter/material.dart';
@@ -94,29 +95,34 @@ class _RegisterCustomerPaymentBottomSheetState extends State<RegisterCustomerPay
 
     setState(() => _isLoading = true);
 
-    try {
-      await widget.debtsViewModel.registerPayment(
-        customerId: widget.customer.id,
-        customerName: widget.customer.name,
-        amount: amount,
-        paymentMethod: _selectedPaymentMethod,
-        notes: _notesController.text,
-        userId: userId,
-        userName: userName,
-      );
+    final payment = CustomerPaymentEntity(
+      id: '',
+      customerId: widget.customer.id,
+      customerName: widget.customer.name,
+      amount: amount,
+      paymentMethod: _selectedPaymentMethod,
+      notes: _notesController.text.trim(),
+      userId: userId,
+      userName: userName,
+      createdAt: DateTime.now(),
+    );
 
-      if (mounted) {
-        Navigator.pop(context, true);
-        AppSnackbar.success(
-          context,
-          'Pagamento de ${CurrencyInputFormatter.formatCurrency(amount)} registrado com sucesso!',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        AppSnackbar.error(context, 'Erro ao registrar pagamento: $e');
-      }
+    await widget.debtsViewModel.registerPaymentCommand.execute(payment);
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (widget.debtsViewModel.registerPaymentCommand.isSuccess) {
+      Navigator.pop(context, true);
+      AppSnackbar.success(
+        context,
+        'Pagamento de ${CurrencyInputFormatter.formatCurrency(amount)} registrado com sucesso!',
+      );
+    } else if (widget.debtsViewModel.registerPaymentCommand.isFailure) {
+      AppSnackbar.error(
+        context,
+        widget.debtsViewModel.registerPaymentCommand.error?.message ?? 'Erro ao registrar pagamento.',
+      );
     }
   }
 

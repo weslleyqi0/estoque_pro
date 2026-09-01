@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/core/utils/cpf_input_formatter.dart';
 import 'package:estoque_pro/app/core/utils/phone_input_formatter.dart';
@@ -63,10 +62,8 @@ class _CustomerDetailBottomSheetState extends State<CustomerDetailBottomSheet> {
     final hasPhone = customer.phone != null && customer.phone!.trim().isNotEmpty;
     final hasAddress = customer.address != null && customer.address!.trim().isNotEmpty;
 
-    final debtsVM = widget.debtsViewModel ??
-        (getIt.isRegistered<CustomerDebtsViewModel>() ? getIt<CustomerDebtsViewModel>() : null);
-    final authVM = widget.authViewModel ??
-        (getIt.isRegistered<AuthViewModel>() ? getIt<AuthViewModel>() : null);
+    final debtsVM = widget.debtsViewModel;
+    final authVM = widget.authViewModel;
 
     return NotificationListener<DraggableScrollableNotification>(
       onNotification: (notification) {

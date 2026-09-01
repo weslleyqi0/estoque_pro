@@ -3,7 +3,6 @@ import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_ent
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/sales/data/models/sale_item_model.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 class DeliveryModel {
   final String id;
@@ -108,7 +107,7 @@ class DeliveryModel {
       'user_id': userId,
       'user_name': userName,
       'created_at': createdAt.toIso8601String(),
-      'updated_at': ServerValue.timestamp,
+      'updated_at': (updatedAt ?? DateTime.now()).toIso8601String(),
     };
   }
 

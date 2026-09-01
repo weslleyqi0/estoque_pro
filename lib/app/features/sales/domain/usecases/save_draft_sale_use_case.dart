@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -18,7 +19,7 @@ class SaveDraftSaleUseCase {
 
   const SaveDraftSaleUseCase(this._saveSaleUseCase);
 
-  Future<void> execute({
+  AsyncResult<SaleEntity> call({
     required List<CartItem> items,
     required String saleNumber,
     required String? editingSaleId,
@@ -37,13 +38,17 @@ class SaveDraftSaleUseCase {
     required DateTime createdAt,
   }) async {
     if (items.isEmpty) {
-      throw Exception('O carrinho está vazio.');
+      return Result.failure(
+        const BusinessRuleFailure(message: 'O carrinho está vazio.'),
+      );
     }
 
     final outOfStock = _getOutOfStockProducts(items, availableProducts);
     if (outOfStock.isNotEmpty) {
       final names = outOfStock.map((p) => '${p.name} (Estoque: ${p.stock})').join(', ');
-      throw Exception('Estoque insuficiente para: $names');
+      return Result.failure(
+        BusinessRuleFailure(message: 'Estoque insuficiente para: $names'),
+      );
     }
 
     final saleItems = items
@@ -78,7 +83,7 @@ class SaveDraftSaleUseCase {
     );
 
     final isUpdate = editingSaleId != null && editingSaleId.isNotEmpty;
-    await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
+    return _saveSaleUseCase(sale: sale, isUpdate: isUpdate);
   }
 
   List<ProductEntity> _getOutOfStockProducts(

@@ -1,6 +1,9 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_card.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +13,18 @@ class SalesListSliver extends StatelessWidget {
   final SalesViewModel viewModel;
   final AuthViewModel authViewModel;
   final DeliveriesViewModel deliveriesViewModel;
+  final EditSaleViewModel Function()? editSaleViewModelFactory;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
 
   const SalesListSliver({
     super.key,
     required this.viewModel,
     required this.authViewModel,
     required this.deliveriesViewModel,
+    this.editSaleViewModelFactory,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
   });
 
   String _formatDateHeader(DateTime date) {
@@ -27,13 +36,13 @@ class SalesListSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (viewModel.state == SalesLoadState.loading) {
+    if (viewModel.isLoading) {
       return const SliverFillRemaining(
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (viewModel.state == SalesLoadState.failure) {
+    if (viewModel.isFailure) {
       return SliverFillRemaining(
         child: Center(
           child: Text(
@@ -112,6 +121,9 @@ class SalesListSliver extends StatelessWidget {
                   authViewModel: authViewModel,
                   salesViewModel: viewModel,
                   deliveriesViewModel: deliveriesViewModel,
+                  editSaleViewModelFactory: editSaleViewModelFactory,
+                  customersViewModelFactory: customersViewModelFactory,
+                  debtsViewModelFactory: debtsViewModelFactory,
                 );
               },
               childCount: entry.value.length,

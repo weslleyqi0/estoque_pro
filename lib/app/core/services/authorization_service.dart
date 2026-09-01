@@ -64,7 +64,8 @@ class AuthorizationService extends ChangeNotifier {
 
   Future<void> loadUserProfile(String uid, String email) async {
     try {
-      final user = await _userRepository.getUser(uid);
+      final userResult = await _userRepository.getUser(uid);
+      final user = userResult.value;
 
       if (user != null) {
         _currentUser = user;
@@ -83,12 +84,12 @@ class AuthorizationService extends ChangeNotifier {
           permissions: UserPermission.values.toSet(),
         );
 
-        try {
-          await _userRepository.saveUser(_currentUser!);
+        final saveResult = await _userRepository.saveUser(_currentUser!);
+        if (saveResult.isSuccess) {
           debugPrint('--> RBAC: Usuário Dono (Owner) salvo com sucesso no banco.');
-        } catch (e) {
+        } else {
           debugPrint(
-            '--> RBAC: Banco de dados já possui usuários ou erro de permissão ($e). Provisionando como Vendedor padrão localmente.',
+            '--> RBAC: Banco de dados já possui usuários ou erro de permissão (${saveResult.error}). Provisionando como Vendedor padrão localmente.',
           );
           _currentUser = UserEntity(
             uid: uid,

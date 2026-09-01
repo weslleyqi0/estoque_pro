@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
@@ -51,7 +52,7 @@ void main() {
 
   group('AuthorizationService Unit Tests', () {
     test('should owner role has all permissions and is active by default', () async {
-      when(() => mockUserRepository.getUser('owner_uid')).thenAnswer((_) async => fakeOwnerUser);
+      when(() => mockUserRepository.getUser('owner_uid')).thenAnswer((_) async => const Result.success(fakeOwnerUser));
 
       await service.loadUserProfile('owner_uid', 'owner@test.com');
 
@@ -65,7 +66,7 @@ void main() {
     });
 
     test('should load user profile from repository when user exists', () async {
-      when(() => mockUserRepository.getUser('seller_123')).thenAnswer((_) async => fakeSellerUser);
+      when(() => mockUserRepository.getUser('seller_123')).thenAnswer((_) async => const Result.success(fakeSellerUser));
 
       await service.loadUserProfile('seller_123', 'seller@test.com');
 
@@ -76,8 +77,8 @@ void main() {
     });
 
     test('should provision user as owner when user does not exist and save succeeds', () async {
-      when(() => mockUserRepository.getUser('new_owner_uid')).thenAnswer((_) async => null);
-      when(() => mockUserRepository.saveUser(any())).thenAnswer((_) async => {});
+      when(() => mockUserRepository.getUser('new_owner_uid')).thenAnswer((_) async => const Result.success(null));
+      when(() => mockUserRepository.saveUser(any())).thenAnswer((_) async => const Result.success(null));
 
       await service.loadUserProfile('new_owner_uid', 'dono@empresa.com');
 
@@ -101,8 +102,8 @@ void main() {
     });
 
     test('should fallback to seller role when owner provision save fails', () async {
-      when(() => mockUserRepository.getUser('new_seller_uid')).thenAnswer((_) async => null);
-      when(() => mockUserRepository.saveUser(any())).thenThrow(Exception('Permission denied: DB already has users'));
+      when(() => mockUserRepository.getUser('new_seller_uid')).thenAnswer((_) async => const Result.success(null));
+      when(() => mockUserRepository.saveUser(any())).thenAnswer((_) async => Result.failure(Exception('Permission denied: DB already has users')));
 
       await service.loadUserProfile('new_seller_uid', 'vendedor@empresa.com');
 
@@ -116,7 +117,7 @@ void main() {
     });
 
     test('should fallback to seller role when loadUserProfile throws an exception', () async {
-      when(() => mockUserRepository.getUser('error_uid')).thenThrow(Exception('Network error'));
+      when(() => mockUserRepository.getUser('error_uid')).thenAnswer((_) async => Result.failure(Exception('Network error')));
 
       await service.loadUserProfile('error_uid', 'user@empresa.com');
 
@@ -127,7 +128,7 @@ void main() {
     });
 
     test('should clear current user and cancel subscription when authStateChanges emits null', () async {
-      when(() => mockUserRepository.getUser('owner_uid')).thenAnswer((_) async => fakeOwnerUser);
+      when(() => mockUserRepository.getUser('owner_uid')).thenAnswer((_) async => const Result.success(fakeOwnerUser));
       await service.loadUserProfile('owner_uid', 'owner@test.com');
       expect(service.hasUser, isTrue);
 
@@ -143,7 +144,7 @@ void main() {
       final mockUser = MockUser();
       when(() => mockUser.uid).thenReturn('uid_123');
       when(() => mockUser.email).thenReturn('user@test.com');
-      when(() => mockUserRepository.getUser('uid_123')).thenAnswer((_) async => fakeSellerUser);
+      when(() => mockUserRepository.getUser('uid_123')).thenAnswer((_) async => const Result.success(fakeSellerUser));
 
       authStateController.add(mockUser);
       await pumpEventQueue();
@@ -156,7 +157,7 @@ void main() {
       final mockUser = MockUser();
       when(() => mockUser.uid).thenReturn('seller_123');
       when(() => mockUser.email).thenReturn('seller@test.com');
-      when(() => mockUserRepository.getUser('seller_123')).thenAnswer((_) async => fakeSellerUser);
+      when(() => mockUserRepository.getUser('seller_123')).thenAnswer((_) async => const Result.success(fakeSellerUser));
 
       authStateController.add(mockUser);
       await pumpEventQueue();
@@ -178,7 +179,7 @@ void main() {
     });
 
     test('should return true for hasRole when role matches current user', () async {
-      when(() => mockUserRepository.getUser('owner_123')).thenAnswer((_) async => fakeOwnerUser);
+      when(() => mockUserRepository.getUser('owner_123')).thenAnswer((_) async => const Result.success(fakeOwnerUser));
 
       await service.loadUserProfile('owner_123', 'owner@test.com');
 

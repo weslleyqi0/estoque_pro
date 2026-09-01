@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class SupplierFormPage extends StatefulWidget {
-  final SuppliersFormViewmodel viewModel;
+  final SuppliersFormViewmodel Function() viewModelFactory;
   final SupplierEntity? supplier;
 
   const SupplierFormPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
     this.supplier,
   });
 
@@ -22,6 +22,7 @@ class SupplierFormPage extends StatefulWidget {
 
 class _SupplierFormPageState extends State<SupplierFormPage> {
   final _formKey = GlobalKey<FormState>();
+  late final SuppliersFormViewmodel viewModel;
   late final TextEditingController _nameController;
   late final TextEditingController _cnpjController;
   late final TextEditingController _phoneController;
@@ -33,6 +34,7 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
   @override
   void initState() {
     super.initState();
+    viewModel = widget.viewModelFactory();
     _currentSupplier = widget.supplier;
     _nameController = TextEditingController(text: _currentSupplier?.name ?? '');
     _cnpjController = TextEditingController(text: _currentSupplier?.cnpj ?? '');
@@ -45,6 +47,7 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
     _nameController.dispose();
     _cnpjController.dispose();
     _phoneController.dispose();
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -60,13 +63,13 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
     );
 
     if (_isEditing) {
-      await widget.viewModel.updateSupplierCommand.execute(supplier);
-      if (widget.viewModel.updateSupplierCommand.isSuccess && mounted) {
+      await viewModel.updateSupplierCommand.execute(supplier);
+      if (viewModel.updateSupplierCommand.isSuccess && mounted) {
         Navigator.pop(context);
       }
     } else {
-      await widget.viewModel.saveSupplierCommand.execute(supplier);
-      if (widget.viewModel.saveSupplierCommand.isSuccess && mounted) {
+      await viewModel.saveSupplierCommand.execute(supplier);
+      if (viewModel.saveSupplierCommand.isSuccess && mounted) {
         Navigator.pop(context);
       }
     }
@@ -75,9 +78,9 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
   Future<void> _delete() async {
     if (_currentSupplier == null) return;
 
-    await widget.viewModel.deleteSupplierCommand.execute(_currentSupplier!.id);
+    await viewModel.deleteSupplierCommand.execute(_currentSupplier!.id);
 
-    if (widget.viewModel.deleteSupplierCommand.isSuccess && mounted) {
+    if (viewModel.deleteSupplierCommand.isSuccess && mounted) {
       Navigator.pop(context);
     }
   }
@@ -149,12 +152,12 @@ class _SupplierFormPageState extends State<SupplierFormPage> {
             const Gap(AppSpacing.space32),
             ListenableBuilder(
               listenable: Listenable.merge([
-                widget.viewModel.saveSupplierCommand,
-                widget.viewModel.updateSupplierCommand,
+                viewModel.saveSupplierCommand,
+                viewModel.updateSupplierCommand,
               ]),
               builder: (context, _) {
                 final isLoading =
-                    widget.viewModel.saveSupplierCommand.isRunning || widget.viewModel.updateSupplierCommand.isRunning;
+                    viewModel.saveSupplierCommand.isRunning || viewModel.updateSupplierCommand.isRunning;
                 return AppButton.primary(
                   label: _isEditing ? 'Salvar Alterações' : 'Salvar Fornecedor',
                   isFullWidth: true,

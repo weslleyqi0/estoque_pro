@@ -1,15 +1,15 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
-import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
+import 'package:estoque_pro/app/features/categories/domain/usecases/get_categories_use_case.dart';
 import 'package:estoque_pro/app/features/products/domain/usecases/count_products_use_case.dart';
-import 'package:flutter/foundation.dart';
 
 enum CategoriesLoadState { idle, loading, success, failure }
 
-class CategoriesViewModel extends ChangeNotifier {
-  final CategoriesRepository _repository;
+class CategoriesViewModel extends BaseViewModel {
+  final GetCategoriesUseCase _getCategoriesUseCase;
   final CountProductsUseCase _countProductsUseCase;
 
   StreamSubscription<List<CategoryEntity>>? _categoriesSubscription;
@@ -17,6 +17,7 @@ class CategoriesViewModel extends ChangeNotifier {
 
   CategoriesLoadState _state = CategoriesLoadState.idle;
   CategoriesLoadState get state => _state;
+  bool get isLoading => _state == CategoriesLoadState.loading;
 
   List<CategoryEntity> _categories = [];
   List<CategoryEntity> get categories => _categories;
@@ -63,14 +64,14 @@ class CategoriesViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
-  CategoriesViewModel(this._repository, this._countProductsUseCase);
+  CategoriesViewModel(this._getCategoriesUseCase, this._countProductsUseCase);
 
   void listenAll() {
     _state = CategoriesLoadState.loading;
     notifyListeners();
 
     _categoriesSubscription?.cancel();
-    _categoriesSubscription = _repository.watchAll().listen(
+    _categoriesSubscription = _getCategoriesUseCase.watchAll().listen(
       (list) {
         _categories = list.sortByName((a) => a.name);
         _state = CategoriesLoadState.success;

@@ -1,4 +1,7 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/delivery_card.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/delivery_detail_bottom_sheet.dart';
@@ -7,10 +10,16 @@ import 'package:gap/gap.dart';
 
 class DeliveriesListSliver extends StatelessWidget {
   final DeliveriesViewModel viewModel;
+  final AuthViewModel? authViewModel;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
 
   const DeliveriesListSliver({
     super.key,
     required this.viewModel,
+    this.authViewModel,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
   });
 
   @override
@@ -73,6 +82,9 @@ class DeliveriesListSliver extends StatelessWidget {
                 context: context,
                 delivery: delivery,
                 viewModel: viewModel,
+                customersViewModelFactory: customersViewModelFactory,
+                debtsViewModelFactory: debtsViewModelFactory,
+                authViewModel: authViewModel,
               );
             },
             onStatusChanged: (newStatus) {

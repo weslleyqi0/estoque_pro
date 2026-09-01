@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:estoque_pro/app/core/services/local_storage_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
+import 'package:estoque_pro/app/features/auth/domain/entities/auth_user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../service/auth_service.dart';
 import '../service/biometric_service.dart';
@@ -15,7 +16,7 @@ class AuthRepositoryImpl extends AuthRepository {
   bool _isBiometricEnabled = false;
   bool _isBiometricAuthenticated = false;
   DateTime? _backgroundTimestamp;
-  User? _previousUser;
+  AuthUserEntity? _previousUser;
 
   AuthRepositoryImpl(
     this._authService,
@@ -41,10 +42,10 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Stream<User?> get authStateChanges => _authService.authStateChanges;
+  Stream<AuthUserEntity?> get authStateChanges => _authService.authStateChanges;
 
   @override
-  User? get currentUser => _authService.currentUser;
+  AuthUserEntity? get currentUser => _authService.currentUser;
 
   @override
   bool get isBiometricEnabled => _isBiometricEnabled;
@@ -71,18 +72,26 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<void> signIn(String email, String password) async {
-    await _authService.signInWithEmailAndPassword(
+  Future<Result<void>> signIn(String email, String password) async {
+    final result = await _authService.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
-    setBiometricAuthenticated(true);
+    if (result.isSuccess) {
+      setBiometricAuthenticated(true);
+      return const Result.success(null);
+    }
+    return Result.failure(result.error!);
   }
 
   @override
-  Future<void> signOut() async {
-    await _authService.signOut();
-    setBiometricAuthenticated(false);
+  Future<Result<void>> signOut() async {
+    final result = await _authService.signOut();
+    if (result.isSuccess) {
+      setBiometricAuthenticated(false);
+      return const Result.success(null);
+    }
+    return Result.failure(result.error!);
   }
 
   @override

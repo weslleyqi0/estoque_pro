@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/utils/currency_input_formatter.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
@@ -15,16 +14,16 @@ import 'package:intl/intl.dart';
 class CreateDeliveryBottomSheet extends StatefulWidget {
   final DeliveriesViewModel deliveriesViewModel;
   final AuthViewModel authViewModel;
-  final SalesRepository salesRepository;
-  final CustomersRepository customersRepository;
+  final SalesRepository? salesRepository;
+  final CustomersRepository? customersRepository;
   final SaleEntity? initialSale;
 
   const CreateDeliveryBottomSheet({
     super.key,
     required this.deliveriesViewModel,
     required this.authViewModel,
-    required this.salesRepository,
-    required this.customersRepository,
+    this.salesRepository,
+    this.customersRepository,
     this.initialSale,
   });
 
@@ -42,8 +41,8 @@ class CreateDeliveryBottomSheet extends StatefulWidget {
       builder: (_) => CreateDeliveryBottomSheet(
         deliveriesViewModel: deliveriesViewModel,
         authViewModel: authViewModel,
-        salesRepository: salesRepository ?? getIt<SalesRepository>(),
-        customersRepository: customersRepository ?? getIt<CustomersRepository>(),
+        salesRepository: salesRepository,
+        customersRepository: customersRepository,
         initialSale: initialSale,
       ),
     );
@@ -93,9 +92,10 @@ class _CreateDeliveryBottomSheetState extends State<CreateDeliveryBottomSheet> {
       _phoneController.clear();
     });
 
-    if (sale.customerId != null && sale.customerId!.isNotEmpty) {
+    if (sale.customerId != null && sale.customerId!.isNotEmpty && widget.customersRepository != null) {
       try {
-        final customers = await widget.customersRepository.getAll();
+        final result = await widget.customersRepository!.getAll();
+        final customers = result.value ?? [];
         final customer = customers.where((c) => c.id == sale.customerId).firstOrNull;
         if (customer != null) {
           if (customer.address != null && customer.address!.isNotEmpty) {
@@ -267,17 +267,19 @@ class _CreateDeliveryBottomSheetState extends State<CreateDeliveryBottomSheet> {
           ),
         ),
         Expanded(
-          child: StreamBuilder<List<SaleEntity>>(
-            stream: widget.salesRepository.watchAll(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.space32),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
+          child: widget.salesRepository == null
+              ? const SizedBox.shrink()
+              : StreamBuilder<List<SaleEntity>>(
+                  stream: widget.salesRepository!.watchAll(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(AppSpacing.space32),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
 
               final allSales = snapshot.data ?? [];
               final existingDeliveries = widget.deliveriesViewModel.deliveries;

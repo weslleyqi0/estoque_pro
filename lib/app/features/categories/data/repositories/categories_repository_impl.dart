@@ -1,22 +1,23 @@
 import 'dart:async';
 
-import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
+import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/categories/data/models/category_model.dart';
 import 'package:estoque_pro/app/features/categories/domain/entities/category_entity.dart';
 import 'package:estoque_pro/app/features/categories/domain/repositories/categories_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class CategoriesRepositoryImpl implements CategoriesRepository {
-  final FirebaseDatabaseService _firebaseDb;
+  final DatabaseService<CategoryEntity> _databaseService;
 
   CategoriesRepositoryImpl(
-    this._firebaseDb,
+    this._databaseService,
   );
 
   @override
   Stream<List<CategoryEntity>> watchAll() {
-    return _firebaseDb
+    return _databaseService
         .listen()
         .map((data) {
           final List<CategoryEntity> entities = [];
@@ -34,14 +35,14 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
           return entities.sortByName((a) => a.name);
         })
         .handleError((e) {
-          debugPrint('---> Categories: Erro no listener Firebase: $e');
+          debugPrint('---> Categories: Erro no listener: $e');
         });
   }
 
   @override
-  Future<List<CategoryEntity>> getAll() async {
+  Future<Result<List<CategoryEntity>>> getAll() async {
     try {
-      final data = await _firebaseDb.getOnce();
+      final data = await _databaseService.getOnce();
       final List<CategoryEntity> entities = [];
       if (data != null) {
         for (final entry in data.entries) {
@@ -54,42 +55,45 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
           }
         }
       }
-      return entities;
-    } catch (e) {
-      debugPrint('---> Categories: Erro getAll Firebase: $e');
-      return [];
+      return Result.success(entities);
+    } catch (e, stackTrace) {
+      debugPrint('---> Categories: Erro getAll: $e');
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> save(CategoryEntity category) async {
+  Future<Result<void>> save(CategoryEntity category) async {
     final model = CategoryModel.fromEntity(category);
     try {
-      await _firebaseDb.add(model.toMap());
-    } catch (e) {
-      debugPrint('---> Categories: Erro ao salvar no Firebase: $e');
-      rethrow;
+      await _databaseService.add(model.toMap());
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Categories: Erro ao salvar: $e');
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> update(CategoryEntity category) async {
+  Future<Result<void>> update(CategoryEntity category) async {
     final model = CategoryModel.fromEntity(category);
     try {
-      await _firebaseDb.update(category.id, model.toMap());
-    } catch (e) {
-      debugPrint('---> Categories: Erro ao atualizar no Firebase: $e');
-      rethrow;
+      await _databaseService.update(category.id, model.toMap());
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Categories: Erro ao atualizar: $e');
+      return Result.failure(e, stackTrace);
     }
   }
 
   @override
-  Future<void> delete(String id) async {
+  Future<Result<void>> delete(String id) async {
     try {
-      await _firebaseDb.delete(id);
-    } catch (e) {
-      debugPrint('---> Categories: Erro ao deletar no Firebase: $e');
-      rethrow;
+      await _databaseService.delete(id);
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Categories: Erro ao deletar: $e');
+      return Result.failure(e, stackTrace);
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -71,13 +72,16 @@ void main() {
     mockSaveSaleUseCase = MockSaveSaleUseCase();
     mockDeliveriesRepository = MockDeliveriesRepository();
     finalizeSaleUseCase = FinalizeSaleUseCase(mockSaveSaleUseCase, mockDeliveriesRepository);
-    when(() => mockSaveSaleUseCase.execute(sale: any(named: 'sale'), isUpdate: any(named: 'isUpdate')))
-        .thenAnswer((_) async {});
-    when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockSaveSaleUseCase.call(sale: any(named: 'sale'), isUpdate: any(named: 'isUpdate')))
+        .thenAnswer((invocation) async {
+      final sale = invocation.namedArguments[#sale] as SaleEntity;
+      return Result.success(sale);
+    });
+    when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async => const Result.success(null));
   });
 
   test('finalize sale with cash succeeds without customer', () async {
-    await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1001',
       editingSaleId: null,
@@ -93,39 +97,37 @@ void main() {
       availableProducts: [testProduct],
     );
 
-    verify(() => mockSaveSaleUseCase.execute(sale: any(named: 'sale'), isUpdate: false)).called(1);
+    expect(result.isSuccess, isTrue);
+    verify(() => mockSaveSaleUseCase(sale: any(named: 'sale'), isUpdate: false)).called(1);
     verifyNever(() => mockDeliveriesRepository.save(any()));
   });
 
-  test('finalize sale with fiado throws exception if customer is missing', () async {
-    expect(
-      () => finalizeSaleUseCase.execute(
-        items: cartItems,
-        saleNumber: '#1002',
-        editingSaleId: null,
-        discountType: DiscountType.valueAmount,
-        discountValue: 0.0,
-        subtotal: 100.0,
-        total: 100.0,
-        paymentMethod: PaymentMethod.fiado,
-        amountPaid: 0.0,
-        change: 0.0,
-        customerId: null,
-        customerName: null,
-        userId: 'u1',
-        userName: 'Vendedor 1',
-        availableProducts: [testProduct],
-      ),
-      throwsA(isA<Exception>().having(
-        (e) => e.toString(),
-        'message',
-        contains('Para vendas no fiado, é obrigatório selecionar um cliente'),
-      )),
+  test('finalize sale with fiado returns BusinessRuleFailure if customer is missing', () async {
+    final result = await finalizeSaleUseCase(
+      items: cartItems,
+      saleNumber: '#1002',
+      editingSaleId: null,
+      discountType: DiscountType.valueAmount,
+      discountValue: 0.0,
+      subtotal: 100.0,
+      total: 100.0,
+      paymentMethod: PaymentMethod.fiado,
+      amountPaid: 0.0,
+      change: 0.0,
+      customerId: null,
+      customerName: null,
+      userId: 'u1',
+      userName: 'Vendedor 1',
+      availableProducts: [testProduct],
     );
+
+    expect(result.isFailure, isTrue);
+    expect(result.error, isA<BusinessRuleFailure>());
+    expect(result.error?.message, contains('Para vendas no fiado, é obrigatório selecionar um cliente'));
   });
 
   test('finalize sale with fiado succeeds when customer is provided', () async {
-    await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1003',
       editingSaleId: null,
@@ -143,8 +145,9 @@ void main() {
       availableProducts: [testProduct],
     );
 
+    expect(result.isSuccess, isTrue);
     verify(
-      () => mockSaveSaleUseCase.execute(
+      () => mockSaveSaleUseCase(
         sale: any(
           named: 'sale',
           that: isA<SaleEntity>()
@@ -157,68 +160,62 @@ void main() {
     ).called(1);
   });
 
-  test('finalize sale with delivery throws exception if customer is missing', () async {
-    expect(
-      () => finalizeSaleUseCase.execute(
-        items: cartItems,
-        saleNumber: '#1004',
-        editingSaleId: null,
-        discountType: DiscountType.valueAmount,
-        discountValue: 0.0,
-        subtotal: 100.0,
-        total: 100.0,
-        paymentMethod: PaymentMethod.dinheiro,
-        amountPaid: 100.0,
-        change: 0.0,
-        customerId: null,
-        customerName: null,
-        userId: 'u1',
-        userName: 'Vendedor 1',
-        availableProducts: [testProduct],
-        isDelivery: true,
-        deliveryAddress: 'Rua das Flores, 123',
-      ),
-      throwsA(isA<Exception>().having(
-        (e) => e.toString(),
-        'message',
-        contains('Para entregas, é obrigatório selecionar um cliente'),
-      )),
+  test('finalize sale with delivery returns BusinessRuleFailure if customer is missing', () async {
+    final result = await finalizeSaleUseCase(
+      items: cartItems,
+      saleNumber: '#1004',
+      editingSaleId: null,
+      discountType: DiscountType.valueAmount,
+      discountValue: 0.0,
+      subtotal: 100.0,
+      total: 100.0,
+      paymentMethod: PaymentMethod.dinheiro,
+      amountPaid: 100.0,
+      change: 0.0,
+      customerId: null,
+      customerName: null,
+      userId: 'u1',
+      userName: 'Vendedor 1',
+      availableProducts: [testProduct],
+      isDelivery: true,
+      deliveryAddress: 'Rua das Flores, 123',
     );
+
+    expect(result.isFailure, isTrue);
+    expect(result.error, isA<BusinessRuleFailure>());
+    expect(result.error?.message, contains('Para entregas, é obrigatório selecionar um cliente'));
   });
 
-  test('finalize sale with delivery throws exception if address is missing', () async {
-    expect(
-      () => finalizeSaleUseCase.execute(
-        items: cartItems,
-        saleNumber: '#1005',
-        editingSaleId: null,
-        discountType: DiscountType.valueAmount,
-        discountValue: 0.0,
-        subtotal: 100.0,
-        total: 100.0,
-        paymentMethod: PaymentMethod.dinheiro,
-        amountPaid: 100.0,
-        change: 0.0,
-        customerId: 'c1',
-        customerName: 'Cliente 1',
-        userId: 'u1',
-        userName: 'Vendedor 1',
-        availableProducts: [testProduct],
-        isDelivery: true,
-        deliveryAddress: '',
-      ),
-      throwsA(isA<Exception>().having(
-        (e) => e.toString(),
-        'message',
-        contains('Para entregas, é obrigatório informar o endereço de entrega'),
-      )),
+  test('finalize sale with delivery returns BusinessRuleFailure if address is missing', () async {
+    final result = await finalizeSaleUseCase(
+      items: cartItems,
+      saleNumber: '#1005',
+      editingSaleId: null,
+      discountType: DiscountType.valueAmount,
+      discountValue: 0.0,
+      subtotal: 100.0,
+      total: 100.0,
+      paymentMethod: PaymentMethod.dinheiro,
+      amountPaid: 100.0,
+      change: 0.0,
+      customerId: 'c1',
+      customerName: 'Cliente 1',
+      userId: 'u1',
+      userName: 'Vendedor 1',
+      availableProducts: [testProduct],
+      isDelivery: true,
+      deliveryAddress: '',
     );
+
+    expect(result.isFailure, isTrue);
+    expect(result.error, isA<BusinessRuleFailure>());
+    expect(result.error?.message, contains('Para entregas, é obrigatório informar o endereço de entrega'));
   });
 
   test('finalize sale with delivery creates sale and saves delivery', () async {
     final scheduledDate = DateTime.now().add(const Duration(hours: 2));
 
-    await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1006',
       editingSaleId: null,
@@ -241,7 +238,8 @@ void main() {
       deliveryNotes: 'Apto 101',
     );
 
-    verify(() => mockSaveSaleUseCase.execute(sale: any(named: 'sale'), isUpdate: false)).called(1);
+    expect(result.isSuccess, isTrue);
+    verify(() => mockSaveSaleUseCase(sale: any(named: 'sale'), isUpdate: false)).called(1);
     verify(
       () => mockDeliveriesRepository.save(
         any(
@@ -256,5 +254,28 @@ void main() {
       ),
     ).called(1);
   });
-}
 
+  test('finalize sale returns BusinessRuleFailure when stock is insufficient', () async {
+    final result = await finalizeSaleUseCase(
+      items: [
+        const CartItem(product: testProduct, quantity: 20),
+      ],
+      saleNumber: '#1007',
+      editingSaleId: null,
+      discountType: DiscountType.valueAmount,
+      discountValue: 0.0,
+      subtotal: 1000.0,
+      total: 1000.0,
+      paymentMethod: PaymentMethod.dinheiro,
+      amountPaid: 1000.0,
+      change: 0.0,
+      userId: 'u1',
+      userName: 'Vendedor 1',
+      availableProducts: [testProduct],
+    );
+
+    expect(result.isFailure, isTrue);
+    expect(result.error, isA<BusinessRuleFailure>());
+    expect(result.error?.message, contains('Estoque insuficiente'));
+  });
+}

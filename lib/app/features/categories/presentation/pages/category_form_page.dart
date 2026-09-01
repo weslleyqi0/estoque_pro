@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class CategoryFormPage extends StatefulWidget {
-  final CategoriesFormViewmodel viewModel;
+  final CategoriesFormViewmodel Function() viewModelFactory;
   final CategoryEntity? category;
 
   const CategoryFormPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
     this.category,
   });
 
@@ -23,6 +23,7 @@ class CategoryFormPage extends StatefulWidget {
 class _CategoryFormPageState extends State<CategoryFormPage> {
   final _formKey = GlobalKey<FormState>();
 
+  late final CategoriesFormViewmodel viewModel;
   late final TextEditingController _nameController;
   CategoryEntity? _currentCategory;
 
@@ -34,6 +35,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   @override
   void initState() {
     super.initState();
+    viewModel = widget.viewModelFactory();
     _currentCategory = widget.category;
     _nameController = TextEditingController(text: _currentCategory?.name ?? '');
     _selectedIcon = _currentCategory?.icon ?? 'category';
@@ -46,6 +48,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   @override
   void dispose() {
     _nameController.dispose();
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -60,13 +63,13 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     );
 
     if (_isEditing) {
-      await widget.viewModel.updateCategoryCommand.execute(category);
-      if (widget.viewModel.updateCategoryCommand.isSuccess && mounted) {
+      await viewModel.updateCategoryCommand.execute(category);
+      if (viewModel.updateCategoryCommand.isSuccess && mounted) {
         Navigator.pop(context);
       }
     } else {
-      await widget.viewModel.saveCategoryCommand.execute(category);
-      if (widget.viewModel.saveCategoryCommand.isSuccess && mounted) {
+      await viewModel.saveCategoryCommand.execute(category);
+      if (viewModel.saveCategoryCommand.isSuccess && mounted) {
         Navigator.pop(context);
       }
     }
@@ -75,9 +78,9 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   Future<void> _delete() async {
     if (_currentCategory == null) return;
 
-    await widget.viewModel.deleteCategoryCommand.execute(_currentCategory!.id);
+    await viewModel.deleteCategoryCommand.execute(_currentCategory!.id);
 
-    if (widget.viewModel.deleteCategoryCommand.isSuccess && mounted) {
+    if (viewModel.deleteCategoryCommand.isSuccess && mounted) {
       Navigator.pop(context);
     }
   }
@@ -198,13 +201,13 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
               padding: const EdgeInsets.all(AppSpacing.space16),
               child: ListenableBuilder(
                 listenable: Listenable.merge([
-                  widget.viewModel.saveCategoryCommand,
-                  widget.viewModel.updateCategoryCommand,
+                  viewModel.saveCategoryCommand,
+                  viewModel.updateCategoryCommand,
                 ]),
                 builder: (context, _) {
                   final isLoading =
-                      widget.viewModel.saveCategoryCommand.isRunning ||
-                      widget.viewModel.updateCategoryCommand.isRunning;
+                      viewModel.saveCategoryCommand.isRunning ||
+                      viewModel.updateCategoryCommand.isRunning;
                   return AppButton.primary(
                     label: _isEditing ? 'Salvar Alterações' : 'Salvar Categoria',
                     isFullWidth: true,

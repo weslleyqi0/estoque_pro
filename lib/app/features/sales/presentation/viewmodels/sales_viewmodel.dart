@@ -1,15 +1,15 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
+import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
-import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
-import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
-import 'package:flutter/foundation.dart';
-
-enum SalesLoadState { idle, loading, success, failure }
+import 'package:estoque_pro/app/features/sales/domain/usecases/delete_sale_use_case.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 
 enum SalesFilterTab {
   all('Todas'),
@@ -23,11 +23,24 @@ enum SalesFilterTab {
   const SalesFilterTab(this.label);
 }
 
-class SalesViewModel extends ChangeNotifier {
-  final SalesRepository _repository;
-  final DeliveriesRepository? _deliveriesRepository;
+enum SalesLoadState { idle, loading, success, failure }
 
-  SalesViewModel(this._repository, [this._deliveriesRepository]);
+class SalesViewModel extends BaseViewModel {
+  final GetSalesUseCase _getSalesUseCase;
+  final DeleteSaleUseCase _deleteSaleUseCase;
+  final GetDeliveriesUseCase? _getDeliveriesUseCase;
+
+  late final Command1<bool, String> deleteSaleCommand;
+
+  SalesViewModel(
+    this._getSalesUseCase,
+    this._deleteSaleUseCase, [
+    this._getDeliveriesUseCase,
+  ]) {
+    deleteSaleCommand = Command1((saleId) async {
+      return _deleteSaleUseCase(saleId);
+    });
+  }
 
   StreamSubscription<List<SaleEntity>>? _salesSubscription;
   StreamSubscription<List<DeliveryEntity>>? _deliveriesSubscription;
@@ -40,6 +53,9 @@ class SalesViewModel extends ChangeNotifier {
 
   SalesLoadState _state = SalesLoadState.idle;
   SalesLoadState get state => _state;
+  bool get isLoading => _state == SalesLoadState.loading;
+  bool get isSuccess => _state == SalesLoadState.success;
+  bool get isFailure => _state == SalesLoadState.failure;
 
   List<SaleEntity> _sales = [];
   List<SaleEntity> get sales => _sales;
@@ -128,7 +144,7 @@ class SalesViewModel extends ChangeNotifier {
     notifyListeners();
 
     _salesSubscription?.cancel();
-    _salesSubscription = _repository.watchAll().listen(
+    _salesSubscription = _getSalesUseCase.watchAll().listen(
       (list) {
         _sales = list;
         _state = SalesLoadState.success;
@@ -141,8 +157,8 @@ class SalesViewModel extends ChangeNotifier {
       },
     );
 
-    if (_deliveriesRepository != null && _deliveriesSubscription == null) {
-      _deliveriesSubscription = _deliveriesRepository.watchAll().listen((deliveries) {
+    if (_getDeliveriesUseCase != null && _deliveriesSubscription == null) {
+      _deliveriesSubscription = _getDeliveriesUseCase.watchAll().listen((deliveries) {
         final map = <String, DeliveryEntity>{};
         for (final d in deliveries) {
           if (d.saleId.isNotEmpty) {
@@ -158,16 +174,7 @@ class SalesViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteSale(String saleId) async {
-    try {
-      await _repository.delete(saleId);
-      notifyListeners();
-    } catch (e) {
-      _error = e;
-      notifyListeners();
-      rethrow;
-    }
-  }
+
 
   @override
   void dispose() {

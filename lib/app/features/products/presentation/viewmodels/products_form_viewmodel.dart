@@ -1,15 +1,23 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_category_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_supplier_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/adjust_stock_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/archive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/save_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/update_product_use_case.dart';
 
-class ProductsFormViewModel extends ChangeNotifier {
-  final ProductsRepository _repository;
+class ProductsFormViewModel extends BaseViewModel {
+  final SaveProductUseCase _saveProductUseCase;
+  final UpdateProductUseCase _updateProductUseCase;
+  final ArchiveProductUseCase _archiveProductUseCase;
+  final UnarchiveProductUseCase _unarchiveProductUseCase;
+  final AdjustStockUseCase _adjustStockUseCase;
 
   late final Command1<bool, ProductEntity> saveProductCommand;
   late final Command1<bool, ProductEntity> updateProductCommand;
@@ -48,7 +56,13 @@ class ProductsFormViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
-  ProductsFormViewModel(this._repository) {
+  ProductsFormViewModel(
+    this._saveProductUseCase,
+    this._updateProductUseCase,
+    this._archiveProductUseCase,
+    this._unarchiveProductUseCase,
+    this._adjustStockUseCase,
+  ) {
     saveProductCommand = Command1(_saveProduct);
     updateProductCommand = Command1(_updateProduct);
     archiveProductCommand = Command1(_archiveProduct);
@@ -117,63 +131,48 @@ class ProductsFormViewModel extends ChangeNotifier {
   }
 
   Future<Result<bool>> _saveProduct(ProductEntity product) async {
-    try {
-      if (product.barcode.isNotEmpty) {
-        final barcodeExists = await _repository.checkBarcodeExists(product.barcode);
-        if (barcodeExists) {
-          throw Exception('Já existe um produto cadastrado com este código de barras.');
-        }
-      }
-      await _repository.save(product);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+    final result = await _saveProductUseCase(product);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
   Future<Result<bool>> _updateProduct(ProductEntity product) async {
-    try {
-      if (product.barcode.isNotEmpty) {
-        final barcodeExists = await _repository.checkBarcodeExists(product.barcode, ignoreId: product.id);
-        if (barcodeExists) {
-          throw Exception('Já existe um produto cadastrado com este código de barras.');
-        }
-      }
-      await _repository.update(product);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+    final result = await _updateProductUseCase(product);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
   Future<Result<bool>> _archiveProduct(String id) async {
-    try {
-      await _repository.archive(id);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+    final result = await _archiveProductUseCase(id);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
   Future<Result<bool>> _unarchiveProduct(String id) async {
-    try {
-      await _repository.unarchive(id);
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+    final result = await _unarchiveProductUseCase(id);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
-  Future<Result<bool>> _adjustStock(({String productId, int quantityDiff, ProductHistoryEntity history}) args) async {
-    try {
-      await _repository.adjustStock(
-        args.productId,
-        args.quantityDiff,
-        args.history,
-      );
-      return const Success(true);
-    } catch (e) {
-      return Failure(Exception(e.toString()));
-    }
+  Future<Result<bool>> _adjustStock(
+    ({String productId, int quantityDiff, ProductHistoryEntity history}) args,
+  ) async {
+    final result = await _adjustStockUseCase(
+      productId: args.productId,
+      quantityDiff: args.quantityDiff,
+      history: args.history,
+    );
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 }

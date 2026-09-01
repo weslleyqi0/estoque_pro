@@ -1,13 +1,18 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customer_payments_repository.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/cancel_customer_payment_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/get_customer_payments_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/register_customer_payment_use_case.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/widgets/register_customer_payment_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter/material.dart';
@@ -48,9 +53,9 @@ void main() {
     mockAuthRepo = MockAuthRepository();
     mockAuthService = MockAuthorizationService();
 
-    when(() => mockSalesRepo.watchAll()).thenAnswer((_) => const Stream.empty());
+    when(() => mockSalesRepo.watchAll(limit: any(named: 'limit'))).thenAnswer((_) => const Stream.empty());
     when(() => mockPaymentsRepo.watchAll()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async {});
+    when(() => mockPaymentsRepo.save(any())).thenAnswer((_) async => const Result.success(null));
     when(() => mockAuthRepo.authStateChanges).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthRepo.currentUser).thenReturn(null);
 
@@ -64,7 +69,12 @@ void main() {
     );
     when(() => mockAuthService.currentUser).thenReturn(loggedUser);
 
-    debtsViewModel = CustomerDebtsViewModel(mockSalesRepo, mockPaymentsRepo);
+    debtsViewModel = CustomerDebtsViewModel(
+      GetSalesUseCase(mockSalesRepo),
+      GetCustomerPaymentsUseCase(mockPaymentsRepo),
+      RegisterCustomerPaymentUseCase(mockPaymentsRepo),
+      CancelCustomerPaymentUseCase(mockPaymentsRepo),
+    );
     authViewModel = AuthViewModel(mockAuthRepo, mockAuthService);
   });
 

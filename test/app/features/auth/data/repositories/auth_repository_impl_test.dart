@@ -1,33 +1,40 @@
 import 'dart:async';
 import 'package:estoque_pro/app/core/services/local_storage_service.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:estoque_pro/app/features/auth/data/service/auth_service.dart';
 import 'package:estoque_pro/app/features/auth/data/service/biometric_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:estoque_pro/app/features/auth/domain/entities/auth_user_entity.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAuthService extends Mock implements AuthService {}
+
 class MockBiometricService extends Mock implements BiometricService {}
+
 class MockLocalStorageService extends Mock implements LocalStorageService {}
-class MockUser extends Mock implements User {}
 
 void main() {
   late MockAuthService mockAuthService;
   late MockBiometricService mockBiometricService;
   late MockLocalStorageService mockLocalStorageService;
-  late StreamController<User?> authStateController;
+  late StreamController<AuthUserEntity?> authStateController;
+
+  const testUser = AuthUserEntity(
+    uid: 'uid-123',
+    email: 'test@example.com',
+    displayName: 'Tester',
+  );
 
   setUp(() {
     mockAuthService = MockAuthService();
     mockBiometricService = MockBiometricService();
     mockLocalStorageService = MockLocalStorageService();
-    authStateController = StreamController<User?>.broadcast();
+    authStateController = StreamController<AuthUserEntity?>.broadcast();
 
     when(() => mockAuthService.authStateChanges).thenAnswer((_) => authStateController.stream);
     when(() => mockAuthService.currentUser).thenReturn(null);
-    when(() => mockLocalStorageService.getBool(any(), defaultValue: any(named: 'defaultValue')))
-        .thenReturn(true);
+    when(() => mockLocalStorageService.getBool(any(), defaultValue: any(named: 'defaultValue'))).thenReturn(true);
     when(() => mockLocalStorageService.setBool(any(), any())).thenAnswer((_) async {});
   });
 
@@ -86,14 +93,19 @@ void main() {
     });
 
     test('when constructed with no user and biometric disabled, isBiometricAuthenticated is true', () {
-      when(() => mockLocalStorageService.getBool(any(), defaultValue: any(named: 'defaultValue')))
-          .thenReturn(false);
+      when(() => mockLocalStorageService.getBool(any(), defaultValue: any(named: 'defaultValue'))).thenReturn(false);
       final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       expect(authRepository.isBiometricAuthenticated, isTrue);
     });
 
+    const testUser = AuthUserEntity(
+      uid: 'uid-123',
+      email: 'test@example.com',
+      displayName: 'Tester',
+    );
+
     test('when constructed with existing user, isBiometricAuthenticated starts as false when enabled', () {
-      when(() => mockAuthService.currentUser).thenReturn(MockUser());
+      when(() => mockAuthService.currentUser).thenReturn(testUser);
       final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       expect(authRepository.isBiometricAuthenticated, isFalse);
     });
@@ -103,14 +115,14 @@ void main() {
       expect(authRepository.isBiometricAuthenticated, isFalse);
 
       // Trigger log in
-      authStateController.add(MockUser());
+      authStateController.add(testUser);
       await Future.delayed(Duration.zero);
 
       expect(authRepository.isBiometricAuthenticated, isTrue);
     });
 
     test('transition from logged in to logged out sets isBiometricAuthenticated to false', () async {
-      when(() => mockAuthService.currentUser).thenReturn(MockUser());
+      when(() => mockAuthService.currentUser).thenReturn(testUser);
       final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
       authRepository.setBiometricAuthenticated(true);
 
@@ -119,6 +131,54 @@ void main() {
       await Future.delayed(Duration.zero);
 
       expect(authRepository.isBiometricAuthenticated, isFalse);
+    });
+
+    test('currentUser returns user from AuthService', () {
+      when(() => mockAuthService.currentUser).thenReturn(testUser);
+
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
+
+      expect(authRepository.currentUser, isNotNull);
+      expect(authRepository.currentUser?.uid, equals('uid-123'));
+      expect(authRepository.currentUser?.email, equals('test@example.com'));
+      expect(authRepository.currentUser?.displayName, equals('Tester'));
+    });
+  });
+
+  group('AuthRepositoryImpl Operations Tests', () {
+    test('signIn delegates to AuthService and returns Success', () async {
+      when(
+        () => mockAuthService.signInWithEmailAndPassword(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async => Result.success(testUser));
+
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
+      final result = await authRepository.signIn('user@test.com', 'pass123');
+
+      expect(result.isSuccess, isTrue);
+      verify(() => mockAuthService.signInWithEmailAndPassword(email: 'user@test.com', password: 'pass123')).called(1);
+    });
+
+    test('signOut delegates to AuthService and returns Success', () async {
+      when(() => mockAuthService.signOut()).thenAnswer((_) async => const Result.success(null));
+
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
+      final result = await authRepository.signOut();
+
+      expect(result.isSuccess, isTrue);
+      verify(() => mockAuthService.signOut()).called(1);
+    });
+
+    test('authenticateWithBiometrics updates biometric state on success', () async {
+      when(() => mockBiometricService.authenticateWithBiometrics()).thenAnswer((_) async => true);
+
+      final authRepository = AuthRepositoryImpl(mockAuthService, mockBiometricService, mockLocalStorageService);
+      final result = await authRepository.authenticateWithBiometrics();
+
+      expect(result, isTrue);
+      expect(authRepository.isBiometricAuthenticated, isTrue);
     });
   });
 }

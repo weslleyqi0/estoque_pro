@@ -1,4 +1,6 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
+import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
@@ -10,12 +12,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockFinalizeSaleUseCase extends Mock implements FinalizeSaleUseCase {}
+
 class MockSaveDraftSaleUseCase extends Mock implements SaveDraftSaleUseCase {}
 
 void main() {
   late MockFinalizeSaleUseCase mockFinalizeSaleUseCase;
   late MockSaveDraftSaleUseCase mockSaveDraftSaleUseCase;
   late CartViewModel cartViewModel;
+
+  setUpAll(() {
+    registerFallbackValue(DiscountType.percent);
+    registerFallbackValue(PaymentMethod.dinheiro);
+  });
 
   setUp(() {
     mockFinalizeSaleUseCase = MockFinalizeSaleUseCase();
@@ -79,5 +87,79 @@ void main() {
     // addProduct também deve conseguir aumentar a quantidade
     expect(cartViewModel.addProduct(realProductInStock), isTrue);
     expect(cartViewModel.items.first.quantity, 4);
+  });
+
+  test('finalizeSaleCommand executes and clears cart on success', () async {
+    cartViewModel.addProduct(realProductInStock);
+    expect(cartViewModel.items.length, 1);
+
+    when(
+      () => mockFinalizeSaleUseCase.call(
+        items: any(named: 'items'),
+        saleNumber: any(named: 'saleNumber'),
+        editingSaleId: any(named: 'editingSaleId'),
+        discountType: any(named: 'discountType'),
+        discountValue: any(named: 'discountValue'),
+        subtotal: any(named: 'subtotal'),
+        total: any(named: 'total'),
+        paymentMethod: any(named: 'paymentMethod'),
+        amountPaid: any(named: 'amountPaid'),
+        change: any(named: 'change'),
+        customerId: any(named: 'customerId'),
+        customerName: any(named: 'customerName'),
+        customerPhone: any(named: 'customerPhone'),
+        userId: any(named: 'userId'),
+        userName: any(named: 'userName'),
+        availableProducts: any(named: 'availableProducts'),
+        isDelivery: any(named: 'isDelivery'),
+        deliveryScheduledAt: any(named: 'deliveryScheduledAt'),
+        deliveryAddress: any(named: 'deliveryAddress'),
+        deliveryNotes: any(named: 'deliveryNotes'),
+      ),
+    ).thenAnswer((_) async => Result.success(sampleSale));
+
+    await cartViewModel.finalizeSaleCommand.execute((
+      userId: 'u1',
+      userName: 'Vendedor',
+      availableProducts: [realProductInStock],
+    ));
+
+    expect(cartViewModel.finalizeSaleCommand.isSuccess, isTrue);
+    expect(cartViewModel.items.isEmpty, isTrue);
+  });
+
+  test('saveDraftCommand executes and clears cart on success', () async {
+    cartViewModel.addProduct(realProductInStock);
+    expect(cartViewModel.items.length, 1);
+
+    when(
+      () => mockSaveDraftSaleUseCase.call(
+        items: any(named: 'items'),
+        saleNumber: any(named: 'saleNumber'),
+        editingSaleId: any(named: 'editingSaleId'),
+        discountType: any(named: 'discountType'),
+        discountValue: any(named: 'discountValue'),
+        subtotal: any(named: 'subtotal'),
+        total: any(named: 'total'),
+        paymentMethod: any(named: 'paymentMethod'),
+        amountPaid: any(named: 'amountPaid'),
+        change: any(named: 'change'),
+        customerId: any(named: 'customerId'),
+        customerName: any(named: 'customerName'),
+        userId: any(named: 'userId'),
+        userName: any(named: 'userName'),
+        availableProducts: any(named: 'availableProducts'),
+        createdAt: any(named: 'createdAt'),
+      ),
+    ).thenAnswer((_) async => Result.success(sampleSale));
+
+    await cartViewModel.saveDraftCommand.execute((
+      userId: 'u1',
+      userName: 'Vendedor',
+      availableProducts: [realProductInStock],
+    ));
+
+    expect(cartViewModel.saveDraftCommand.isSuccess, isTrue);
+    expect(cartViewModel.items.isEmpty, isTrue);
   });
 }

@@ -1,22 +1,38 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
+import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/string_extensions.dart';
-
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_history_entity.dart';
-import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/archive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/delete_product_permanently_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/unarchive_product_use_case.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/watch_product_history_use_case.dart';
 
 enum ProductsLoadState { idle, loading, success, failure }
 
-class ProductsViewModel extends ChangeNotifier {
-  final ProductsRepository _repository;
+class ProductsViewModel extends BaseViewModel {
+  final GetProductsUseCase _getProductsUseCase;
+  final ArchiveProductUseCase _archiveProductUseCase;
+  final UnarchiveProductUseCase _unarchiveProductUseCase;
+  final DeleteProductPermanentlyUseCase _deleteProductPermanentlyUseCase;
+  final WatchProductHistoryUseCase _watchProductHistoryUseCase;
 
   StreamSubscription<List<ProductEntity>>? _subscription;
 
+  late final Command1<bool, String> archiveProductCommand;
+  late final Command1<bool, String> unarchiveProductCommand;
+  late final Command1<bool, String> deletePermanentlyCommand;
+
   ProductsLoadState _state = ProductsLoadState.idle;
   ProductsLoadState get state => _state;
+
+  bool get isLoading => _state == ProductsLoadState.loading;
+  bool get isSuccess => _state == ProductsLoadState.success;
+  bool get isFailure => _state == ProductsLoadState.failure;
 
   List<ProductEntity> _products = [];
   List<ProductEntity> get products => _products;
@@ -103,7 +119,17 @@ class ProductsViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
-  ProductsViewModel(this._repository);
+  ProductsViewModel(
+    this._getProductsUseCase,
+    this._archiveProductUseCase,
+    this._unarchiveProductUseCase,
+    this._deleteProductPermanentlyUseCase,
+    this._watchProductHistoryUseCase,
+  ) {
+    archiveProductCommand = Command1(_archiveProduct);
+    unarchiveProductCommand = Command1(_unarchiveProduct);
+    deletePermanentlyCommand = Command1(_deletePermanently);
+  }
 
   void listenAll() {
     if (_subscription != null) return;
@@ -112,69 +138,84 @@ class ProductsViewModel extends ChangeNotifier {
     notifyListeners();
 
     _subscription?.cancel();
-    _subscription = _repository.watchAll().listen(
+    _subscription = _getProductsUseCase.watchAll().listen(
       (list) {
         _products = list.sortByName((a) => a.name);
         _state = ProductsLoadState.success;
         notifyListeners();
       },
       onError: (e) {
-        _error = e;
+        _error = e is AppFailure ? e : UnknownFailure(message: e.toString(), error: e);
         _state = ProductsLoadState.failure;
         notifyListeners();
       },
     );
   }
 
-  Future<void> archiveProduct(String id) async {
-    try {
-      final index = _products.indexWhere((p) => p.id == id);
-      if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: false, isArchived: true);
-        notifyListeners();
-      }
-      await _repository.archive(id);
-    } catch (e) {
-      _error = e;
+  AsyncResult<bool> _archiveProduct(String id) async {
+    final index = _products.indexWhere((p) => p.id == id);
+    if (index != -1) {
+      _products[index] = _products[index].copyWith(isActive: false, isArchived: true);
       notifyListeners();
-      rethrow;
     }
+    final result = await _archiveProductUseCase(id);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
-  Future<void> unarchiveProduct(String id) async {
-    try {
-      final index = _products.indexWhere((p) => p.id == id);
-      if (index != -1) {
-        _products[index] = _products[index].copyWith(isActive: false, isArchived: false);
-        notifyListeners();
-      }
-      await _repository.unarchive(id);
-    } catch (e) {
-      _error = e;
+  AsyncResult<bool> _unarchiveProduct(String id) async {
+    final index = _products.indexWhere((p) => p.id == id);
+    if (index != -1) {
+      _products[index] = _products[index].copyWith(isActive: false, isArchived: false);
       notifyListeners();
-      rethrow;
     }
+    final result = await _unarchiveProductUseCase(id);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
-  Future<void> deletePermanently(String id) async {
-    try {
-      _products.removeWhere((p) => p.id == id);
-      notifyListeners();
-      await _repository.deletePermanently(id);
-    } catch (e) {
-      _error = e;
-      notifyListeners();
-      rethrow;
-    }
+  AsyncResult<bool> _deletePermanently(String id) async {
+    _products.removeWhere((p) => p.id == id);
+    notifyListeners();
+    final result = await _deleteProductPermanentlyUseCase(id);
+    return result.fold(
+      onSuccess: (_) => const Result.success(true),
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
+
+
+
+  StreamSubscription<List<ProductHistoryEntity>>? _historySubscription;
+  List<ProductHistoryEntity> _productHistory = [];
+  List<ProductHistoryEntity> get productHistory => _productHistory;
 
   Stream<List<ProductHistoryEntity>> watchProductHistory(String productId, {int limit = 100}) {
-    return _repository.watchHistory(productId, limit: limit);
+    return _watchProductHistoryUseCase(productId, limit: limit);
+  }
+
+  void listenProductHistory(String productId, {int limit = 6}) {
+    _historySubscription?.cancel();
+    _historySubscription = _watchProductHistoryUseCase(productId, limit: limit).listen(
+      (history) {
+        _productHistory = history;
+        notifyListeners();
+      },
+      onError: (e) {
+        _error = e is AppFailure ? e : UnknownFailure(message: e.toString(), error: e);
+        notifyListeners();
+      },
+    );
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
+    _historySubscription?.cancel();
     super.dispose();
   }
 }

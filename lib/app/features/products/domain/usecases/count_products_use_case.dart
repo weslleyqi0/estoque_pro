@@ -14,7 +14,8 @@ class CountProductsUseCase {
 
   /// One-shot product count by supplier
   Future<int> executeBySupplier(String supplierId) async {
-    final products = await _productsRepository.getAll();
+    final productsResult = await _productsRepository.getAll();
+    final products = productsResult.value ?? [];
     return products.where((p) => p.supplier?.id == supplierId).length;
   }
 
@@ -27,7 +28,8 @@ class CountProductsUseCase {
 
   /// One-shot product count by category
   Future<int> executeByCategory(String categoryId) async {
-    final products = await _productsRepository.getAll();
+    final productsResult = await _productsRepository.getAll();
+    final products = productsResult.value ?? [];
     return products.where((p) => p.categories.any((c) => c.id == categoryId)).length;
   }
 

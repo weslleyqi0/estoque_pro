@@ -1,8 +1,10 @@
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
+import 'package:estoque_pro/app/features/products/domain/usecases/get_products_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
@@ -92,14 +94,14 @@ void main() {
     when(() => mockAuthRepo.authStateChanges).thenAnswer((_) => const Stream.empty());
 
     authViewModel = AuthViewModel(mockAuthRepo, mockAuthService);
-    when(() => mockProductsRepository.getAll()).thenAnswer((_) async => []);
+    when(() => mockProductsRepository.getAll()).thenAnswer((_) async => const Result.success([]));
   });
 
   test('EditSaleViewModel setCustomer updates customerId and customerName and marks hasChanges', () {
     final vm = EditSaleViewModel(
       mockEditSaleUseCase,
       mockCancelUseCase,
-      mockProductsRepository,
+      GetProductsUseCase(mockProductsRepository),
     )..initWithSale(initialSale);
 
     expect(vm.selectedCustomerId, 'c1');
@@ -126,7 +128,7 @@ void main() {
     final vm = EditSaleViewModel(
       mockEditSaleUseCase,
       mockCancelUseCase,
-      mockProductsRepository,
+      GetProductsUseCase(mockProductsRepository),
     );
 
     await tester.pumpWidget(
@@ -159,8 +161,8 @@ void main() {
   test('EditSaleUseCase does not append to editHistory when only customer changes', () async {
     final mockSalesRepo = MockSalesRepository();
     final mockProductsRepo = MockProductsRepository();
-    when(() => mockProductsRepo.getAll()).thenAnswer((_) async => []);
-    when(() => mockSalesRepo.updateSale(any())).thenAnswer((_) async {});
+    when(() => mockProductsRepo.getAll()).thenAnswer((_) async => const Result.success([]));
+    when(() => mockSalesRepo.updateSale(any())).thenAnswer((_) async => const Result.success(null));
 
     final useCase = EditSaleUseCase(mockSalesRepo, mockProductsRepo);
 

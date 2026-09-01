@@ -7,17 +7,18 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class HomeShortcutsSettingsPage extends StatelessWidget {
-  final HomeShortcutsViewModel viewModel;
+  final HomeShortcutsViewModel Function() viewModelFactory;
   final AuthViewModel authViewModel;
 
   const HomeShortcutsSettingsPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
     required this.authViewModel,
   });
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = viewModelFactory();
     return ListenableBuilder(
       listenable: Listenable.merge([viewModel, authViewModel]),
       builder: (context, _) {

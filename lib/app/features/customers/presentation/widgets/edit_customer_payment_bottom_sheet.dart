@@ -80,27 +80,28 @@ class _EditCustomerPaymentBottomSheetState extends State<EditCustomerPaymentBott
 
     setState(() => _isLoading = true);
 
-    try {
-      final updatedPayment = widget.payment.copyWith(
-        amount: amount,
-        paymentMethod: _selectedPaymentMethod,
-        notes: _notesController.text.trim(),
+    final updatedPayment = widget.payment.copyWith(
+      amount: amount,
+      paymentMethod: _selectedPaymentMethod,
+      notes: _notesController.text.trim(),
+    );
+
+    await widget.debtsViewModel.registerPaymentCommand.execute(updatedPayment);
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (widget.debtsViewModel.registerPaymentCommand.isSuccess) {
+      Navigator.pop(context, true);
+      AppSnackbar.success(
+        context,
+        'Pagamento atualizado com sucesso!',
       );
-
-      await widget.debtsViewModel.updatePayment(updatedPayment);
-
-      if (mounted) {
-        Navigator.pop(context, true);
-        AppSnackbar.success(
-          context,
-          'Pagamento atualizado com sucesso!',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        AppSnackbar.error(context, 'Erro ao atualizar pagamento: $e');
-      }
+    } else if (widget.debtsViewModel.registerPaymentCommand.isFailure) {
+      AppSnackbar.error(
+        context,
+        widget.debtsViewModel.registerPaymentCommand.error?.message ?? 'Erro ao atualizar pagamento.',
+      );
     }
   }
 
@@ -114,24 +115,25 @@ class _EditCustomerPaymentBottomSheetState extends State<EditCustomerPaymentBott
 
     setState(() => _isLoading = true);
 
-    try {
-      await widget.debtsViewModel.cancelPayment(
-        widget.payment.id,
-        reason: reason.trim(),
-      );
+    await widget.debtsViewModel.cancelPaymentCommand.execute((
+      payment: widget.payment,
+      reason: reason.trim(),
+    ));
 
-      if (mounted) {
-        Navigator.pop(context, true);
-        AppSnackbar.success(
-          context,
-          'Pagamento cancelado com sucesso. O valor retornou para a dívida.',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        AppSnackbar.error(context, 'Erro ao cancelar pagamento: $e');
-      }
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (widget.debtsViewModel.cancelPaymentCommand.isSuccess) {
+      Navigator.pop(context, true);
+      AppSnackbar.success(
+        context,
+        'Pagamento cancelado com sucesso. O valor retornou para a dívida.',
+      );
+    } else if (widget.debtsViewModel.cancelPaymentCommand.isFailure) {
+      AppSnackbar.error(
+        context,
+        widget.debtsViewModel.cancelPaymentCommand.error?.message ?? 'Erro ao cancelar pagamento.',
+      );
     }
   }
 

@@ -1,8 +1,10 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sales_list_sliver.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sales_status_tabs.dart';
@@ -11,14 +13,20 @@ import 'package:go_router/go_router.dart';
 
 class SalesPage extends StatefulWidget {
   final SalesViewModel Function() viewModelFactory;
-  final DeliveriesViewModel Function()? deliveriesViewModelFactory;
+  final DeliveriesViewModel Function() deliveriesViewModelFactory;
+  final EditSaleViewModel Function()? editSaleViewModelFactory;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
   final AuthViewModel authViewModel;
   final SalesFilterTab? initialTab;
 
   const SalesPage({
     super.key,
     required this.viewModelFactory,
-    this.deliveriesViewModelFactory,
+    required this.deliveriesViewModelFactory,
+    this.editSaleViewModelFactory,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
     required this.authViewModel,
     this.initialTab,
   });
@@ -35,7 +43,7 @@ class _SalesPageState extends State<SalesPage> {
   void initState() {
     super.initState();
     viewModel = widget.viewModelFactory();
-    deliveriesViewModel = widget.deliveriesViewModelFactory?.call() ?? getIt<DeliveriesViewModel>();
+    deliveriesViewModel = widget.deliveriesViewModelFactory();
     if (widget.initialTab != null) {
       viewModel.setSelectedTab(widget.initialTab!);
     }
@@ -91,6 +99,9 @@ class _SalesPageState extends State<SalesPage> {
                 viewModel: viewModel,
                 authViewModel: widget.authViewModel,
                 deliveriesViewModel: deliveriesViewModel,
+                editSaleViewModelFactory: widget.editSaleViewModelFactory,
+                customersViewModelFactory: widget.customersViewModelFactory,
+                debtsViewModelFactory: widget.debtsViewModelFactory,
               ),
             ],
           ),

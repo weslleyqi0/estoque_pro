@@ -1,3 +1,5 @@
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
+import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/core/utils/sale_code_generator.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
@@ -7,17 +9,33 @@ import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.da
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/finalize_sale_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/save_draft_sale_use_case.dart';
-import 'package:flutter/foundation.dart';
 
-class CartViewModel extends ChangeNotifier {
+typedef FinalizeSaleParams = ({
+  String userId,
+  String userName,
+  List<ProductEntity> availableProducts,
+});
+
+typedef SaveDraftSaleParams = ({
+  String userId,
+  String userName,
+  List<ProductEntity> availableProducts,
+});
+
+class CartViewModel extends BaseViewModel {
   final FinalizeSaleUseCase _finalizeSaleUseCase;
   final SaveDraftSaleUseCase _saveDraftSaleUseCase;
+
+  late final Command1<SaleEntity, FinalizeSaleParams> finalizeSaleCommand;
+  late final Command1<bool, SaveDraftSaleParams> saveDraftCommand;
 
   CartViewModel(
     this._finalizeSaleUseCase,
     this._saveDraftSaleUseCase,
   ) {
     _initSaleNumber();
+    finalizeSaleCommand = Command1(_finalizeSale);
+    saveDraftCommand = Command1(_saveDraft);
   }
 
   final DateTime _createdAt = DateTime.now();
@@ -289,12 +307,8 @@ class CartViewModel extends ChangeNotifier {
     return invalid;
   }
 
-  Future<bool> executeFinalize({
-    required String userId,
-    required String userName,
-    required List<ProductEntity> availableProducts,
-  }) async {
-    await _finalizeSaleUseCase.execute(
+  AsyncResult<SaleEntity> _finalizeSale(FinalizeSaleParams params) async {
+    final result = await _finalizeSaleUseCase(
       items: _items,
       saleNumber: _saleNumber,
       editingSaleId: _editingSaleId,
@@ -308,25 +322,23 @@ class CartViewModel extends ChangeNotifier {
       customerId: _customerId,
       customerName: _customerName,
       customerPhone: _customerPhone,
-      userId: userId,
-      userName: userName,
-      availableProducts: availableProducts,
+      userId: params.userId,
+      userName: params.userName,
+      availableProducts: params.availableProducts,
       isDelivery: _isDelivery,
       deliveryScheduledAt: _scheduledDeliveryDate,
       deliveryAddress: _deliveryAddress,
       deliveryNotes: _deliveryNotes,
     );
 
-    clearCart();
-    return true;
+    if (result.isSuccess) {
+      clearCart();
+    }
+    return result;
   }
 
-  Future<bool> saveInProgressToFirebase({
-    required String userId,
-    required String userName,
-    required List<ProductEntity> availableProducts,
-  }) async {
-    await _saveDraftSaleUseCase.execute(
+  AsyncResult<bool> _saveDraft(SaveDraftSaleParams params) async {
+    final result = await _saveDraftSaleUseCase(
       items: _items,
       saleNumber: _saleNumber,
       editingSaleId: _editingSaleId,
@@ -339,13 +351,20 @@ class CartViewModel extends ChangeNotifier {
       change: change,
       customerId: _customerId,
       customerName: _customerName,
-      userId: userId,
-      userName: userName,
-      availableProducts: availableProducts,
+      userId: params.userId,
+      userName: params.userName,
+      availableProducts: params.availableProducts,
       createdAt: _createdAt,
     );
 
-    clearCart();
-    return true;
+    return result.fold(
+      onSuccess: (_) {
+        clearCart();
+        return const Result.success(true);
+      },
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
+
+
 }

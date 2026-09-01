@@ -1,5 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
@@ -7,6 +9,7 @@ import 'package:estoque_pro/app/features/deliveries/presentation/widgets/create_
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/delivery_detail_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sheets/digital_invoice_sheet.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sheets/edit_sale_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
@@ -20,6 +23,9 @@ class SaleCardHeader extends StatelessWidget {
   final DeliveryEntity? delivery;
   final AuthViewModel authViewModel;
   final DeliveriesViewModel deliveriesViewModel;
+  final EditSaleViewModel Function()? editSaleViewModelFactory;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
 
   const SaleCardHeader({
     super.key,
@@ -27,6 +33,9 @@ class SaleCardHeader extends StatelessWidget {
     this.delivery,
     required this.authViewModel,
     required this.deliveriesViewModel,
+    this.editSaleViewModelFactory,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
   });
 
   bool get _canEditSale {
@@ -94,11 +103,16 @@ class SaleCardHeader extends StatelessWidget {
                 iconColor: context.colorScheme.primary,
                 visualDensity: VisualDensity.compact,
                 tooltip: 'Editar Venda',
-                onPressed: () => EditSaleBottomSheet.show(
-                  context,
-                  sale,
-                  authViewModel: authViewModel,
-                ),
+                onPressed: editSaleViewModelFactory == null
+                    ? null
+                    : () => EditSaleBottomSheet.show(
+                          context,
+                          sale,
+                          authViewModel: authViewModel,
+                          viewModelFactory: editSaleViewModelFactory!,
+                          customersViewModelFactory: customersViewModelFactory,
+                          debtsViewModelFactory: debtsViewModelFactory,
+                        ),
               ),
             ],
             if (hasDeliveryAction) ...[

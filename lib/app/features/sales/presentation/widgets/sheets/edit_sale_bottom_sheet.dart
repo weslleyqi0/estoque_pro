@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
@@ -39,11 +38,10 @@ class EditSaleBottomSheet extends StatefulWidget {
     BuildContext context,
     SaleEntity sale, {
     required AuthViewModel authViewModel,
-    EditSaleViewModel Function()? viewModelFactory,
+    required EditSaleViewModel Function() viewModelFactory,
     CustomersViewModel Function()? customersViewModelFactory,
     CustomerDebtsViewModel Function()? debtsViewModelFactory,
   }) {
-    final factory = viewModelFactory ?? () => getIt<EditSaleViewModel>();
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -52,7 +50,7 @@ class EditSaleBottomSheet extends StatefulWidget {
       builder: (_) => EditSaleBottomSheet(
         sale: sale,
         authViewModel: authViewModel,
-        viewModelFactory: factory,
+        viewModelFactory: viewModelFactory,
         customersViewModelFactory: customersViewModelFactory,
         debtsViewModelFactory: debtsViewModelFactory,
       ),
@@ -130,12 +128,9 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
   }
 
   void _selectCustomer(BuildContext context) {
-    final customersVM = widget.customersViewModelFactory != null
-        ? widget.customersViewModelFactory!()
-        : getIt<CustomersViewModel>();
-    final debtsVM = widget.debtsViewModelFactory != null
-        ? widget.debtsViewModelFactory!()
-        : getIt<CustomerDebtsViewModel>();
+    if (widget.customersViewModelFactory == null || widget.debtsViewModelFactory == null) return;
+    final customersVM = widget.customersViewModelFactory!();
+    final debtsVM = widget.debtsViewModelFactory!();
     final canManageCustomers =
         widget.authViewModel.currentUser?.hasPermission(UserPermission.managerCustomer) ?? false;
 

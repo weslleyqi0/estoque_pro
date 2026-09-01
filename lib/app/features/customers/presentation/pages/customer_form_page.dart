@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class CustomerFormPage extends StatefulWidget {
-  final CustomersFormViewModel viewModel;
+  final CustomersFormViewModel Function() viewModelFactory;
   final CustomerEntity? customer;
 
   const CustomerFormPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
     this.customer,
   });
 
@@ -22,6 +22,7 @@ class CustomerFormPage extends StatefulWidget {
 
 class _CustomerFormPageState extends State<CustomerFormPage> {
   final _formKey = GlobalKey<FormState>();
+  late final CustomersFormViewModel viewModel;
   late final TextEditingController _nameController;
   late final TextEditingController _addressController;
   late final TextEditingController _cpfController;
@@ -34,6 +35,7 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
   @override
   void initState() {
     super.initState();
+    viewModel = widget.viewModelFactory();
     _currentCustomer = widget.customer;
     _nameController = TextEditingController(text: _currentCustomer?.name ?? '');
     _addressController = TextEditingController(text: _currentCustomer?.address ?? '');
@@ -48,6 +50,7 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
     _addressController.dispose();
     _cpfController.dispose();
     _phoneController.dispose();
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -64,13 +67,13 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
     );
 
     if (_isEditing) {
-      await widget.viewModel.updateCustomerCommand.execute(customer);
-      if (widget.viewModel.updateCustomerCommand.isSuccess && mounted) {
+      await viewModel.updateCustomerCommand.execute(customer);
+      if (viewModel.updateCustomerCommand.isSuccess && mounted) {
         Navigator.pop(context);
       }
     } else {
-      await widget.viewModel.saveCustomerCommand.execute(customer);
-      if (widget.viewModel.saveCustomerCommand.isSuccess && mounted) {
+      await viewModel.saveCustomerCommand.execute(customer);
+      if (viewModel.saveCustomerCommand.isSuccess && mounted) {
         Navigator.pop(context);
       }
     }
@@ -89,8 +92,8 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
     );
 
     if (confirmed == true && mounted) {
-      await widget.viewModel.deleteCustomerCommand.execute(_currentCustomer!.id);
-      if (widget.viewModel.deleteCustomerCommand.isSuccess && mounted) {
+      await viewModel.deleteCustomerCommand.execute(_currentCustomer!.id);
+      if (viewModel.deleteCustomerCommand.isSuccess && mounted) {
         Navigator.pop(context);
       }
     }
@@ -105,13 +108,11 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
         actions: [
           AppIconButton(
             icon: AppIcons.save,
-            tooltip: 'Salvar',
             onPressed: () => _save(),
           ),
           if (_currentCustomer != null)
             AppIconButton(
               icon: AppIcons.delete,
-              tooltip: 'Excluir',
               onPressed: () => _delete(),
             ),
           const Gap(AppSpacing.space4),
@@ -123,18 +124,16 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
           padding: const EdgeInsets.all(AppSpacing.space16),
           children: [
             AppTextfield(
-              label: 'Nome',
-              hint: 'Nome do cliente',
+              label: 'Nome do Cliente',
+              hint: 'Ex: Supermercado Silva ou Maria Oliveira',
               required: true,
               controller: _nameController,
-              keyboardType: TextInputType.name,
-              prefixIcon: AppIcons.person,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Nome é obrigatório';
-                }
-                return null;
-              },
+            ),
+            const Gap(AppSpacing.space16),
+            AppTextfield(
+              label: 'Endereço',
+              hint: 'Ex: Rua das Flores, 123 - Centro',
+              controller: _addressController,
             ),
             const Gap(AppSpacing.space16),
             AppTextfield(
@@ -142,25 +141,15 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
               hint: '000.000.000-00',
               controller: _cpfController,
               keyboardType: TextInputType.number,
-              prefixIcon: AppIcons.badge,
               inputFormatters: [CpfInputFormatter()],
             ),
             const Gap(AppSpacing.space16),
             AppTextfield(
-              label: 'Telefone',
+              label: 'Telefone / WhatsApp',
               hint: '(00) 00000-0000',
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              prefixIcon: AppIcons.phone,
               inputFormatters: [PhoneInputFormatter()],
-            ),
-            const Gap(AppSpacing.space16),
-            AppTextfield(
-              label: 'Endereço',
-              hint: 'Rua, número, bairro...',
-              controller: _addressController,
-              keyboardType: TextInputType.streetAddress,
-              prefixIcon: AppIcons.homeWork,
             ),
             const Gap(AppSpacing.space24),
             AppSwitchTitle(
@@ -172,13 +161,13 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
             const Gap(AppSpacing.space32),
             ListenableBuilder(
               listenable: Listenable.merge([
-                widget.viewModel.saveCustomerCommand,
-                widget.viewModel.updateCustomerCommand,
+                viewModel.saveCustomerCommand,
+                viewModel.updateCustomerCommand,
               ]),
               builder: (context, _) {
                 final isLoading =
-                    widget.viewModel.saveCustomerCommand.isRunning ||
-                    widget.viewModel.updateCustomerCommand.isRunning;
+                    viewModel.saveCustomerCommand.isRunning ||
+                    viewModel.updateCustomerCommand.isRunning;
                 return AppButton.primary(
                   label: _isEditing ? 'Salvar Alterações' : 'Salvar Cliente',
                   isFullWidth: true,

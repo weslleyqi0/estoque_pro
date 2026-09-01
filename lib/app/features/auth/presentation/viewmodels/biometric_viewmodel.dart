@@ -1,8 +1,9 @@
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/command.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:flutter/widgets.dart';
 
-class BiometricViewModel extends ChangeNotifier with WidgetsBindingObserver {
+class BiometricViewModel extends BaseViewModel with WidgetsBindingObserver {
   final AuthRepository _authRepository;
 
   @visibleForTesting

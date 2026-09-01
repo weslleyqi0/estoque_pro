@@ -21,15 +21,15 @@ import 'package:go_router/go_router.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final ProductEntity product;
-  final ProductsViewModel viewModel;
-  final ProductsFormViewModel formViewModel;
+  final ProductsViewModel Function() viewModelFactory;
+  final ProductsFormViewModel Function() formViewModelFactory;
   final AuthViewModel authViewModel;
 
   const ProductDetailsPage({
     super.key,
     required this.product,
-    required this.viewModel,
-    required this.formViewModel,
+    required this.viewModelFactory,
+    required this.formViewModelFactory,
     required this.authViewModel,
   });
 
@@ -38,14 +38,32 @@ class ProductDetailsPage extends StatefulWidget {
 }
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
-  ProductsViewModel get _viewModel => widget.viewModel;
-  ProductsFormViewModel get _formViewModel => widget.formViewModel;
+  late final ProductsViewModel _viewModel;
+  late final ProductsFormViewModel _formViewModel;
   AuthViewModel get _authViewModel => widget.authViewModel;
 
   @override
   void initState() {
     super.initState();
+    _viewModel = widget.viewModelFactory();
+    _formViewModel = widget.formViewModelFactory();
     _viewModel.listenAll();
+    _viewModel.listenProductHistory(widget.product.id, limit: 6);
+  }
+
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    _formViewModel.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductDetailsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.product.id != widget.product.id) {
+      _viewModel.listenProductHistory(widget.product.id, limit: 6);
+    }
   }
 
   ProductEntity get _currentProduct {
@@ -113,15 +131,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
 
     if (confirm == true && mounted) {
-      try {
-        await _viewModel.archiveProduct(product.id);
-        if (mounted) {
-          AppSnackbar.success(context, 'Produto arquivado com sucesso!');
-        }
-      } catch (e) {
-        if (mounted) {
-          AppSnackbar.error(context, 'Erro ao arquivar produto: $e');
-        }
+      await _viewModel.archiveProductCommand.execute(product.id);
+      if (!mounted) return;
+      if (_viewModel.archiveProductCommand.isSuccess) {
+        AppSnackbar.success(context, 'Produto arquivado com sucesso!');
+      } else if (_viewModel.archiveProductCommand.isFailure) {
+        AppSnackbar.error(
+          context,
+          _viewModel.archiveProductCommand.error?.message ?? 'Erro ao arquivar produto.',
+        );
       }
     }
   }
@@ -136,15 +154,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
 
     if (confirm == true && mounted) {
-      try {
-        await _viewModel.unarchiveProduct(product.id);
-        if (mounted) {
-          AppSnackbar.success(context, 'Produto restaurado! Ele permanece desativado até ser ativado.');
-        }
-      } catch (e) {
-        if (mounted) {
-          AppSnackbar.error(context, 'Erro ao restaurar produto: $e');
-        }
+      await _viewModel.unarchiveProductCommand.execute(product.id);
+      if (!mounted) return;
+      if (_viewModel.unarchiveProductCommand.isSuccess) {
+        AppSnackbar.success(context, 'Produto restaurado! Ele permanece desativado até ser ativado.');
+      } else if (_viewModel.unarchiveProductCommand.isFailure) {
+        AppSnackbar.error(
+          context,
+          _viewModel.unarchiveProductCommand.error?.message ?? 'Erro ao restaurar produto.',
+        );
       }
     }
   }
@@ -236,24 +254,16 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               ],
 
               if (canViewHistory) ...[
-                StreamBuilder<List<ProductHistoryEntity>>(
-                  stream: _viewModel.watchProductHistory(product.id, limit: 6),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return const SizedBox.shrink();
-                    }
-                    final historyList = snapshot.data ?? [];
-                    final hasMore = historyList.length > 5;
-                    final displayedHistory = hasMore ? historyList.take(5).toList() : historyList;
-
-                    return ProductHistoryCard(
-                      title: 'Histórico de Movimentações',
-                      subtitle: 'Últimas movimentações',
-                      history: displayedHistory,
-                      showEmptyMessage: true,
-                      onViewAll: hasMore ? () => context.push(AppRoutes.productHistory, extra: product) : null,
-                    );
-                  },
+                ProductHistoryCard(
+                  title: 'Histórico de Movimentações',
+                  subtitle: 'Últimas movimentações',
+                  history: _viewModel.productHistory.length > 5
+                      ? _viewModel.productHistory.take(5).toList()
+                      : _viewModel.productHistory,
+                  showEmptyMessage: true,
+                  onViewAll: _viewModel.productHistory.length > 5
+                      ? () => context.push(AppRoutes.productHistory, extra: product)
+                      : null,
                 ),
                 const Gap(AppSpacing.space16),
               ],

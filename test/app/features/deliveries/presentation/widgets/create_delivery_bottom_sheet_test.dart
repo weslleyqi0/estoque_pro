@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
@@ -6,6 +7,11 @@ import 'package:estoque_pro/app/features/customers/domain/repositories/customers
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/delete_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/get_deliveries_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_delivery_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/create_delivery_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -132,20 +138,27 @@ void main() {
     when(() => mockAuthRepository.authStateChanges).thenAnswer((_) => const Stream.empty());
 
     when(() => mockDeliveriesRepository.watchAll()).thenAnswer((_) => Stream.value([existingDelivery]));
-    when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockDeliveriesRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
-    when(() => mockSalesRepository.watchAll()).thenAnswer((_) => Stream.value([saleWithoutDelivery, saleWithDelivery]));
-    when(() => mockCustomersRepository.getAll()).thenAnswer((_) async => [
-      const CustomerEntity(
+    when(() => mockSalesRepository.watchAll(limit: any(named: 'limit')))
+        .thenAnswer((_) => Stream.value([saleWithoutDelivery, saleWithDelivery]));
+    when(() => mockCustomersRepository.getAll()).thenAnswer((_) async => const Result.success([
+      CustomerEntity(
         id: 'c1',
         name: 'Maria Silva',
         address: 'Rua das Palmeiras, 100',
         phone: '11988887777',
       ),
-    ]);
+    ]));
 
     authViewModel = AuthViewModel(mockAuthRepository, mockAuthService);
-    deliveriesViewModel = DeliveriesViewModel(mockDeliveriesRepository)..listenAll();
+    deliveriesViewModel = DeliveriesViewModel(
+      GetDeliveriesUseCase(mockDeliveriesRepository),
+      SaveDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryUseCase(mockDeliveriesRepository),
+      UpdateDeliveryStatusUseCase(mockDeliveriesRepository),
+      DeleteDeliveryUseCase(mockDeliveriesRepository),
+    )..listenAll();
   });
 
   testWidgets('CreateDeliveryBottomSheet shows only sales that do not have a delivery yet', (tester) async {

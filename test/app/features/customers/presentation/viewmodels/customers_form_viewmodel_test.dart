@@ -1,5 +1,9 @@
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/delete_customer_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/save_customer_use_case.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/update_customer_use_case.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_form_viewmodel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -25,11 +29,15 @@ void main() {
 
   setUp(() {
     mockRepository = MockCustomersRepository();
-    viewModel = CustomersFormViewModel(mockRepository);
+    viewModel = CustomersFormViewModel(
+      SaveCustomerUseCase(mockRepository),
+      UpdateCustomerUseCase(mockRepository),
+      DeleteCustomerUseCase(mockRepository),
+    );
   });
 
   test('saveCustomerCommand executes repository save', () async {
-    when(() => mockRepository.save(any())).thenAnswer((_) async {});
+    when(() => mockRepository.save(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.saveCustomerCommand.execute(testCustomer);
 
@@ -38,7 +46,7 @@ void main() {
   });
 
   test('updateCustomerCommand executes repository update', () async {
-    when(() => mockRepository.update(any())).thenAnswer((_) async {});
+    when(() => mockRepository.update(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.updateCustomerCommand.execute(testCustomer);
 
@@ -47,7 +55,7 @@ void main() {
   });
 
   test('deleteCustomerCommand executes repository delete', () async {
-    when(() => mockRepository.delete(any())).thenAnswer((_) async {});
+    when(() => mockRepository.delete(any())).thenAnswer((_) async => const Result.success(null));
 
     await viewModel.deleteCustomerCommand.execute('123');
 

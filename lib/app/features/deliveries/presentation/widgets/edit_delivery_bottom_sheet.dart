@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
@@ -85,15 +84,14 @@ class _EditDeliveryBottomSheetState extends State<EditDeliveryBottomSheet> {
   }
 
   void _selectCustomer(BuildContext context) {
-    final customersVM = widget.customersViewModelFactory != null
-        ? widget.customersViewModelFactory!()
-        : getIt<CustomersViewModel>();
-    final debtsVM = widget.debtsViewModelFactory != null
-        ? widget.debtsViewModelFactory!()
-        : getIt<CustomerDebtsViewModel>();
-    final authVM = widget.authViewModel ?? getIt<AuthViewModel>();
+    if (widget.customersViewModelFactory == null || widget.debtsViewModelFactory == null) return;
+    final customersVM = widget.customersViewModelFactory!();
+    final debtsVM = widget.debtsViewModelFactory!();
+    final authVM = widget.authViewModel;
     final canManageCustomers =
-        authVM.currentUser?.hasPermission(UserPermission.managerCustomer) ?? false;
+        authVM?.currentUser?.hasPermission(UserPermission.managerCustomer) ?? false;
+
+    if (authVM == null) return;
 
     CustomerBottomSheet.show(
       context: context,

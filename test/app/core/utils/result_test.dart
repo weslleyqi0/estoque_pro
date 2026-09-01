@@ -19,21 +19,47 @@ void main() {
       expect(foldResult, equals('Success: ok'));
     });
 
-    test('Failure pattern matching and fold works', () {
+    test('Failure pattern matching and fold works with AppFailure', () {
+      const failure = NetworkFailure(message: 'Connection failed');
+      final result = Result<String>.failure(failure);
+
+      expect(result.isSuccess, isFalse);
+      expect(result.isFailure, isTrue);
+      expect(result.value, isNull);
+      expect(result.error, equals(failure));
+
+      final foldResult = result.fold(
+        onSuccess: (value) => 'Success',
+        onFailure: (error) => 'Failure: ${error.message}',
+      );
+
+      expect(foldResult, equals('Failure: Connection failed'));
+    });
+
+    test('Failure wraps generic Exception in UnknownFailure', () {
       final exception = Exception('error message');
       final result = Result<String>.failure(exception);
 
       expect(result.isSuccess, isFalse);
       expect(result.isFailure, isTrue);
-      expect(result.value, isNull);
-      expect(result.error, equals(exception));
+      expect(result.error, isA<UnknownFailure>());
+      expect(result.error?.message, equals('error message'));
+    });
 
-      final foldResult = result.fold(
-        onSuccess: (value) => 'Success',
-        onFailure: (error) => 'Failure: ${error.toString()}',
-      );
+    test('guard returns Success on successful execution', () async {
+      final result = await Result.guard(() async => 42);
 
-      expect(foldResult, equals('Failure: Exception: error message'));
+      expect(result.isSuccess, isTrue);
+      expect(result.value, equals(42));
+    });
+
+    test('guard returns Failure on thrown exception', () async {
+      final result = await Result.guard<int>(() async {
+        throw const PermissionFailure();
+      });
+
+      expect(result.isFailure, isTrue);
+      expect(result.error, isA<PermissionFailure>());
     });
   });
 }

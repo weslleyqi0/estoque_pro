@@ -246,6 +246,7 @@ class AppTheme {
     appBarTheme: AppBarTheme(
       elevation: 0,
       centerTitle: true,
+      surfaceTintColor: AppColors.transparent,
       backgroundColor: AppColors.surfaceDark,
       foregroundColor: AppColors.textPrimaryDark,
       titleTextStyle: AppTypography.titleLarge.copyWith(

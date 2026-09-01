@@ -1,19 +1,20 @@
 import 'dart:async';
 
+import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
 import 'package:estoque_pro/app/core/utils/list_extensions.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
-import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:estoque_pro/app/features/customers/domain/usecases/get_customers_use_case.dart';
 
 enum CustomersLoadState { idle, loading, success, failure }
 
-class CustomersViewModel extends ChangeNotifier {
-  final CustomersRepository _repository;
+class CustomersViewModel extends BaseViewModel {
+  final GetCustomersUseCase _getCustomersUseCase;
 
   StreamSubscription<List<CustomerEntity>>? _customersSubscription;
 
   CustomersLoadState _state = CustomersLoadState.idle;
   CustomersLoadState get state => _state;
+  bool get isLoading => _state == CustomersLoadState.loading;
 
   List<CustomerEntity> _customers = [];
   List<CustomerEntity> get customers => _customers;
@@ -62,14 +63,14 @@ class CustomersViewModel extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
-  CustomersViewModel(this._repository);
+  CustomersViewModel(this._getCustomersUseCase);
 
   void listenAll() {
     _state = CustomersLoadState.loading;
     notifyListeners();
 
     _customersSubscription?.cancel();
-    _customersSubscription = _repository.watchAll().listen(
+    _customersSubscription = _getCustomersUseCase.watchAll().listen(
       (list) {
         _customers = list.sortByName((a) => a.name);
         _state = CustomersLoadState.success;
