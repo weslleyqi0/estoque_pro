@@ -80,8 +80,10 @@ import 'package:estoque_pro/app/features/products/presentation/viewmodels/produc
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_form_viewmodel.dart';
 import 'package:estoque_pro/app/features/products/presentation/viewmodels/products_viewmodel.dart';
 import 'package:estoque_pro/app/features/users/data/repositories/users_repository_impl.dart';
+import 'package:estoque_pro/app/features/users/data/services/user_provisioning_service.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/features/users/domain/repositories/users_repository.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/create_user_use_case.dart';
 import 'package:estoque_pro/app/features/users/domain/usecases/delete_user_use_case.dart';
 import 'package:estoque_pro/app/features/users/domain/usecases/get_users_use_case.dart';
 import 'package:estoque_pro/app/features/users/domain/usecases/save_user_use_case.dart';
@@ -124,7 +126,7 @@ Future<void> setupServiceLocator() async {
   await localStorageService.init();
   getIt.registerSingleton<LocalStorageService>(localStorageService);
 
-  getIt.registerLazySingleton<AuthService>(() => AuthService());
+  getIt.registerLazySingleton<AuthService>(() => AuthServiceImpl(getIt<FirebaseAuth>()));
   getIt.registerLazySingleton<BiometricService>(() => BiometricService());
   getIt.registerLazySingleton<AuthorizationService>(
     () {
@@ -135,6 +137,10 @@ Future<void> setupServiceLocator() async {
       service.init();
       return service;
     },
+  );
+
+  getIt.registerLazySingleton<UserProvisioningService>(
+    () => UserProvisioningServiceImpl(),
   );
 
   // Repositories
@@ -319,6 +325,12 @@ Future<void> setupServiceLocator() async {
     () => DeleteSupplierUseCase(getIt<SuppliersRepository>()),
   );
 
+  getIt.registerFactory<CreateUserUseCase>(
+    () => CreateUserUseCase(
+      getIt<UserProvisioningService>(),
+      getIt<SaveUserUseCase>(),
+    ),
+  );
   getIt.registerFactory<GetUsersUseCase>(
     () => GetUsersUseCase(getIt<UsersRepository>()),
   );
@@ -363,6 +375,7 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerFactory<UserFormViewModel>(
     () => UserFormViewModel(
+      getIt<CreateUserUseCase>(),
       getIt<SaveUserUseCase>(),
       getIt<AuthorizationService>(),
     ),
