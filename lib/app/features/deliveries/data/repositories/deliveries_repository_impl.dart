@@ -4,7 +4,6 @@ import 'package:estoque_pro/app/features/deliveries/data/models/delivery_model.d
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 
 class DeliveriesRepositoryImpl implements DeliveriesRepository {
@@ -14,15 +13,15 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
 
   @override
   Stream<List<DeliveryEntity>> watchAll({int limit = 100}) {
-    return _databaseService.ref
-        .orderByChild('created_at')
-        .limitToLast(limit)
-        .onValue
-        .map((event) {
+    return _databaseService
+        .listenOrdered(
+          orderByChild: 'created_at',
+          limitToLast: limit,
+        )
+        .map((data) {
           final List<DeliveryEntity> deliveries = [];
-          final value = event.snapshot.value;
-          if (value is Map) {
-            for (final entry in value.entries) {
+          if (data != null) {
+            for (final entry in data.entries) {
               if (entry.value is Map) {
                 try {
                   final model = DeliveryModel.fromMap(
@@ -37,7 +36,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
             }
           }
           // Sort by scheduledAt ascending (or createdAt descending)
-          return deliveries..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+          return deliveries..sort((a, b) => a.scheduledAt.compareTo(a.scheduledAt));
         })
         .handleError((e) {
           debugPrint('---> Deliveries: Erro no listener: $e');
@@ -47,8 +46,8 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
   @override
   Future<Result<void>> save(DeliveryEntity delivery) async {
     try {
-      final pushRef = _databaseService.ref.push();
-      final deliveryId = delivery.id.isNotEmpty ? delivery.id : pushRef.key!;
+      final pushKey = _databaseService.pushKey();
+      final deliveryId = delivery.id.isNotEmpty ? delivery.id : pushKey;
 
       final finalDelivery = delivery.copyWith(id: deliveryId);
       final deliveryModel = DeliveryModel.fromEntity(finalDelivery);
@@ -91,7 +90,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
     try {
       final Map<String, dynamic> updates = {
         'status': status.value,
-        'updated_at': ServerValue.timestamp,
+        'updated_at': DateTime.now().toIso8601String(),
       };
 
       if (deliveredAt != null) {
@@ -100,7 +99,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
         updates['delivered_at'] = DateTime.now().toIso8601String();
       }
 
-      await _databaseService.ref.child(deliveryId).update(updates);
+      await _databaseService.update(deliveryId, updates);
       return const Result.success(null);
     } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao atualizar status da entrega: $e');
