@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class UserFormPage extends StatefulWidget {
-  final UserFormViewModel viewModel;
+  final UserFormViewModel Function() viewModelFactory;
   final UserEntity? user;
 
   const UserFormPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
     this.user,
   });
 
@@ -22,6 +22,7 @@ class UserFormPage extends StatefulWidget {
 class _UserFormPageState extends State<UserFormPage> {
   final _formKey = GlobalKey<FormState>();
 
+  late final UserFormViewModel viewModel;
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
@@ -33,6 +34,7 @@ class _UserFormPageState extends State<UserFormPage> {
   @override
   void initState() {
     super.initState();
+    viewModel = widget.viewModelFactory();
     _currentUser = widget.user;
     _nameController = TextEditingController(text: _currentUser?.name ?? '');
     _emailController = TextEditingController(text: _currentUser?.email ?? '');
@@ -44,6 +46,7 @@ class _UserFormPageState extends State<UserFormPage> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -55,13 +58,13 @@ class _UserFormPageState extends State<UserFormPage> {
         name: _nameController.text.trim(),
       );
 
-      await widget.viewModel.updateUserCommand.execute(updatedUser);
+      await viewModel.updateUserCommand.execute(updatedUser);
 
-      if (widget.viewModel.updateUserCommand.isSuccess && mounted) {
+      if (viewModel.updateUserCommand.isSuccess && mounted) {
         AppSnackbar.success(context, 'Usuário atualizado com sucesso!');
         Navigator.pop(context);
-      } else if (widget.viewModel.updateUserCommand.isFailure && mounted) {
-        final error = widget.viewModel.updateUserCommand.error.toString().replaceAll('Exception: ', '');
+      } else if (viewModel.updateUserCommand.isFailure && mounted) {
+        final error = viewModel.updateUserCommand.error.toString().replaceAll('Exception: ', '');
         AppSnackbar.error(context, error);
       }
     } else {
@@ -72,13 +75,13 @@ class _UserFormPageState extends State<UserFormPage> {
         role: UserRole.seller,
       );
 
-      await widget.viewModel.createUserCommand.execute(data);
+      await viewModel.createUserCommand.execute(data);
 
-      if (widget.viewModel.createUserCommand.isSuccess && mounted) {
+      if (viewModel.createUserCommand.isSuccess && mounted) {
         AppSnackbar.success(context, 'Funcionário cadastrado com sucesso!');
         Navigator.pop(context);
-      } else if (widget.viewModel.createUserCommand.isFailure && mounted) {
-        final error = widget.viewModel.createUserCommand.error.toString().replaceAll('Exception: ', '');
+      } else if (viewModel.createUserCommand.isFailure && mounted) {
+        final error = viewModel.createUserCommand.error.toString().replaceAll('Exception: ', '');
         AppSnackbar.error(context, error);
       }
     }
@@ -163,12 +166,11 @@ class _UserFormPageState extends State<UserFormPage> {
                 padding: const EdgeInsets.all(AppSpacing.space16),
                 child: ListenableBuilder(
                   listenable: Listenable.merge([
-                    widget.viewModel.createUserCommand,
-                    widget.viewModel.updateUserCommand,
+                    viewModel.createUserCommand,
+                    viewModel.updateUserCommand,
                   ]),
                   builder: (context, _) {
-                    final isLoading =
-                        widget.viewModel.createUserCommand.isRunning || widget.viewModel.updateUserCommand.isRunning;
+                    final isLoading = viewModel.createUserCommand.isRunning || viewModel.updateUserCommand.isRunning;
                     return AppButton.primary(
                       label: _isEditing ? 'Salvar Alterações' : 'Cadastrar Funcionário',
                       isFullWidth: true,
