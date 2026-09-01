@@ -1,4 +1,3 @@
-import 'package:estoque_pro/app/core/errors/app_failure.dart';
 import 'package:estoque_pro/app/core/services/authorization_service.dart';
 import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/auth/domain/entities/auth_user_entity.dart';
