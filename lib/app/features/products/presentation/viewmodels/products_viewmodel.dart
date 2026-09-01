@@ -186,26 +186,7 @@ class ProductsViewModel extends BaseViewModel {
     );
   }
 
-  Future<void> archiveProduct(String id) async {
-    await archiveProductCommand.execute(id);
-    if (archiveProductCommand.isFailure) {
-      throw archiveProductCommand.error!;
-    }
-  }
 
-  Future<void> unarchiveProduct(String id) async {
-    await unarchiveProductCommand.execute(id);
-    if (unarchiveProductCommand.isFailure) {
-      throw unarchiveProductCommand.error!;
-    }
-  }
-
-  Future<void> deletePermanently(String id) async {
-    await deletePermanentlyCommand.execute(id);
-    if (deletePermanentlyCommand.isFailure) {
-      throw deletePermanentlyCommand.error!;
-    }
-  }
 
   StreamSubscription<List<ProductHistoryEntity>>? _historySubscription;
   List<ProductHistoryEntity> _productHistory = [];

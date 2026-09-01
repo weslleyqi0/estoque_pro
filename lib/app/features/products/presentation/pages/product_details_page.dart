@@ -122,15 +122,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
 
     if (confirm == true && mounted) {
-      try {
-        await _viewModel.archiveProduct(product.id);
-        if (mounted) {
-          AppSnackbar.success(context, 'Produto arquivado com sucesso!');
-        }
-      } catch (e) {
-        if (mounted) {
-          AppSnackbar.error(context, 'Erro ao arquivar produto: $e');
-        }
+      await _viewModel.archiveProductCommand.execute(product.id);
+      if (!mounted) return;
+      if (_viewModel.archiveProductCommand.isSuccess) {
+        AppSnackbar.success(context, 'Produto arquivado com sucesso!');
+      } else if (_viewModel.archiveProductCommand.isFailure) {
+        AppSnackbar.error(
+          context,
+          _viewModel.archiveProductCommand.error?.message ?? 'Erro ao arquivar produto.',
+        );
       }
     }
   }
@@ -145,15 +145,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
 
     if (confirm == true && mounted) {
-      try {
-        await _viewModel.unarchiveProduct(product.id);
-        if (mounted) {
-          AppSnackbar.success(context, 'Produto restaurado! Ele permanece desativado até ser ativado.');
-        }
-      } catch (e) {
-        if (mounted) {
-          AppSnackbar.error(context, 'Erro ao restaurar produto: $e');
-        }
+      await _viewModel.unarchiveProductCommand.execute(product.id);
+      if (!mounted) return;
+      if (_viewModel.unarchiveProductCommand.isSuccess) {
+        AppSnackbar.success(context, 'Produto restaurado! Ele permanece desativado até ser ativado.');
+      } else if (_viewModel.unarchiveProductCommand.isFailure) {
+        AppSnackbar.error(
+          context,
+          _viewModel.unarchiveProductCommand.error?.message ?? 'Erro ao restaurar produto.',
+        );
       }
     }
   }

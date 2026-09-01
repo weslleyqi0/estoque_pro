@@ -113,19 +113,7 @@ class ArchivedProductsViewModel extends BaseViewModel {
     );
   }
 
-  Future<void> unarchiveProduct(String id) async {
-    await unarchiveProductCommand.execute(id);
-    if (unarchiveProductCommand.isFailure) {
-      throw unarchiveProductCommand.error!;
-    }
-  }
 
-  Future<void> deletePermanently(String id) async {
-    await deletePermanentlyCommand.execute(id);
-    if (deletePermanentlyCommand.isFailure) {
-      throw deletePermanentlyCommand.error!;
-    }
-  }
 
   @override
   void dispose() {
