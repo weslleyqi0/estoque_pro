@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class BiometricPage extends StatefulWidget {
-  final BiometricViewModel viewModel;
+  final BiometricViewModel Function() viewModelFactory;
 
   const BiometricPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
   });
 
   @override
@@ -16,11 +16,12 @@ class BiometricPage extends StatefulWidget {
 }
 
 class _BiometricPageState extends State<BiometricPage> {
-  BiometricViewModel get viewModel => widget.viewModel;
+  late final BiometricViewModel viewModel;
 
   @override
   void initState() {
     super.initState();
+    viewModel = widget.viewModelFactory();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.checkAvailability();
     });

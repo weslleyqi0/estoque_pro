@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class LoginPage extends StatefulWidget {
-  final AuthViewModel viewModel;
+  final AuthViewModel Function() viewModelFactory;
 
   const LoginPage({
     super.key,
-    required this.viewModel,
+    required this.viewModelFactory,
   });
 
   @override
@@ -16,10 +16,22 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  AuthViewModel get viewModel => widget.viewModel;
+  late final AuthViewModel viewModel;
   final _emailController = TextEditingController();
-
   final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = widget.viewModelFactory();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
