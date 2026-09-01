@@ -1,4 +1,7 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
@@ -15,17 +18,26 @@ import 'package:url_launcher/url_launcher.dart';
 class DeliveryDetailBottomSheet extends StatelessWidget {
   final DeliveryEntity delivery;
   final DeliveriesViewModel viewModel;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
+  final AuthViewModel? authViewModel;
 
   const DeliveryDetailBottomSheet({
     super.key,
     required this.delivery,
     required this.viewModel,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
+    this.authViewModel,
   });
 
   static Future<void> show({
     required BuildContext context,
     required DeliveryEntity delivery,
     required DeliveriesViewModel viewModel,
+    CustomersViewModel Function()? customersViewModelFactory,
+    CustomerDebtsViewModel Function()? debtsViewModelFactory,
+    AuthViewModel? authViewModel,
   }) {
     return AppBottomSheet.show(
       context: context,
@@ -33,6 +45,9 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
       builder: (_) => DeliveryDetailBottomSheet(
         delivery: delivery,
         viewModel: viewModel,
+        customersViewModelFactory: customersViewModelFactory,
+        debtsViewModelFactory: debtsViewModelFactory,
+        authViewModel: authViewModel,
       ),
     );
   }
@@ -42,6 +57,9 @@ class DeliveryDetailBottomSheet extends StatelessWidget {
       context: context,
       delivery: delivery,
       viewModel: viewModel,
+      customersViewModelFactory: customersViewModelFactory,
+      debtsViewModelFactory: debtsViewModelFactory,
+      authViewModel: authViewModel,
     );
     if (result == true && context.mounted) {
       Navigator.pop(context);

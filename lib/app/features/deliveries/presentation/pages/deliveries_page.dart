@@ -1,19 +1,31 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/domain/repositories/customers_repository.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/create_delivery_bottom_sheet.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/deliveries_list_sliver.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/widgets/deliveries_status_tabs.dart';
+import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:flutter/material.dart';
 
 class DeliveriesPage extends StatefulWidget {
   final DeliveriesViewModel Function() viewModelFactory;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
+  final SalesRepository? salesRepository;
+  final CustomersRepository? customersRepository;
   final AuthViewModel authViewModel;
   final DeliveryFilterTab? initialTab;
 
   const DeliveriesPage({
     super.key,
     required this.viewModelFactory,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
+    this.salesRepository,
+    this.customersRepository,
     required this.authViewModel,
     this.initialTab,
   });
@@ -71,6 +83,8 @@ class _DeliveriesPageState extends State<DeliveriesPage> {
               context: context,
               deliveriesViewModel: viewModel,
               authViewModel: widget.authViewModel,
+              salesRepository: widget.salesRepository,
+              customersRepository: widget.customersRepository,
             ),
           ),
           body: CustomScrollView(
@@ -82,7 +96,12 @@ class _DeliveriesPageState extends State<DeliveriesPage> {
                   initialValue: viewModel.searchQuery,
                   onChanged: viewModel.setSearchQuery,
                 ),
-              DeliveriesListSliver(viewModel: viewModel),
+              DeliveriesListSliver(
+                viewModel: viewModel,
+                authViewModel: widget.authViewModel,
+                customersViewModelFactory: widget.customersViewModelFactory,
+                debtsViewModelFactory: widget.debtsViewModelFactory,
+              ),
               const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           ),
