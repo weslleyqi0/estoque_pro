@@ -69,7 +69,7 @@ class EditSaleFooter extends StatelessWidget {
                     onPressed: isSaving ? null : onCancelSale,
                     borderColor: context.colorScheme.error,
                     backgroundColor: context.colorScheme.error.withValues(alpha: 0.1),
-                    label: 'Cancelar Edição',
+                    label: 'Cancelar Venda',
                   ),
                 ),
                 const Gap(AppSpacing.space8),

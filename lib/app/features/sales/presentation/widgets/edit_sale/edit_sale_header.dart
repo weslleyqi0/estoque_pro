@@ -6,10 +6,12 @@ import 'package:gap/gap.dart';
 
 class EditSaleHeader extends StatelessWidget {
   final SaleEntity sale;
+  final VoidCallback? onClose;
 
   const EditSaleHeader({
     super.key,
     required this.sale,
+    this.onClose,
   });
 
   @override
@@ -38,7 +40,7 @@ class EditSaleHeader extends StatelessWidget {
             ],
           ),
           CloseButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: onClose ?? () => Navigator.of(context).pop(),
           ),
         ],
       ),

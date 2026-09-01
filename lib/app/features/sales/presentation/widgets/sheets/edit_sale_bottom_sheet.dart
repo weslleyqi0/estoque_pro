@@ -131,8 +131,7 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
     if (widget.customersViewModelFactory == null || widget.debtsViewModelFactory == null) return;
     final customersVM = widget.customersViewModelFactory!();
     final debtsVM = widget.debtsViewModelFactory!();
-    final canManageCustomers =
-        widget.authViewModel.currentUser?.hasPermission(UserPermission.managerCustomer) ?? false;
+    final canManageCustomers = widget.authViewModel.currentUser?.hasPermission(UserPermission.managerCustomer) ?? false;
 
     CustomerBottomSheet.show(
       context: context,
@@ -161,6 +160,47 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
         AppToast.error(
           result.error?.toString().replaceAll('Exception: ', '') ?? 'Erro ao salvar edição',
         );
+      }
+    }
+  }
+
+  void _onCancelSale(BuildContext context) async {
+    final currentUser = widget.authViewModel.currentUser;
+    if (currentUser == null) return;
+
+    if (!_canCancel) {
+      AppToast.error('Você não possui permissão para cancelar vendas.');
+      return;
+    }
+
+    final confirmed = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Cancelar Venda',
+      content:
+          'Deseja realmente cancelar a Venda ${widget.sale.saleNumber}?\n\n'
+          '⚠️ Atenção: Todos os produtos desta venda retornarão automaticamente ao estoque.',
+      confirmLabel: 'Sim, Cancelar Venda',
+      cancelLabel: 'Voltar',
+      isDestructive: true,
+    );
+
+    if (confirmed == true && context.mounted) {
+      final comment = _commentController.text.trim();
+      final result = await _viewModel.cancelSale(
+        currentUser: currentUser,
+        reason: 'Cancelamento',
+        comment: comment.isNotEmpty ? comment : null,
+      );
+
+      if (context.mounted) {
+        if (result.isSuccess) {
+          AppToast.success('Venda cancelada com sucesso!');
+          Navigator.of(context).pop();
+        } else {
+          AppToast.error(
+            result.error?.toString().replaceAll('Exception: ', '') ?? 'Erro ao cancelar venda.',
+          );
+        }
       }
     }
   }
@@ -287,167 +327,175 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      decoration: BoxDecoration(
-        color: context.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.radius24)),
-      ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: SafeArea(
-        child: ListenableBuilder(
-          listenable: _viewModel,
-          builder: (context, _) {
-            final items = _viewModel.draftItems;
-            final hasCustomer = _viewModel.selectedCustomerName?.isNotEmpty == true;
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, _) {
+        return PopScope(
+          canPop: !_viewModel.hasChanges,
+          onPopInvokedWithResult: (didPop, result) {
+            if (!didPop) {
+              _onCancelEdit(context);
+            }
+          },
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              color: context.colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.radius24)),
+            ),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  EditSaleHeader(
+                    sale: widget.sale,
+                    onClose: () => _onCancelEdit(context),
+                  ),
+                  const Divider(height: 1),
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                EditSaleHeader(sale: widget.sale),
-                const Divider(height: 1),
-
-                // Scrollable content body
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppSpacing.space16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Card do Cliente
-                        Container(
-                          padding: const EdgeInsets.all(AppSpacing.space12),
-                          decoration: BoxDecoration(
-                            color: context.colorScheme.surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(AppSpacing.radius12),
-                            border: Border.all(
-                              color: context.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(AppSpacing.space8),
-                                decoration: BoxDecoration(
-                                  color: context.colorScheme.primary.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(AppSpacing.radius8),
-                                ),
-                                child: Icon(
-                                  AppIcons.person,
-                                  color: context.colorScheme.primary,
-                                  size: AppSpacing.icon20,
-                                ),
+                  // Scrollable content body
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppSpacing.space16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Card do Cliente
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.space12),
+                            decoration: BoxDecoration(
+                              color: context.colorScheme.surfaceContainerLow,
+                              borderRadius: BorderRadius.circular(AppSpacing.radius12),
+                              border: Border.all(
+                                color: context.colorScheme.outlineVariant.withValues(alpha: 0.4),
                               ),
-                              const Gap(AppSpacing.space12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Cliente da Venda',
-                                      style: context.textTheme.labelSmall?.copyWith(
-                                        color: context.colorScheme.onSurfaceVariant,
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(AppSpacing.space8),
+                                  decoration: BoxDecoration(
+                                    color: context.colorScheme.primary.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(AppSpacing.radius8),
+                                  ),
+                                  child: Icon(
+                                    AppIcons.person,
+                                    color: context.colorScheme.primary,
+                                    size: AppSpacing.icon20,
+                                  ),
+                                ),
+                                const Gap(AppSpacing.space12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Cliente da Venda',
+                                        style: context.textTheme.labelSmall?.copyWith(
+                                          color: context.colorScheme.onSurfaceVariant,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      hasCustomer
-                                          ? _viewModel.selectedCustomerName!
-                                          : 'Cliente não vinculado (Venda Balcão)',
-                                      style: context.textTheme.bodyMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: hasCustomer
-                                            ? null
-                                            : context.colorScheme.onSurfaceVariant,
+                                      Text(
+                                        _viewModel.selectedCustomerName?.isNotEmpty == true
+                                            ? _viewModel.selectedCustomerName!
+                                            : 'Cliente não vinculado (Venda Balcão)',
+                                        style: context.textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: _viewModel.selectedCustomerName?.isNotEmpty == true
+                                              ? null
+                                              : context.colorScheme.onSurfaceVariant,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: AppSpacing.space32,
-                                child: AppButton.text(
-                                  onPressed: () => _selectCustomer(context),
-                                  label: hasCustomer ? 'Trocar' : 'Vincular',
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space8),
+                                SizedBox(
+                                  height: AppSpacing.space32,
+                                  child: AppButton.text(
+                                    onPressed: () => _selectCustomer(context),
+                                    label: _viewModel.selectedCustomerName?.isNotEmpty == true ? 'Trocar' : 'Vincular',
+                                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space8),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        const Gap(AppSpacing.space16),
+                          const Gap(AppSpacing.space16),
 
-                        Text(
-                          'Itens da Venda em Rascunho',
-                          style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const Gap(AppSpacing.space8),
-                        if (items.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.space16),
-                            child: Center(
-                              child: Text(
-                                'Nenhum item restante na venda.',
-                                style: context.textTheme.bodyMedium?.copyWith(
-                                  color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+                          Text(
+                            'Itens da Venda em Rascunho',
+                            style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const Gap(AppSpacing.space8),
+                          if (_viewModel.draftItems.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: AppSpacing.space16),
+                              child: Center(
+                                child: Text(
+                                  'Nenhum item restante na venda.',
+                                  style: context.textTheme.bodyMedium?.copyWith(
+                                    color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+                                  ),
                                 ),
                               ),
+                            )
+                          else
+                            ..._viewModel.draftItems.map(
+                              (item) => EditSaleItemCard(
+                                item: item,
+                                onDecrease: () => _viewModel.updateQuantity(item, item.quantity - 1),
+                                onIncrease: () => _increaseItemQuantity(item),
+                                onSwap: () => _showSwapProductDialog(context, item),
+                                onRemove: () => _viewModel.removeItem(item),
+                              ),
                             ),
-                          )
-                        else
-                          ...items.map(
-                            (item) => EditSaleItemCard(
-                              item: item,
-                              onDecrease: () => _viewModel.updateQuantity(item, item.quantity - 1),
-                              onIncrease: () => _increaseItemQuantity(item),
-                              onSwap: () => _showSwapProductDialog(context, item),
-                              onRemove: () => _viewModel.removeItem(item),
+                          const Gap(AppSpacing.space8),
+                          AppButton.outlined(
+                            onPressed: () => _showAddProductDialog(context),
+                            icon: AppIcons.add,
+                            label: 'Adicionar Novo Produto',
+                          ),
+                          const Divider(height: AppSpacing.space24),
+                          EditSaleReasonSelector(
+                            reasons: SaleEditReason.values,
+                            selectedReason: _viewModel.selectedReason,
+                            onReasonSelected: _viewModel.setReason,
+                          ),
+                          const Gap(AppSpacing.space12),
+                          TextField(
+                            controller: _commentController,
+                            decoration: const InputDecoration(
+                              labelText: 'Observação da Edição (Opcional)',
+                              hintText: 'Ex: Cliente trocou o tamanho / Devolução parcial',
+                              border: OutlineInputBorder(),
                             ),
+                            maxLines: 2,
                           ),
-                        const Gap(AppSpacing.space8),
-                        AppButton.outlined(
-                          onPressed: () => _showAddProductDialog(context),
-                          icon: AppIcons.add,
-                          label: 'Adicionar Novo Produto',
-                        ),
-                        const Divider(height: AppSpacing.space24),
-                        EditSaleReasonSelector(
-                          reasons: SaleEditReason.values,
-                          selectedReason: _viewModel.selectedReason,
-                          onReasonSelected: _viewModel.setReason,
-                        ),
-                        const Gap(AppSpacing.space12),
-                        TextField(
-                          controller: _commentController,
-                          decoration: const InputDecoration(
-                            labelText: 'Observação da Edição (Opcional)',
-                            hintText: 'Ex: Cliente trocou o tamanho / Devolução parcial',
-                            border: OutlineInputBorder(),
-                          ),
-                          maxLines: 2,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const Divider(height: 1),
-                EditSaleFooter(
-                  originalTotal: widget.sale.total,
-                  newTotal: _viewModel.newTotal,
-                  canCancel: _canCancel,
-                  isSaving: _viewModel.isSaving,
-                  hasChanges: _viewModel.hasChanges,
-                  onCancelSale: () => _onCancelEdit(context),
-                  onSaveEdit: () => _onSave(context),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+                  const Divider(height: 1),
+                  EditSaleFooter(
+                    originalTotal: widget.sale.total,
+                    newTotal: _viewModel.newTotal,
+                    canCancel: _canCancel,
+                    isSaving: _viewModel.isSaving,
+                    hasChanges: _viewModel.hasChanges,
+                    onCancelSale: () => _onCancelSale(context),
+                    onSaveEdit: () => _onSave(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
