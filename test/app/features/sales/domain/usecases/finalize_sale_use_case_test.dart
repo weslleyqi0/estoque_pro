@@ -72,7 +72,7 @@ void main() {
     mockSaveSaleUseCase = MockSaveSaleUseCase();
     mockDeliveriesRepository = MockDeliveriesRepository();
     finalizeSaleUseCase = FinalizeSaleUseCase(mockSaveSaleUseCase, mockDeliveriesRepository);
-    when(() => mockSaveSaleUseCase.execute(sale: any(named: 'sale'), isUpdate: any(named: 'isUpdate')))
+    when(() => mockSaveSaleUseCase.call(sale: any(named: 'sale'), isUpdate: any(named: 'isUpdate')))
         .thenAnswer((invocation) async {
       final sale = invocation.namedArguments[#sale] as SaleEntity;
       return Result.success(sale);
@@ -81,7 +81,7 @@ void main() {
   });
 
   test('finalize sale with cash succeeds without customer', () async {
-    final result = await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1001',
       editingSaleId: null,
@@ -98,12 +98,12 @@ void main() {
     );
 
     expect(result.isSuccess, isTrue);
-    verify(() => mockSaveSaleUseCase.execute(sale: any(named: 'sale'), isUpdate: false)).called(1);
+    verify(() => mockSaveSaleUseCase(sale: any(named: 'sale'), isUpdate: false)).called(1);
     verifyNever(() => mockDeliveriesRepository.save(any()));
   });
 
   test('finalize sale with fiado returns BusinessRuleFailure if customer is missing', () async {
-    final result = await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1002',
       editingSaleId: null,
@@ -127,7 +127,7 @@ void main() {
   });
 
   test('finalize sale with fiado succeeds when customer is provided', () async {
-    final result = await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1003',
       editingSaleId: null,
@@ -147,7 +147,7 @@ void main() {
 
     expect(result.isSuccess, isTrue);
     verify(
-      () => mockSaveSaleUseCase.execute(
+      () => mockSaveSaleUseCase(
         sale: any(
           named: 'sale',
           that: isA<SaleEntity>()
@@ -161,7 +161,7 @@ void main() {
   });
 
   test('finalize sale with delivery returns BusinessRuleFailure if customer is missing', () async {
-    final result = await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1004',
       editingSaleId: null,
@@ -187,7 +187,7 @@ void main() {
   });
 
   test('finalize sale with delivery returns BusinessRuleFailure if address is missing', () async {
-    final result = await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1005',
       editingSaleId: null,
@@ -215,7 +215,7 @@ void main() {
   test('finalize sale with delivery creates sale and saves delivery', () async {
     final scheduledDate = DateTime.now().add(const Duration(hours: 2));
 
-    final result = await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1006',
       editingSaleId: null,
@@ -239,7 +239,7 @@ void main() {
     );
 
     expect(result.isSuccess, isTrue);
-    verify(() => mockSaveSaleUseCase.execute(sale: any(named: 'sale'), isUpdate: false)).called(1);
+    verify(() => mockSaveSaleUseCase(sale: any(named: 'sale'), isUpdate: false)).called(1);
     verify(
       () => mockDeliveriesRepository.save(
         any(
@@ -256,7 +256,7 @@ void main() {
   });
 
   test('finalize sale returns BusinessRuleFailure when stock is insufficient', () async {
-    final result = await finalizeSaleUseCase.execute(
+    final result = await finalizeSaleUseCase(
       items: [
         const CartItem(product: testProduct, quantity: 20),
       ],

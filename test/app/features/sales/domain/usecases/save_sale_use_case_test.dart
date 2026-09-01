@@ -68,7 +68,7 @@ void main() {
 
   test('returns BusinessRuleFailure when sale has no items', () async {
     final emptySale = testSale.copyWith(items: []);
-    final result = await saveSaleUseCase.execute(sale: emptySale);
+    final result = await saveSaleUseCase(sale: emptySale);
 
     expect(result.isFailure, isTrue);
     expect(result.error, isA<BusinessRuleFailure>());
@@ -88,7 +88,7 @@ void main() {
       ],
     );
 
-    final result = await saveSaleUseCase.execute(sale: excessiveSale);
+    final result = await saveSaleUseCase(sale: excessiveSale);
 
     expect(result.isFailure, isTrue);
     expect(result.error, isA<BusinessRuleFailure>());
@@ -96,7 +96,7 @@ void main() {
   });
 
   test('saves sale successfully when stock is available', () async {
-    final result = await saveSaleUseCase.execute(sale: testSale);
+    final result = await saveSaleUseCase(sale: testSale);
 
     expect(result.isSuccess, isTrue);
     expect(result.value, equals(testSale));

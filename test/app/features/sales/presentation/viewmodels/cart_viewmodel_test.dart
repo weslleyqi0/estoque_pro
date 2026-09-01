@@ -94,7 +94,7 @@ void main() {
     expect(cartViewModel.items.length, 1);
 
     when(
-      () => mockFinalizeSaleUseCase.execute(
+      () => mockFinalizeSaleUseCase.call(
         items: any(named: 'items'),
         saleNumber: any(named: 'saleNumber'),
         editingSaleId: any(named: 'editingSaleId'),
@@ -133,7 +133,7 @@ void main() {
     expect(cartViewModel.items.length, 1);
 
     when(
-      () => mockSaveDraftSaleUseCase.execute(
+      () => mockSaveDraftSaleUseCase.call(
         items: any(named: 'items'),
         saleNumber: any(named: 'saleNumber'),
         editingSaleId: any(named: 'editingSaleId'),
@@ -144,12 +144,14 @@ void main() {
         paymentMethod: any(named: 'paymentMethod'),
         amountPaid: any(named: 'amountPaid'),
         change: any(named: 'change'),
+        customerId: any(named: 'customerId'),
+        customerName: any(named: 'customerName'),
         userId: any(named: 'userId'),
         userName: any(named: 'userName'),
         availableProducts: any(named: 'availableProducts'),
         createdAt: any(named: 'createdAt'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => Result.success(sampleSale));
 
     await cartViewModel.saveDraftCommand.execute((
       userId: 'u1',

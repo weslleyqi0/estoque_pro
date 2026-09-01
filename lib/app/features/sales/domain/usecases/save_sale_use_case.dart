@@ -19,7 +19,7 @@ class SaveSaleUseCase {
     this._productsRepository,
   );
 
-  AsyncResult<SaleEntity> execute({
+  AsyncResult<SaleEntity> call({
     required SaleEntity sale,
     bool isUpdate = false,
   }) async {

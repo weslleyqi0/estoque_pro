@@ -308,7 +308,7 @@ class CartViewModel extends BaseViewModel {
   }
 
   AsyncResult<SaleEntity> _finalizeSale(FinalizeSaleParams params) async {
-    final result = await _finalizeSaleUseCase.execute(
+    final result = await _finalizeSaleUseCase(
       items: _items,
       saleNumber: _saleNumber,
       editingSaleId: _editingSaleId,
@@ -338,31 +338,32 @@ class CartViewModel extends BaseViewModel {
   }
 
   AsyncResult<bool> _saveDraft(SaveDraftSaleParams params) async {
-    try {
-      await _saveDraftSaleUseCase.execute(
-        items: _items,
-        saleNumber: _saleNumber,
-        editingSaleId: _editingSaleId,
-        discountType: _discountType,
-        discountValue: _discountValue,
-        subtotal: subtotal,
-        total: total,
-        paymentMethod: _paymentMethod ?? PaymentMethod.dinheiro,
-        amountPaid: _amountPaid,
-        change: change,
-        customerId: _customerId,
-        customerName: _customerName,
-        userId: params.userId,
-        userName: params.userName,
-        availableProducts: params.availableProducts,
-        createdAt: _createdAt,
-      );
+    final result = await _saveDraftSaleUseCase(
+      items: _items,
+      saleNumber: _saleNumber,
+      editingSaleId: _editingSaleId,
+      discountType: _discountType,
+      discountValue: _discountValue,
+      subtotal: subtotal,
+      total: total,
+      paymentMethod: _paymentMethod ?? PaymentMethod.dinheiro,
+      amountPaid: _amountPaid,
+      change: change,
+      customerId: _customerId,
+      customerName: _customerName,
+      userId: params.userId,
+      userName: params.userName,
+      availableProducts: params.availableProducts,
+      createdAt: _createdAt,
+    );
 
-      clearCart();
-      return const Result.success(true);
-    } catch (e, stackTrace) {
-      return Result.failure(e, stackTrace);
-    }
+    return result.fold(
+      onSuccess: (_) {
+        clearCart();
+        return const Result.success(true);
+      },
+      onFailure: (failure) => Result.failure(failure),
+    );
   }
 
 

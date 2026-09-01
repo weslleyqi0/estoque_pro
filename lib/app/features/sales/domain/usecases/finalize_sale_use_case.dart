@@ -28,7 +28,7 @@ class FinalizeSaleUseCase {
     this._deliveriesRepository,
   );
 
-  AsyncResult<SaleEntity> execute({
+  AsyncResult<SaleEntity> call({
     required List<CartItem> items,
     required String saleNumber,
     required String? editingSaleId,
@@ -124,7 +124,7 @@ class FinalizeSaleUseCase {
     );
 
     final isUpdate = editingSaleId != null && editingSaleId.isNotEmpty;
-    final saveResult = await _saveSaleUseCase.execute(sale: sale, isUpdate: isUpdate);
+    final saveResult = await _saveSaleUseCase(sale: sale, isUpdate: isUpdate);
     if (saveResult.isFailure) {
       return saveResult;
     }
