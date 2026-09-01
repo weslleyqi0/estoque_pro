@@ -1,8 +1,11 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/presentation/viewmodels/deliveries_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_card/sale_card_actions.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sale_card/sale_card_edit_history.dart';
@@ -19,6 +22,9 @@ class SaleCard extends StatelessWidget {
   final AuthViewModel authViewModel;
   final SalesViewModel salesViewModel;
   final DeliveriesViewModel deliveriesViewModel;
+  final EditSaleViewModel Function()? editSaleViewModelFactory;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
 
   const SaleCard({
     super.key,
@@ -29,6 +35,9 @@ class SaleCard extends StatelessWidget {
     required this.authViewModel,
     required this.salesViewModel,
     required this.deliveriesViewModel,
+    this.editSaleViewModelFactory,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
   });
 
   @override
@@ -57,6 +66,9 @@ class SaleCard extends StatelessWidget {
                 delivery: effectiveDelivery,
                 authViewModel: authViewModel,
                 deliveriesViewModel: deliveriesViewModel,
+                editSaleViewModelFactory: editSaleViewModelFactory,
+                customersViewModelFactory: customersViewModelFactory,
+                debtsViewModelFactory: debtsViewModelFactory,
               ),
             ),
             Padding(
@@ -84,6 +96,9 @@ class SaleCard extends StatelessWidget {
                       sale: sale,
                       authViewModel: authViewModel,
                       salesViewModel: salesViewModel,
+                      editSaleViewModelFactory: editSaleViewModelFactory,
+                      customersViewModelFactory: customersViewModelFactory,
+                      debtsViewModelFactory: debtsViewModelFactory,
                     ),
                   ],
                 ],

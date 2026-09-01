@@ -1,8 +1,11 @@
 import 'package:design_system/design_system.dart';
 import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
+import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
+import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/sales_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sheets/digital_invoice_sheet.dart';
 import 'package:estoque_pro/app/features/sales/presentation/widgets/sheets/edit_sale_bottom_sheet.dart';
@@ -16,12 +19,18 @@ class SaleCardActions extends StatelessWidget {
   final SaleEntity sale;
   final AuthViewModel authViewModel;
   final SalesViewModel salesViewModel;
+  final EditSaleViewModel Function()? editSaleViewModelFactory;
+  final CustomersViewModel Function()? customersViewModelFactory;
+  final CustomerDebtsViewModel Function()? debtsViewModelFactory;
 
   const SaleCardActions({
     super.key,
     required this.sale,
     required this.authViewModel,
     required this.salesViewModel,
+    this.editSaleViewModelFactory,
+    this.customersViewModelFactory,
+    this.debtsViewModelFactory,
   });
 
   bool get _canCancelSale {
@@ -163,11 +172,16 @@ class SaleCardActions extends StatelessWidget {
                 SizedBox(
                   height: AppSpacing.space48,
                   child: AppButton.outlined(
-                    onPressed: () => EditSaleBottomSheet.show(
-                      context,
-                      sale,
-                      authViewModel: authViewModel,
-                    ),
+                    onPressed: editSaleViewModelFactory == null
+                        ? null
+                        : () => EditSaleBottomSheet.show(
+                              context,
+                              sale,
+                              authViewModel: authViewModel,
+                              viewModelFactory: editSaleViewModelFactory!,
+                              customersViewModelFactory: customersViewModelFactory,
+                              debtsViewModelFactory: debtsViewModelFactory,
+                            ),
                     icon: AppIcons.edit,
                     label: 'Editar',
                   ),
