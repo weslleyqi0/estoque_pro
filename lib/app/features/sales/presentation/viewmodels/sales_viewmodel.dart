@@ -170,12 +170,7 @@ class SalesViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> deleteSale(String saleId) async {
-    await deleteSaleCommand.execute(saleId);
-    if (deleteSaleCommand.isFailure) {
-      throw deleteSaleCommand.error!;
-    }
-  }
+
 
   @override
   void dispose() {

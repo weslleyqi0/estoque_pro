@@ -67,24 +67,25 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
   }
 
   void _saveInProgress(BuildContext context, CartViewModel vm) async {
-    try {
-      final currentUser = widget.authViewModel.currentUser;
-      final userId = currentUser?.uid ?? '';
-      final userName = currentUser?.name ?? 'Vendedor';
+    final currentUser = widget.authViewModel.currentUser;
+    final userId = currentUser?.uid ?? '';
+    final userName = currentUser?.name ?? 'Vendedor';
 
-      await vm.saveInProgressToFirebase(
-        userId: userId,
-        userName: userName,
-        availableProducts: widget.availableProducts,
+    await vm.saveDraftCommand.execute((
+      userId: userId,
+      userName: userName,
+      availableProducts: widget.availableProducts,
+    ));
+
+    if (!context.mounted) return;
+
+    if (vm.saveDraftCommand.isSuccess) {
+      AppSnackbar.success(context, 'Venda em andamento salva com sucesso!');
+    } else if (vm.saveDraftCommand.isFailure) {
+      AppSnackbar.error(
+        context,
+        vm.saveDraftCommand.error?.message ?? 'Erro ao salvar venda em andamento.',
       );
-
-      if (context.mounted) {
-        AppSnackbar.success(context, 'Venda em andamento salva com sucesso!');
-      }
-    } catch (e) {
-      if (context.mounted) {
-        AppSnackbar.error(context, e.toString().replaceAll('Exception: ', ''));
-      }
     }
   }
 

@@ -107,33 +107,32 @@ class _NewSalePageState extends State<NewSalePage> {
     if (confirmed == null) return false;
 
     if (confirmed) {
-      try {
-        final currentUser = widget.authViewModel.currentUser;
-        final userId = currentUser?.uid ?? '';
-        final userName = currentUser?.name ?? 'Vendedor';
+      final currentUser = widget.authViewModel.currentUser;
+      final userId = currentUser?.uid ?? '';
+      final userName = currentUser?.name ?? 'Vendedor';
 
-        await cartViewModel.saveInProgressToFirebase(
-          userId: userId,
-          userName: userName,
-          availableProducts: productsViewModel.products,
+      await cartViewModel.saveDraftCommand.execute((
+        userId: userId,
+        userName: userName,
+        availableProducts: productsViewModel.products,
+      ));
+
+      if (!context.mounted) return false;
+
+      if (cartViewModel.saveDraftCommand.isSuccess) {
+        AppSnackbar.success(
+          context,
+          'Venda em andamento salva com sucesso!',
         );
-
-        if (context.mounted) {
-          AppSnackbar.success(
-            context,
-            'Venda em andamento salva com sucesso!',
-          );
-        }
         return true;
-      } catch (e) {
-        if (context.mounted) {
-          AppSnackbar.error(
-            context,
-            e.toString().replaceAll('Exception: ', ''),
-          );
-        }
+      } else if (cartViewModel.saveDraftCommand.isFailure) {
+        AppSnackbar.error(
+          context,
+          cartViewModel.saveDraftCommand.error?.message ?? 'Erro ao salvar venda em andamento.',
+        );
         return false;
       }
+      return false;
     } else {
       cartViewModel.clearCart();
       return true;

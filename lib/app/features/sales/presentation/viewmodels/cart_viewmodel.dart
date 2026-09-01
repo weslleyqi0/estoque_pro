@@ -365,37 +365,5 @@ class CartViewModel extends BaseViewModel {
     }
   }
 
-  Future<bool> executeFinalize({
-    required String userId,
-    required String userName,
-    required List<ProductEntity> availableProducts,
-  }) async {
-    await finalizeSaleCommand.execute((
-      userId: userId,
-      userName: userName,
-      availableProducts: availableProducts,
-    ));
 
-    if (finalizeSaleCommand.isFailure) {
-      throw finalizeSaleCommand.error!;
-    }
-    return true;
-  }
-
-  Future<bool> saveInProgressToFirebase({
-    required String userId,
-    required String userName,
-    required List<ProductEntity> availableProducts,
-  }) async {
-    await saveDraftCommand.execute((
-      userId: userId,
-      userName: userName,
-      availableProducts: availableProducts,
-    ));
-
-    if (saveDraftCommand.isFailure) {
-      throw saveDraftCommand.error!;
-    }
-    return true;
-  }
 }

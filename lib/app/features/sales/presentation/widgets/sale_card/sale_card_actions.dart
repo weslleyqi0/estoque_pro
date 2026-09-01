@@ -68,20 +68,17 @@ class SaleCardActions extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      try {
-        await salesViewModel.deleteSale(sale.id);
-        if (context.mounted) {
-          AppToast.info(
-            'Venda ${sale.saleNumber} excluída sem alterar o estoque.',
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          AppSnackbar.error(
-            context,
-            'Erro ao excluir venda: ${e.toString()}',
-          );
-        }
+      await salesViewModel.deleteSaleCommand.execute(sale.id);
+      if (!context.mounted) return;
+      if (salesViewModel.deleteSaleCommand.isSuccess) {
+        AppToast.info(
+          'Venda ${sale.saleNumber} excluída sem alterar o estoque.',
+        );
+      } else if (salesViewModel.deleteSaleCommand.isFailure) {
+        AppSnackbar.error(
+          context,
+          salesViewModel.deleteSaleCommand.error?.message ?? 'Erro ao excluir venda.',
+        );
       }
     }
   }
@@ -97,18 +94,16 @@ class SaleCardActions extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      try {
-        await salesViewModel.deleteSale(sale.id);
-        if (context.mounted) {
-          AppSnackbar.success(context, 'Venda cancelada com sucesso!');
-        }
-      } catch (e) {
-        if (context.mounted) {
-          AppSnackbar.error(
-            context,
-            'Erro ao cancelar venda. Talvez você não tenha permissão para realizar essa ação.',
-          );
-        }
+      await salesViewModel.deleteSaleCommand.execute(sale.id);
+      if (!context.mounted) return;
+      if (salesViewModel.deleteSaleCommand.isSuccess) {
+        AppSnackbar.success(context, 'Venda cancelada com sucesso!');
+      } else if (salesViewModel.deleteSaleCommand.isFailure) {
+        AppSnackbar.error(
+          context,
+          salesViewModel.deleteSaleCommand.error?.message ??
+              'Erro ao cancelar venda. Talvez você não tenha permissão para realizar essa ação.',
+        );
       }
     }
   }
