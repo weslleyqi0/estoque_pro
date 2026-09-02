@@ -117,4 +117,104 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       return Result.failure(e, stackTrace);
     }
   }
+
+  @override
+  Future<Result<DeliveryEntity?>> getDeliveryBySaleId(String saleId, [String? saleNumber]) async {
+    try {
+      if (saleId.isNotEmpty) {
+        final data = await _databaseService.queryOnce(
+          orderByChild: 'sale_id',
+          equalTo: saleId,
+          limitToLast: 1,
+        );
+        if (data != null && data.isNotEmpty) {
+          final entry = data.entries.first;
+          if (entry.value is Map) {
+            final model = DeliveryModel.fromMap(
+              entry.key.toString(),
+              Map<dynamic, dynamic>.from(entry.value as Map),
+            );
+            return Result.success(model.toEntity());
+          }
+        }
+      }
+
+      if (saleNumber != null && saleNumber.isNotEmpty) {
+        final data = await _databaseService.queryOnce(
+          orderByChild: 'sale_number',
+          equalTo: saleNumber,
+          limitToLast: 1,
+        );
+        if (data != null && data.isNotEmpty) {
+          final entry = data.entries.first;
+          if (entry.value is Map) {
+            final model = DeliveryModel.fromMap(
+              entry.key.toString(),
+              Map<dynamic, dynamic>.from(entry.value as Map),
+            );
+            return Result.success(model.toEntity());
+          }
+        }
+      }
+
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Deliveries: Erro ao buscar entrega por venda: $e');
+      return Result.failure(e, stackTrace);
+    }
+  }
+
+  @override
+  Future<Result<void>> cancelDeliveryForSale(String saleId, [String? saleNumber]) async {
+    try {
+      final List<DeliveryEntity> toCancel = [];
+
+      if (saleId.isNotEmpty) {
+        final data = await _databaseService.queryOnce(
+          orderByChild: 'sale_id',
+          equalTo: saleId,
+        );
+        if (data != null && data.isNotEmpty) {
+          for (final entry in data.entries) {
+            if (entry.value is Map) {
+              final model = DeliveryModel.fromMap(
+                entry.key.toString(),
+                Map<dynamic, dynamic>.from(entry.value as Map),
+              );
+              toCancel.add(model.toEntity());
+            }
+          }
+        }
+      }
+
+      if (toCancel.isEmpty && saleNumber != null && saleNumber.isNotEmpty) {
+        final data = await _databaseService.queryOnce(
+          orderByChild: 'sale_number',
+          equalTo: saleNumber,
+        );
+        if (data != null && data.isNotEmpty) {
+          for (final entry in data.entries) {
+            if (entry.value is Map) {
+              final model = DeliveryModel.fromMap(
+                entry.key.toString(),
+                Map<dynamic, dynamic>.from(entry.value as Map),
+              );
+              toCancel.add(model.toEntity());
+            }
+          }
+        }
+      }
+
+      for (final delivery in toCancel) {
+        if (delivery.status != DeliveryStatus.cancelled) {
+          await updateStatus(delivery.id, DeliveryStatus.cancelled);
+        }
+      }
+
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Deliveries: Erro ao cancelar entrega da venda: $e');
+      return Result.failure(e, stackTrace);
+    }
+  }
 }

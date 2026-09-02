@@ -8,4 +8,6 @@ abstract class DeliveriesRepository {
   Future<Result<void>> updateDelivery(DeliveryEntity delivery);
   Future<Result<void>> updateStatus(String deliveryId, DeliveryStatus status, {DateTime? deliveredAt});
   Future<Result<void>> delete(String deliveryId);
+  Future<Result<DeliveryEntity?>> getDeliveryBySaleId(String saleId, [String? saleNumber]);
+  Future<Result<void>> cancelDeliveryForSale(String saleId, [String? saleNumber]);
 }

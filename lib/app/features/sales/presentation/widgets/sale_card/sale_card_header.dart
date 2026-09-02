@@ -108,6 +108,7 @@ class SaleCardHeader extends StatelessWidget {
                     : () => EditSaleBottomSheet.show(
                           context,
                           sale,
+                          delivery: delivery,
                           authViewModel: authViewModel,
                           viewModelFactory: editSaleViewModelFactory!,
                           customersViewModelFactory: customersViewModelFactory,

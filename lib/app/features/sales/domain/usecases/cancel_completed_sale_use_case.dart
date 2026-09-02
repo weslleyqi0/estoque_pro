@@ -1,15 +1,21 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:flutter/foundation.dart';
 
 class CancelCompletedSaleUseCase {
   final SalesRepository _salesRepository;
+  final DeliveriesRepository? _deliveriesRepository;
 
-  const CancelCompletedSaleUseCase(this._salesRepository);
+  const CancelCompletedSaleUseCase(
+    this._salesRepository, [
+    this._deliveriesRepository,
+  ]);
 
   Future<Result<SaleEntity>> call({
     required SaleEntity sale,
@@ -67,9 +73,21 @@ class CancelCompletedSaleUseCase {
       editHistoryEntry: cancelHistoryEntry,
     );
 
-    return updateResult.fold(
-      onSuccess: (_) => Result.success(cancelledSale),
-      onFailure: (error) => Result.failure(error),
-    );
+    if (updateResult.isFailure) {
+      return Result.failure(updateResult.error!);
+    }
+
+    if (_deliveriesRepository != null) {
+      try {
+        await _deliveriesRepository.cancelDeliveryForSale(
+          sale.id,
+          sale.saleNumber,
+        );
+      } catch (e, stack) {
+        debugPrint('---> Deliveries: Erro ao cancelar entrega da venda cancelada: $e\n$stack');
+      }
+    }
+
+    return Result.success(cancelledSale);
   }
 }

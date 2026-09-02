@@ -3,6 +3,7 @@ import 'package:estoque_pro/app/core/router/app_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
 import 'package:estoque_pro/app/features/sales/presentation/viewmodels/edit_sale_viewmodel.dart';
@@ -17,6 +18,7 @@ import 'package:go_router/go_router.dart';
 
 class SaleCardActions extends StatelessWidget {
   final SaleEntity sale;
+  final DeliveryEntity? delivery;
   final AuthViewModel authViewModel;
   final SalesViewModel salesViewModel;
   final EditSaleViewModel Function()? editSaleViewModelFactory;
@@ -26,6 +28,7 @@ class SaleCardActions extends StatelessWidget {
   const SaleCardActions({
     super.key,
     required this.sale,
+    this.delivery,
     required this.authViewModel,
     required this.salesViewModel,
     this.editSaleViewModelFactory,
@@ -177,6 +180,7 @@ class SaleCardActions extends StatelessWidget {
                         : () => EditSaleBottomSheet.show(
                               context,
                               sale,
+                              delivery: delivery,
                               authViewModel: authViewModel,
                               viewModelFactory: editSaleViewModelFactory!,
                               customersViewModelFactory: customersViewModelFactory,

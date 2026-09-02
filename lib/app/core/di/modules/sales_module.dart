@@ -53,13 +53,19 @@ void setupSalesModule(GetIt getIt) {
     ),
   );
   getIt.registerFactory<CancelCompletedSaleUseCase>(
-    () => CancelCompletedSaleUseCase(getIt<SalesRepository>()),
+    () => CancelCompletedSaleUseCase(
+      getIt<SalesRepository>(),
+      getIt<DeliveriesRepository>(),
+    ),
   );
   getIt.registerFactory<GetSalesUseCase>(
     () => GetSalesUseCase(getIt<SalesRepository>()),
   );
   getIt.registerFactory<DeleteSaleUseCase>(
-    () => DeleteSaleUseCase(getIt<SalesRepository>()),
+    () => DeleteSaleUseCase(
+      getIt<SalesRepository>(),
+      getIt<DeliveriesRepository>(),
+    ),
   );
 
   // ViewModels
