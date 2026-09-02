@@ -95,6 +95,44 @@ class SaleCardActions extends StatelessWidget {
     }
   }
 
+  bool get _canDeleteCancelledSale {
+    if (sale.status != SaleStatus.cancelled) return false;
+    final currentUser = authViewModel.currentUser;
+    if (currentUser == null || !currentUser.isActive) return false;
+    if (currentUser.role == UserRole.owner || currentUser.role == UserRole.admin) return true;
+    if (sale.userId == currentUser.uid) return true;
+    return currentUser.hasPermission(UserPermission.deleteSales) ||
+        currentUser.hasPermission(UserPermission.cancelCompletedSales);
+  }
+
+  void _deleteCancelledSale(BuildContext context) async {
+    final confirmed = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Excluir Venda Cancelada',
+      content:
+          'Deseja realmente excluir a Venda ${sale.saleNumber} cancelada definitivamente do histórico?\n\n'
+          'Esta ação removerá o registro e não poderá ser desfeita.',
+      confirmLabel: 'Sim, Excluir',
+      cancelLabel: 'Cancelar',
+      isDestructive: true,
+    );
+
+    if (confirmed == true && context.mounted) {
+      await salesViewModel.deleteSaleCommand.execute(sale.id);
+      if (!context.mounted) return;
+      if (salesViewModel.deleteSaleCommand.isSuccess) {
+        AppToast.success(
+          'Venda ${sale.saleNumber} excluída com sucesso.',
+        );
+      } else if (salesViewModel.deleteSaleCommand.isFailure) {
+        AppSnackbar.error(
+          context,
+          salesViewModel.deleteSaleCommand.error?.message ?? 'Erro ao excluir venda.',
+        );
+      }
+    }
+  }
+
   void _cancelSale(BuildContext context) async {
     final confirmed = await AppDialog.showConfirmation(
       context: context,
@@ -206,6 +244,25 @@ class SaleCardActions extends StatelessWidget {
                       ),
                     ),
                     tooltip: 'Excluir Venda (Sem alterar estoque)',
+                  ),
+                ),
+              ],
+              if (sale.status == SaleStatus.cancelled && _canDeleteCancelledSale) ...[
+                const Gap(AppSpacing.space8),
+                SizedBox(
+                  height: AppSpacing.space48,
+                  child: AppButton.outlined(
+                    onPressed: () => _deleteCancelledSale(context),
+                    icon: AppIcons.delete,
+                    borderColor: context.colorScheme.error,
+                    backgroundColor: context.colorScheme.error.withValues(alpha: 0.1),
+                    child: Text(
+                      'Excluir',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: context.colorScheme.error,
+                      ),
+                    ),
                   ),
                 ),
               ],
