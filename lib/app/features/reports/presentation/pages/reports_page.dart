@@ -62,14 +62,18 @@ class _ReportsPageState extends State<ReportsPage> {
             title: const Text('Relatórios & Métricas'),
             centerTitle: true,
             actions: [
-              IconButton(
-                icon: const Icon(AppIcons.tune),
+              AppIconButton.primary(
+                icon: AppIcons.tune,
                 tooltip: 'Personalizar cards',
+                visualDensity: VisualDensity.compact,
+                iconColor: context.colorScheme.onSurface,
                 onPressed: () => context.push(AppRoutes.reportCardsSettings),
               ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
+              AppIconButton.primary(
+                icon: Icons.refresh,
                 tooltip: 'Atualizar dados',
+                visualDensity: VisualDensity.compact,
+                iconColor: context.colorScheme.onSurface,
                 onPressed: () => _viewModel.listenAll(),
               ),
               const Gap(AppSpacing.space8),
@@ -208,31 +212,31 @@ class _ReportsPageState extends State<ReportsPage> {
   Widget _buildCard(ReportCardType type, ReportsSummaryEntity summary) {
     return switch (type) {
       ReportCardType.salesComparison => SalesComparisonChart(
-          points: summary.sales.chartPoints,
-          currentLabel: _viewModel.period.type.label,
-          previousLabel: _viewModel.period.type.previousLabel,
-          currentTotal: summary.sales.totalSales,
-          previousTotal: summary.sales.previousTotalSales,
-        ),
+        points: summary.sales.chartPoints,
+        currentLabel: _viewModel.period.type.label,
+        previousLabel: _viewModel.period.type.previousLabel,
+        currentTotal: summary.sales.totalSales,
+        previousTotal: summary.sales.previousTotalSales,
+      ),
       ReportCardType.salesSummary => DailySalesSummarySection(
-          salesReport: summary.sales,
-          periodName: _viewModel.period.type.label,
-        ),
+        salesReport: summary.sales,
+        periodName: _viewModel.period.type.label,
+      ),
       ReportCardType.salesPerformance => SalesModuleReportCard(
-          salesReport: summary.sales,
-        ),
+        salesReport: summary.sales,
+      ),
       ReportCardType.stock => StockReportCard(
-          stockReport: summary.stock,
-        ),
+        stockReport: summary.stock,
+      ),
       ReportCardType.customersDebt => CustomersDebtReportCard(
-          customersDebtReport: summary.customersDebt,
-        ),
+        customersDebtReport: summary.customersDebt,
+      ),
       ReportCardType.deliveries => DeliveriesReportCard(
-          deliveriesReport: summary.deliveries,
-        ),
+        deliveriesReport: summary.deliveries,
+      ),
       ReportCardType.sellerRanking => SellerRankingReportCard(
-          sellerRanking: summary.sales.sellerRanking,
-        ),
+        sellerRanking: summary.sales.sellerRanking,
+      ),
     };
   }
 }

@@ -100,11 +100,10 @@ class ReportCardReorderTile extends StatelessWidget {
                 ],
               ),
             ),
-            IconButton(
-              icon: Icon(
-                isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                color: isVisible ? context.colorScheme.primary : context.colorScheme.outline,
-              ),
+            AppIconButton.primary(
+              icon: isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+              size: AppIconButtonSize.medium,
+              iconColor: isVisible ? context.colorScheme.primary : context.colorScheme.outline,
               tooltip: isVisible ? 'Ocultar card' : 'Mostrar card',
               onPressed: onToggleVisibility,
             ),

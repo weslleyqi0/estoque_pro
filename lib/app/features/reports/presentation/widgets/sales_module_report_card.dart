@@ -68,10 +68,12 @@ class SalesModuleReportCard extends StatelessWidget {
                   ),
                 ],
               ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_ios, size: 14),
-                onPressed: () => context.push(AppRoutes.sales),
+              AppIconButton.primary(
+                icon: Icons.arrow_forward_ios,
+                size: AppIconButtonSize.small,
+                iconColor: context.colorScheme.onSurface.withValues(alpha: 0.6),
                 tooltip: 'Ver vendas',
+                onPressed: () => context.push(AppRoutes.sales),
               ),
             ],
           ),
