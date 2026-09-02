@@ -341,7 +341,7 @@ class GetReportsUseCase {
             final prevSegStart = period.previousStartDate.add(Duration(days: i * step));
             final prevSegEnd = i == 4 ? period.previousEndDate : prevSegStart.add(Duration(days: step - 1, hours: 23, minutes: 59));
 
-            final label = '${DateFormat('dd/MM').format(segStart)}';
+            final label = DateFormat('dd/MM').format(segStart);
 
             final current = currentSales
                 .where((s) => !s.createdAt.isBefore(segStart) && !s.createdAt.isAfter(segEnd))
