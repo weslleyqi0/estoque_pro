@@ -9,6 +9,7 @@ import 'package:estoque_pro/app/features/reports/domain/entities/report_period.d
 import 'package:estoque_pro/app/features/reports/domain/entities/reports_summary_entity.dart';
 import 'package:estoque_pro/app/features/reports/domain/entities/sales_chart_point.dart';
 import 'package:estoque_pro/app/features/reports/domain/entities/sales_report_entity.dart';
+import 'package:estoque_pro/app/features/reports/domain/entities/seller_ranking_item_entity.dart';
 import 'package:estoque_pro/app/features/reports/domain/entities/stock_report_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
@@ -124,6 +125,31 @@ class GetReportsUseCase {
       previousSales: previousSales,
     );
 
+    // Ranking de vendedores no período
+    final sellerMap = <String, _SellerAccumulator>{};
+    for (final sale in currentSales) {
+      final acc = sellerMap.putIfAbsent(
+        sale.userId,
+        () => _SellerAccumulator(userId: sale.userId, userName: sale.userName),
+      );
+      acc.salesCount++;
+      acc.totalAmount += sale.total;
+    }
+
+    final sellerRanking = sellerMap.values.map((a) {
+      return SellerRankingItemEntity(
+        userId: a.userId,
+        userName: a.userName.trim().isNotEmpty ? a.userName : 'Vendedor',
+        salesCount: a.salesCount,
+        totalAmount: a.totalAmount,
+      );
+    }).toList()
+      ..sort((a, b) {
+        final cmp = b.totalAmount.compareTo(a.totalAmount);
+        if (cmp != 0) return cmp;
+        return b.salesCount.compareTo(a.salesCount);
+      });
+
     return SalesReportEntity(
       salesCount: currentSales.length,
       totalSales: totalSales,
@@ -138,6 +164,7 @@ class GetReportsUseCase {
       pixAmount: pixAmount,
       previousTotalSales: previousTotalSales,
       chartPoints: chartPoints,
+      sellerRanking: sellerRanking,
     );
   }
 
@@ -295,10 +322,12 @@ class GetReportsUseCase {
 
     for (final p in unarchived) {
       totalUnits += p.stock;
-      if (p.stock <= 0) {
-        outOfStock++;
-      } else if (p.stock <= p.minStock) {
-        lowStock++;
+      if (p.isActive) {
+        if (p.stock <= 0) {
+          outOfStock++;
+        } else if (p.stock <= p.minStock) {
+          lowStock++;
+        }
       }
       totalCost += p.totalCostStock;
       totalSelling += p.totalSellingStock;
@@ -399,4 +428,16 @@ class GetReportsUseCase {
       cancelledCount: cancelled,
     );
   }
+}
+
+class _SellerAccumulator {
+  final String userId;
+  final String userName;
+  int salesCount = 0;
+  double totalAmount = 0.0;
+
+  _SellerAccumulator({
+    required this.userId,
+    required this.userName,
+  });
 }

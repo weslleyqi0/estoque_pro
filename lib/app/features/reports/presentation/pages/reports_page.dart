@@ -11,6 +11,7 @@ import 'package:estoque_pro/app/features/reports/presentation/widgets/deliveries
 import 'package:estoque_pro/app/features/reports/presentation/widgets/report_period_selector.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/sales_comparison_chart.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/sales_module_report_card.dart';
+import 'package:estoque_pro/app/features/reports/presentation/widgets/seller_ranking_report_card.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/stock_report_card.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -189,6 +190,9 @@ class _ReportsPageState extends State<ReportsPage> {
         ),
       ReportCardType.deliveries => DeliveriesReportCard(
           deliveriesReport: summary.deliveries,
+        ),
+      ReportCardType.sellerRanking => SellerRankingReportCard(
+          sellerRanking: summary.sales.sellerRanking,
         ),
     };
   }

@@ -119,8 +119,8 @@ void main() {
       paymentMethod: PaymentMethod.fiado,
       customerId: 'c1',
       customerName: 'Carlos',
-      userId: 'u1',
-      userName: 'Admin',
+      userId: 'u2',
+      userName: 'Lucas',
       status: SaleStatus.completed,
       createdAt: DateTime(2026, 9, 2, 12, 0), // Período atual
     ),
@@ -217,6 +217,18 @@ void main() {
       // Métodos de pagamento
       expect(sales.cashAmount, 200.0);
       expect(sales.fiadoAmount, 80.0);
+
+      // Ranking de vendedores
+      expect(sales.sellerRanking.length, 2);
+      expect(sales.sellerRanking.first.userId, 'u1');
+      expect(sales.sellerRanking.first.userName, 'Admin');
+      expect(sales.sellerRanking.first.salesCount, 1);
+      expect(sales.sellerRanking.first.totalAmount, 200.0);
+
+      expect(sales.sellerRanking[1].userId, 'u2');
+      expect(sales.sellerRanking[1].userName, 'Lucas');
+      expect(sales.sellerRanking[1].salesCount, 1);
+      expect(sales.sellerRanking[1].totalAmount, 80.0);
     });
 
     test('aggregates stock report with low stock, empty stock and projections', () {
