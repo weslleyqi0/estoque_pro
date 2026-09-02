@@ -16,8 +16,6 @@ class DeliveriesReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasDelayed = deliveriesReport.delayedCount > 0;
-
     return Container(
       padding: const EdgeInsets.all(AppSpacing.space16),
       decoration: BoxDecoration(
@@ -100,8 +98,8 @@ class DeliveriesReportCard extends StatelessWidget {
                 child: _DeliveryStatusItem(
                   label: 'Atrasadas',
                   count: deliveriesReport.delayedCount,
-                  color: hasDelayed ? AppColors.error : Colors.grey,
-                  isAlert: hasDelayed,
+                  color: AppColors.error,
+                  isAlert: true,
                   onTap: () => context.push(
                     AppRoutes.deliveries,
                     extra: DeliveryFilterTab.delayed,
