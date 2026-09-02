@@ -146,7 +146,7 @@ class _ReportsPageState extends State<ReportsPage> {
               previousTotal: summary.sales.previousTotalSales,
             ),
 
-            const Gap(AppSpacing.space20),
+            const Gap(AppSpacing.space16),
 
             // 3. Resumo Financeiro de Vendas (Total, Lucro, Custo, Fiados, Cartão, Dinheiro)
             DailySalesSummarySection(
@@ -154,7 +154,7 @@ class _ReportsPageState extends State<ReportsPage> {
               periodName: _viewModel.period.type.label,
             ),
 
-            const Gap(AppSpacing.space20),
+            const Gap(AppSpacing.space16),
 
             // 4. Card Modular: Produtos & Estoque (Estoque baixo, vazios, custo investido, lucro)
             StockReportCard(
