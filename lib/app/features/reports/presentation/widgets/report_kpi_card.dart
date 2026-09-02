@@ -76,14 +76,16 @@ class ReportKpiCard extends StatelessWidget {
               ),
               if (subtitle != null) ...[
                 const Gap(AppSpacing.space4),
-                Text(
-                  subtitle!,
-                  style: context.textTheme.labelSmall?.copyWith(
-                    color: context.colorScheme.onSurface.withValues(alpha: 0.6),
-                    fontSize: 11,
+                Expanded(
+                  child: Text(
+                    subtitle!,
+                    style: context.textTheme.labelSmall?.copyWith(
+                      color: context.colorScheme.onSurface.withValues(alpha: 0.6),
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ],

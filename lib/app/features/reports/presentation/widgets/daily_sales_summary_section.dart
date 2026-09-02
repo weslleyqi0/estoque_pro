@@ -49,7 +49,7 @@ class DailySalesSummarySection extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: AppSpacing.space8,
           crossAxisSpacing: AppSpacing.space8,
-          childAspectRatio: 1.6,
+          childAspectRatio: 1.5,
           children: [
             ReportKpiCard(
               title: 'Total em Vendas',
