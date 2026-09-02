@@ -148,10 +148,17 @@ class _ReportsPageState extends State<ReportsPage> {
 
             const Gap(AppSpacing.space16),
 
-            // 3. Resumo Financeiro de Vendas (Total, Lucro, Custo, Fiados, Cartão, Dinheiro)
+            // 2. Resumo Financeiro de Vendas (Total, Lucro, Custo, Fiados, Cartão, Dinheiro)
             DailySalesSummarySection(
               salesReport: summary.sales,
               periodName: _viewModel.period.type.label,
+            ),
+
+            const Gap(AppSpacing.space16),
+
+            // 3. Card Modular: Desempenho de Vendas (Ticket médio, descontos, margem)
+            SalesModuleReportCard(
+              salesReport: summary.sales,
             ),
 
             const Gap(AppSpacing.space16),
@@ -163,21 +170,14 @@ class _ReportsPageState extends State<ReportsPage> {
 
             const Gap(AppSpacing.space16),
 
-            // 5. Card Modular: Desempenho de Vendas (Ticket médio, descontos, margem)
-            SalesModuleReportCard(
-              salesReport: summary.sales,
-            ),
-
-            const Gap(AppSpacing.space16),
-
-            // 6. Card Modular: Clientes & Fiados (Clientes em débito, saldo a receber)
+            // 5. Card Modular: Clientes & Fiados (Clientes em débito, saldo a receber)
             CustomersDebtReportCard(
               customersDebtReport: summary.customersDebt,
             ),
 
             const Gap(AppSpacing.space16),
 
-            // 7. Card Modular: Entregas (Pendentes, atrasadas, concluídas)
+            // 6. Card Modular: Entregas (Pendentes, atrasadas, concluídas)
             DeliveriesReportCard(
               deliveriesReport: summary.deliveries,
             ),
