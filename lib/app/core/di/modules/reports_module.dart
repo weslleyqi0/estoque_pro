@@ -5,6 +5,7 @@ import 'package:estoque_pro/app/features/products/domain/usecases/get_products_u
 import 'package:estoque_pro/app/features/reports/domain/usecases/get_reports_use_case.dart';
 import 'package:estoque_pro/app/features/reports/presentation/viewmodels/reports_viewmodel.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/get_users_use_case.dart';
 import 'package:get_it/get_it.dart';
 
 void setupReportsModule(GetIt getIt) {
@@ -22,6 +23,7 @@ void setupReportsModule(GetIt getIt) {
       getIt<GetDeliveriesUseCase>(),
       getIt<GetCustomersUseCase>(),
       getIt<GetCustomerPaymentsUseCase>(),
+      getIt<GetUsersUseCase>(),
     ),
   );
 }

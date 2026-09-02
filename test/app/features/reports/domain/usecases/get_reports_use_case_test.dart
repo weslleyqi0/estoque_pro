@@ -9,6 +9,8 @@ import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.da
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_item_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -231,6 +233,66 @@ void main() {
       expect(sales.sellerRanking[1].userName, 'Lucas');
       expect(sales.sellerRanking[1].salesCount, 1);
       expect(sales.sellerRanking[1].totalAmount, 80.0);
+    });
+
+    test('includes sellers without sales with zeroed values in ranking', () {
+      final testUsers = [
+        const UserEntity(
+          uid: 'u1',
+          name: 'Admin',
+          email: 'admin@test.com',
+          role: UserRole.admin,
+          isActive: true,
+          permissions: {},
+        ),
+        const UserEntity(
+          uid: 'u2',
+          name: 'Lucas',
+          email: 'lucas@test.com',
+          role: UserRole.seller,
+          isActive: true,
+          permissions: {},
+        ),
+        const UserEntity(
+          uid: 'u3',
+          name: 'Maria (Sem Vendas)',
+          email: 'maria@test.com',
+          role: UserRole.seller,
+          isActive: true,
+          permissions: {},
+        ),
+        const UserEntity(
+          uid: 'u4',
+          name: 'Inativo',
+          email: 'inativo@test.com',
+          role: UserRole.seller,
+          isActive: false,
+          permissions: {},
+        ),
+      ];
+
+      final summary = useCase.execute(
+        period: period,
+        products: testProducts,
+        sales: testSales,
+        deliveries: testDeliveries,
+        customers: testCustomers,
+        customerPayments: testPayments,
+        users: testUsers,
+      );
+
+      final ranking = summary.sales.sellerRanking;
+      expect(ranking.length, 3); // u1, u2, u3 (u4 inativo é excluído)
+      expect(ranking[0].userId, 'u1');
+      expect(ranking[0].totalAmount, 200.0);
+      expect(ranking[1].userId, 'u2');
+      expect(ranking[1].totalAmount, 80.0);
+
+      // u3 aparece com valores zerados
+      expect(ranking[2].userId, 'u3');
+      expect(ranking[2].userName, 'Maria (Sem Vendas)');
+      expect(ranking[2].salesCount, 0);
+      expect(ranking[2].totalAmount, 0.0);
     });
 
     test('aggregates stock report with low stock, empty stock and projections', () {

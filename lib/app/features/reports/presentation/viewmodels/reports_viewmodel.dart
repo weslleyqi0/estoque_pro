@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estoque_pro/app/core/base/base_viewmodel.dart';
+import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/entities/customer_payment_entity.dart';
 import 'package:estoque_pro/app/features/customers/domain/usecases/get_customer_payments_use_case.dart';
@@ -14,6 +15,8 @@ import 'package:estoque_pro/app/features/reports/domain/entities/reports_summary
 import 'package:estoque_pro/app/features/reports/domain/usecases/get_reports_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/usecases/get_sales_use_case.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
+import 'package:estoque_pro/app/features/users/domain/usecases/get_users_use_case.dart';
 
 class ReportsViewModel extends BaseViewModel {
   final GetReportsUseCase _getReportsUseCase;
@@ -22,18 +25,21 @@ class ReportsViewModel extends BaseViewModel {
   final GetDeliveriesUseCase _getDeliveriesUseCase;
   final GetCustomersUseCase _getCustomersUseCase;
   final GetCustomerPaymentsUseCase _getCustomerPaymentsUseCase;
+  final GetUsersUseCase? _getUsersUseCase;
 
   StreamSubscription<List<ProductEntity>>? _productsSub;
   StreamSubscription<List<SaleEntity>>? _salesSub;
   StreamSubscription<List<DeliveryEntity>>? _deliveriesSub;
   StreamSubscription<List<CustomerEntity>>? _customersSub;
   StreamSubscription<List<CustomerPaymentEntity>>? _paymentsSub;
+  StreamSubscription<Result<List<UserEntity>>>? _usersSub;
 
   List<ProductEntity> _products = [];
   List<SaleEntity> _sales = [];
   List<DeliveryEntity> _deliveries = [];
   List<CustomerEntity> _customers = [];
   List<CustomerPaymentEntity> _payments = [];
+  List<UserEntity> _users = [];
 
   ReportPeriod _period = ReportPeriod.today();
   ReportPeriod get period => _period;
@@ -53,8 +59,9 @@ class ReportsViewModel extends BaseViewModel {
     this._getSalesUseCase,
     this._getDeliveriesUseCase,
     this._getCustomersUseCase,
-    this._getCustomerPaymentsUseCase,
-  );
+    this._getCustomerPaymentsUseCase, [
+    this._getUsersUseCase,
+  ]);
 
   void listenAll() {
     _isLoading = true;
@@ -102,6 +109,18 @@ class ReportsViewModel extends BaseViewModel {
       },
       onError: _handleError,
     );
+
+    if (_getUsersUseCase != null) {
+      _usersSub = _getUsersUseCase.listenAllUsers().listen(
+        (result) {
+          if (result is Success<List<UserEntity>>) {
+            _users = result.value;
+            _recalculate();
+          }
+        },
+        onError: _handleError,
+      );
+    }
   }
 
   void setPeriodType(ReportPeriodType type) {
@@ -148,6 +167,7 @@ class ReportsViewModel extends BaseViewModel {
       deliveries: _deliveries,
       customers: _customers,
       customerPayments: _payments,
+      users: _users,
     );
     _isLoading = false;
     notifyListeners();
@@ -165,6 +185,7 @@ class ReportsViewModel extends BaseViewModel {
     _deliveriesSub?.cancel();
     _customersSub?.cancel();
     _paymentsSub?.cancel();
+    _usersSub?.cancel();
   }
 
   @override

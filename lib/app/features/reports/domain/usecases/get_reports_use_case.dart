@@ -14,6 +14,7 @@ import 'package:estoque_pro/app/features/reports/domain/entities/stock_report_en
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:intl/intl.dart';
 
 class GetReportsUseCase {
@@ -26,6 +27,7 @@ class GetReportsUseCase {
     required List<DeliveryEntity> deliveries,
     required List<CustomerEntity> customers,
     required List<CustomerPaymentEntity> customerPayments,
+    List<UserEntity> users = const [],
   }) {
     final productMap = {for (final p in products) p.id: p};
 
@@ -33,6 +35,7 @@ class GetReportsUseCase {
       period: period,
       sales: sales,
       productMap: productMap,
+      users: users,
     );
 
     final stockReport = _buildStockReport(products);
@@ -61,6 +64,7 @@ class GetReportsUseCase {
     required ReportPeriod period,
     required List<SaleEntity> sales,
     required Map<String, ProductEntity> productMap,
+    List<UserEntity> users = const [],
   }) {
     // Vendas ativas no período atual (convertendo sempre para horário local)
     final currentSales = sales.where((s) {
@@ -136,8 +140,33 @@ class GetReportsUseCase {
       previousSales: previousSales,
     );
 
-    // Ranking de vendedores no período
+    // Ranking de vendedores no período (inclui vendedores mesmo sem vendas no período com valores zerados)
     final sellerMap = <String, _SellerAccumulator>{};
+
+    // 1. Inicializa todos os usuários ativos da equipe
+    for (final u in users) {
+      if (u.isActive) {
+        sellerMap[u.uid] = _SellerAccumulator(
+          userId: u.uid,
+          userName: u.name.trim().isNotEmpty ? u.name : 'Vendedor',
+        );
+      }
+    }
+
+    // 2. Garante inclusão de qualquer vendedor com vendas registradas no histórico
+    for (final sale in sales) {
+      if (sale.userId.trim().isNotEmpty) {
+        sellerMap.putIfAbsent(
+          sale.userId,
+          () => _SellerAccumulator(
+            userId: sale.userId,
+            userName: sale.userName.trim().isNotEmpty ? sale.userName : 'Vendedor',
+          ),
+        );
+      }
+    }
+
+    // 3. Acumula as vendas do período selecionado
     for (final sale in currentSales) {
       final acc = sellerMap.putIfAbsent(
         sale.userId,
@@ -156,9 +185,11 @@ class GetReportsUseCase {
       );
     }).toList()
       ..sort((a, b) {
-        final cmp = b.totalAmount.compareTo(a.totalAmount);
-        if (cmp != 0) return cmp;
-        return b.salesCount.compareTo(a.salesCount);
+        final cmpAmount = b.totalAmount.compareTo(a.totalAmount);
+        if (cmpAmount != 0) return cmpAmount;
+        final cmpCount = b.salesCount.compareTo(a.salesCount);
+        if (cmpCount != 0) return cmpCount;
+        return a.userName.toLowerCase().compareTo(b.userName.toLowerCase());
       });
 
     return SalesReportEntity(
