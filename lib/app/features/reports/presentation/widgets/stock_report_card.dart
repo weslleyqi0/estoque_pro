@@ -209,9 +209,10 @@ class _StockAlertBadge extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.space8,
-            vertical: AppSpacing.space12,
+            vertical: AppSpacing.space16,
           ),
           child: Row(
+            crossAxisAlignment: .start,
             children: [
               Icon(icon, color: color, size: AppSpacing.icon20),
               const Gap(AppSpacing.space8),
@@ -224,6 +225,7 @@ class _StockAlertBadge extends StatelessWidget {
                       style: context.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: color,
+                        height: 0.9,
                       ),
                     ),
                     Text(
