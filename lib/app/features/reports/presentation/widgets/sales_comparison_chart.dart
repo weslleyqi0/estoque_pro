@@ -242,7 +242,7 @@ class _SalesComparisonChartState extends State<SalesComparisonChart> {
                                   color: isSelected
                                       ? context.colorScheme.primary.withValues(alpha: 0.08)
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(AppSpacing.radius8),
+                                  borderRadius: BorderRadius.circular(AppSpacing.radius12),
                                 ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
@@ -260,13 +260,9 @@ class _SalesComparisonChartState extends State<SalesComparisonChart> {
                                               width: 10,
                                               height: math.max(prevHeight, 2.0),
                                               decoration: BoxDecoration(
-                                                color: Colors.grey.withValues(alpha: 0.15),
+                                                color: context.colorScheme.outline,
                                                 borderRadius: const BorderRadius.vertical(
                                                   top: Radius.circular(4),
-                                                ),
-                                                border: Border.all(
-                                                  color: Colors.grey.shade400,
-                                                  width: 1.2,
                                                 ),
                                               ),
                                             ),

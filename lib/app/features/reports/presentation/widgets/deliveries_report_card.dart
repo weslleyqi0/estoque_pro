@@ -89,6 +89,10 @@ class DeliveriesReportCard extends StatelessWidget {
                   label: 'Pendentes',
                   count: deliveriesReport.pendingCount,
                   color: AppColors.warning,
+                  onTap: () => context.push(
+                    AppRoutes.deliveries,
+                    extra: DeliveryFilterTab.pending,
+                  ),
                 ),
               ),
               const Gap(AppSpacing.space8),
@@ -98,6 +102,10 @@ class DeliveriesReportCard extends StatelessWidget {
                   count: deliveriesReport.delayedCount,
                   color: hasDelayed ? AppColors.error : Colors.grey,
                   isAlert: hasDelayed,
+                  onTap: () => context.push(
+                    AppRoutes.deliveries,
+                    extra: DeliveryFilterTab.delayed,
+                  ),
                 ),
               ),
               const Gap(AppSpacing.space8),
@@ -106,6 +114,10 @@ class DeliveriesReportCard extends StatelessWidget {
                   label: 'Concluídas',
                   count: deliveriesReport.completedCount,
                   color: AppColors.success,
+                  onTap: () => context.push(
+                    AppRoutes.deliveries,
+                    extra: DeliveryFilterTab.completed,
+                  ),
                 ),
               ),
             ],
@@ -121,48 +133,57 @@ class _DeliveryStatusItem extends StatelessWidget {
   final int count;
   final Color color;
   final bool isAlert;
+  final VoidCallback? onTap;
 
   const _DeliveryStatusItem({
     required this.label,
     required this.count,
     required this.color,
     this.isAlert = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space8,
-        vertical: AppSpacing.space12,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isAlert ? 0.15 : 0.08),
+    return Material(
+      color: color.withValues(alpha: isAlert ? 0.15 : 0.08),
+      borderRadius: BorderRadius.circular(AppSpacing.radius12),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(AppSpacing.radius12),
-        border: Border.all(
-          color: color.withValues(alpha: isAlert ? 0.4 : 0.2),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.space8,
+            vertical: AppSpacing.space12,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSpacing.radius12),
+            border: Border.all(
+              color: color.withValues(alpha: isAlert ? 0.4 : 0.2),
+            ),
+          ),
+          child: Column(
+            children: [
+              Text(
+                '$count',
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+              const Gap(AppSpacing.space4),
+              Text(
+                label,
+                style: context.textTheme.labelSmall?.copyWith(
+                  fontSize: 11,
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          Text(
-            '$count',
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const Gap(AppSpacing.space4),
-          Text(
-            label,
-            style: context.textTheme.labelSmall?.copyWith(
-              fontSize: 11,
-              color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
       ),
     );
   }
