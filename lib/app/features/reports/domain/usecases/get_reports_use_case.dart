@@ -62,17 +62,19 @@ class GetReportsUseCase {
     required List<SaleEntity> sales,
     required Map<String, ProductEntity> productMap,
   }) {
-    // Vendas ativas no período atual
+    // Vendas ativas no período atual (convertendo sempre para horário local)
     final currentSales = sales.where((s) {
       if (s.status == SaleStatus.cancelled) return false;
-      return !s.createdAt.isBefore(period.startDate) && !s.createdAt.isAfter(period.endDate);
+      final dt = s.createdAt.toLocal();
+      return !dt.isBefore(period.startDate) && !dt.isAfter(period.endDate);
     }).toList();
 
-    // Vendas ativas no período anterior
+    // Vendas ativas no período anterior (convertendo sempre para horário local)
     final previousSales = sales.where((s) {
       if (s.status == SaleStatus.cancelled) return false;
-      return !s.createdAt.isBefore(period.previousStartDate) &&
-          !s.createdAt.isAfter(period.previousEndDate);
+      final dt = s.createdAt.toLocal();
+      return !dt.isBefore(period.previousStartDate) &&
+          !dt.isAfter(period.previousEndDate);
     }).toList();
 
     final totalSales = currentSales.fold(0.0, (sum, s) => sum + s.total);
@@ -186,15 +188,22 @@ class GetReportsUseCase {
   }) {
     switch (period.type) {
       case ReportPeriodType.today:
-        // Divisão por blocos de 2 horas (06h às 22h)
-        const hours = [6, 8, 10, 12, 14, 16, 18, 20, 22];
+        // Divisão por blocos de 2 horas das 06h às 20h
+        const hours = [6, 8, 10, 12, 14, 16, 18, 20];
         return hours.map((h) {
           final label = '${h.toString().padLeft(2, '0')}h';
+          bool matches(DateTime dt) {
+            final local = dt.toLocal();
+            if (h == 6) return local.hour < 8;
+            if (h == 20) return local.hour >= 20;
+            return local.hour >= h && local.hour < h + 2;
+          }
+
           final current = currentSales
-              .where((s) => s.createdAt.hour >= h && s.createdAt.hour < h + 2)
+              .where((s) => matches(s.createdAt))
               .fold(0.0, (sum, s) => sum + s.total);
           final previous = previousSales
-              .where((s) => s.createdAt.hour >= h && s.createdAt.hour < h + 2)
+              .where((s) => matches(s.createdAt))
               .fold(0.0, (sum, s) => sum + s.total);
           return SalesChartPoint(label: label, currentAmount: current, previousAmount: previous);
         }).toList();
