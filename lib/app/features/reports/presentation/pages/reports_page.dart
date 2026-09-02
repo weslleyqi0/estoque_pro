@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:estoque_pro/app/features/reports/domain/entities/report_period.dart';
 import 'package:estoque_pro/app/features/reports/presentation/viewmodels/reports_viewmodel.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/customers_debt_report_card.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/daily_sales_summary_section.dart';

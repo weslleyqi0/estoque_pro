@@ -80,66 +80,69 @@ class CustomersDebtReportCard extends StatelessWidget {
           const Gap(AppSpacing.space16),
 
           // Card de Fiado / Devedores
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.space16),
-            decoration: BoxDecoration(
-              color: hasDebt ? Colors.pink.withValues(alpha: 0.08) : AppColors.success.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(AppSpacing.radius12),
-              border: Border.all(
-                color: hasDebt ? Colors.pink.withValues(alpha: 0.25) : AppColors.success.withValues(alpha: 0.25),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Total a Receber (Fiados)',
-                      style: context.textTheme.labelMedium?.copyWith(
-                        color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    const Gap(AppSpacing.space4),
-                    Text(
-                      currency.format(customersDebtReport.totalDebtAmount),
-                      style: context.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: hasDebt ? Colors.pink.shade700 : AppColors.success,
-                      ),
-                    ),
-                  ],
+          GestureDetector(
+            onTap: () => context.push(AppRoutes.customers),
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.space16),
+              decoration: BoxDecoration(
+                color: hasDebt ? Colors.pink.withValues(alpha: 0.08) : AppColors.success.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppSpacing.radius12),
+                border: Border.all(
+                  color: hasDebt ? Colors.pink.withValues(alpha: 0.25) : AppColors.success.withValues(alpha: 0.25),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.space12,
-                    vertical: AppSpacing.space8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: hasDebt ? Colors.pink.withValues(alpha: 0.18) : AppColors.success.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(AppSpacing.radius8),
-                  ),
-                  child: Column(
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${customersDebtReport.customersInDebtCount}',
-                        style: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: hasDebt ? Colors.pink.shade700 : AppColors.success,
+                        'Total a Receber (Fiados)',
+                        style: context.textTheme.labelMedium?.copyWith(
+                          color: context.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
+                      const Gap(AppSpacing.space4),
                       Text(
-                        'em débito',
-                        style: context.textTheme.labelSmall?.copyWith(
-                          fontSize: 10,
+                        currency.format(customersDebtReport.totalDebtAmount),
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
                           color: hasDebt ? Colors.pink.shade700 : AppColors.success,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.space12,
+                      vertical: AppSpacing.space8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: hasDebt ? Colors.pink.withValues(alpha: 0.18) : AppColors.success.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(AppSpacing.radius8),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          '${customersDebtReport.customersInDebtCount}',
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: hasDebt ? Colors.pink.shade700 : AppColors.success,
+                          ),
+                        ),
+                        Text(
+                          'em débito',
+                          style: context.textTheme.labelSmall?.copyWith(
+                            fontSize: 10,
+                            color: hasDebt ? Colors.pink.shade700 : AppColors.success,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
