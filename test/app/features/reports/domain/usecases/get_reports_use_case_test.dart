@@ -52,6 +52,18 @@ void main() {
       stock: 0, // Estoque vazio
       minStock: 3,
     ),
+    const ProductEntity(
+      id: 'prod4',
+      name: 'Produto Arquivado',
+      imgUrl: '',
+      description: '',
+      categories: [],
+      price: 30.0,
+      costPrice: 15.0,
+      stock: 5,
+      minStock: 2,
+      isArchived: true,
+    ),
   ];
 
   final now = DateTime(2026, 9, 2, 14, 0); // Quarta-feira
@@ -209,6 +221,7 @@ void main() {
       expect(stock.totalProducts, 3);
       expect(stock.lowStockCount, 1); // prod2 (2 <= 5)
       expect(stock.outOfStockCount, 1); // prod3 (0 <= 0)
+      expect(stock.archivedCount, 1); // prod4
       expect(stock.totalUnitsInStock, 12); // 10 + 2 + 0
 
       // Custo total: 10*40 + 2*50 + 0*20 = 400 + 100 = 500

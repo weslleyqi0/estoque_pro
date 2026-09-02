@@ -78,7 +78,7 @@ class StockReportCard extends StatelessWidget {
 
           const Gap(AppSpacing.space16),
 
-          // Alertas de estoque baixo e vazio
+          // Alertas de estoque baixo, vazio e arquivados
           Row(
             children: [
               Expanded(
@@ -88,7 +88,7 @@ class StockReportCard extends StatelessWidget {
                   color: AppColors.warning,
                   icon: Icons.warning_amber_rounded,
                   onTap: () {
-                    context.push(AppRoutes.products, extra: true);
+                    context.push(AppRoutes.products, extra: 'low_stock');
                   },
                 ),
               ),
@@ -101,6 +101,18 @@ class StockReportCard extends StatelessWidget {
                   icon: Icons.remove_circle_outline,
                   onTap: () {
                     context.push(AppRoutes.products, extra: 'empty_stock');
+                  },
+                ),
+              ),
+              const Gap(AppSpacing.space8),
+              Expanded(
+                child: _StockAlertBadge(
+                  label: 'Arquivados',
+                  count: stockReport.archivedCount,
+                  color: Colors.blueGrey,
+                  icon: Icons.inventory_2_outlined,
+                  onTap: () {
+                    context.push(AppRoutes.archivedProducts);
                   },
                 ),
               ),
@@ -180,7 +192,7 @@ class _StockAlertBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radius12),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.space12,
+            horizontal: AppSpacing.space8,
             vertical: AppSpacing.space12,
           ),
           child: Row(
@@ -201,6 +213,7 @@ class _StockAlertBadge extends StatelessWidget {
                     Text(
                       label,
                       style: context.textTheme.labelSmall?.copyWith(
+                        fontSize: 10,
                         color: context.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                       maxLines: 1,

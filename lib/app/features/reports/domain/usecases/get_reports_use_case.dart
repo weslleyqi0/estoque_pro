@@ -282,6 +282,7 @@ class GetReportsUseCase {
 
   StockReportEntity _buildStockReport(List<ProductEntity> products) {
     final unarchived = products.where((p) => !p.isArchived).toList();
+    final archived = products.where((p) => p.isArchived).toList();
     final active = unarchived.where((p) => p.isActive).toList();
 
     int totalUnits = 0;
@@ -309,6 +310,7 @@ class GetReportsUseCase {
       totalUnitsInStock: totalUnits,
       lowStockCount: lowStock,
       outOfStockCount: outOfStock,
+      archivedCount: archived.length,
       totalCostStock: totalCost,
       totalSellingStock: totalSelling,
       totalProjectedProfit: totalProjectedProfit,

@@ -6,6 +6,7 @@ class StockReportEntity extends Equatable {
   final int totalUnitsInStock;
   final int lowStockCount;
   final int outOfStockCount;
+  final int archivedCount;
   final double totalCostStock;
   final double totalSellingStock;
   final double totalProjectedProfit;
@@ -19,6 +20,7 @@ class StockReportEntity extends Equatable {
     this.totalUnitsInStock = 0,
     this.lowStockCount = 0,
     this.outOfStockCount = 0,
+    this.archivedCount = 0,
     this.totalCostStock = 0.0,
     this.totalSellingStock = 0.0,
     this.totalProjectedProfit = 0.0,
@@ -31,6 +33,7 @@ class StockReportEntity extends Equatable {
         totalUnitsInStock,
         lowStockCount,
         outOfStockCount,
+        archivedCount,
         totalCostStock,
         totalSellingStock,
         totalProjectedProfit,
