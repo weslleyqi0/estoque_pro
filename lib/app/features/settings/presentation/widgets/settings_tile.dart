@@ -28,6 +28,7 @@ class SettingsTile extends StatelessWidget {
         vertical: AppSpacing.space12,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.space8),
