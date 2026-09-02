@@ -23,13 +23,18 @@ List<GoRoute> productsRoutes() {
       path: AppRoutes.products,
       builder: (context, state) {
         final extra = state.extra;
-        final initialSearchQuery = extra is String ? extra : null;
-        final initialShowOnlyLowStock = extra is bool ? extra : false;
+        final initialSearchQuery = extra is String && extra != 'empty_stock' && extra != 'low_stock' ? extra : null;
+        final initialShowOnlyLowStock = (extra is bool && extra) ||
+            extra == 'low_stock' ||
+            (extra is Map && extra['lowStock'] == true);
+        final initialShowOnlyEmptyStock = extra == 'empty_stock' ||
+            (extra is Map && extra['emptyStock'] == true);
 
         return ProductsPage(
           viewModelFactory: () => getIt<ProductsViewModel>(),
           initialSearchQuery: initialSearchQuery,
           initialShowOnlyLowStock: initialShowOnlyLowStock,
+          initialShowOnlyEmptyStock: initialShowOnlyEmptyStock,
         );
       },
     ),

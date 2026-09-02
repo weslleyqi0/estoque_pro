@@ -100,7 +100,7 @@ class StockReportCard extends StatelessWidget {
                   color: AppColors.error,
                   icon: Icons.remove_circle_outline,
                   onTap: () {
-                    context.push(AppRoutes.products);
+                    context.push(AppRoutes.products, extra: 'empty_stock');
                   },
                 ),
               ),

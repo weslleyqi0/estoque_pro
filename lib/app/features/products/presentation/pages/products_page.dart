@@ -10,12 +10,14 @@ class ProductsPage extends StatefulWidget {
   final ProductsViewModel Function() viewModelFactory;
   final String? initialSearchQuery;
   final bool initialShowOnlyLowStock;
+  final bool initialShowOnlyEmptyStock;
 
   const ProductsPage({
     super.key,
     required this.viewModelFactory,
     this.initialSearchQuery,
     this.initialShowOnlyLowStock = false,
+    this.initialShowOnlyEmptyStock = false,
   });
 
   @override
@@ -29,13 +31,16 @@ class _ProductsPageState extends State<ProductsPage> {
   void initState() {
     super.initState();
     viewModel = widget.viewModelFactory();
-    if (widget.initialShowOnlyLowStock) {
+    if (widget.initialShowOnlyEmptyStock) {
+      viewModel.setShowOnlyEmptyStock(true);
+    } else if (widget.initialShowOnlyLowStock) {
       viewModel.setShowOnlyLowStock(true);
     }
     viewModel.listenAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.initialSearchQuery != null && widget.initialSearchQuery!.isNotEmpty) {
         viewModel.clearLowStockFilter();
+        viewModel.clearEmptyStockFilter();
         viewModel.setSearchQuery(widget.initialSearchQuery!);
       }
     });
@@ -45,6 +50,7 @@ class _ProductsPageState extends State<ProductsPage> {
   void dispose() {
     viewModel.setSearchQuery('', notify: false);
     viewModel.clearLowStockFilter(notify: false);
+    viewModel.clearEmptyStockFilter(notify: false);
     viewModel.dispose();
     super.dispose();
   }
@@ -116,6 +122,30 @@ class _ProductsPageState extends State<ProductsPage> {
                           iconColor: AppColors.warningDark,
                           tooltip: 'Exibir todos os produtos',
                           onPressed: viewModel.clearLowStockFilter,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (viewModel.showOnlyEmptyStock)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.space16,
+                        right: AppSpacing.space16,
+                        bottom: AppSpacing.space12,
+                      ),
+                      child: AppInfoBanner(
+                        title: viewModel.emptyStockProducts.length == 1
+                            ? '1 produto com estoque vazio'
+                            : '${viewModel.emptyStockProducts.length} produtos com estoque vazio',
+                        subtitle: 'Exibindo apenas produtos com estoque zerado',
+                        icon: AppIcons.package2,
+                        type: AppInfoBannerType.error,
+                        trailing: AppIconButton(
+                          icon: AppIcons.close,
+                          iconColor: AppColors.error,
+                          tooltip: 'Exibir todos os produtos',
+                          onPressed: viewModel.clearEmptyStockFilter,
                         ),
                       ),
                     ),

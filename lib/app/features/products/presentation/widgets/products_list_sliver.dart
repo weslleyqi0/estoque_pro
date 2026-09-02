@@ -38,14 +38,19 @@ class ProductsListSliver extends StatelessWidget {
 
     if (viewModel.filteredProducts.isEmpty) {
       final isLowStock = viewModel.showOnlyLowStock;
+      final isEmptyStock = viewModel.showOnlyEmptyStock;
       final hasSearchQuery = viewModel.searchQuery.trim().isNotEmpty;
+
+      final emptyMessage = isEmptyStock && !hasSearchQuery
+          ? 'Nenhum produto com estoque vazio!'
+          : isLowStock && !hasSearchQuery
+              ? 'Nenhum produto com estoque baixo!'
+              : 'Nenhum produto encontrado para essa pesquisa.';
 
       return SliverFillRemaining(
         child: AppEmptyList(
-          message: isLowStock && !hasSearchQuery
-              ? 'Nenhum produto com estoque baixo!'
-              : 'Nenhum produto encontrado para essa pesquisa.',
-          icon: isLowStock && !hasSearchQuery ? AppIcons.package2 : AppIcons.searchOff,
+          message: emptyMessage,
+          icon: (isLowStock || isEmptyStock) && !hasSearchQuery ? AppIcons.package2 : AppIcons.searchOff,
           iconColor: Colors.grey,
           iconSize: AppSpacing.icon48,
         ),

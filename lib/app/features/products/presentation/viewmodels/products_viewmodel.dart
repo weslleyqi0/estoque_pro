@@ -47,19 +47,39 @@ class ProductsViewModel extends BaseViewModel {
   bool _showOnlyLowStock = false;
   bool get showOnlyLowStock => _showOnlyLowStock;
 
+  bool _showOnlyEmptyStock = false;
+  bool get showOnlyEmptyStock => _showOnlyEmptyStock;
+
   List<ProductEntity> get lowStockProducts => _products.where((p) => p.stock < p.minStock && p.isActive).toList();
 
+  List<ProductEntity> get emptyStockProducts => _products.where((p) => p.stock <= 0 && p.isActive).toList();
+
   bool get hasLowStock => lowStockProducts.isNotEmpty;
+  bool get hasEmptyStock => emptyStockProducts.isNotEmpty;
 
   void setShowOnlyLowStock(bool value, {bool notify = true}) {
     if (_showOnlyLowStock == value) return;
     _showOnlyLowStock = value;
+    if (value) _showOnlyEmptyStock = false;
     if (notify) notifyListeners();
   }
 
   void clearLowStockFilter({bool notify = true}) {
     if (!_showOnlyLowStock) return;
     _showOnlyLowStock = false;
+    if (notify) notifyListeners();
+  }
+
+  void setShowOnlyEmptyStock(bool value, {bool notify = true}) {
+    if (_showOnlyEmptyStock == value) return;
+    _showOnlyEmptyStock = value;
+    if (value) _showOnlyLowStock = false;
+    if (notify) notifyListeners();
+  }
+
+  void clearEmptyStockFilter({bool notify = true}) {
+    if (!_showOnlyEmptyStock) return;
+    _showOnlyEmptyStock = false;
     if (notify) notifyListeners();
   }
 
@@ -81,7 +101,14 @@ class ProductsViewModel extends BaseViewModel {
   }
 
   List<ProductEntity> get filteredProducts {
-    final list = _showOnlyLowStock ? lowStockProducts : activeProducts;
+    final List<ProductEntity> list;
+    if (_showOnlyEmptyStock) {
+      list = emptyStockProducts;
+    } else if (_showOnlyLowStock) {
+      list = lowStockProducts;
+    } else {
+      list = activeProducts;
+    }
 
     if (_searchQuery.trim().isEmpty) return list;
 
