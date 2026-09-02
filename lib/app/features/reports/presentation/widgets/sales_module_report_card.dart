@@ -108,12 +108,6 @@ class SalesModuleReportCard extends StatelessWidget {
                   value: currency.format(salesReport.totalDiscount),
                   color: Colors.orange,
                 ),
-                const Divider(height: 16),
-                _RowMetric(
-                  label: 'Vendas via PIX',
-                  value: currency.format(salesReport.pixAmount),
-                  color: Colors.teal,
-                ),
               ],
             ),
           ),
