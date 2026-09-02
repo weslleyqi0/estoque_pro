@@ -10,6 +10,7 @@ import 'package:estoque_pro/app/core/router/routes/products_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/reports_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/sales_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/settings_routes.dart';
+import 'package:estoque_pro/app/core/router/routes/splash_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/suppliers_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/users_routes.dart';
 import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewmodel.dart';
@@ -22,7 +23,7 @@ class AppRouter {
 
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.splash,
     refreshListenable: getIt<AuthViewModel>(),
     redirect: (context, state) => _authRedirectPolicy.resolveRedirect(
       context,
@@ -30,6 +31,7 @@ class AppRouter {
       getIt<AuthViewModel>(),
     ),
     routes: [
+      ...splashRoutes(),
       ...authRoutes(),
       ...homeRoutes(),
       ...productsRoutes(),

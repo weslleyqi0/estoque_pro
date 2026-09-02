@@ -70,6 +70,15 @@ void main() {
       expect(policy.resolveRedirect(mockContext, mockState, mockAuthViewModel), isNull);
     });
 
+    test('user on splash page is not redirected so splash can complete its initialization', () {
+      when(() => mockAuthViewModel.isAuthenticated).thenReturn(false);
+      mockRoute(AppRoutes.splash);
+      expect(policy.resolveRedirect(mockContext, mockState, mockAuthViewModel), isNull);
+
+      when(() => mockAuthViewModel.isAuthenticated).thenReturn(true);
+      expect(policy.resolveRedirect(mockContext, mockState, mockAuthViewModel), isNull);
+    });
+
     test('inactive user is redirected to inactive page', () {
       when(() => mockAuthViewModel.isAuthenticated).thenReturn(true);
       when(() => mockAuthViewModel.isBiometricAuthenticated).thenReturn(true);
