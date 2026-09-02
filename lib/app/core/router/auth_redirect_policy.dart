@@ -29,11 +29,15 @@ class AuthRedirectPolicy {
     GoRouterState state,
     AuthViewModel authViewModel,
   ) {
+    final path = state.uri.path;
+    if (path == AppRoutes.splash) {
+      return null;
+    }
+
     final isAuthenticated = authViewModel.isAuthenticated;
     final isBiometricAuth = authViewModel.isBiometricAuthenticated;
     final currentUser = authViewModel.currentUser;
 
-    final path = state.uri.path;
     final isLoginPage = path == AppRoutes.login;
     final isBiometricPage = path == AppRoutes.biometric;
     final isInactivePage = path == AppRoutes.inactive;

@@ -70,7 +70,6 @@ class SettingsPage extends StatelessWidget {
                         subtitle: 'Personalizar a ordem dos botões na Home',
                         onTap: () => context.push(AppRoutes.homeShortcutsSettings),
                       ),
-                      const Gap(AppSpacing.space8),
                       SettingsTile(
                         icon: AppIcons.barChart,
                         iconColor: Colors.deepPurple,
@@ -78,7 +77,6 @@ class SettingsPage extends StatelessWidget {
                         subtitle: 'Personalizar a ordem dos cards de relatórios',
                         onTap: () => context.push(AppRoutes.reportCardsSettings),
                       ),
-                      const Gap(AppSpacing.space8),
                       SettingsThemeTile(themeViewModel: themeViewModel),
                     ],
                   ),
