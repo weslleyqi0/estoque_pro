@@ -54,49 +54,61 @@ class ReportPeriodSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = context.colorScheme.primary;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Barra horizontal de opções
+        // Barra horizontal de opções (padronizada com as outras tabs do sistema)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
           child: Row(
             children: ReportPeriodType.values.map((type) {
               final isSelected = period.type == type;
               return Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.space8),
-                child: ChoiceChip(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(type.label),
-                      if (type == ReportPeriodType.custom && isSelected) ...[
-                        const Gap(AppSpacing.space4),
-                        const Icon(Icons.calendar_today, size: 12),
-                      ],
-                    ],
-                  ),
-                  selected: isSelected,
-                  onSelected: (_) {
+                child: InkWell(
+                  onTap: () {
                     if (type == ReportPeriodType.custom) {
                       _handleCustomTap(context);
                     } else {
                       onPeriodSelected(type);
                     }
                   },
-                  selectedColor: context.colorScheme.primary,
-                  labelStyle: context.textTheme.labelMedium?.copyWith(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? Colors.white : context.colorScheme.onSurface,
-                  ),
-                  backgroundColor: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                  showCheckmark: false,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radius24),
-                    side: BorderSide(
-                      color: isSelected
-                          ? context.colorScheme.primary
-                          : context.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AppSpacing.radius16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.space12,
+                      horizontal: AppSpacing.space16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected ? primaryColor : context.colorScheme.surface.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(AppSpacing.radius24),
+                      border: Border.all(
+                        color: isSelected ? primaryColor : context.colorScheme.onSurface.withValues(alpha: 0.2),
+                        width: isSelected ? 2.0 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          type.label,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: isSelected ? AppColors.white : context.colorScheme.onSurface.withValues(alpha: 0.8),
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          ),
+                        ),
+                        if (type == ReportPeriodType.custom && isSelected) ...[
+                          const Gap(AppSpacing.space8),
+                          Icon(
+                            Icons.calendar_today,
+                            size: 14,
+                            color: AppColors.white,
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
@@ -109,7 +121,7 @@ class ReportPeriodSelector extends StatelessWidget {
 
         // Subtítulo descritivo com as datas ativas
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space16),
           child: Row(
             children: [
               Icon(

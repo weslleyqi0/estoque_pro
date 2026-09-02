@@ -50,7 +50,7 @@ class _ReportsPageState extends State<ReportsPage> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Relatórios & Métricas'),
-            centerTitle: false,
+            centerTitle: true,
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh),
@@ -59,8 +59,22 @@ class _ReportsPageState extends State<ReportsPage> {
               ),
               const Gap(AppSpacing.space8),
             ],
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(92.0),
+              child: Container(
+                padding: const EdgeInsets.only(bottom: AppSpacing.space12),
+                color: context.isDark
+                    ? context.colorScheme.surfaceContainerLow
+                    : context.colorScheme.surfaceContainerHighest,
+                child: ReportPeriodSelector(
+                  period: period,
+                  onPeriodSelected: (type) => _viewModel.setPeriodType(type),
+                  onCustomRangeSelected: (start, end) => _viewModel.setCustomRange(start, end),
+                ),
+              ),
+            ),
           ),
-          body: _buildBody(context, summary, period),
+          body: _buildBody(context, summary),
         );
       },
     );
@@ -69,7 +83,6 @@ class _ReportsPageState extends State<ReportsPage> {
   Widget _buildBody(
     BuildContext context,
     dynamic summary,
-    ReportPeriod period,
   ) {
     if (_viewModel.isLoading && summary == null) {
       return const Center(
@@ -125,20 +138,11 @@ class _ReportsPageState extends State<ReportsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Seletor de Período (Hoje, Semana, Mês, Ano, Personalizado)
-            ReportPeriodSelector(
-              period: period,
-              onPeriodSelected: (type) => _viewModel.setPeriodType(type),
-              onCustomRangeSelected: (start, end) => _viewModel.setCustomRange(start, end),
-            ),
-
-            const Gap(AppSpacing.space16),
-
-            // 2. Gráfico Comparativo de Vendas (Atual na cor Primary, Anterior em Outline cinza)
+            // 1. Gráfico Comparativo de Vendas (Atual na cor Primary, Anterior em Outline cinza)
             SalesComparisonChart(
               points: summary.sales.chartPoints,
-              currentLabel: period.type.label,
-              previousLabel: period.type.previousLabel,
+              currentLabel: _viewModel.period.type.label,
+              previousLabel: _viewModel.period.type.previousLabel,
               currentTotal: summary.sales.totalSales,
               previousTotal: summary.sales.previousTotalSales,
             ),
@@ -148,7 +152,7 @@ class _ReportsPageState extends State<ReportsPage> {
             // 3. Resumo Financeiro de Vendas (Total, Lucro, Custo, Fiados, Cartão, Dinheiro)
             DailySalesSummarySection(
               salesReport: summary.sales,
-              periodName: period.type.label,
+              periodName: _viewModel.period.type.label,
             ),
 
             const Gap(AppSpacing.space20),
