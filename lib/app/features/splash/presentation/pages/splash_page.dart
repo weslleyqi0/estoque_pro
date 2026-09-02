@@ -32,7 +32,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
 
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 800),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
@@ -57,7 +57,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     });
 
     // 2. Aguarda estabilização do Auth e Perfil do Usuário
-    await Future<void>.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
     setState(() {
       _progress = 0.75;
@@ -65,7 +65,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     });
 
     // 3. Conclusão da barra de progresso
-    await Future<void>.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
     setState(() {
       _progress = 1.0;
