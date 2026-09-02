@@ -64,6 +64,18 @@ void main() {
       minStock: 2,
       isArchived: true,
     ),
+    const ProductEntity(
+      id: 'prod5',
+      name: 'Produto Desativado',
+      imgUrl: '',
+      description: '',
+      categories: [],
+      price: 0.0,
+      costPrice: 0.0,
+      stock: 0,
+      minStock: 0,
+      isActive: false,
+    ),
   ];
 
   final now = DateTime(2026, 9, 2, 14, 0); // Quarta-feira
@@ -218,11 +230,13 @@ void main() {
       );
 
       final stock = summary.stock;
-      expect(stock.totalProducts, 3);
+      expect(stock.totalProducts, 4);
+      expect(stock.activeProducts, 3);
       expect(stock.lowStockCount, 1); // prod2 (2 <= 5)
       expect(stock.outOfStockCount, 1); // prod3 (0 <= 0)
       expect(stock.archivedCount, 1); // prod4
-      expect(stock.totalUnitsInStock, 12); // 10 + 2 + 0
+      expect(stock.inactiveCount, 1); // prod5
+      expect(stock.totalUnitsInStock, 12); // 10 + 2 + 0 + 0
 
       // Custo total: 10*40 + 2*50 + 0*20 = 400 + 100 = 500
       expect(stock.totalCostStock, 500.0);

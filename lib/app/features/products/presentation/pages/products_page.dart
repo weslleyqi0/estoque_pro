@@ -11,6 +11,7 @@ class ProductsPage extends StatefulWidget {
   final String? initialSearchQuery;
   final bool initialShowOnlyLowStock;
   final bool initialShowOnlyEmptyStock;
+  final bool initialShowOnlyInactive;
 
   const ProductsPage({
     super.key,
@@ -18,6 +19,7 @@ class ProductsPage extends StatefulWidget {
     this.initialSearchQuery,
     this.initialShowOnlyLowStock = false,
     this.initialShowOnlyEmptyStock = false,
+    this.initialShowOnlyInactive = false,
   });
 
   @override
@@ -31,7 +33,9 @@ class _ProductsPageState extends State<ProductsPage> {
   void initState() {
     super.initState();
     viewModel = widget.viewModelFactory();
-    if (widget.initialShowOnlyEmptyStock) {
+    if (widget.initialShowOnlyInactive) {
+      viewModel.setShowOnlyInactive(true);
+    } else if (widget.initialShowOnlyEmptyStock) {
       viewModel.setShowOnlyEmptyStock(true);
     } else if (widget.initialShowOnlyLowStock) {
       viewModel.setShowOnlyLowStock(true);
@@ -41,6 +45,7 @@ class _ProductsPageState extends State<ProductsPage> {
       if (widget.initialSearchQuery != null && widget.initialSearchQuery!.isNotEmpty) {
         viewModel.clearLowStockFilter();
         viewModel.clearEmptyStockFilter();
+        viewModel.clearInactiveFilter();
         viewModel.setSearchQuery(widget.initialSearchQuery!);
       }
     });
@@ -51,6 +56,7 @@ class _ProductsPageState extends State<ProductsPage> {
     viewModel.setSearchQuery('', notify: false);
     viewModel.clearLowStockFilter(notify: false);
     viewModel.clearEmptyStockFilter(notify: false);
+    viewModel.clearInactiveFilter(notify: false);
     viewModel.dispose();
     super.dispose();
   }
@@ -146,6 +152,30 @@ class _ProductsPageState extends State<ProductsPage> {
                           iconColor: AppColors.error,
                           tooltip: 'Exibir todos os produtos',
                           onPressed: viewModel.clearEmptyStockFilter,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (viewModel.showOnlyInactive)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.space16,
+                        right: AppSpacing.space16,
+                        bottom: AppSpacing.space12,
+                      ),
+                      child: AppInfoBanner(
+                        title: viewModel.inactiveProducts.length == 1
+                            ? '1 produto desativado'
+                            : '${viewModel.inactiveProducts.length} produtos desativados',
+                        subtitle: 'Exibindo apenas produtos desativados',
+                        icon: AppIcons.package2,
+                        type: AppInfoBannerType.warning,
+                        trailing: AppIconButton(
+                          icon: AppIcons.close,
+                          iconColor: AppColors.warningDark,
+                          tooltip: 'Exibir todos os produtos',
+                          onPressed: viewModel.clearInactiveFilter,
                         ),
                       ),
                     ),

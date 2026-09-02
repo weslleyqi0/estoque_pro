@@ -284,6 +284,7 @@ class GetReportsUseCase {
     final unarchived = products.where((p) => !p.isArchived).toList();
     final archived = products.where((p) => p.isArchived).toList();
     final active = unarchived.where((p) => p.isActive).toList();
+    final inactive = unarchived.where((p) => !p.isActive).toList();
 
     int totalUnits = 0;
     int lowStock = 0;
@@ -311,6 +312,7 @@ class GetReportsUseCase {
       lowStockCount: lowStock,
       outOfStockCount: outOfStock,
       archivedCount: archived.length,
+      inactiveCount: inactive.length,
       totalCostStock: totalCost,
       totalSellingStock: totalSelling,
       totalProjectedProfit: totalProjectedProfit,

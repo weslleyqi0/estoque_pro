@@ -50,17 +50,26 @@ class ProductsViewModel extends BaseViewModel {
   bool _showOnlyEmptyStock = false;
   bool get showOnlyEmptyStock => _showOnlyEmptyStock;
 
+  bool _showOnlyInactive = false;
+  bool get showOnlyInactive => _showOnlyInactive;
+
   List<ProductEntity> get lowStockProducts => _products.where((p) => p.stock < p.minStock && p.isActive).toList();
 
   List<ProductEntity> get emptyStockProducts => _products.where((p) => p.stock <= 0 && p.isActive).toList();
 
+  List<ProductEntity> get inactiveProducts => _products.where((p) => !p.isArchived && !p.isActive).toList();
+
   bool get hasLowStock => lowStockProducts.isNotEmpty;
   bool get hasEmptyStock => emptyStockProducts.isNotEmpty;
+  bool get hasInactive => inactiveProducts.isNotEmpty;
 
   void setShowOnlyLowStock(bool value, {bool notify = true}) {
     if (_showOnlyLowStock == value) return;
     _showOnlyLowStock = value;
-    if (value) _showOnlyEmptyStock = false;
+    if (value) {
+      _showOnlyEmptyStock = false;
+      _showOnlyInactive = false;
+    }
     if (notify) notifyListeners();
   }
 
@@ -73,13 +82,32 @@ class ProductsViewModel extends BaseViewModel {
   void setShowOnlyEmptyStock(bool value, {bool notify = true}) {
     if (_showOnlyEmptyStock == value) return;
     _showOnlyEmptyStock = value;
-    if (value) _showOnlyLowStock = false;
+    if (value) {
+      _showOnlyLowStock = false;
+      _showOnlyInactive = false;
+    }
     if (notify) notifyListeners();
   }
 
   void clearEmptyStockFilter({bool notify = true}) {
     if (!_showOnlyEmptyStock) return;
     _showOnlyEmptyStock = false;
+    if (notify) notifyListeners();
+  }
+
+  void setShowOnlyInactive(bool value, {bool notify = true}) {
+    if (_showOnlyInactive == value) return;
+    _showOnlyInactive = value;
+    if (value) {
+      _showOnlyLowStock = false;
+      _showOnlyEmptyStock = false;
+    }
+    if (notify) notifyListeners();
+  }
+
+  void clearInactiveFilter({bool notify = true}) {
+    if (!_showOnlyInactive) return;
+    _showOnlyInactive = false;
     if (notify) notifyListeners();
   }
 
@@ -102,7 +130,9 @@ class ProductsViewModel extends BaseViewModel {
 
   List<ProductEntity> get filteredProducts {
     final List<ProductEntity> list;
-    if (_showOnlyEmptyStock) {
+    if (_showOnlyInactive) {
+      list = inactiveProducts;
+    } else if (_showOnlyEmptyStock) {
       list = emptyStockProducts;
     } else if (_showOnlyLowStock) {
       list = lowStockProducts;

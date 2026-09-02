@@ -78,7 +78,7 @@ class StockReportCard extends StatelessWidget {
 
           const Gap(AppSpacing.space16),
 
-          // Alertas de estoque baixo, vazio e arquivados
+          // Alertas de estoque: Estoque Baixo, Vazio, Desativados e Arquivados
           Row(
             children: [
               Expanded(
@@ -101,6 +101,22 @@ class StockReportCard extends StatelessWidget {
                   icon: Icons.remove_circle_outline,
                   onTap: () {
                     context.push(AppRoutes.products, extra: 'empty_stock');
+                  },
+                ),
+              ),
+            ],
+          ),
+          const Gap(AppSpacing.space8),
+          Row(
+            children: [
+              Expanded(
+                child: _StockAlertBadge(
+                  label: 'Desativados',
+                  count: stockReport.inactiveCount,
+                  color: Colors.deepOrange,
+                  icon: Icons.visibility_off_outlined,
+                  onTap: () {
+                    context.push(AppRoutes.products, extra: 'inactive');
                   },
                 ),
               ),
