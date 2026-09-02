@@ -4,6 +4,7 @@ import 'package:estoque_pro/app/core/di/modules/core_module.dart';
 import 'package:estoque_pro/app/core/di/modules/customers_module.dart';
 import 'package:estoque_pro/app/core/di/modules/deliveries_module.dart';
 import 'package:estoque_pro/app/core/di/modules/products_module.dart';
+import 'package:estoque_pro/app/core/di/modules/reports_module.dart';
 import 'package:estoque_pro/app/core/di/modules/sales_module.dart';
 import 'package:estoque_pro/app/core/di/modules/suppliers_module.dart';
 import 'package:estoque_pro/app/core/di/modules/users_module.dart';
@@ -21,4 +22,5 @@ Future<void> setupServiceLocator() async {
   setupProductsModule(getIt);
   setupDeliveriesModule(getIt);
   setupSalesModule(getIt);
+  setupReportsModule(getIt);
 }

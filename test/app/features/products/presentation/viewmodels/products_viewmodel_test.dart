@@ -117,4 +117,23 @@ void main() {
     expect(viewModel.productHistory.length, equals(1));
     expect(viewModel.productHistory.first.quantity, equals(5));
   });
+
+  test('empty stock filter updates filtered products list', () async {
+    final outOfStockProduct = testProduct.copyWith(id: 'p2', name: 'Calça Jeans', stock: 0);
+    when(() => mockGetProductsUseCase.watchAll()).thenAnswer((_) => Stream.value([testProduct, outOfStockProduct]));
+
+    viewModel.listenAll();
+    await Future.delayed(Duration.zero);
+
+    expect(viewModel.products.length, equals(2));
+    expect(viewModel.emptyStockProducts.length, equals(1));
+    expect(viewModel.emptyStockProducts.first.name, equals('Calça Jeans'));
+
+    viewModel.setShowOnlyEmptyStock(true);
+    expect(viewModel.filteredProducts.length, equals(1));
+    expect(viewModel.filteredProducts.first.id, equals('p2'));
+
+    viewModel.clearEmptyStockFilter();
+    expect(viewModel.filteredProducts.length, equals(2));
+  });
 }

@@ -94,7 +94,7 @@ class HomeShortcutButton extends StatelessWidget {
           subTitle: type.subTitle,
           color: type.color,
           icon: type.icon,
-          onPressed: () {},
+          onPressed: () => context.push(AppRoutes.reports),
         );
       case HomeShortcutType.users:
         return HomeButton(
