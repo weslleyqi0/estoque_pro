@@ -32,4 +32,6 @@ class AppRoutes {
   static const saleScanner = '/sales/new/scan';
 
   static const deliveries = '/deliveries';
+
+  static const reports = '/reports';
 }

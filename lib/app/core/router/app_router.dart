@@ -7,6 +7,7 @@ import 'package:estoque_pro/app/core/router/routes/customers_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/deliveries_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/home_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/products_routes.dart';
+import 'package:estoque_pro/app/core/router/routes/reports_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/sales_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/settings_routes.dart';
 import 'package:estoque_pro/app/core/router/routes/suppliers_routes.dart';
@@ -39,6 +40,7 @@ class AppRouter {
       ...deliveriesRoutes(),
       ...usersRoutes(),
       ...settingsRoutes(),
+      ...reportsRoutes(),
     ],
   );
 }

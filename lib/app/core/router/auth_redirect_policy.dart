@@ -19,6 +19,7 @@ class AuthRedirectPolicy {
         AppRoutes.customerForm: UserPermission.managerCustomer,
         AppRoutes.categoryForm: UserPermission.manageCategories,
         AppRoutes.deliveries: UserPermission.deliveries,
+        AppRoutes.reports: UserPermission.viewReports,
       },
     ),
   });
