@@ -1,7 +1,9 @@
 class AppRoutes {
+  static const splash = '/splash';
   static const login = '/login';
   static const biometric = '/biometric';
   static const home = '/home';
+
   static const settings = '/settings';
   static const homeShortcutsSettings = '/settings/home-shortcuts';
   static const reportCardsSettings = '/settings/report-cards';
