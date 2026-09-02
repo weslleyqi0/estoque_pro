@@ -108,11 +108,10 @@ class _PaymentSheetState extends State<PaymentSheet> {
         return;
       }
 
-      if (_addressController.text.trim().isEmpty) {
-        AppSnackbar.error(context, 'Por favor, informe o endereço de entrega.');
-        return;
-      }
-      vm.setDeliveryAddress(_addressController.text.trim());
+      final addressText = _addressController.text.trim().isNotEmpty
+          ? _addressController.text.trim()
+          : (vm.deliveryAddress.trim().isNotEmpty ? vm.deliveryAddress.trim() : 'A combinar');
+      vm.setDeliveryAddress(addressText);
       vm.setDeliveryNotes(_deliveryNotesController.text.trim());
     }
 
@@ -289,8 +288,8 @@ class _PaymentSheetState extends State<PaymentSheet> {
                           // Endereço de entrega
                           AppTextfield(
                             controller: _addressController,
-                            label: 'Endereço de Entrega *',
-                            hint: 'Rua, número, bairro, complemento',
+                            label: 'Endereço de Entrega',
+                            hint: 'Rua, número, bairro (ou a combinar)',
                             prefixIcon: AppIcons.locationOn,
                             onChanged: vm.setDeliveryAddress,
                           ),

@@ -71,9 +71,14 @@ void main() {
   setUp(() {
     mockSaveSaleUseCase = MockSaveSaleUseCase();
     mockDeliveriesRepository = MockDeliveriesRepository();
-    finalizeSaleUseCase = FinalizeSaleUseCase(mockSaveSaleUseCase, mockDeliveriesRepository);
-    when(() => mockSaveSaleUseCase.call(sale: any(named: 'sale'), isUpdate: any(named: 'isUpdate')))
-        .thenAnswer((invocation) async {
+    finalizeSaleUseCase = FinalizeSaleUseCase(mockSaveSaleUseCase);
+    when(
+      () => mockSaveSaleUseCase.call(
+        sale: any(named: 'sale'),
+        isUpdate: any(named: 'isUpdate'),
+        delivery: any(named: 'delivery'),
+      ),
+    ).thenAnswer((invocation) async {
       final sale = invocation.namedArguments[#sale] as SaleEntity;
       return Result.success(sale);
     });
@@ -98,7 +103,13 @@ void main() {
     );
 
     expect(result.isSuccess, isTrue);
-    verify(() => mockSaveSaleUseCase(sale: any(named: 'sale'), isUpdate: false)).called(1);
+    verify(
+      () => mockSaveSaleUseCase(
+        sale: any(named: 'sale'),
+        isUpdate: false,
+        delivery: null,
+      ),
+    ).called(1);
     verifyNever(() => mockDeliveriesRepository.save(any()));
   });
 
@@ -186,7 +197,7 @@ void main() {
     expect(result.error?.message, contains('Para entregas, é obrigatório selecionar um cliente'));
   });
 
-  test('finalize sale with delivery returns BusinessRuleFailure if address is missing', () async {
+  test('finalize sale with delivery and empty address defaults to A combinar', () async {
     final result = await finalizeSaleUseCase(
       items: cartItems,
       saleNumber: '#1005',
@@ -207,9 +218,18 @@ void main() {
       deliveryAddress: '',
     );
 
-    expect(result.isFailure, isTrue);
-    expect(result.error, isA<BusinessRuleFailure>());
-    expect(result.error?.message, contains('Para entregas, é obrigatório informar o endereço de entrega'));
+    expect(result.isSuccess, isTrue);
+    verify(
+      () => mockSaveSaleUseCase(
+        sale: any(named: 'sale'),
+        isUpdate: false,
+        delivery: any(
+          named: 'delivery',
+          that: isA<DeliveryEntity>()
+              .having((d) => d.customerAddress, 'customerAddress', 'A combinar'),
+        ),
+      ),
+    ).called(1);
   });
 
   test('finalize sale with delivery creates sale and saves delivery', () async {
@@ -239,10 +259,12 @@ void main() {
     );
 
     expect(result.isSuccess, isTrue);
-    verify(() => mockSaveSaleUseCase(sale: any(named: 'sale'), isUpdate: false)).called(1);
     verify(
-      () => mockDeliveriesRepository.save(
-        any(
+      () => mockSaveSaleUseCase(
+        sale: any(named: 'sale'),
+        isUpdate: false,
+        delivery: any(
+          named: 'delivery',
           that: isA<DeliveryEntity>()
               .having((d) => d.saleNumber, 'saleNumber', '#1006')
               .having((d) => d.customerId, 'customerId', 'cust_1')
