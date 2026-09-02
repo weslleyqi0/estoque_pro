@@ -40,7 +40,6 @@ void setupSalesModule(GetIt getIt) {
   getIt.registerFactory<FinalizeSaleUseCase>(
     () => FinalizeSaleUseCase(
       getIt<SaveSaleUseCase>(),
-      getIt<DeliveriesRepository>(),
     ),
   );
   getIt.registerFactory<SaveDraftSaleUseCase>(

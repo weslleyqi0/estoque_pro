@@ -7,6 +7,8 @@ import 'package:estoque_pro/app/features/sales/data/models/sale_model.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
+import 'package:estoque_pro/app/features/deliveries/data/models/delivery_model.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:flutter/foundation.dart';
 
@@ -73,31 +75,56 @@ class SalesRepositoryImpl implements SalesRepository {
 
       updates['products/$productId/stock'] = _databaseService.increment(-item.quantity);
       updates['products/$productId/updatedAt'] = _databaseService.serverTimestamp;
-      updates['stock_movements/$productId/$movPushKey'] = historyModel.toMap();
+      final movMap = historyModel.toMap();
+      movMap['date'] = _databaseService.serverTimestamp;
+      updates['stock_movements/$productId/$movPushKey'] = movMap;
     }
   }
 
   @override
-  Future<Result<void>> save(SaleEntity sale, {Map<String, int>? productStocks}) async {
+  Future<Result<SaleEntity>> save(
+    SaleEntity sale, {
+    Map<String, int>? productStocks,
+    DeliveryEntity? delivery,
+  }) async {
     try {
       final pushKey = _databaseService.pushKey();
-      final saleId = pushKey;
+      final saleId = sale.id.isNotEmpty ? sale.id : pushKey;
 
       // Auto-generate saleNumber if empty
       final saleNumber = sale.saleNumber.isNotEmpty ? sale.saleNumber : SaleCodeGenerator.generate();
 
       final finalSale = sale.copyWith(id: saleId, saleNumber: saleNumber);
       final saleModel = SaleModel.fromEntity(finalSale);
+      final saleModelMap = saleModel.toMap();
+      // Garante que as datas venham diretamente do servidor do Firebase
+      saleModelMap['created_at'] = _databaseService.serverTimestamp;
+      saleModelMap['updated_at'] = _databaseService.serverTimestamp;
 
       final Map<String, dynamic> updates = {};
-      updates['sales/$saleId'] = saleModel.toMap();
+      updates['sales/$saleId'] = saleModelMap;
 
       if (finalSale.status != SaleStatus.inProgress) {
         await _addStockDeductionUpdates(finalSale, updates, productStocks ?? {});
       }
 
+      if (delivery != null) {
+        final deliveryPushKey = _databaseService.pushKey();
+        final deliveryId = delivery.id.isNotEmpty ? delivery.id : deliveryPushKey;
+        final finalDelivery = delivery.copyWith(
+          id: deliveryId,
+          saleId: saleId,
+          saleNumber: saleNumber,
+        );
+        final deliveryModel = DeliveryModel.fromEntity(finalDelivery);
+        final deliveryModelMap = deliveryModel.toMap();
+        deliveryModelMap['created_at'] = _databaseService.serverTimestamp;
+        deliveryModelMap['updated_at'] = _databaseService.serverTimestamp;
+        updates['deliveries/$deliveryId'] = deliveryModelMap;
+      }
+
       await _databaseService.updateMultiple(updates);
-      return const Result.success(null);
+      return Result.success(finalSale);
     } catch (e, stackTrace) {
       debugPrint('---> Sales: Erro ao salvar venda atômicamente: $e');
       return Result.failure(e, stackTrace);
@@ -105,7 +132,11 @@ class SalesRepositoryImpl implements SalesRepository {
   }
 
   @override
-  Future<Result<void>> updateSale(SaleEntity sale, {Map<String, int>? productStocks}) async {
+  Future<Result<SaleEntity>> updateSale(
+    SaleEntity sale, {
+    Map<String, int>? productStocks,
+    DeliveryEntity? delivery,
+  }) async {
     try {
       final oldVal = await _databaseService.getChildOnce(sale.id);
       String? oldStatus;
@@ -114,16 +145,33 @@ class SalesRepositoryImpl implements SalesRepository {
       }
 
       final saleModel = SaleModel.fromEntity(sale.copyWith(updatedAt: DateTime.now()));
+      final saleModelMap = saleModel.toMap();
+      saleModelMap['updated_at'] = _databaseService.serverTimestamp;
 
       final Map<String, dynamic> updates = {};
-      updates['sales/${sale.id}'] = saleModel.toMap();
+      updates['sales/${sale.id}'] = saleModelMap;
 
       if (oldStatus == SaleStatus.inProgress.value && sale.status == SaleStatus.completed) {
         await _addStockDeductionUpdates(sale, updates, productStocks ?? {});
       }
 
+      if (delivery != null) {
+        final deliveryPushKey = _databaseService.pushKey();
+        final deliveryId = delivery.id.isNotEmpty ? delivery.id : deliveryPushKey;
+        final finalDelivery = delivery.copyWith(
+          id: deliveryId,
+          saleId: sale.id,
+          saleNumber: sale.saleNumber,
+        );
+        final deliveryModel = DeliveryModel.fromEntity(finalDelivery);
+        final deliveryModelMap = deliveryModel.toMap();
+        deliveryModelMap['created_at'] = _databaseService.serverTimestamp;
+        deliveryModelMap['updated_at'] = _databaseService.serverTimestamp;
+        updates['deliveries/$deliveryId'] = deliveryModelMap;
+      }
+
       await _databaseService.updateMultiple(updates);
-      return const Result.success(null);
+      return Result.success(sale);
     } catch (e, stackTrace) {
       debugPrint('---> Sales: Erro ao atualizar venda pós-venda atômicamente: $e');
       return Result.failure(e, stackTrace);

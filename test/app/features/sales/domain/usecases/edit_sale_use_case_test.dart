@@ -94,7 +94,7 @@ void main() {
     editSaleUseCase = EditSaleUseCase(mockSalesRepository, mockProductsRepository);
 
     when(() => mockProductsRepository.getAll()).thenAnswer((_) async => const Result.success([testProduct]));
-    when(() => mockSalesRepository.updateSale(any())).thenAnswer((_) async => const Result.success(null));
+    when(() => mockSalesRepository.updateSale(any())).thenAnswer((_) async => Result.success(originalSale));
     when(
       () => mockSalesRepository.updateSaleWithStockAndHistory(
         sale: any(named: 'sale'),

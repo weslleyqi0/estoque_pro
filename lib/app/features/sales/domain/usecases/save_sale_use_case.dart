@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
@@ -22,6 +23,7 @@ class SaveSaleUseCase {
   AsyncResult<SaleEntity> call({
     required SaleEntity sale,
     bool isUpdate = false,
+    DeliveryEntity? delivery,
   }) async {
     if (sale.items.isEmpty) {
       return Result.failure(
@@ -51,12 +53,8 @@ class SaveSaleUseCase {
       }
     }
 
-    final result = isUpdate
-        ? await _salesRepository.updateSale(sale, productStocks: productStocks)
-        : await _salesRepository.save(sale, productStocks: productStocks);
-    return result.fold(
-      onSuccess: (_) => Result.success(sale),
-      onFailure: (error) => Result.failure(error),
-    );
+    return isUpdate
+        ? await _salesRepository.updateSale(sale, productStocks: productStocks, delivery: delivery)
+        : await _salesRepository.save(sale, productStocks: productStocks, delivery: delivery);
   }
 }
