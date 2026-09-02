@@ -142,7 +142,46 @@ class _ReportsPageState extends State<ReportsPage> {
       return const SizedBox.shrink();
     }
 
-    final orderedCards = _orderViewModel.cards;
+    final orderedCards = _orderViewModel.visibleCards;
+
+    if (orderedCards.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.space24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.visibility_off_outlined,
+                size: 48,
+                color: context.colorScheme.outline.withValues(alpha: 0.5),
+              ),
+              const Gap(AppSpacing.space12),
+              Text(
+                'Nenhum card visível',
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Gap(AppSpacing.space4),
+              Text(
+                'Todos os cards de relatórios foram ocultados nas configurações.',
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+              const Gap(AppSpacing.space16),
+              FilledButton.tonalIcon(
+                icon: const Icon(AppIcons.tune, size: 18),
+                label: const Text('Personalizar cards'),
+                onPressed: () => context.push(AppRoutes.reportCardsSettings),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return RefreshIndicator(
       onRefresh: () async => _viewModel.listenAll(),
