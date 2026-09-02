@@ -24,21 +24,11 @@ class ProductFinancialCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(
-              Icons.attach_money,
-              size: AppSpacing.icon20,
-              color: context.colorScheme.primary,
-            ),
-            const Gap(AppSpacing.space8),
-            Text(
-              'Rentabilidade & Estoque',
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        Text(
+          'Rentabilidade & Estoque',
+          style: context.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const Gap(AppSpacing.space8),
         Card(
