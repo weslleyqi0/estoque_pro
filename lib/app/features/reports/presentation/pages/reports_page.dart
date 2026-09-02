@@ -1,4 +1,9 @@
 import 'package:design_system/design_system.dart';
+import 'package:estoque_pro/app/core/di/service_locator.dart';
+import 'package:estoque_pro/app/core/router/app_routes.dart';
+import 'package:estoque_pro/app/features/reports/domain/entities/report_card_type.dart';
+import 'package:estoque_pro/app/features/reports/domain/entities/reports_summary_entity.dart';
+import 'package:estoque_pro/app/features/reports/presentation/viewmodels/report_cards_order_viewmodel.dart';
 import 'package:estoque_pro/app/features/reports/presentation/viewmodels/reports_viewmodel.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/customers_debt_report_card.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/daily_sales_summary_section.dart';
@@ -9,13 +14,16 @@ import 'package:estoque_pro/app/features/reports/presentation/widgets/sales_modu
 import 'package:estoque_pro/app/features/reports/presentation/widgets/stock_report_card.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 class ReportsPage extends StatefulWidget {
   final ReportsViewModel Function() viewModelFactory;
+  final ReportCardsOrderViewModel Function()? orderViewModelFactory;
 
   const ReportsPage({
     super.key,
     required this.viewModelFactory,
+    this.orderViewModelFactory,
   });
 
   @override
@@ -24,11 +32,13 @@ class ReportsPage extends StatefulWidget {
 
 class _ReportsPageState extends State<ReportsPage> {
   late final ReportsViewModel _viewModel;
+  late final ReportCardsOrderViewModel _orderViewModel;
 
   @override
   void initState() {
     super.initState();
     _viewModel = widget.viewModelFactory();
+    _orderViewModel = widget.orderViewModelFactory?.call() ?? getIt<ReportCardsOrderViewModel>();
     _viewModel.listenAll();
   }
 
@@ -41,7 +51,7 @@ class _ReportsPageState extends State<ReportsPage> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _viewModel,
+      listenable: Listenable.merge([_viewModel, _orderViewModel]),
       builder: (context, _) {
         final summary = _viewModel.summary;
         final period = _viewModel.period;
@@ -51,6 +61,11 @@ class _ReportsPageState extends State<ReportsPage> {
             title: const Text('Relatórios & Métricas'),
             centerTitle: true,
             actions: [
+              IconButton(
+                icon: const Icon(AppIcons.tune),
+                tooltip: 'Personalizar cards',
+                onPressed: () => context.push(AppRoutes.reportCardsSettings),
+              ),
               IconButton(
                 icon: const Icon(Icons.refresh),
                 tooltip: 'Atualizar dados',
@@ -81,7 +96,7 @@ class _ReportsPageState extends State<ReportsPage> {
 
   Widget _buildBody(
     BuildContext context,
-    dynamic summary,
+    ReportsSummaryEntity? summary,
   ) {
     if (_viewModel.isLoading && summary == null) {
       return const Center(
@@ -126,6 +141,8 @@ class _ReportsPageState extends State<ReportsPage> {
       return const SizedBox.shrink();
     }
 
+    final orderedCards = _orderViewModel.cards;
+
     return RefreshIndicator(
       onRefresh: () async => _viewModel.listenAll(),
       child: SingleChildScrollView(
@@ -137,55 +154,42 @@ class _ReportsPageState extends State<ReportsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Gráfico Comparativo de Vendas (Atual na cor Primary, Anterior em Outline cinza)
-            SalesComparisonChart(
-              points: summary.sales.chartPoints,
-              currentLabel: _viewModel.period.type.label,
-              previousLabel: _viewModel.period.type.previousLabel,
-              currentTotal: summary.sales.totalSales,
-              previousTotal: summary.sales.previousTotalSales,
-            ),
-
+            for (final cardType in orderedCards) ...[
+              _buildCard(cardType, summary),
+              const Gap(AppSpacing.space16),
+            ],
             const Gap(AppSpacing.space16),
-
-            // 2. Resumo Financeiro de Vendas (Total, Lucro, Custo, Fiados, Cartão, Dinheiro)
-            DailySalesSummarySection(
-              salesReport: summary.sales,
-              periodName: _viewModel.period.type.label,
-            ),
-
-            const Gap(AppSpacing.space16),
-
-            // 3. Card Modular: Desempenho de Vendas (Ticket médio, descontos, margem)
-            SalesModuleReportCard(
-              salesReport: summary.sales,
-            ),
-
-            const Gap(AppSpacing.space16),
-
-            // 4. Card Modular: Produtos & Estoque (Estoque baixo, vazios, custo investido, lucro)
-            StockReportCard(
-              stockReport: summary.stock,
-            ),
-
-            const Gap(AppSpacing.space16),
-
-            // 5. Card Modular: Clientes & Fiados (Clientes em débito, saldo a receber)
-            CustomersDebtReportCard(
-              customersDebtReport: summary.customersDebt,
-            ),
-
-            const Gap(AppSpacing.space16),
-
-            // 6. Card Modular: Entregas (Pendentes, atrasadas, concluídas)
-            DeliveriesReportCard(
-              deliveriesReport: summary.deliveries,
-            ),
-
-            const Gap(AppSpacing.space32),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildCard(ReportCardType type, ReportsSummaryEntity summary) {
+    return switch (type) {
+      ReportCardType.salesComparison => SalesComparisonChart(
+          points: summary.sales.chartPoints,
+          currentLabel: _viewModel.period.type.label,
+          previousLabel: _viewModel.period.type.previousLabel,
+          currentTotal: summary.sales.totalSales,
+          previousTotal: summary.sales.previousTotalSales,
+        ),
+      ReportCardType.salesSummary => DailySalesSummarySection(
+          salesReport: summary.sales,
+          periodName: _viewModel.period.type.label,
+        ),
+      ReportCardType.salesPerformance => SalesModuleReportCard(
+          salesReport: summary.sales,
+        ),
+      ReportCardType.stock => StockReportCard(
+          stockReport: summary.stock,
+        ),
+      ReportCardType.customersDebt => CustomersDebtReportCard(
+          customersDebtReport: summary.customersDebt,
+        ),
+      ReportCardType.deliveries => DeliveriesReportCard(
+          deliveriesReport: summary.deliveries,
+        ),
+    };
   }
 }

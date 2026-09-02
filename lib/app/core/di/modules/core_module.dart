@@ -2,6 +2,7 @@ import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/core/services/firebase_database_service.dart';
 import 'package:estoque_pro/app/core/services/local_storage_service.dart';
 import 'package:estoque_pro/app/features/home/presentation/viewmodels/home_shortcuts_viewmodel.dart';
+import 'package:estoque_pro/app/features/reports/presentation/viewmodels/report_cards_order_viewmodel.dart';
 import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -31,5 +32,8 @@ Future<void> setupCoreModule(GetIt getIt) async {
   );
   getIt.registerLazySingleton<HomeShortcutsViewModel>(
     () => HomeShortcutsViewModel(getIt<LocalStorageService>()),
+  );
+  getIt.registerLazySingleton<ReportCardsOrderViewModel>(
+    () => ReportCardsOrderViewModel(getIt<LocalStorageService>()),
   );
 }

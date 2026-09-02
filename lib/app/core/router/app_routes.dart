@@ -4,6 +4,7 @@ class AppRoutes {
   static const home = '/home';
   static const settings = '/settings';
   static const homeShortcutsSettings = '/settings/home-shortcuts';
+  static const reportCardsSettings = '/settings/report-cards';
 
   static const users = '/users';
   static const userForm = '/users/form';
