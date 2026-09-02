@@ -34,7 +34,7 @@ class ReportPeriod extends Equatable {
     final start = DateTime(now.year, now.month, now.day, 0, 0, 0);
     final end = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
 
-    final prevDay = start.subtract(const Duration(days: 1));
+    final prevDay = DateTime(now.year, now.month, now.day - 1);
     final prevStart = DateTime(prevDay.year, prevDay.month, prevDay.day, 0, 0, 0);
     final prevEnd = DateTime(prevDay.year, prevDay.month, prevDay.day, 23, 59, 59, 999);
 

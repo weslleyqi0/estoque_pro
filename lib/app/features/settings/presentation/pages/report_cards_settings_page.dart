@@ -67,7 +67,7 @@ class ReportCardsSettingsPage extends StatelessWidget {
                         const Gap(AppSpacing.space12),
                         Expanded(
                           child: Text(
-                            'Arraste os itens para reorganizar a ordem de exibição dos cards na tela de relatórios.',
+                            'Arraste para reordenar ou toque no ícone de olho para ocultar/mostrar cards no relatório.',
                             style: context.textTheme.bodySmall?.copyWith(
                               color: context.colorScheme.onSurface,
                             ),
@@ -93,6 +93,8 @@ class ReportCardsSettingsPage extends StatelessWidget {
                         key: ValueKey(item.id),
                         item: item,
                         index: index,
+                        isVisible: viewModel.isCardVisible(item),
+                        onToggleVisibility: () => viewModel.toggleCardVisibility(item),
                       );
                     },
                   ),

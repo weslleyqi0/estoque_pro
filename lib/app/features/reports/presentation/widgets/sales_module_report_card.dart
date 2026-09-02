@@ -68,10 +68,12 @@ class SalesModuleReportCard extends StatelessWidget {
                   ),
                 ],
               ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_ios, size: 14),
-                onPressed: () => context.push(AppRoutes.sales),
+              AppIconButton.primary(
+                icon: Icons.arrow_forward_ios,
+                size: AppIconButtonSize.small,
+                iconColor: context.colorScheme.onSurface.withValues(alpha: 0.6),
                 tooltip: 'Ver vendas',
+                onPressed: () => context.push(AppRoutes.sales),
               ),
             ],
           ),
@@ -110,9 +112,17 @@ class SalesModuleReportCard extends StatelessWidget {
                 ),
                 const Divider(height: 16),
                 _RowMetric(
-                  label: 'Vendas via PIX',
-                  value: currency.format(salesReport.pixAmount),
-                  color: Colors.teal,
+                  label: 'Vendas no Fiado',
+                  value: salesReport.fiadoSalesCount > 0
+                      ? '${salesReport.fiadoSalesCount} (${currency.format(salesReport.fiadoAmount)})'
+                      : '0',
+                  color: salesReport.fiadoSalesCount > 0 ? Colors.pink : null,
+                ),
+                const Divider(height: 16),
+                _RowMetric(
+                  label: 'Vendas Canceladas',
+                  value: '${salesReport.cancelledSalesCount}',
+                  color: salesReport.cancelledSalesCount > 0 ? AppColors.error : null,
                 ),
               ],
             ),

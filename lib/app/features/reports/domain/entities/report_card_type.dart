@@ -43,6 +43,13 @@ enum ReportCardType {
     subTitle: 'Pendentes, atrasadas e concluídas no período',
     icon: Icons.local_shipping_outlined,
     color: Colors.orange,
+  ),
+  sellerRanking(
+    id: 'seller_ranking',
+    title: 'Ranking por Vendedor',
+    subTitle: 'Desempenho da equipe: vendas e faturamento por vendedor',
+    icon: Icons.leaderboard_outlined,
+    color: Colors.amber,
   );
 
   final String id;
@@ -70,6 +77,7 @@ enum ReportCardType {
     ReportCardType.salesComparison,
     ReportCardType.salesSummary,
     ReportCardType.salesPerformance,
+    ReportCardType.sellerRanking,
     ReportCardType.stock,
     ReportCardType.customersDebt,
     ReportCardType.deliveries,

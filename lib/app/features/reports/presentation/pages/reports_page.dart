@@ -11,6 +11,7 @@ import 'package:estoque_pro/app/features/reports/presentation/widgets/deliveries
 import 'package:estoque_pro/app/features/reports/presentation/widgets/report_period_selector.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/sales_comparison_chart.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/sales_module_report_card.dart';
+import 'package:estoque_pro/app/features/reports/presentation/widgets/seller_ranking_report_card.dart';
 import 'package:estoque_pro/app/features/reports/presentation/widgets/stock_report_card.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -61,14 +62,18 @@ class _ReportsPageState extends State<ReportsPage> {
             title: const Text('Relatórios & Métricas'),
             centerTitle: true,
             actions: [
-              IconButton(
-                icon: const Icon(AppIcons.tune),
+              AppIconButton.primary(
+                icon: AppIcons.tune,
                 tooltip: 'Personalizar cards',
+                visualDensity: VisualDensity.compact,
+                iconColor: context.colorScheme.onSurface,
                 onPressed: () => context.push(AppRoutes.reportCardsSettings),
               ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
+              AppIconButton.primary(
+                icon: Icons.refresh,
                 tooltip: 'Atualizar dados',
+                visualDensity: VisualDensity.compact,
+                iconColor: context.colorScheme.onSurface,
                 onPressed: () => _viewModel.listenAll(),
               ),
               const Gap(AppSpacing.space8),
@@ -141,7 +146,46 @@ class _ReportsPageState extends State<ReportsPage> {
       return const SizedBox.shrink();
     }
 
-    final orderedCards = _orderViewModel.cards;
+    final orderedCards = _orderViewModel.visibleCards;
+
+    if (orderedCards.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.space24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.visibility_off_outlined,
+                size: 48,
+                color: context.colorScheme.outline.withValues(alpha: 0.5),
+              ),
+              const Gap(AppSpacing.space12),
+              Text(
+                'Nenhum card visível',
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Gap(AppSpacing.space4),
+              Text(
+                'Todos os cards de relatórios foram ocultados nas configurações.',
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+              const Gap(AppSpacing.space16),
+              FilledButton.tonalIcon(
+                icon: const Icon(AppIcons.tune, size: 18),
+                label: const Text('Personalizar cards'),
+                onPressed: () => context.push(AppRoutes.reportCardsSettings),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return RefreshIndicator(
       onRefresh: () async => _viewModel.listenAll(),
@@ -168,28 +212,31 @@ class _ReportsPageState extends State<ReportsPage> {
   Widget _buildCard(ReportCardType type, ReportsSummaryEntity summary) {
     return switch (type) {
       ReportCardType.salesComparison => SalesComparisonChart(
-          points: summary.sales.chartPoints,
-          currentLabel: _viewModel.period.type.label,
-          previousLabel: _viewModel.period.type.previousLabel,
-          currentTotal: summary.sales.totalSales,
-          previousTotal: summary.sales.previousTotalSales,
-        ),
+        points: summary.sales.chartPoints,
+        currentLabel: _viewModel.period.type.label,
+        previousLabel: _viewModel.period.type.previousLabel,
+        currentTotal: summary.sales.totalSales,
+        previousTotal: summary.sales.previousTotalSales,
+      ),
       ReportCardType.salesSummary => DailySalesSummarySection(
-          salesReport: summary.sales,
-          periodName: _viewModel.period.type.label,
-        ),
+        salesReport: summary.sales,
+        periodName: _viewModel.period.type.label,
+      ),
       ReportCardType.salesPerformance => SalesModuleReportCard(
-          salesReport: summary.sales,
-        ),
+        salesReport: summary.sales,
+      ),
       ReportCardType.stock => StockReportCard(
-          stockReport: summary.stock,
-        ),
+        stockReport: summary.stock,
+      ),
       ReportCardType.customersDebt => CustomersDebtReportCard(
-          customersDebtReport: summary.customersDebt,
-        ),
+        customersDebtReport: summary.customersDebt,
+      ),
       ReportCardType.deliveries => DeliveriesReportCard(
-          deliveriesReport: summary.deliveries,
-        ),
+        deliveriesReport: summary.deliveries,
+      ),
+      ReportCardType.sellerRanking => SellerRankingReportCard(
+        sellerRanking: summary.sales.sellerRanking,
+      ),
     };
   }
 }

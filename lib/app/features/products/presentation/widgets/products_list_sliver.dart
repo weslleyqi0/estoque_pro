@@ -29,8 +29,8 @@ class ProductsListSliver extends StatelessWidget {
       return const SliverFillRemaining(
         child: AppEmptyList(
           message: 'Nenhum produto cadastrado!\nClique no botão abaixo para cadastrar um novo produto.',
-          icon: AppIcons.inventory2,
-          iconColor: Colors.cyan,
+          icon: AppIcons.lists,
+          iconColor: AppColors.primary,
           iconSize: AppSpacing.icon48,
         ),
       );
@@ -45,10 +45,10 @@ class ProductsListSliver extends StatelessWidget {
       final emptyMessage = isInactive && !hasSearchQuery
           ? 'Nenhum produto desativado!'
           : isEmptyStock && !hasSearchQuery
-              ? 'Nenhum produto com estoque vazio!'
-              : isLowStock && !hasSearchQuery
-                  ? 'Nenhum produto com estoque baixo!'
-                  : 'Nenhum produto encontrado para essa pesquisa.';
+          ? 'Nenhum produto com estoque vazio!'
+          : isLowStock && !hasSearchQuery
+          ? 'Nenhum produto com estoque baixo!'
+          : 'Nenhum produto encontrado para essa pesquisa.';
 
       return SliverFillRemaining(
         child: AppEmptyList(

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:estoque_pro/app/features/reports/domain/entities/sales_chart_point.dart';
+import 'package:estoque_pro/app/features/reports/domain/entities/seller_ranking_item_entity.dart';
 
 class SalesReportEntity extends Equatable {
   final int salesCount;
@@ -15,6 +16,9 @@ class SalesReportEntity extends Equatable {
   final double pixAmount;
   final double previousTotalSales;
   final List<SalesChartPoint> chartPoints;
+  final List<SellerRankingItemEntity> sellerRanking;
+  final int cancelledSalesCount;
+  final int fiadoSalesCount;
 
   double get cardTotalAmount => cardCreditAmount + cardDebitAmount;
 
@@ -42,6 +46,9 @@ class SalesReportEntity extends Equatable {
     this.pixAmount = 0.0,
     this.previousTotalSales = 0.0,
     this.chartPoints = const [],
+    this.sellerRanking = const [],
+    this.cancelledSalesCount = 0,
+    this.fiadoSalesCount = 0,
   });
 
   @override
@@ -59,5 +66,8 @@ class SalesReportEntity extends Equatable {
         pixAmount,
         previousTotalSales,
         chartPoints,
+        sellerRanking,
+        cancelledSalesCount,
+        fiadoSalesCount,
       ];
 }

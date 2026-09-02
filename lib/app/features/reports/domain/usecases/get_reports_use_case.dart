@@ -9,10 +9,12 @@ import 'package:estoque_pro/app/features/reports/domain/entities/report_period.d
 import 'package:estoque_pro/app/features/reports/domain/entities/reports_summary_entity.dart';
 import 'package:estoque_pro/app/features/reports/domain/entities/sales_chart_point.dart';
 import 'package:estoque_pro/app/features/reports/domain/entities/sales_report_entity.dart';
+import 'package:estoque_pro/app/features/reports/domain/entities/seller_ranking_item_entity.dart';
 import 'package:estoque_pro/app/features/reports/domain/entities/stock_report_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart';
+import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:intl/intl.dart';
 
 class GetReportsUseCase {
@@ -25,6 +27,7 @@ class GetReportsUseCase {
     required List<DeliveryEntity> deliveries,
     required List<CustomerEntity> customers,
     required List<CustomerPaymentEntity> customerPayments,
+    List<UserEntity> users = const [],
   }) {
     final productMap = {for (final p in products) p.id: p};
 
@@ -32,6 +35,7 @@ class GetReportsUseCase {
       period: period,
       sales: sales,
       productMap: productMap,
+      users: users,
     );
 
     final stockReport = _buildStockReport(products);
@@ -60,18 +64,21 @@ class GetReportsUseCase {
     required ReportPeriod period,
     required List<SaleEntity> sales,
     required Map<String, ProductEntity> productMap,
+    List<UserEntity> users = const [],
   }) {
-    // Vendas ativas no período atual
+    // Vendas ativas no período atual (convertendo sempre para horário local)
     final currentSales = sales.where((s) {
       if (s.status == SaleStatus.cancelled) return false;
-      return !s.createdAt.isBefore(period.startDate) && !s.createdAt.isAfter(period.endDate);
+      final dt = s.createdAt.toLocal();
+      return !dt.isBefore(period.startDate) && !dt.isAfter(period.endDate);
     }).toList();
 
-    // Vendas ativas no período anterior
+    // Vendas ativas no período anterior (convertendo sempre para horário local)
     final previousSales = sales.where((s) {
       if (s.status == SaleStatus.cancelled) return false;
-      return !s.createdAt.isBefore(period.previousStartDate) &&
-          !s.createdAt.isAfter(period.previousEndDate);
+      final dt = s.createdAt.toLocal();
+      return !dt.isBefore(period.previousStartDate) &&
+          !dt.isAfter(period.previousEndDate);
     }).toList();
 
     final totalSales = currentSales.fold(0.0, (sum, s) => sum + s.total);
@@ -98,6 +105,8 @@ class GetReportsUseCase {
     double fiadoAmount = 0.0;
     double pixAmount = 0.0;
 
+    int fiadoSalesCount = 0;
+
     for (final s in currentSales) {
       switch (s.paymentMethod) {
         case PaymentMethod.dinheiro:
@@ -111,6 +120,7 @@ class GetReportsUseCase {
           break;
         case PaymentMethod.fiado:
           fiadoAmount += s.total;
+          fiadoSalesCount++;
           break;
         case PaymentMethod.pix:
           pixAmount += s.total;
@@ -118,11 +128,69 @@ class GetReportsUseCase {
       }
     }
 
+    final cancelledSalesCount = sales.where((s) {
+      return s.status == SaleStatus.cancelled &&
+          !s.createdAt.isBefore(period.startDate) &&
+          !s.createdAt.isAfter(period.endDate);
+    }).length;
+
     final chartPoints = _buildChartPoints(
       period: period,
       currentSales: currentSales,
       previousSales: previousSales,
     );
+
+    // Ranking de vendedores no período (inclui vendedores mesmo sem vendas no período com valores zerados)
+    final sellerMap = <String, _SellerAccumulator>{};
+
+    // 1. Inicializa todos os usuários ativos da equipe
+    for (final u in users) {
+      if (u.isActive) {
+        sellerMap[u.uid] = _SellerAccumulator(
+          userId: u.uid,
+          userName: u.name.trim().isNotEmpty ? u.name : 'Vendedor',
+        );
+      }
+    }
+
+    // 2. Garante inclusão de qualquer vendedor com vendas registradas no histórico
+    for (final sale in sales) {
+      if (sale.userId.trim().isNotEmpty) {
+        sellerMap.putIfAbsent(
+          sale.userId,
+          () => _SellerAccumulator(
+            userId: sale.userId,
+            userName: sale.userName.trim().isNotEmpty ? sale.userName : 'Vendedor',
+          ),
+        );
+      }
+    }
+
+    // 3. Acumula as vendas do período selecionado
+    for (final sale in currentSales) {
+      final acc = sellerMap.putIfAbsent(
+        sale.userId,
+        () => _SellerAccumulator(userId: sale.userId, userName: sale.userName),
+      );
+      acc.salesCount++;
+      acc.totalAmount += sale.total;
+    }
+
+    final sellerRanking = sellerMap.values.map((a) {
+      return SellerRankingItemEntity(
+        userId: a.userId,
+        userName: a.userName.trim().isNotEmpty ? a.userName : 'Vendedor',
+        salesCount: a.salesCount,
+        totalAmount: a.totalAmount,
+      );
+    }).toList()
+      ..sort((a, b) {
+        final cmpAmount = b.totalAmount.compareTo(a.totalAmount);
+        if (cmpAmount != 0) return cmpAmount;
+        final cmpCount = b.salesCount.compareTo(a.salesCount);
+        if (cmpCount != 0) return cmpCount;
+        return a.userName.toLowerCase().compareTo(b.userName.toLowerCase());
+      });
 
     return SalesReportEntity(
       salesCount: currentSales.length,
@@ -138,6 +206,9 @@ class GetReportsUseCase {
       pixAmount: pixAmount,
       previousTotalSales: previousTotalSales,
       chartPoints: chartPoints,
+      sellerRanking: sellerRanking,
+      cancelledSalesCount: cancelledSalesCount,
+      fiadoSalesCount: fiadoSalesCount,
     );
   }
 
@@ -148,15 +219,22 @@ class GetReportsUseCase {
   }) {
     switch (period.type) {
       case ReportPeriodType.today:
-        // Divisão por blocos de 2 horas (06h às 22h)
-        const hours = [6, 8, 10, 12, 14, 16, 18, 20, 22];
+        // Divisão por blocos de 2 horas das 06h às 20h
+        const hours = [6, 8, 10, 12, 14, 16, 18, 20];
         return hours.map((h) {
           final label = '${h.toString().padLeft(2, '0')}h';
+          bool matches(DateTime dt) {
+            final local = dt.toLocal();
+            if (h == 6) return local.hour < 8;
+            if (h == 20) return local.hour >= 20;
+            return local.hour >= h && local.hour < h + 2;
+          }
+
           final current = currentSales
-              .where((s) => s.createdAt.hour >= h && s.createdAt.hour < h + 2)
+              .where((s) => matches(s.createdAt))
               .fold(0.0, (sum, s) => sum + s.total);
           final previous = previousSales
-              .where((s) => s.createdAt.hour >= h && s.createdAt.hour < h + 2)
+              .where((s) => matches(s.createdAt))
               .fold(0.0, (sum, s) => sum + s.total);
           return SalesChartPoint(label: label, currentAmount: current, previousAmount: previous);
         }).toList();
@@ -295,10 +373,12 @@ class GetReportsUseCase {
 
     for (final p in unarchived) {
       totalUnits += p.stock;
-      if (p.stock <= 0) {
-        outOfStock++;
-      } else if (p.stock <= p.minStock) {
-        lowStock++;
+      if (p.isActive) {
+        if (p.stock <= 0) {
+          outOfStock++;
+        } else if (p.stock <= p.minStock) {
+          lowStock++;
+        }
       }
       totalCost += p.totalCostStock;
       totalSelling += p.totalSellingStock;
@@ -399,4 +479,16 @@ class GetReportsUseCase {
       cancelledCount: cancelled,
     );
   }
+}
+
+class _SellerAccumulator {
+  final String userId;
+  final String userName;
+  int salesCount = 0;
+  double totalAmount = 0.0;
+
+  _SellerAccumulator({
+    required this.userId,
+    required this.userName,
+  });
 }

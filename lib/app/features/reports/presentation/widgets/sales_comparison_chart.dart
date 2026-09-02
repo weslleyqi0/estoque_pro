@@ -32,7 +32,9 @@ class _SalesComparisonChartState extends State<SalesComparisonChart> {
 
   @override
   Widget build(BuildContext context) {
-    final hasData = widget.points.any((p) => p.currentAmount > 0 || p.previousAmount > 0);
+    final hasData = widget.points.any((p) => p.currentAmount > 0 || p.previousAmount > 0) ||
+        widget.currentTotal > 0 ||
+        widget.previousTotal > 0;
     final maxAmount = widget.points.fold<double>(
       0.0,
       (max, p) => math.max(max, math.max(p.currentAmount, p.previousAmount)),
@@ -110,6 +112,13 @@ class _SalesComparisonChartState extends State<SalesComparisonChart> {
                             ),
                           ),
                       ],
+                    ),
+                    const Gap(AppSpacing.space4),
+                    Text(
+                      'vs. ${widget.previousLabel}: ${_currencyFormat.format(widget.previousTotal)}',
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
                     ),
                   ],
                 ),
@@ -254,13 +263,20 @@ class _SalesComparisonChartState extends State<SalesComparisonChart> {
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
-                                          // Barra do período anterior (Outline cinza)
+                                          // Barra do período anterior (Outline cinza suave)
                                           Flexible(
                                             child: Container(
                                               width: 10,
-                                              height: math.max(prevHeight, 2.0),
+                                              height: prevHeight > 0 ? math.max(prevHeight, 4.0) : 2.0,
                                               decoration: BoxDecoration(
-                                                color: context.colorScheme.outline,
+                                                color: prevHeight > 0
+                                                    ? context.colorScheme.outlineVariant
+                                                    : context.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                                                border: Border.all(
+                                                  color: prevHeight > 0
+                                                      ? context.colorScheme.outline
+                                                      : context.colorScheme.outline.withValues(alpha: 0.3),
+                                                ),
                                                 borderRadius: const BorderRadius.vertical(
                                                   top: Radius.circular(4),
                                                 ),
@@ -272,11 +288,13 @@ class _SalesComparisonChartState extends State<SalesComparisonChart> {
                                           Flexible(
                                             child: Container(
                                               width: 12,
-                                              height: math.max(curHeight, 2.0),
+                                              height: curHeight > 0 ? math.max(curHeight, 4.0) : 2.0,
                                               decoration: BoxDecoration(
-                                                color: isSelected
-                                                    ? context.colorScheme.primary
-                                                    : context.colorScheme.primary.withValues(alpha: 0.85),
+                                                color: curHeight > 0
+                                                    ? (isSelected
+                                                        ? context.colorScheme.primary
+                                                        : context.colorScheme.primary.withValues(alpha: 0.85))
+                                                    : context.colorScheme.primary.withValues(alpha: 0.2),
                                                 borderRadius: const BorderRadius.vertical(
                                                   top: Radius.circular(4),
                                                 ),
