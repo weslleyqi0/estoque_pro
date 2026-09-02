@@ -117,7 +117,7 @@ class ReportPeriodSelector extends StatelessWidget {
           ),
         ),
 
-        const Gap(AppSpacing.space8),
+        const Gap(AppSpacing.space4),
 
         // Subtítulo descritivo com as datas ativas
         Padding(

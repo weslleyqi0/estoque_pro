@@ -60,9 +60,9 @@ class _ReportsPageState extends State<ReportsPage> {
               const Gap(AppSpacing.space8),
             ],
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(92.0),
+              preferredSize: const Size.fromHeight(80.0),
               child: Container(
-                padding: const EdgeInsets.only(bottom: AppSpacing.space12),
+                padding: const EdgeInsets.only(bottom: AppSpacing.space8),
                 color: context.isDark
                     ? context.colorScheme.surfaceContainerLow
                     : context.colorScheme.surfaceContainerHighest,
