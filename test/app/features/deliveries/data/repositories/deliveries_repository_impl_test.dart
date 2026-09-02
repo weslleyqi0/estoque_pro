@@ -16,6 +16,7 @@ void main() {
 
   setUp(() {
     mockDatabaseService = MockDatabaseService();
+    when(() => mockDatabaseService.serverTimestamp).thenReturn({'.sv': 'timestamp'});
     repository = DeliveriesRepositoryImpl(mockDatabaseService);
   });
 
@@ -75,33 +76,33 @@ void main() {
       await controller.close();
     });
 
-    test('save generates pushKey when id is empty and calls updateMultiple', () async {
+    test('save generates pushKey when id is empty and calls update', () async {
       when(() => mockDatabaseService.pushKey()).thenReturn('generated-key');
-      when(() => mockDatabaseService.updateMultiple(any())).thenAnswer((_) async {});
+      when(() => mockDatabaseService.update(any(), any())).thenAnswer((_) async {});
 
       final result = await repository.save(testDelivery.copyWith(id: ''));
 
       expect(result.isSuccess, isTrue);
       verify(() => mockDatabaseService.pushKey()).called(1);
-      verify(() => mockDatabaseService.updateMultiple(any())).called(1);
+      verify(() => mockDatabaseService.update('generated-key', any())).called(1);
     });
 
     test('save returns failure on error', () async {
       when(() => mockDatabaseService.pushKey()).thenReturn('generated-key');
-      when(() => mockDatabaseService.updateMultiple(any())).thenThrow(Exception('Save error'));
+      when(() => mockDatabaseService.update(any(), any())).thenThrow(Exception('Save error'));
 
       final result = await repository.save(testDelivery.copyWith(id: ''));
 
       expect(result.isFailure, isTrue);
     });
 
-    test('updateDelivery calls updateMultiple on DatabaseService', () async {
-      when(() => mockDatabaseService.updateMultiple(any())).thenAnswer((_) async {});
+    test('updateDelivery calls update on DatabaseService', () async {
+      when(() => mockDatabaseService.update(any(), any())).thenAnswer((_) async {});
 
       final result = await repository.updateDelivery(testDelivery);
 
       expect(result.isSuccess, isTrue);
-      verify(() => mockDatabaseService.updateMultiple(any())).called(1);
+      verify(() => mockDatabaseService.update(testDelivery.id, any())).called(1);
     });
 
     test('updateStatus updates delivery status and deliveredAt', () async {

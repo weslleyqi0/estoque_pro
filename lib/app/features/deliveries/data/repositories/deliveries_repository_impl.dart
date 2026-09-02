@@ -36,7 +36,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
             }
           }
           // Sort by scheduledAt ascending (or createdAt descending)
-          return deliveries..sort((a, b) => a.scheduledAt.compareTo(a.scheduledAt));
+          return deliveries..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
         })
         .handleError((e) {
           debugPrint('---> Deliveries: Erro no listener: $e');
@@ -51,11 +51,11 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
 
       final finalDelivery = delivery.copyWith(id: deliveryId);
       final deliveryModel = DeliveryModel.fromEntity(finalDelivery);
+      final deliveryModelMap = deliveryModel.toMap();
+      deliveryModelMap['created_at'] = _databaseService.serverTimestamp;
+      deliveryModelMap['updated_at'] = _databaseService.serverTimestamp;
 
-      final Map<String, dynamic> updates = {};
-      updates['deliveries/$deliveryId'] = deliveryModel.toMap();
-
-      await _databaseService.updateMultiple(updates);
+      await _databaseService.update(deliveryId, deliveryModelMap);
       return const Result.success(null);
     } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao salvar entrega: $e');
@@ -69,11 +69,10 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       final deliveryModel = DeliveryModel.fromEntity(
         delivery.copyWith(updatedAt: DateTime.now()),
       );
+      final deliveryModelMap = deliveryModel.toMap();
+      deliveryModelMap['updated_at'] = _databaseService.serverTimestamp;
 
-      final Map<String, dynamic> updates = {};
-      updates['deliveries/${delivery.id}'] = deliveryModel.toMap();
-
-      await _databaseService.updateMultiple(updates);
+      await _databaseService.update(delivery.id, deliveryModelMap);
       return const Result.success(null);
     } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao atualizar entrega: $e');
