@@ -108,6 +108,20 @@ class SalesModuleReportCard extends StatelessWidget {
                   value: currency.format(salesReport.totalDiscount),
                   color: Colors.orange,
                 ),
+                const Divider(height: 16),
+                _RowMetric(
+                  label: 'Vendas no Fiado',
+                  value: salesReport.fiadoSalesCount > 0
+                      ? '${salesReport.fiadoSalesCount} (${currency.format(salesReport.fiadoAmount)})'
+                      : '0',
+                  color: salesReport.fiadoSalesCount > 0 ? Colors.pink : null,
+                ),
+                const Divider(height: 16),
+                _RowMetric(
+                  label: 'Vendas Canceladas',
+                  value: '${salesReport.cancelledSalesCount}',
+                  color: salesReport.cancelledSalesCount > 0 ? AppColors.error : null,
+                ),
               ],
             ),
           ),

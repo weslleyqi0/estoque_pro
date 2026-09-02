@@ -217,6 +217,8 @@ void main() {
       // Métodos de pagamento
       expect(sales.cashAmount, 200.0);
       expect(sales.fiadoAmount, 80.0);
+      expect(sales.fiadoSalesCount, 1);
+      expect(sales.cancelledSalesCount, 1);
 
       // Ranking de vendedores
       expect(sales.sellerRanking.length, 2);

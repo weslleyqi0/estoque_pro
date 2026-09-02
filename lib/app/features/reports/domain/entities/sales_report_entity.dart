@@ -17,6 +17,8 @@ class SalesReportEntity extends Equatable {
   final double previousTotalSales;
   final List<SalesChartPoint> chartPoints;
   final List<SellerRankingItemEntity> sellerRanking;
+  final int cancelledSalesCount;
+  final int fiadoSalesCount;
 
   double get cardTotalAmount => cardCreditAmount + cardDebitAmount;
 
@@ -45,6 +47,8 @@ class SalesReportEntity extends Equatable {
     this.previousTotalSales = 0.0,
     this.chartPoints = const [],
     this.sellerRanking = const [],
+    this.cancelledSalesCount = 0,
+    this.fiadoSalesCount = 0,
   });
 
   @override
@@ -63,5 +67,7 @@ class SalesReportEntity extends Equatable {
         previousTotalSales,
         chartPoints,
         sellerRanking,
+        cancelledSalesCount,
+        fiadoSalesCount,
       ];
 }

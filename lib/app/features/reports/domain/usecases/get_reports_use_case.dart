@@ -99,6 +99,8 @@ class GetReportsUseCase {
     double fiadoAmount = 0.0;
     double pixAmount = 0.0;
 
+    int fiadoSalesCount = 0;
+
     for (final s in currentSales) {
       switch (s.paymentMethod) {
         case PaymentMethod.dinheiro:
@@ -112,12 +114,19 @@ class GetReportsUseCase {
           break;
         case PaymentMethod.fiado:
           fiadoAmount += s.total;
+          fiadoSalesCount++;
           break;
         case PaymentMethod.pix:
           pixAmount += s.total;
           break;
       }
     }
+
+    final cancelledSalesCount = sales.where((s) {
+      return s.status == SaleStatus.cancelled &&
+          !s.createdAt.isBefore(period.startDate) &&
+          !s.createdAt.isAfter(period.endDate);
+    }).length;
 
     final chartPoints = _buildChartPoints(
       period: period,
@@ -165,6 +174,8 @@ class GetReportsUseCase {
       previousTotalSales: previousTotalSales,
       chartPoints: chartPoints,
       sellerRanking: sellerRanking,
+      cancelledSalesCount: cancelledSalesCount,
+      fiadoSalesCount: fiadoSalesCount,
     );
   }
 
