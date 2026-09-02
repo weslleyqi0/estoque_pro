@@ -35,7 +35,7 @@ class DeliveriesReportCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(AppSpacing.space8),
+                    padding: const EdgeInsets.all(AppSpacing.space12),
                     decoration: BoxDecoration(
                       color: Colors.orange.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(AppSpacing.radius8),

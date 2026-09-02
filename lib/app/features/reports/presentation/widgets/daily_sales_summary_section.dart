@@ -46,20 +46,36 @@ class DailySalesSummarySection extends StatelessWidget {
         children: [
           // Header da Seção
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Resumo de Vendas',
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.space12),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSpacing.radius8),
+                ),
+                child: const Icon(
+                  Icons.pie_chart_outline_rounded,
+                  color: Colors.deepPurple,
+                  size: AppSpacing.icon20,
                 ),
               ),
-              Text(
-                '$periodName • ${salesReport.salesCount} vendas',
-                style: context.textTheme.labelSmall?.copyWith(
-                  color: context.colorScheme.onSurface.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.w600,
-                ),
+              const Gap(AppSpacing.space12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Resumo de Vendas',
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '$periodName • ${salesReport.salesCount} vendas',
+                    style: context.textTheme.labelSmall?.copyWith(
+                      color: context.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
