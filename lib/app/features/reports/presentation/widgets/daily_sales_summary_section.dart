@@ -197,13 +197,13 @@ class _DonutSummaryRow extends StatelessWidget {
       children: [
         // Gráfico Donut
         SizedBox(
-          width: 105,
-          height: 105,
+          width: 120,
+          height: 120,
           child: Stack(
             alignment: Alignment.center,
             children: [
               CustomPaint(
-                size: const Size(105, 105),
+                size: const Size(120, 120),
                 painter: _DonutChartPainter(
                   slices: slices,
                   total: total,
@@ -216,7 +216,7 @@ class _DonutSummaryRow extends StatelessWidget {
                     centerTitle,
                     style: context.textTheme.labelSmall?.copyWith(
                       color: context.colorScheme.onSurface.withValues(alpha: 0.6),
-                      fontSize: 9,
+                      fontSize: 10,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -224,7 +224,7 @@ class _DonutSummaryRow extends StatelessWidget {
                     centerValue,
                     style: context.textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 11,
+                      fontSize: 12,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -335,22 +335,44 @@ class _DonutChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
-    const strokeWidth = 16.0;
+    const strokeWidth = 20.0;
 
     if (total <= 0 || slices.isEmpty) {
       final emptyPaint = Paint()
-        ..color = Colors.grey.withValues(alpha: 0.2)
+        ..color = Colors.grey.withValues(alpha: 0.15)
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth;
       canvas.drawCircle(center, radius - strokeWidth / 2, emptyPaint);
       return;
     }
 
-    double startAngle = -math.pi / 2; // Inicia às 12 horas
-    final rect = Rect.fromCircle(center: center, radius: radius - strokeWidth / 2);
+    // Se houver apenas uma fatia com 100%, desenha o círculo completo
+    if (slices.length == 1) {
+      final singlePaint = Paint()
+        ..color = slices.first.color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth;
+      canvas.drawCircle(center, radius - strokeWidth / 2, singlePaint);
+      return;
+    }
+
+    final arcRadius = radius - strokeWidth / 2;
+    final rect = Rect.fromCircle(center: center, radius: arcRadius);
+
+    // Espaçamento constante de 4px entre segmentos
+    const double desiredPixelGap = 4.0;
+
+    final capAngle = (strokeWidth / 2) / arcRadius;
+    final gapAngle = (capAngle * 2) + (desiredPixelGap / arcRadius);
+
+    // Ângulo total disponível após descontar os espaçamentos uniformes
+    final totalGaps = gapAngle * slices.length;
+    final availableAngle = math.max(2 * math.pi - totalGaps, 0.5);
+
+    double currentAngle = -math.pi / 2; // Inicia às 12 horas
 
     for (final slice in slices) {
-      final sweepAngle = (slice.amount / total) * 2 * math.pi;
+      final sweepAngle = (slice.amount / total) * availableAngle;
 
       final paint = Paint()
         ..color = slice.color
@@ -358,12 +380,10 @@ class _DonutChartPainter extends CustomPainter {
         ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.round;
 
-      // Espaçamento angular entre fatias
-      final adjustedSweep = slices.length > 1 ? math.max(sweepAngle - 0.05, 0.01) : sweepAngle;
-      final adjustedStart = slices.length > 1 ? startAngle + 0.025 : startAngle;
+      canvas.drawArc(rect, currentAngle, math.max(sweepAngle, 0.02), false, paint);
 
-      canvas.drawArc(rect, adjustedStart, adjustedSweep, false, paint);
-      startAngle += sweepAngle;
+      // Avança exatamente o arco desenhado + o gap constante idêntico para todos
+      currentAngle += sweepAngle + gapAngle;
     }
   }
 
