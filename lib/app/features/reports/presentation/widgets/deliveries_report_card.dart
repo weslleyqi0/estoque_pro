@@ -57,7 +57,7 @@ class DeliveriesReportCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${deliveriesReport.totalDeliveries} entregas no período',
+                        '${deliveriesReport.completedCount} concluídas no período',
                         style: context.textTheme.labelSmall?.copyWith(
                           color: context.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),

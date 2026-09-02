@@ -247,5 +247,83 @@ void main() {
       expect(debtReport.customersInDebtCount, 1); // Carlos deve 80
       expect(debtReport.totalDebtAmount, 80.0);
     });
+
+    test('aggregates deliveries with pending and delayed globally and completed by period', () {
+      final oldDelayedDelivery = DeliveryEntity(
+        id: 'd_old',
+        saleId: 's_old',
+        saleNumber: '000',
+        customerId: 'c1',
+        customerName: 'Carlos',
+        customerAddress: 'Rua Central, 10',
+        items: const [],
+        subtotal: 50.0,
+        totalAmount: 50.0,
+        paymentMethod: PaymentMethod.dinheiro,
+        status: DeliveryStatus.delayed,
+        scheduledAt: DateTime(2026, 8, 15, 10, 0), // Data antiga fora do período atual
+        userId: 'u1',
+        userName: 'Admin',
+        createdAt: DateTime(2026, 8, 15),
+      );
+
+      final oldCompletedDelivery = DeliveryEntity(
+        id: 'd_comp_old',
+        saleId: 's_comp',
+        saleNumber: '002',
+        customerId: 'c2',
+        customerName: 'Maria',
+        customerAddress: 'Rua B, 20',
+        items: const [],
+        subtotal: 70.0,
+        totalAmount: 70.0,
+        paymentMethod: PaymentMethod.dinheiro,
+        status: DeliveryStatus.completed,
+        scheduledAt: DateTime(2026, 8, 10, 10, 0),
+        deliveredAt: DateTime(2026, 8, 10, 12, 0), // Concluída no passado (fora do período)
+        userId: 'u1',
+        userName: 'Admin',
+        createdAt: DateTime(2026, 8, 10),
+      );
+
+      final pendingDelivery = DeliveryEntity(
+        id: 'd_pend',
+        saleId: 's_pend',
+        saleNumber: '003',
+        customerId: 'c1',
+        customerName: 'Carlos',
+        customerAddress: 'Rua C, 30',
+        items: const [],
+        subtotal: 30.0,
+        totalAmount: 30.0,
+        paymentMethod: PaymentMethod.dinheiro,
+        status: DeliveryStatus.pending,
+        scheduledAt: DateTime(2026, 10, 1, 10, 0), // Agendada no futuro (fora do período de hoje)
+        userId: 'u1',
+        userName: 'Admin',
+        createdAt: now,
+      );
+
+      final allDeliveries = [
+        ...testDeliveries, // d1: completed hoje (no período)
+        oldDelayedDelivery, // atrasada antiga
+        oldCompletedDelivery, // concluída antiga
+        pendingDelivery, // pendente futura
+      ];
+
+      final summary = useCase.execute(
+        period: period,
+        products: testProducts,
+        sales: testSales,
+        deliveries: allDeliveries,
+        customers: testCustomers,
+        customerPayments: testPayments,
+      );
+
+      final deliveriesReport = summary.deliveries;
+      expect(deliveriesReport.completedCount, 1); // Apenas d1 de hoje
+      expect(deliveriesReport.delayedCount, 1); // d_old (globalmente atrasada)
+      expect(deliveriesReport.pendingCount, 1); // d_pend (globalmente pendente)
+    });
   });
 }

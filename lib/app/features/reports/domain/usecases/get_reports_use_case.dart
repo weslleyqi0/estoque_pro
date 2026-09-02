@@ -358,29 +358,39 @@ class GetReportsUseCase {
     required ReportPeriod period,
     required List<DeliveryEntity> deliveries,
   }) {
-    final filtered = deliveries.where((d) {
-      return !d.scheduledAt.isBefore(period.startDate) && !d.scheduledAt.isAfter(period.endDate);
-    }).toList();
-
+    // Pendentes e Atrasadas: mostradas todas que estiverem pendentes ou atrasadas, independente do filtro
     int pending = 0;
     int delayed = 0;
-    int completed = 0;
-    int cancelled = 0;
 
-    for (final d in filtered) {
-      if (d.status == DeliveryStatus.cancelled) {
-        cancelled++;
-      } else if (d.status == DeliveryStatus.completed) {
-        completed++;
-      } else if (d.isDelayed) {
+    for (final d in deliveries) {
+      if (d.status == DeliveryStatus.cancelled || d.status == DeliveryStatus.completed) {
+        continue;
+      }
+      if (d.isDelayed) {
         delayed++;
       } else {
         pending++;
       }
     }
 
+    // Concluídas (e canceladas): apenas as que pertencem ao período filtrado
+    int completed = 0;
+    int cancelled = 0;
+
+    for (final d in deliveries) {
+      final date = d.deliveredAt ?? d.scheduledAt;
+      final inPeriod = !date.isBefore(period.startDate) && !date.isAfter(period.endDate);
+      if (!inPeriod) continue;
+
+      if (d.status == DeliveryStatus.completed) {
+        completed++;
+      } else if (d.status == DeliveryStatus.cancelled) {
+        cancelled++;
+      }
+    }
+
     return DeliveriesReportEntity(
-      totalDeliveries: filtered.length,
+      totalDeliveries: completed + pending + delayed,
       pendingCount: pending,
       delayedCount: delayed,
       completedCount: completed,
