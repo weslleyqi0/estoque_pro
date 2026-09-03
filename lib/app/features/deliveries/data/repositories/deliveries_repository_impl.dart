@@ -1,6 +1,7 @@
 import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/data/models/delivery_model.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/dtos/update_delivery_customer_dto.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
@@ -213,6 +214,30 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       return const Result.success(null);
     } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao cancelar entrega da venda: $e');
+      return Result.failure(e, stackTrace);
+    }
+  }
+
+  @override
+  Future<Result<void>> updateCustomerForSale(UpdateDeliveryCustomerDto dto) async {
+    try {
+      final deliveryResult = await getDeliveryBySaleId(dto.saleId, dto.saleNumber);
+      final delivery = deliveryResult.value;
+      if (delivery != null) {
+        final updatedDelivery = delivery.copyWith(
+          customerId: dto.customerId,
+          customerName: dto.customerName,
+          customerPhone: dto.customerPhone ?? delivery.customerPhone,
+          customerAddress: (dto.customerAddress != null && dto.customerAddress!.trim().isNotEmpty)
+              ? dto.customerAddress
+              : delivery.customerAddress,
+          updatedAt: DateTime.now(),
+        );
+        return await updateDelivery(updatedDelivery);
+      }
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Deliveries: Erro ao atualizar cliente da entrega pela venda: $e');
       return Result.failure(e, stackTrace);
     }
   }

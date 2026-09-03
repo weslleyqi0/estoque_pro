@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/features/deliveries/data/repositories/deliveries_repository_impl.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/dtos/update_delivery_customer_dto.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
@@ -125,6 +126,66 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       verify(() => mockDatabaseService.delete('del-1')).called(1);
+    });
+
+    test('updateCustomerForSale updates customer fields when delivery is found', () async {
+      when(() => mockDatabaseService.queryOnce(
+        orderByChild: 'sale_id',
+        equalTo: 's1',
+        limitToLast: any(named: 'limitToLast'),
+      )).thenAnswer((_) async => {
+        'del-1': {
+          'sale_id': 's1',
+          'sale_number': '#1001',
+          'customer_id': 'c_old',
+          'customer_name': 'Cliente Velho',
+          'customer_address': 'Rua Antiga',
+          'items': [],
+          'subtotal': 10.0,
+          'total_amount': 10.0,
+          'payment_method': 'pix',
+          'status': 'pending',
+          'scheduled_at': DateTime.now().toIso8601String(),
+          'observations': '',
+          'user_id': 'u1',
+          'user_name': 'Admin',
+          'created_at': DateTime.now().millisecondsSinceEpoch,
+          'updated_at': DateTime.now().millisecondsSinceEpoch,
+        }
+      });
+      when(() => mockDatabaseService.update(any(), any())).thenAnswer((_) async {});
+
+      final result = await repository.updateCustomerForSale(
+        const UpdateDeliveryCustomerDto(
+          saleId: 's1',
+          customerId: 'c_novo',
+          customerName: 'Cliente Novo',
+          customerPhone: '11999999999',
+          customerAddress: 'Rua Nova, 123',
+        ),
+      );
+
+      expect(result.isSuccess, isTrue);
+      verify(() => mockDatabaseService.update('del-1', any())).called(1);
+    });
+
+    test('updateCustomerForSale returns success when delivery is not found', () async {
+      when(() => mockDatabaseService.queryOnce(
+        orderByChild: 'sale_id',
+        equalTo: 's999',
+        limitToLast: any(named: 'limitToLast'),
+      )).thenAnswer((_) async => null);
+
+      final result = await repository.updateCustomerForSale(
+        const UpdateDeliveryCustomerDto(
+          saleId: 's999',
+          customerId: 'c_novo',
+          customerName: 'Cliente Novo',
+        ),
+      );
+
+      expect(result.isSuccess, isTrue);
+      verifyNever(() => mockDatabaseService.update(any(), any()));
     });
   });
 }
