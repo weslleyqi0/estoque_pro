@@ -248,6 +248,26 @@ class SalesRepositoryImpl implements SalesRepository {
   }
 
   @override
+  Future<Result<void>> updateCustomer(
+    String saleId, {
+    required String customerId,
+    required String customerName,
+  }) async {
+    try {
+      final updates = <String, dynamic>{
+        'sales/$saleId/customer_id': customerId,
+        'sales/$saleId/customer_name': customerName,
+        'sales/$saleId/updated_at': _databaseService.serverTimestamp,
+      };
+      await _databaseService.updateMultiple(updates);
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Sales: Erro ao atualizar cliente da venda: $e');
+      return Result.failure(e, stackTrace);
+    }
+  }
+
+  @override
   Future<Result<void>> delete(String saleId) async {
     try {
       await _databaseService.delete(saleId);

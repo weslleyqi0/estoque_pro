@@ -21,5 +21,10 @@ abstract class SalesRepository {
     required SaleEditHistoryEntity editHistoryEntry,
     Map<String, int>? currentProductStocks,
   });
+  Future<Result<void>> updateCustomer(
+    String saleId, {
+    required String customerId,
+    required String customerName,
+  });
   Future<Result<void>> delete(String saleId);
 }
