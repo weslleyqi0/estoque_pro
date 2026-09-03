@@ -1,32 +1,24 @@
 import 'package:design_system/design_system.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_router.dart';
 import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:estoque_pro/config/app_config.dart';
-import 'package:estoque_pro/firebase/firebase_options_prod.dart';
+import 'package:estoque_pro/firebase/firebase_options_dev.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-// Entrypoint padrão — aponta para PROD.
-// Use os entrypoints específicos de flavor para desenvolvimento:
-//   flutter run --flavor development -t lib/main_dev.dart
-//   flutter run --flavor production  -t lib/main_prod.dart
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  /* if (Firebase.apps.isEmpty) {
-    try {
-      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    } on FirebaseException catch (e) {
-      if (e.code != 'duplicate-app') rethrow;
-    }
-  } */
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   FirebaseDatabase.instance.setPersistenceEnabled(true);
 
-  const config = AppConfig(environment: Environment.production);
+  const config = AppConfig(environment: Environment.development);
 
   await setupServiceLocator(config: config);
 
@@ -47,7 +39,7 @@ class MyApp extends StatelessWidget {
       builder: (context, _) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'Estoque Pro',
+          title: 'Estoque PRO - DEV',
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: themeViewModel.themeMode,
@@ -60,6 +52,14 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [
             Locale('pt', 'BR'),
           ],
+          builder: (context, child) {
+            return Banner(
+              message: 'DEV',
+              location: BannerLocation.topEnd,
+              color: Colors.orange,
+              child: child!,
+            );
+          },
         );
       },
     );
