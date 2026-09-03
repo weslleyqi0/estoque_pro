@@ -14,12 +14,17 @@ import 'package:estoque_pro/app/features/users/domain/entities/user_role.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:estoque_pro/app/features/deliveries/domain/dtos/update_delivery_customer_dto.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
+
 class MockSalesRepository extends Mock implements SalesRepository {}
 class MockProductsRepository extends Mock implements ProductsRepository {}
+class MockDeliveriesRepository extends Mock implements DeliveriesRepository {}
 
 void main() {
   late MockSalesRepository mockSalesRepository;
   late MockProductsRepository mockProductsRepository;
+  late MockDeliveriesRepository mockDeliveriesRepository;
   late EditSaleUseCase editSaleUseCase;
 
   const testUser = UserEntity(
@@ -68,12 +73,21 @@ void main() {
     paymentMethod: PaymentMethod.dinheiro,
     userId: 'u1',
     userName: 'Admin',
+    customerId: 'c1',
+    customerName: 'Cliente Antigo',
     status: SaleStatus.completed,
     createdAt: DateTime.now(),
   );
 
   setUpAll(() {
     registerFallbackValue(originalSale);
+    registerFallbackValue(
+      const UpdateDeliveryCustomerDto(
+        saleId: 's1',
+        customerId: 'c1',
+        customerName: 'Cliente 1',
+      ),
+    );
     registerFallbackValue(
       SaleEditHistoryEntity(
         id: '1',
@@ -91,10 +105,18 @@ void main() {
   setUp(() {
     mockSalesRepository = MockSalesRepository();
     mockProductsRepository = MockProductsRepository();
-    editSaleUseCase = EditSaleUseCase(mockSalesRepository, mockProductsRepository);
+    mockDeliveriesRepository = MockDeliveriesRepository();
+    editSaleUseCase = EditSaleUseCase(
+      mockSalesRepository,
+      mockProductsRepository,
+      mockDeliveriesRepository,
+    );
 
     when(() => mockProductsRepository.getAll()).thenAnswer((_) async => const Result.success([testProduct]));
     when(() => mockSalesRepository.updateSale(any())).thenAnswer((_) async => Result.success(originalSale));
+    when(
+      () => mockDeliveriesRepository.updateCustomerForSale(any()),
+    ).thenAnswer((_) async => const Result.success(null));
     when(
       () => mockSalesRepository.updateSaleWithStockAndHistory(
         sale: any(named: 'sale'),
@@ -171,5 +193,67 @@ void main() {
     expect(result.isSuccess, isTrue);
     expect(result.value?.items.first.quantity, equals(3));
     expect(result.value?.status, equals(SaleStatus.edited));
+  });
+
+  test('calls updateCustomerForSale when customer is changed in edit sale with items change', () async {
+    final result = await editSaleUseCase.call(
+      originalSale: originalSale,
+      updatedItems: [
+        const SaleItemEntity(
+          productId: 'prod_1',
+          productName: 'Camisa Polo',
+          productImgUrl: '',
+          unitPrice: 50.0,
+          quantity: 3,
+        ),
+      ],
+      reason: 'Troca de cliente e item',
+      customerId: 'c_novo',
+      customerName: 'Cliente Novo',
+      customerPhone: '11999999999',
+      customerAddress: 'Rua Nova, 456',
+      currentUser: testUser,
+    );
+
+    expect(result.isSuccess, isTrue);
+    verify(
+      () => mockDeliveriesRepository.updateCustomerForSale(
+        const UpdateDeliveryCustomerDto(
+          saleId: 's1',
+          customerId: 'c_novo',
+          customerName: 'Cliente Novo',
+          customerPhone: '11999999999',
+          customerAddress: 'Rua Nova, 456',
+          saleNumber: '#101',
+        ),
+      ),
+    ).called(1);
+  });
+
+  test('calls updateCustomerForSale when only customer is changed without item changes', () async {
+    final result = await editSaleUseCase.call(
+      originalSale: originalSale,
+      updatedItems: originalSale.items,
+      reason: 'Troca apenas de cliente',
+      customerId: 'c_novo_2',
+      customerName: 'Cliente Novo 2',
+      customerPhone: '11888888888',
+      customerAddress: 'Avenida Brasil, 100',
+      currentUser: testUser,
+    );
+
+    expect(result.isSuccess, isTrue);
+    verify(
+      () => mockDeliveriesRepository.updateCustomerForSale(
+        const UpdateDeliveryCustomerDto(
+          saleId: 's1',
+          customerId: 'c_novo_2',
+          customerName: 'Cliente Novo 2',
+          customerPhone: '11888888888',
+          customerAddress: 'Avenida Brasil, 100',
+          saleNumber: '#101',
+        ),
+      ),
+    ).called(1);
   });
 }

@@ -71,9 +71,14 @@ class EditSaleViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void setCustomer({String? id, String? name}) {
+  String? _selectedCustomerPhone;
+  String? _selectedCustomerAddress;
+
+  void setCustomer({String? id, String? name, String? phone, String? address}) {
     _selectedCustomerId = id;
     _selectedCustomerName = name;
+    _selectedCustomerPhone = phone;
+    _selectedCustomerAddress = address;
     notifyListeners();
   }
 
@@ -208,6 +213,8 @@ class EditSaleViewModel extends BaseViewModel {
       comment: _comment.isNotEmpty ? _comment : null,
       customerId: _selectedCustomerId,
       customerName: _selectedCustomerName,
+      customerPhone: _selectedCustomerPhone,
+      customerAddress: _selectedCustomerAddress,
       currentUser: currentUser,
     );
   }

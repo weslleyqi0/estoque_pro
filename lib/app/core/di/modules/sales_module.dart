@@ -49,6 +49,7 @@ void setupSalesModule(GetIt getIt) {
     () => EditSaleUseCase(
       getIt<SalesRepository>(),
       getIt<ProductsRepository>(),
+      getIt<DeliveriesRepository>(),
     ),
   );
   getIt.registerFactory<CancelCompletedSaleUseCase>(

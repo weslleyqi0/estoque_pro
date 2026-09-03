@@ -145,7 +145,12 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
       authViewModel: widget.authViewModel,
       canManageCustomers: canManageCustomers,
       onCustomerSelected: (customer) {
-        _viewModel.setCustomer(id: customer.id, name: customer.name);
+        _viewModel.setCustomer(
+          id: customer.id,
+          name: customer.name,
+          phone: customer.phone,
+          address: customer.address,
+        );
       },
     );
   }
