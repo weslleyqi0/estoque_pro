@@ -23,16 +23,13 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
   late final AnimationController _animController;
   late final Animation<double> _scaleAnimation;
   late final Animation<double> _fadeAnimation;
-  double _progress = 0.0;
-  String _statusText = 'Iniciando aplicativo...';
-
   @override
   void initState() {
     super.initState();
 
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 800),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
@@ -48,33 +45,8 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
   }
 
   Future<void> _initializeApp() async {
-    // 1. Etapa inicial de carregamento visual
-    await Future<void>.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 1000));
     if (!mounted) return;
-    setState(() {
-      _progress = 0.35;
-      _statusText = 'Verificando conexão e dados...';
-    });
-
-    // 2. Aguarda estabilização do Auth e Perfil do Usuário
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() {
-      _progress = 0.75;
-      _statusText = 'Preparando seu painel...';
-    });
-
-    // 3. Conclusão da barra de progresso
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() {
-      _progress = 1.0;
-      _statusText = 'Pronto!';
-    });
-
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-    if (!mounted) return;
-
     _navigateNext();
   }
 
@@ -172,7 +144,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
 
                 const Gap(AppSpacing.space24),
 
-                // Título e subtítulo da aplicação
+                // Título, subtítulo e barra de progresso da aplicação
                 FadeTransition(
                   opacity: _fadeAnimation,
                   child: Column(
@@ -191,48 +163,24 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                           color: colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
+                      const Gap(AppSpacing.space24),
+                      SizedBox(
+                        width: 140,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(AppSpacing.radius8),
+                          child: LinearProgressIndicator(
+                            minHeight: 4,
+                            backgroundColor: colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(AppSpacing.radius8),
+                            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
 
                 const Spacer(),
-
-                // Barra de progresso com porcentagem e status
-                SizedBox(
-                  width: 200,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(AppSpacing.radius8),
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0.0, end: _progress),
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          builder: (context, value, _) {
-                            return LinearProgressIndicator(
-                              value: value,
-                              minHeight: 6,
-                              backgroundColor: colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(AppSpacing.radius8),
-                              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
-                            );
-                          },
-                        ),
-                      ),
-                      const Gap(AppSpacing.space8),
-                      Text(
-                        _statusText,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.5),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const Gap(AppSpacing.space32),
               ],
             ),
           ),

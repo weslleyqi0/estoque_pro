@@ -225,7 +225,7 @@ void main() {
     final mockSalesRepo = MockSalesRepository();
     final mockProductsRepo = MockProductsRepository();
     when(() => mockProductsRepo.getAll()).thenAnswer((_) async => const Result.success([]));
-    when(() => mockSalesRepo.updateSale(any())).thenAnswer((_) async => const Result.success(null));
+    when(() => mockSalesRepo.updateSale(any())).thenAnswer((_) async => Result.success(initialSale));
 
     final useCase = EditSaleUseCase(mockSalesRepo, mockProductsRepo);
 

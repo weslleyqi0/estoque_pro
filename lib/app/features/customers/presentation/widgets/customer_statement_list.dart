@@ -91,7 +91,7 @@ class CustomerStatementList extends StatelessWidget {
                   onPressed: onViewAll,
                   label: 'Ver todas (${statementItems.length})',
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space8),
-                  textStyle: context.textTheme.labelMedium?.copyWith(
+                  textStyle: context.textTheme.titleSmall?.copyWith(
                     color: context.colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
@@ -161,7 +161,8 @@ class _CompactStatementCard extends StatelessWidget {
   void _openEditPayment(BuildContext context) {
     if (debtsViewModel == null) return;
 
-    final payment = item.payment ??
+    final payment =
+        item.payment ??
         CustomerPaymentEntity(
           id: item.id,
           customerId: '',
@@ -209,9 +210,7 @@ class _CompactStatementCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: isPurchase
-            ? () => _openPurchaseInvoice(context)
-            : () => _openEditPayment(context),
+        onTap: isPurchase ? () => _openPurchaseInvoice(context) : () => _openEditPayment(context),
         borderRadius: BorderRadius.circular(AppSpacing.radius12),
         child: Container(
           decoration: BoxDecoration(
@@ -232,16 +231,11 @@ class _CompactStatementCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.space8),
                   decoration: BoxDecoration(
-                    color: (isCancelled
-                            ? AppColors.error
-                            : accentColor)
-                        .withValues(alpha: 0.12),
+                    color: (isCancelled ? AppColors.error : accentColor).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppSpacing.radius8),
                   ),
                   child: Icon(
-                    isCancelled
-                        ? AppIcons.block
-                        : (isPurchase ? AppIcons.shoppingBag : AppIcons.checkCircle),
+                    isCancelled ? AppIcons.block : (isPurchase ? AppIcons.shoppingBag : AppIcons.checkCircle),
                     color: isCancelled ? AppColors.error : accentColor,
                     size: AppSpacing.icon20,
                   ),

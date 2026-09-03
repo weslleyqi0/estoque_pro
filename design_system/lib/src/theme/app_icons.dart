@@ -35,8 +35,8 @@ abstract class AppIcons {
   static const IconData searchOff = Symbols.search_off_rounded;
   static const IconData settings = Symbols.settings_rounded;
   static const IconData stacks = Symbols.stacks_rounded;
-  static const IconData visibility = Icons.visibility_outlined;
-  static const IconData visibilityOff = Icons.visibility_off_outlined;
+  static const IconData visibility = Symbols.visibility_rounded;
+  static const IconData visibilityOff = Symbols.visibility_off_rounded;
   static const IconData warning = Symbols.warning_rounded;
 
   // --- DOMAIN & FEATURE ICONS ---

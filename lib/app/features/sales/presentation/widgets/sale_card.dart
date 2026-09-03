@@ -94,6 +94,7 @@ class SaleCard extends StatelessWidget {
                     ),
                     SaleCardActions(
                       sale: sale,
+                      delivery: effectiveDelivery,
                       authViewModel: authViewModel,
                       salesViewModel: salesViewModel,
                       editSaleViewModelFactory: editSaleViewModelFactory,

@@ -60,10 +60,20 @@ void main() {
     saveSaleUseCase = SaveSaleUseCase(mockSalesRepository, mockProductsRepository);
 
     when(() => mockProductsRepository.getAll()).thenAnswer((_) async => const Result.success([testProduct]));
-    when(() => mockSalesRepository.save(any(), productStocks: any(named: 'productStocks')))
-        .thenAnswer((_) async => const Result.success(null));
-    when(() => mockSalesRepository.updateSale(any(), productStocks: any(named: 'productStocks')))
-        .thenAnswer((_) async => const Result.success(null));
+    when(
+      () => mockSalesRepository.save(
+        any(),
+        productStocks: any(named: 'productStocks'),
+        delivery: any(named: 'delivery'),
+      ),
+    ).thenAnswer((_) async => Result.success(testSale));
+    when(
+      () => mockSalesRepository.updateSale(
+        any(),
+        productStocks: any(named: 'productStocks'),
+        delivery: any(named: 'delivery'),
+      ),
+    ).thenAnswer((_) async => Result.success(testSale));
   });
 
   test('returns BusinessRuleFailure when sale has no items', () async {

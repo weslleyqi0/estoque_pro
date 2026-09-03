@@ -1,6 +1,7 @@
 import 'package:estoque_pro/app/core/services/database_service.dart';
 import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/data/models/delivery_model.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/dtos/update_delivery_customer_dto.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
@@ -36,7 +37,7 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
             }
           }
           // Sort by scheduledAt ascending (or createdAt descending)
-          return deliveries..sort((a, b) => a.scheduledAt.compareTo(a.scheduledAt));
+          return deliveries..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
         })
         .handleError((e) {
           debugPrint('---> Deliveries: Erro no listener: $e');
@@ -51,11 +52,11 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
 
       final finalDelivery = delivery.copyWith(id: deliveryId);
       final deliveryModel = DeliveryModel.fromEntity(finalDelivery);
+      final deliveryModelMap = deliveryModel.toMap();
+      deliveryModelMap['created_at'] = _databaseService.serverTimestamp;
+      deliveryModelMap['updated_at'] = _databaseService.serverTimestamp;
 
-      final Map<String, dynamic> updates = {};
-      updates['deliveries/$deliveryId'] = deliveryModel.toMap();
-
-      await _databaseService.updateMultiple(updates);
+      await _databaseService.update(deliveryId, deliveryModelMap);
       return const Result.success(null);
     } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao salvar entrega: $e');
@@ -69,11 +70,10 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       final deliveryModel = DeliveryModel.fromEntity(
         delivery.copyWith(updatedAt: DateTime.now()),
       );
+      final deliveryModelMap = deliveryModel.toMap();
+      deliveryModelMap['updated_at'] = _databaseService.serverTimestamp;
 
-      final Map<String, dynamic> updates = {};
-      updates['deliveries/${delivery.id}'] = deliveryModel.toMap();
-
-      await _databaseService.updateMultiple(updates);
+      await _databaseService.update(delivery.id, deliveryModelMap);
       return const Result.success(null);
     } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao atualizar entrega: $e');
@@ -114,6 +114,130 @@ class DeliveriesRepositoryImpl implements DeliveriesRepository {
       return const Result.success(null);
     } catch (e, stackTrace) {
       debugPrint('---> Deliveries: Erro ao deletar entrega: $e');
+      return Result.failure(e, stackTrace);
+    }
+  }
+
+  @override
+  Future<Result<DeliveryEntity?>> getDeliveryBySaleId(String saleId, [String? saleNumber]) async {
+    try {
+      if (saleId.isNotEmpty) {
+        final data = await _databaseService.queryOnce(
+          orderByChild: 'sale_id',
+          equalTo: saleId,
+          limitToLast: 1,
+        );
+        if (data != null && data.isNotEmpty) {
+          final entry = data.entries.first;
+          if (entry.value is Map) {
+            final model = DeliveryModel.fromMap(
+              entry.key.toString(),
+              Map<dynamic, dynamic>.from(entry.value as Map),
+            );
+            return Result.success(model.toEntity());
+          }
+        }
+      }
+
+      if (saleNumber != null && saleNumber.isNotEmpty) {
+        final data = await _databaseService.queryOnce(
+          orderByChild: 'sale_number',
+          equalTo: saleNumber,
+          limitToLast: 1,
+        );
+        if (data != null && data.isNotEmpty) {
+          final entry = data.entries.first;
+          if (entry.value is Map) {
+            final model = DeliveryModel.fromMap(
+              entry.key.toString(),
+              Map<dynamic, dynamic>.from(entry.value as Map),
+            );
+            return Result.success(model.toEntity());
+          }
+        }
+      }
+
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Deliveries: Erro ao buscar entrega por venda: $e');
+      return Result.failure(e, stackTrace);
+    }
+  }
+
+  @override
+  Future<Result<void>> cancelDeliveryForSale(String saleId, [String? saleNumber]) async {
+    try {
+      final List<DeliveryEntity> toCancel = [];
+
+      if (saleId.isNotEmpty) {
+        final data = await _databaseService.queryOnce(
+          orderByChild: 'sale_id',
+          equalTo: saleId,
+        );
+        if (data != null && data.isNotEmpty) {
+          for (final entry in data.entries) {
+            if (entry.value is Map) {
+              final model = DeliveryModel.fromMap(
+                entry.key.toString(),
+                Map<dynamic, dynamic>.from(entry.value as Map),
+              );
+              toCancel.add(model.toEntity());
+            }
+          }
+        }
+      }
+
+      if (toCancel.isEmpty && saleNumber != null && saleNumber.isNotEmpty) {
+        final data = await _databaseService.queryOnce(
+          orderByChild: 'sale_number',
+          equalTo: saleNumber,
+        );
+        if (data != null && data.isNotEmpty) {
+          for (final entry in data.entries) {
+            if (entry.value is Map) {
+              final model = DeliveryModel.fromMap(
+                entry.key.toString(),
+                Map<dynamic, dynamic>.from(entry.value as Map),
+              );
+              toCancel.add(model.toEntity());
+            }
+          }
+        }
+      }
+
+      for (final delivery in toCancel) {
+        if (delivery.status != DeliveryStatus.cancelled) {
+          await updateStatus(delivery.id, DeliveryStatus.cancelled);
+        }
+      }
+
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Deliveries: Erro ao cancelar entrega da venda: $e');
+      return Result.failure(e, stackTrace);
+    }
+  }
+
+  @override
+  Future<Result<void>> updateCustomerForSale(UpdateDeliveryCustomerDto dto) async {
+    try {
+      final deliveryResult = await getDeliveryBySaleId(dto.saleId, dto.saleNumber);
+      final delivery = deliveryResult.value;
+      if (delivery != null) {
+        final updatedDelivery = delivery.copyWith(
+          customerId: dto.customerId,
+          customerName: dto.customerName,
+          customerPhone: dto.customerPhone ?? delivery.customerPhone,
+          customerAddress: (dto.customerAddress != null && dto.customerAddress!.trim().isNotEmpty)
+              ? dto.customerAddress
+              : delivery.customerAddress,
+          updatedAt: DateTime.now(),
+        );
+        return await updateDelivery(updatedDelivery);
+      }
+      return const Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('---> Deliveries: Erro ao atualizar cliente da entrega pela venda: $e');
       return Result.failure(e, stackTrace);
     }
   }

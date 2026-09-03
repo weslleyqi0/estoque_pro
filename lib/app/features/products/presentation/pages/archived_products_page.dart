@@ -57,7 +57,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
       title: 'Excluir Permanentemente',
       content:
           'Atenção! Ao excluir permanentemente o produto "$name", TODO O SEU HISTÓRICO DE MOVIMENTAÇÕES DE ESTOQUE SERÁ EXCLUÍDO e os registros vinculados não poderão ser recuperados.\n\nDeseja continuar?',
-      confirmLabel: 'Sim, Excluir Permanentemente',
+      confirmLabel: 'Sim, Excluir',
       cancelLabel: 'Cancelar',
       isDestructive: true,
     );

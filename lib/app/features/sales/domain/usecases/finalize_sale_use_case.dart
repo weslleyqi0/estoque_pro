@@ -1,7 +1,6 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
-import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/cart_item.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
@@ -21,11 +20,9 @@ import 'package:estoque_pro/app/features/sales/domain/usecases/save_sale_use_cas
 /// - optionally create and persist a [DeliveryEntity] if delivery is requested.
 class FinalizeSaleUseCase {
   final SaveSaleUseCase _saveSaleUseCase;
-  final DeliveriesRepository _deliveriesRepository;
 
   const FinalizeSaleUseCase(
     this._saveSaleUseCase,
-    this._deliveriesRepository,
   );
 
   AsyncResult<SaleEntity> call({
@@ -74,13 +71,6 @@ class FinalizeSaleUseCase {
           ),
         );
       }
-      if (deliveryAddress == null || deliveryAddress.trim().isEmpty) {
-        return Result.failure(
-          const BusinessRuleFailure(
-            message: 'Para entregas, é obrigatório informar o endereço de entrega.',
-          ),
-        );
-      }
     }
 
     final outOfStock = _getOutOfStockProducts(items, availableProducts);
@@ -123,21 +113,21 @@ class FinalizeSaleUseCase {
       createdAt: createdAt ?? DateTime.now(),
     );
 
-    final isUpdate = editingSaleId != null && editingSaleId.isNotEmpty;
-    final saveResult = await _saveSaleUseCase(sale: sale, isUpdate: isUpdate);
-    if (saveResult.isFailure) {
-      return saveResult;
-    }
+    DeliveryEntity? delivery;
+    final hasCustomer = customerName != null && customerName.trim().isNotEmpty;
+    if (isDelivery && hasCustomer) {
+      final effectiveAddress = (deliveryAddress != null && deliveryAddress.trim().isNotEmpty)
+          ? deliveryAddress.trim()
+          : 'A combinar';
 
-    if (isDelivery) {
-      final delivery = DeliveryEntity(
+      delivery = DeliveryEntity(
         id: '',
-        saleId: sale.id,
+        saleId: editingSaleId ?? '',
         saleNumber: saleNumber,
         customerId: customerId ?? '',
-        customerName: customerName ?? '',
+        customerName: customerName,
         customerPhone: customerPhone,
-        customerAddress: deliveryAddress ?? '',
+        customerAddress: effectiveAddress,
         items: saleItems,
         subtotal: subtotal,
         totalAmount: total,
@@ -149,14 +139,19 @@ class FinalizeSaleUseCase {
         userName: userName,
         createdAt: DateTime.now(),
       );
-
-      final deliveryResult = await _deliveriesRepository.save(delivery);
-      if (deliveryResult.isFailure) {
-        return Result.failure(deliveryResult.error!);
-      }
     }
 
-    return Result.success(sale);
+    final isUpdate = editingSaleId != null && editingSaleId.isNotEmpty;
+    final saveResult = await _saveSaleUseCase(
+      sale: sale,
+      isUpdate: isUpdate,
+      delivery: delivery,
+    );
+    if (saveResult.isFailure) {
+      return saveResult;
+    }
+
+    return Result.success(saveResult.value!);
   }
 
   List<ProductEntity> _getOutOfStockProducts(

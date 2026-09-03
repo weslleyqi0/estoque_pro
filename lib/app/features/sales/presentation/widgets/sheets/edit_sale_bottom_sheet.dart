@@ -4,6 +4,7 @@ import 'package:estoque_pro/app/features/auth/presentation/viewmodels/auth_viewm
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customer_debts_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/viewmodels/customers_viewmodel.dart';
 import 'package:estoque_pro/app/features/customers/presentation/widgets/customer_bottom_sheet.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/products/domain/entities/product_entity.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_reason.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_entity.dart';
@@ -20,6 +21,7 @@ import 'package:go_router/go_router.dart';
 
 class EditSaleBottomSheet extends StatefulWidget {
   final SaleEntity sale;
+  final DeliveryEntity? delivery;
   final AuthViewModel authViewModel;
   final EditSaleViewModel Function() viewModelFactory;
   final CustomersViewModel Function()? customersViewModelFactory;
@@ -28,6 +30,7 @@ class EditSaleBottomSheet extends StatefulWidget {
   const EditSaleBottomSheet({
     super.key,
     required this.sale,
+    this.delivery,
     required this.authViewModel,
     required this.viewModelFactory,
     this.customersViewModelFactory,
@@ -37,6 +40,7 @@ class EditSaleBottomSheet extends StatefulWidget {
   static Future<void> show(
     BuildContext context,
     SaleEntity sale, {
+    DeliveryEntity? delivery,
     required AuthViewModel authViewModel,
     required EditSaleViewModel Function() viewModelFactory,
     CustomersViewModel Function()? customersViewModelFactory,
@@ -49,6 +53,7 @@ class EditSaleBottomSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => EditSaleBottomSheet(
         sale: sale,
+        delivery: delivery,
         authViewModel: authViewModel,
         viewModelFactory: viewModelFactory,
         customersViewModelFactory: customersViewModelFactory,
@@ -140,7 +145,12 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
       authViewModel: widget.authViewModel,
       canManageCustomers: canManageCustomers,
       onCustomerSelected: (customer) {
-        _viewModel.setCustomer(id: customer.id, name: customer.name);
+        _viewModel.setCustomer(
+          id: customer.id,
+          name: customer.name,
+          phone: customer.phone,
+          address: customer.address,
+        );
       },
     );
   }
@@ -173,12 +183,14 @@ class _EditSaleBottomSheetState extends State<EditSaleBottomSheet> {
       return;
     }
 
+    final hasDelivery = widget.delivery != null;
     final confirmed = await AppDialog.showConfirmation(
       context: context,
       title: 'Cancelar Venda',
       content:
           'Deseja realmente cancelar a Venda ${widget.sale.saleNumber}?\n\n'
-          '⚠️ Atenção: Todos os produtos desta venda retornarão automaticamente ao estoque.',
+          '⚠️ Atenção: Todos os produtos desta venda retornarão automaticamente ao estoque.'
+          '${hasDelivery ? '\n\n📦 A entrega vinculada a esta venda também será cancelada automaticamente.' : ''}',
       confirmLabel: 'Sim, Cancelar Venda',
       cancelLabel: 'Voltar',
       isDestructive: true,

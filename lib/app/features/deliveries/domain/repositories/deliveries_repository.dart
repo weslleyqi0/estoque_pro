@@ -1,4 +1,5 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/dtos/update_delivery_customer_dto.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_entity.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/entities/delivery_status.dart';
 
@@ -8,4 +9,7 @@ abstract class DeliveriesRepository {
   Future<Result<void>> updateDelivery(DeliveryEntity delivery);
   Future<Result<void>> updateStatus(String deliveryId, DeliveryStatus status, {DateTime? deliveredAt});
   Future<Result<void>> delete(String deliveryId);
+  Future<Result<DeliveryEntity?>> getDeliveryBySaleId(String saleId, [String? saleNumber]);
+  Future<Result<void>> cancelDeliveryForSale(String saleId, [String? saleNumber]);
+  Future<Result<void>> updateCustomerForSale(UpdateDeliveryCustomerDto dto);
 }

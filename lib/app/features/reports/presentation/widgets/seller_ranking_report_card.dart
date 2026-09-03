@@ -324,10 +324,10 @@ class _SellerRankingRow extends StatelessWidget {
               height: 28,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isTopThree ? posColor!.withValues(alpha: 0.15) : neutralBg,
+                color: isTopThree ? posColor.withValues(alpha: 0.15) : neutralBg,
                 borderRadius: BorderRadius.circular(AppSpacing.radius8),
                 border: Border.all(
-                  color: isTopThree ? posColor!.withValues(alpha: 0.3) : neutralBorder,
+                  color: isTopThree ? posColor.withValues(alpha: 0.3) : neutralBorder,
                 ),
               ),
               child: Text(
@@ -400,7 +400,7 @@ class _SellerRankingRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radius8),
             backgroundColor: context.colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(
-              isTopThree ? posColor! : context.colorScheme.outlineVariant,
+              isTopThree ? posColor : context.colorScheme.outlineVariant,
             ),
           ),
         ),

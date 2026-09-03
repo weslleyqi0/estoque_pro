@@ -40,7 +40,6 @@ void setupSalesModule(GetIt getIt) {
   getIt.registerFactory<FinalizeSaleUseCase>(
     () => FinalizeSaleUseCase(
       getIt<SaveSaleUseCase>(),
-      getIt<DeliveriesRepository>(),
     ),
   );
   getIt.registerFactory<SaveDraftSaleUseCase>(
@@ -50,16 +49,23 @@ void setupSalesModule(GetIt getIt) {
     () => EditSaleUseCase(
       getIt<SalesRepository>(),
       getIt<ProductsRepository>(),
+      getIt<DeliveriesRepository>(),
     ),
   );
   getIt.registerFactory<CancelCompletedSaleUseCase>(
-    () => CancelCompletedSaleUseCase(getIt<SalesRepository>()),
+    () => CancelCompletedSaleUseCase(
+      getIt<SalesRepository>(),
+      getIt<DeliveriesRepository>(),
+    ),
   );
   getIt.registerFactory<GetSalesUseCase>(
     () => GetSalesUseCase(getIt<SalesRepository>()),
   );
   getIt.registerFactory<DeleteSaleUseCase>(
-    () => DeleteSaleUseCase(getIt<SalesRepository>()),
+    () => DeleteSaleUseCase(
+      getIt<SalesRepository>(),
+      getIt<DeliveriesRepository>(),
+    ),
   );
 
   // ViewModels

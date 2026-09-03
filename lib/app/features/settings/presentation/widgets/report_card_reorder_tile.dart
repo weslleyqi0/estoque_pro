@@ -41,12 +41,12 @@ class ReportCardReorderTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: item.color.withValues(alpha: isVisible ? 0.15 : 0.08),
+                color: item.color.withValues(alpha: isVisible ? 0.15 : 0.1),
                 borderRadius: BorderRadius.circular(AppSpacing.radius8),
               ),
               child: Icon(
                 item.icon,
-                color: isVisible ? item.color : context.colorScheme.outline,
+                color: item.color.withValues(alpha: isVisible ? 1 : 0.6),
                 size: AppSpacing.icon24,
               ),
             ),
@@ -63,7 +63,6 @@ class ReportCardReorderTile extends StatelessWidget {
                           item.title,
                           style: context.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            decoration: isVisible ? null : TextDecoration.lineThrough,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -101,9 +100,9 @@ class ReportCardReorderTile extends StatelessWidget {
               ),
             ),
             AppIconButton.primary(
-              icon: isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+              icon: isVisible ? AppIcons.visibility : AppIcons.visibilityOff,
               size: AppIconButtonSize.medium,
-              iconColor: isVisible ? context.colorScheme.primary : context.colorScheme.outline,
+              iconColor: isVisible ? context.colorScheme.primary : context.colorScheme.onSurfaceVariant,
               tooltip: isVisible ? 'Ocultar card' : 'Mostrar card',
               onPressed: onToggleVisibility,
             ),

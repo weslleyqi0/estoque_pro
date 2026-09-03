@@ -8,13 +8,16 @@ import 'package:estoque_pro/app/features/deliveries/domain/usecases/save_deliver
 import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_status_use_case.dart';
 import 'package:estoque_pro/app/features/deliveries/domain/usecases/update_delivery_use_case.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/payment_method.dart';
+import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockDeliveriesRepository extends Mock implements DeliveriesRepository {}
+class MockSalesRepository extends Mock implements SalesRepository {}
 
 void main() {
   late MockDeliveriesRepository mockRepository;
+  late MockSalesRepository mockSalesRepository;
 
   final testDelivery = DeliveryEntity(
     id: 'd1',
@@ -41,6 +44,7 @@ void main() {
 
   setUp(() {
     mockRepository = MockDeliveriesRepository();
+    mockSalesRepository = MockSalesRepository();
   });
 
   group('GetDeliveriesUseCase', () {
@@ -75,21 +79,51 @@ void main() {
 
   group('UpdateDeliveryUseCase', () {
     test('returns BusinessRuleFailure if id is empty', () async {
-      final useCase = UpdateDeliveryUseCase(mockRepository);
+      final useCase = UpdateDeliveryUseCase(mockRepository, mockSalesRepository);
       final result = await useCase.call(testDelivery.copyWith(id: ''));
 
       expect(result.isFailure, isTrue);
       expect(result.error, isA<BusinessRuleFailure>());
     });
 
-    test('updates and returns success when valid', () async {
+    test('updates delivery and synchronizes customer to linked sale', () async {
       when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async => const Result.success(null));
+      when(
+        () => mockSalesRepository.updateCustomer(
+          's1',
+          customerId: 'c_novo',
+          customerName: 'Cliente Novo',
+        ),
+      ).thenAnswer((_) async => const Result.success(null));
 
-      final useCase = UpdateDeliveryUseCase(mockRepository);
-      final result = await useCase.call(testDelivery);
+      final useCase = UpdateDeliveryUseCase(mockRepository, mockSalesRepository);
+      final updatedDelivery = testDelivery.copyWith(
+        customerId: 'c_novo',
+        customerName: 'Cliente Novo',
+      );
+      final result = await useCase.call(updatedDelivery);
 
       expect(result.isSuccess, isTrue);
       expect(result.value, isTrue);
+      verify(
+        () => mockSalesRepository.updateCustomer(
+          's1',
+          customerId: 'c_novo',
+          customerName: 'Cliente Novo',
+        ),
+      ).called(1);
+    });
+
+    test('updates delivery without calling SalesRepository when saleId is empty', () async {
+      when(() => mockRepository.updateDelivery(any())).thenAnswer((_) async => const Result.success(null));
+
+      final useCase = UpdateDeliveryUseCase(mockRepository, mockSalesRepository);
+      final deliveryWithoutSale = testDelivery.copyWith(saleId: '');
+      final result = await useCase.call(deliveryWithoutSale);
+
+      expect(result.isSuccess, isTrue);
+      expect(result.value, isTrue);
+      verifyNever(() => mockSalesRepository.updateCustomer(any(), customerId: any(named: 'customerId'), customerName: any(named: 'customerName')));
     });
   });
 

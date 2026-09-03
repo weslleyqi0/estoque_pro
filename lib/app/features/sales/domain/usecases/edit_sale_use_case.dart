@@ -1,4 +1,6 @@
 import 'package:estoque_pro/app/core/utils/result.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/dtos/update_delivery_customer_dto.dart';
+import 'package:estoque_pro/app/features/deliveries/domain/repositories/deliveries_repository.dart';
 import 'package:estoque_pro/app/features/products/domain/repositories/products_repository.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/discount_type.dart';
 import 'package:estoque_pro/app/features/sales/domain/entities/sale_edit_history_entity.dart';
@@ -8,15 +10,18 @@ import 'package:estoque_pro/app/features/sales/domain/entities/sale_status.dart'
 import 'package:estoque_pro/app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_entity.dart';
 import 'package:estoque_pro/app/features/users/domain/entities/user_permission.dart';
+import 'package:flutter/foundation.dart';
 
 class EditSaleUseCase {
   final SalesRepository _salesRepository;
   final ProductsRepository _productsRepository;
+  final DeliveriesRepository? _deliveriesRepository;
 
   const EditSaleUseCase(
     this._salesRepository,
-    this._productsRepository,
-  );
+    this._productsRepository, [
+    this._deliveriesRepository,
+  ]);
 
   AsyncResult<SaleEntity> call({
     required SaleEntity originalSale,
@@ -25,6 +30,8 @@ class EditSaleUseCase {
     String? comment,
     String? customerId,
     String? customerName,
+    String? customerPhone,
+    String? customerAddress,
     required UserEntity currentUser,
   }) async {
     if (!currentUser.hasPermission(UserPermission.editSales)) {
@@ -117,6 +124,29 @@ class EditSaleUseCase {
 
     final hasItemChanges = addedItems.isNotEmpty || removedItems.isNotEmpty;
 
+    Future<void> syncDeliveryCustomer(SaleEntity sale) async {
+      if (_deliveriesRepository != null) {
+        try {
+          final effCustomerId = sale.customerId;
+          final effCustomerName = sale.customerName;
+          if (effCustomerId != null && effCustomerName != null) {
+            await _deliveriesRepository.updateCustomerForSale(
+              UpdateDeliveryCustomerDto(
+                saleId: sale.id,
+                customerId: effCustomerId,
+                customerName: effCustomerName,
+                customerPhone: customerPhone,
+                customerAddress: customerAddress,
+                saleNumber: sale.saleNumber,
+              ),
+            );
+          }
+        } catch (e, stack) {
+          debugPrint('---> Deliveries: Erro ao sincronizar cliente na entrega: $e\n$stack');
+        }
+      }
+    }
+
     if (!hasItemChanges) {
       // Se apenas o cliente ou dados cadastrais mudaram, não adiciona histórico de edição
       final updatedSale = originalSale.copyWith(
@@ -127,7 +157,10 @@ class EditSaleUseCase {
 
       final updateResult = await _salesRepository.updateSale(updatedSale);
       return updateResult.fold(
-        onSuccess: (_) => Result.success(updatedSale),
+        onSuccess: (_) async {
+          await syncDeliveryCustomer(updatedSale);
+          return Result.success(updatedSale);
+        },
         onFailure: (error) => Result.failure(error),
       );
     }
@@ -169,7 +202,10 @@ class EditSaleUseCase {
     );
 
     return saveResult.fold(
-      onSuccess: (_) => Result.success(updatedSale),
+      onSuccess: (_) async {
+        await syncDeliveryCustomer(updatedSale);
+        return Result.success(updatedSale);
+      },
       onFailure: (error) => Result.failure(error),
     );
   }
