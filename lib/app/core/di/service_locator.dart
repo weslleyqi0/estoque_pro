@@ -8,11 +8,19 @@ import 'package:estoque_pro/app/core/di/modules/reports_module.dart';
 import 'package:estoque_pro/app/core/di/modules/sales_module.dart';
 import 'package:estoque_pro/app/core/di/modules/suppliers_module.dart';
 import 'package:estoque_pro/app/core/di/modules/users_module.dart';
+import 'package:estoque_pro/config/app_config.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
 
-Future<void> setupServiceLocator() async {
+Future<void> setupServiceLocator({AppConfig? config}) async {
+  if (getIt.isRegistered<AppConfig>()) {
+    getIt.unregister<AppConfig>();
+  }
+  getIt.registerSingleton<AppConfig>(
+    config ?? const AppConfig(environment: Environment.production),
+  );
+
   await setupCoreModule(getIt);
   setupUsersModule(getIt);
   setupAuthModule(getIt);

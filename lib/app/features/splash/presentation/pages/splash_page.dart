@@ -7,12 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:estoque_pro/config/app_config.dart';
+
 class SplashPage extends StatefulWidget {
   final AuthViewModel authViewModel;
+  final AppConfig appConfig;
 
   const SplashPage({
     super.key,
     required this.authViewModel,
+    this.appConfig = const AppConfig(environment: Environment.production),
   });
 
   @override
@@ -125,7 +129,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(AppSpacing.radius24),
                       child: Image.asset(
-                        'assets/images/app_logo.png',
+                        widget.appConfig.appLogo,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           // Fallback gracioso caso asset não seja encontrado
@@ -150,7 +154,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                   child: Column(
                     children: [
                       Text(
-                        'Estoque Pro',
+                        widget.appConfig.appTitle,
                         style: context.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           letterSpacing: -0.5,

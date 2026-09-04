@@ -3,22 +3,40 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:estoque_pro/app/core/di/service_locator.dart';
 import 'package:estoque_pro/app/core/router/app_router.dart';
 import 'package:estoque_pro/app/features/settings/presentation/viewmodels/theme_viewmodel.dart';
-import 'package:estoque_pro/firebase_options.dart';
+import 'package:estoque_pro/config/app_config.dart';
+import 'package:estoque_pro/firebase/firebase_options_prod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
+// Entrypoint padrão — aponta para PROD.
+// Use os entrypoints específicos de flavor para desenvolvimento:
+//   flutter run --flavor development -t lib/main_dev.dart
+//   flutter run --flavor production  -t lib/main_prod.dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  /* if (Firebase.apps.isEmpty) {
+    try {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    } on FirebaseException catch (e) {
+      if (e.code != 'duplicate-app') rethrow;
+    }
+  } */
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseDatabase.instance.setPersistenceEnabled(true);
 
-  await setupServiceLocator();
-  runApp(const MyApp());
+  const config = AppConfig(environment: Environment.production);
+
+  await setupServiceLocator(config: config);
+
+  runApp(MyApp(config: config));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AppConfig config;
+
+  const MyApp({super.key, required this.config});
 
   @override
   Widget build(BuildContext context) {

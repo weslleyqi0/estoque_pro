@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "1037548014539",
+    "firebase_url": "https://estoquepro-dev-default-rtdb.firebaseio.com",
+    "project_id": "estoquepro-dev",
+    "storage_bucket": "estoquepro-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1037548014539:android:c54c37515ab1837eeac44e",
+        "android_client_info": {
+          "package_name": "br.com.qi0development.estoque_pro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_18-GqeGl2NV-w_Inwv4vA5G9UItIC10"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1037548014539:android:a270d06d834b12aceac44e",
+        "android_client_info": {
+          "package_name": "br.com.qi0development.estoque_pro.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_18-GqeGl2NV-w_Inwv4vA5G9UItIC10"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

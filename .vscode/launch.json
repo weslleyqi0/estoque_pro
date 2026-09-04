@@ -5,20 +5,41 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "estoque_pro",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "estoque_pro (profile mode)",
+            "name": "DEV",
             "request": "launch",
             "type": "dart",
+            "program": "lib/main_dev.dart",
+            "args": ["--flavor", "development"]
+        },
+        {
+            "name": "DEV (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_dev.dart",
+            "args": ["--flavor", "development"],
             "flutterMode": "profile"
         },
         {
-            "name": "estoque_pro (release mode)",
+            "name": "DEV (release mode)",
             "request": "launch",
             "type": "dart",
+            "program": "lib/main_dev.dart",
+            "args": ["--flavor", "development"],
+            "flutterMode": "release"
+        },
+        {
+            "name": "PROD",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_prod.dart",
+            "args": ["--flavor", "production"]
+        },
+        {
+            "name": "PROD (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_prod.dart",
+            "args": ["--flavor", "production"],
             "flutterMode": "release"
         }
     ]
